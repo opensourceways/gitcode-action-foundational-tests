@@ -13,7 +13,7 @@
 | `security-knowledge/` | 建议（安全维度深度依赖它） | ☐ |
 | `platform-config/` | 建议（配额/容量/规格 → 稳定性边界用例） | ☐ |
 | `business-context/` | 建议（部署方式/迁移场景/历史问题 → 贴合实际） | ☐ |
-| `existing-cases/` | 建议（已有用例列表 → 去重/查漏/继承覆盖） | ☐ |
+| `existing-cases/` | 建议（已有用例列表 → 去重/查漏/继承覆盖） | ✅ 已补充（631 条用例，已预转为 cases.md） |
 | `history/` | 可选（有则火力分配更准） | ☐ |
 
 ---

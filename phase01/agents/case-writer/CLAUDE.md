@@ -11,13 +11,13 @@
 
 ## 输入
 - 本 run 的准入 intent（`intent-library.md` 中标记准入的项）
-- `phase01/inputs/existing-cases/`（**如有 Excel**：先解析已有用例列表，避免产出的文本用例与已有用例重复）
+- `phase01/inputs/existing-cases/cases.md`（**已有用例清单 Markdown 版**：展开 intent 前先扫此文件，避免产出的文本用例与已有用例重复）
 - `phase01/templates/text-case.md`、`executable-case.yaml`、`phase01/schema/`
 - `phase01/inputs/gitcode-spec/`（编译 YAML 时的语法依据）
 - `phase01/rules.md`（命名、优先级、断言、脱敏、溯源纪律）
 
 ## 工作步骤
-0. **（如有 Excel）先解析已有用例列表**：提取已有用例的 ID / 标题 / 维度 / 状态。后续展开 intent 前先检查等价性——若已有用例覆盖了该 intent，标注 `已有覆盖: <已有用例ID>`，不重复展开文本用例和 YAML。
+0. **先读 `cases.md`**：已有用例的 ID / 标题 / 维度（从`测试分类`列推断）/ 状态。后续展开 intent 前先检查等价性——若已有用例覆盖了该 intent，标注 `已有覆盖: <已有用例ID>`，不重复展开文本用例和 YAML。
 1. 对每条准入 intent，判断需展开成几条用例（正常/边界/负向变体），分配用例 ID（**格式 `<维度>-<主题>-<run序列>-<序号>`，见 `rules.md` §1.3**）。
 2. 从 intent 中继承 `dimensions`（维度标签），写入文本用例的「维度标签」字段——不可遗漏。
 3. **先写文本用例** → `cases/text/<ID>.md`：维度标签 / 前置条件 / 操作步骤（意图层）/ 预期结果 / 验证点（正向+负向）/ 清理级别 / 溯源意图。

@@ -12,12 +12,12 @@
 
 ## 输入
 - `runs/<id>/intent-library.md`（各维度汇总意图）
-- `phase01/inputs/existing-cases/`（**如有 Excel**：已有用例列表，去重时纳入考量——「已有 + 本轮 = 不重复」）
+- `phase01/inputs/existing-cases/cases.md`（**已有用例清单**：去重时纳入考量——「已有 + 本轮 = 不重复」）
 - `phase01/baseline/parity-matrix.md`、`risk-register.md`、`quality-gate.md`
 - `phase01/rules.md`、`phase01/testing-focus.md`
 
 ## 工作步骤
-1. **去重**：聚类意图库，对每组给出「保留代表 + 合并/关联决定」。（如有 Excel）同时对比已有用例：若意图已被已有用例有效覆盖，标注 `已有覆盖` 并给出已有用例 ID 关联建议——用户判定是「复用已有」还是「仍需新产出」。
+1. **去重**：聚类意图库，对每组给出「保留代表 + 合并/关联决定」。同时对比 `cases.md` 中已有用例：若意图已被已有用例有效覆盖，标注 `已有覆盖` 并给出已有用例 ID 关联建议——用户判定是「复用已有」还是「仍需新产出」。
 2. **定优先级**：逐条对齐风险登记册；无法对齐的标「待定/质疑」并说明。
 3. **可测性审查**：不满足最小可测标准的 intent 打回，注明缺什么。
 4. **覆盖盲区**：对照 Parity Matrix 与风险登记册，列出无 intent 覆盖的 blocker 风险与「部分/不支持/未知」能力项。
