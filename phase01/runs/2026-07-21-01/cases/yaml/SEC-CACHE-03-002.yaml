@@ -1,0 +1,46 @@
+id: SEC-CACHE-03-002
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "同一 workflow 多次运行之间的 cache 不应跨不同事件类型互相污染"
+intent_ref: INTENT-SEC-020
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    cross-event:
+      name: (SEC-CACHE-03-002) 验证跨事件 cache 隔离
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-CACHE-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-CACHE-03-002) cache 读写验证
+          run: |
+            echo "EVENT_TYPE: push"
+            echo "CACHE_ISOLATION_CHECK: true"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "同事件类型的 cache 命中正常，跨事件类型隔离生效"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

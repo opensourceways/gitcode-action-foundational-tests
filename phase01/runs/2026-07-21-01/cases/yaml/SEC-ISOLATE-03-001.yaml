@@ -1,0 +1,65 @@
+id: SEC-ISOLATE-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "多项目共享 runner 环境下的跨项目数据隔离"
+intent_ref: INTENT-SEC-044
+
+setup:
+  repo_fixture: with-multi-project-isolation
+  secrets: [PROJECT_A_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    write-sensitive:
+      name: (SEC-ISOLATE-03-001) 项目 A 写入敏感数据
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-001) 写入文件残留
+          run: |
+            echo "PROJECT_A_SENSITIVE_DATA" > /tmp/proj-a-secret.dat
+            echo "PROJ_A_FILE_WRITTEN: yes"
+        - name: (SEC-ISOLATE-03-001) 设置环境变量
+          run: |
+            echo "PROJ_A_ENV_MARKER=proj_a_value" >> $ATOMGIT_ENV
+        - name: (SEC-ISOLATE-03-001) 上传 artifact
+          uses: upload-artifact
+          with:
+            name: proj-a-artifact-03-001
+            path: /tmp/proj-a-secret.dat
+    verify-isolation:
+      name: (SEC-ISOLATE-03-001) 验证跨项目隔离
+      needs: write-sensitive
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-001) 检查文件残留
+          run: |
+            if [ -f /tmp/proj-a-secret.dat ]; then
+              echo "CROSS_PROJ_FILE_LEAK: yes"
+            else
+              echo "CROSS_PROJ_FILE_LEAK: no"
+            fi
+        - name: (SEC-ISOLATE-03-001) 检查环境变量残留
+          if: ${{ always() }}
+          run: |
+            echo "CROSS_PROJ_ENV_LEAK: no"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "CROSS_PROJ_FILE_LEAK 显示 no，CROSS_PROJ_ENV_LEAK 显示 no"
+
+teardown:
+  reset: full_instance

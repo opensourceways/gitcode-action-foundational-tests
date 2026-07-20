@@ -1,0 +1,57 @@
+id: SEC-INJECT-03-004
+dimensions: [security]
+dimension: security
+priority: P0
+title: "提交信息中的不可信输入不应通过 ${{ }} 直接插入 run 导致命令注入"
+intent_ref: INTENT-SEC-012
+
+setup:
+  repo_fixture: with-fork-and-injection-commits
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    commit-check:
+      name: (SEC-INJECT-03-004) 验证提交信息注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-004) 检出代码
+          uses: checkout
+        - name: (SEC-INJECT-03-004) 引用提交信息
+          run: |
+            echo "COMMIT_MSG: ${{ atomgit.event.commits[0].message }}"
+            echo "COMMIT_INJECTION_SAFE: yes"
+        - name: (SEC-INJECT-03-004) 检查 /tmp/exfil 是否存在
+          if: ${{ always() }}
+          run: |
+            if [ -f /tmp/exfil ]; then
+              echo "EXFIL_FILE_EXISTS: yes"
+              exit 1
+            else
+              echo "EXFIL_FILE_EXISTS: no"
+            fi
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    commit_message: "`cat /etc/passwd > /tmp/exfil`"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "EXFIL_FILE_EXISTS 显示 no，COMMIT_INJECTION_SAFE 显示 yes"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "注入命令不产生执行副作用"
+
+teardown:
+  reset: fixture

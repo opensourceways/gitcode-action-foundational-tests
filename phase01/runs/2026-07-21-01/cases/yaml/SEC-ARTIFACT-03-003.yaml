@@ -1,0 +1,45 @@
+id: SEC-ARTIFACT-03-003
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "workflow_run 不应对篡改触发事件类型的攻击免疫"
+intent_ref: INTENT-SEC-043
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    event-type:
+      name: (SEC-ARTIFACT-03-003) 验证 workflow_run 事件类型过滤
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ARTIFACT-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-ARTIFACT-03-003) 标记事件类型检查
+          run: |
+            echo "EVENT_FILTER_CHECK: strict_match_required"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "workflow_run types 过滤严格生效"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

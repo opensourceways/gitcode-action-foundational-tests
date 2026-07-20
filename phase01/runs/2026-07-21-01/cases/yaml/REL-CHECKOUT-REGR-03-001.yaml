@@ -1,0 +1,61 @@
+id: REL-CHECKOUT-REGR-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "official_checkout 在标准仓库上完整可用——回归基础可用性"
+intent_ref: INTENT-REL-054
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    checkout-test:
+      name: checkout-regression-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: verify checkout
+          run: |
+            if [ -n "$(ls -A)" ]; then
+              echo "WORKSPACE_NOT_EMPTY: yes"
+            else
+              echo "WORKSPACE_NOT_EMPTY: no"
+            fi
+            echo "HEAD_SHA: $(git rev-parse HEAD)"
+            echo "EXPECTED_SHA: $ATOMGIT_SHA"
+            if [ "$(git rev-parse HEAD)" = "$ATOMGIT_SHA" ]; then
+              echo "SHA_MATCH: yes"
+            else
+              echo "SHA_MATCH: no"
+            fi
+        - name: list files
+          run: |
+            echo "FILE_COUNT: $(find . -maxdepth 1 -type f | wc -l)"
+            echo "CHECKOUT_OK: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "WORKSPACE_NOT_EMPTY=yes, SHA_MATCH=yes, CHECKOUT_OK=yes"
+  - type: nonfunctional
+    target: step_logs
+    eval: deterministic
+    rubric: "checkout 耗时 < 3min（标准小型仓库）"
+
+teardown:
+  reset: fixture

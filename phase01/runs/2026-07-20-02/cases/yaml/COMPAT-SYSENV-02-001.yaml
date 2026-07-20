@@ -1,0 +1,74 @@
+id: COMPAT-SYSENV-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "验证 ATOMGIT_ 系统环境变量注入完整性"
+intent_ref: INTENT-COMPAT-002
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-atomgit-env:
+      name: Test Atomgit Env
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Dump all ATOMGIT_ env vars
+        run: 'echo "ATOMGIT_TOKEN=***"
+  
+          echo "ATOMGIT_WORKSPACE=$ATOMGIT_WORKSPACE"
+  
+          echo "ATOMGIT_OUTPUT=$ATOMGIT_OUTPUT"
+  
+          echo "ATOMGIT_STEP_SUMMARY=$ATOMGIT_STEP_SUMMARY"
+  
+          echo "ATOMGIT_REPOSITORY=$ATOMGIT_REPOSITORY"
+  
+          echo "ATOMGIT_REPOSITORY_OWNER=$ATOMGIT_REPOSITORY_OWNER"
+  
+          echo "ATOMGIT_SHA=$ATOMGIT_SHA"
+  
+          echo "ATOMGIT_REF=$ATOMGIT_REF"
+  
+          echo "ATOMGIT_REF_NAME=$ATOMGIT_REF_NAME"
+  
+          echo "ATOMGIT_SYSENV_DUMP_COMPLETE"
+  
+          '
+      name: Test Atomgit Env
+  name: 验证 ATOMGIT_* 系统环境变量注入完整性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "所有文档声明的 ATOMGIT_* 变量在 shell 中非空，日志含 ATOMGIT_SYSENV_DUMP_COMPLETE"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "ATOMGIT_REPOSITORY_OWNER 应非空（修复确认）"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "$GITHUB_TOKEN 等 GitHub 前缀命名不静默空值"
+
+teardown:
+  reset: fixture

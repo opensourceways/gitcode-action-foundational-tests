@@ -1,0 +1,64 @@
+id: COMPAT-ACT-REF-03-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "Action 引用格式差异：uses: checkout vs uses: actions/checkout@v4"
+intent_ref: INTENT-COMPAT-050
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    gitcode-style:
+      name: test-gitcode-short-name
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout with gitcode short name
+          uses: checkout
+        - name: verify checkout
+          run: |
+            if [ -f README.md ] || [ -f readme.md ] || [ -n "$(ls -A)" ]; then
+              echo "CHECKOUT_OK: yes"
+            else
+              echo "CHECKOUT_OK: no (empty workspace)"
+            fi
+    github-style:
+      name: test-github-ref-format
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout with github format
+          uses: actions/checkout@v4
+        - name: verify checkout or error
+          if: ${{ always() }}
+          run: |
+            if [ -n "$(ls -A 2>/dev/null)" ]; then
+              echo "GITHUB_FORMAT_WORKS: unexpectedly yes"
+            else
+              echo "GITHUB_FORMAT_WORKS: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "GitCode 短名 checkout 成功（CHECKOUT_OK=yes）"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "GitHub 格式 actions/checkout@v4 应明确报错——报错消息含 'action' 相关提示"
+
+teardown:
+  reset: fixture

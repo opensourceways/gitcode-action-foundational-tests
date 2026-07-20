@@ -1,0 +1,45 @@
+id: COMPAT-COMPOSITE-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "Composite Action 不支持：验证报错质量——历史 #41"
+intent_ref: INTENT-COMPAT-042
+
+setup:
+  repo_fixture: with-composite-action
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-composite:
+      name: test-composite-action
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: use composite action
+          uses: ./.gitcode/actions/test-composite
+          with:
+            message: "hello composite"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "若 composite 不支持：应明确报错含 'composite' 关键词"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应失败无日志（历史 #41 已知问题——任务失败且无报错信息）"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,67 @@
+id: REL-CHAOS-CPU-03-001
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "CPU 饱和下 job 仍能推进且不被 OOM killer 误杀"
+intent_ref: INTENT-REL-015
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    cpu-test:
+      name: cpu-saturation-test
+      runs-on: [ubuntu-latest, x64, small]
+      timeout-minutes: 5
+      steps:
+        - name: start cpu load
+          run: |
+            echo "CPU_LOAD_START: $(date -u +%H:%M:%S)"
+            for i in $(seq 1 4); do
+              (while true; do :; done) &
+            done
+            echo "CPU_LOAD_PROCESSES: 4 background jobs started"
+        - name: do work under cpu load
+          run: |
+            for i in $(seq 1 20); do
+              echo "PROGRESS: $i at $(date -u +%H:%M:%S)"
+              sleep 2
+            done
+            echo "JOB_SURVIVED_CPU_SATURATION: yes"
+        - name: cleanup background processes
+          if: ${{ always() }}
+          run: |
+            echo "CLEANUP: killing background cpu loads"
+            pkill -P $$ 2>/dev/null || true
+            echo "CPU_LOAD_STOPPED"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection:
+  at: pre_job
+  action: cpu_saturate
+  params:
+    duration_seconds: 120
+  recovery_expectation: job_completes_despite_cpu_pressure
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: "deterministic"
+    rubric: "JOB_SURVIVED_CPU_SATURATION=yes，所有 step 完成"
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "不应因 CPU 饱和被系统 OOM kill"
+
+teardown:
+  reset: full_instance

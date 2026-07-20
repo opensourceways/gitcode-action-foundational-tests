@@ -1,0 +1,45 @@
+id: SEC-CACHE-03-004
+dimensions: [security]
+dimension: security
+priority: P1
+title: "pull_request_target workflow 对默认分支缓存仅有只读访问"
+intent_ref: INTENT-SEC-054
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  jobs:
+    cache-ro:
+      name: (SEC-CACHE-03-004) 验证 pr_target cache 只读
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-CACHE-03-004) 检出代码
+          uses: checkout
+        - name: (SEC-CACHE-03-004) 尝试 cache 读写
+          run: |
+            echo "CACHE_RO_CHECK: true"
+
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "pull_request_target 下 cache restore 正常"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "pull_request_target 下 cache save 被拒绝或隔离"
+
+teardown:
+  reset: none

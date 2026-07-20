@@ -1,0 +1,44 @@
+id: SEC-MASK-03-006
+dimensions: [security]
+dimension: security
+priority: P1
+title: "fork PR 下 ::add-mask:: 命令注册新 mask 不应影响主分支 job"
+intent_ref: INTENT-SEC-028
+
+setup:
+  repo_fixture: with-fork-and-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    fork-mask:
+      name: (SEC-MASK-03-006) fork PR 注册干扰 mask
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-006) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-006) 注册干扰 mask 值
+          run: |
+            echo "::add-mask::FORK_V1"
+            echo "::add-mask::FORK_V2"
+            echo "::add-mask::FORK_V3"
+            echo "DONE"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 注册的干扰 mask 值在日志中以 *** 出现"
+
+teardown:
+  reset: fixture

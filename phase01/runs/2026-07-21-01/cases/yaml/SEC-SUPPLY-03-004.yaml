@@ -1,0 +1,42 @@
+id: SEC-SUPPLY-03-004
+dimensions: [security]
+dimension: security
+priority: P1
+title: "reusable workflow 调用方传入的 secrets 不应被被调用方泄露到日志"
+intent_ref: INTENT-SEC-032
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    reusable-secret:
+      name: (SEC-SUPPLY-03-004) 验证 reusable workflow secret 安全
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-SUPPLY-03-004) 检出代码
+          uses: checkout
+        - name: (SEC-SUPPLY-03-004) echo 传入的 secret
+          run: echo "PASSED_SECRET: ${MY_SECRET}"
+          env:
+            MY_SECRET: ${{ secrets.TEST_SECRET }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "被调用方 echo 传入的 secret，日志应显示 ***，不泄露原文"
+
+teardown:
+  reset: none

@@ -1,0 +1,57 @@
+id: SEC-ISSUEOPS-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "issue_comment 触发器不应绕过 PR 审批机制——IssueOps TOCTOU"
+intent_ref: INTENT-SEC-039
+
+setup:
+  repo_fixture: with-issueops-scenario
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [issue_comment]
+  permissions: {}
+  jobs:
+    issueops-check:
+      name: (SEC-ISSUEOPS-03-001) 验证 IssueOps 安全
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISSUEOPS-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-ISSUEOPS-03-001) 记录 issue_comment 触发信息
+          run: |
+            echo "TRIGGER_EVENT: issue_comment"
+            echo "COMMENT_BODY: ${{ atomgit.event.comment.body }}"
+            echo "ISSUE_NUMBER: ${{ atomgit.event.issue.number }}"
+            echo "CURRENT_SHA: $(git rev-parse HEAD)"
+        - name: (SEC-ISSUEOPS-03-001) 安全警告
+          run: |
+            echo "SECURITY_NOTE: issue_comment 触发器的 TOCTOU 风险"
+            echo "攻击者可能在管理员评论后推送恶意代码"
+            echo "推荐使用 labeled activity type + 锁定的 commit SHA 替代 comment 触发"
+            echo "ISSUEOPS_TOCTOU_AWARE: yes"
+
+trigger:
+  event: issue_comment
+  as: maintainer
+  params:
+    comment_body: "/deploy"
+    post_comment_malicious_push: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "workflow 执行的 git SHA 应与管理员的 comment 时间点对应的 commit 一致"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "ISSUEOPS_TOCTOU_AWARE 标记存在"
+
+teardown:
+  reset: fixture

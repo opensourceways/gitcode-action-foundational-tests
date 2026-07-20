@@ -1,0 +1,50 @@
+id: COMPAT-MISS-FN-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "fromJSON/join/case 缺失函数：验证不支持函数是报错还是静默失败"
+intent_ref: INTENT-COMPAT-012
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-missing:
+      name: test-missing-functions
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: test fromJSON
+          if: ${{ always() }}
+          run: echo "TEST_fromJSON: ${{ fromJSON('[\"a\",\"b\"]') }}"
+        - name: test join
+          if: ${{ always() }}
+          run: echo "TEST_join: ${{ join('a,b,c', ',') }}"
+        - name: test case
+          if: ${{ always() }}
+          run: echo "TEST_case: ${{ case(true, 'yes', 'no') }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "若函数不支持：step 应报错含函数名；若支持：输出正确结果"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不支持函数不应以 success 状态掩盖——必须报错"
+
+teardown:
+  reset: fixture

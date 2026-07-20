@@ -1,0 +1,55 @@
+id: COMPAT-RUN-FMT-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "runs-on 标签格式：三段式数组 vs GitHub 单标签"
+intent_ref: INTENT-COMPAT-060
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    gitcode-style:
+      name: test-gitcode-runs-on-format
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: echo runner info
+          run: |
+            echo "RUNNER_OS: ${{ runner.os }}"
+            echo "RUNNER_ARCH: ${{ runner.arch }}"
+            echo "RUNS_ON_FORMAT: array"
+    github-style:
+      name: test-github-runs-on-format
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: echo runner info
+          run: |
+            echo "RUNNER_OS: ${{ runner.os }}"
+            echo "RUNNER_ARCH: ${{ runner.arch }}"
+            echo "RUNS_ON_FORMAT: single-label-comparison"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "三段式数组格式正常调度执行"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "RUNNER_OS 和 RUNNER_ARCH 值格式与文档声明一致"
+
+teardown:
+  reset: fixture

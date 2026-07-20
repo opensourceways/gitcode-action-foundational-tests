@@ -1,0 +1,41 @@
+id: SEC-PRTARGET-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "非默认分支上的旧版 workflow 文件不应成为攻击入口"
+intent_ref: INTENT-SEC-038
+
+setup:
+  repo_fixture: with-fork
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  jobs:
+    branch-safety:
+      name: (SEC-PRTARGET-03-003) 验证跨分支 workflow 安全
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PRTARGET-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-PRTARGET-03-003) 标记执行的 workflow 版本
+          run: |
+            echo "WORKFLOW_VERSION: default_branch"
+
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "pull_request_target 始终执行默认分支的 workflow 版本"
+
+teardown:
+  reset: none

@@ -1,0 +1,73 @@
+id: COMPAT-CTX-AVAIL-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "上下文可用性矩阵：验证 atomgit/env/secrets/runner/matrix 在各作用域的可用性"
+intent_ref: INTENT-COMPAT-025
+
+setup:
+  repo_fixture: basic-ci
+  secrets: [TEST_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  env:
+    WORKFLOW_ENV: workflow-level
+  jobs:
+    test-context-availability:
+      name: Test Context Availability
+      runs-on: [ubuntu-latest, x64, small]
+      env:
+        JOB_ENV: job-level
+      steps:
+      - name: Test env context availability
+        run: 'echo "Workflow env: ${{ env.WORKFLOW_ENV }}"
+  
+          echo "Job env: ${{ env.JOB_ENV }}"
+  
+          '
+      - name: Test secrets in run context
+        run: "if [ -n \"${{ secrets.TEST_TOKEN }}\" ]; then\n  echo \"Secret available\
+          \ in run context\"\nfi\n"
+      - name: Test runner context
+        if: ${{ runner.os != '' }}
+        run: 'echo "runner.os=${{ runner.os }}"
+  
+          echo "runner.arch=${{ runner.arch }}"
+  
+          '
+      - name: Test job context
+        run: echo "job.status=${{ job.status }}"
+      name: Test Context Availability
+  name: 上下文可用性矩阵：验证 atomgit/env/secrets/runner/matrix 在各作用
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "env 上下文在 step/run 中可用"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "secrets 上下文在 run: 中可用"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "runner 上下文在 job/step/if 中可用"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "secrets 上下文在 if: 条件中应不可直接使用"
+
+teardown:
+  reset: fixture

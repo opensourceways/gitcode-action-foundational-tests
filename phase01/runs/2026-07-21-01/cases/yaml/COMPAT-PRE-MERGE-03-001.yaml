@@ -1,0 +1,60 @@
+id: COMPAT-PRE-MERGE-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "checkout 插件的 PR 预合并行为——历史 #25/#71"
+intent_ref: INTENT-COMPAT-051
+
+setup:
+  repo_fixture: with-pr-conflict
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - pull_request
+    types: [open, update]
+  jobs:
+    test-checkout:
+      name: test-pr-checkout-behavior
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: check git info
+          run: |
+            echo "GIT_SHA: $(git rev-parse HEAD)"
+            echo "GIT_BRANCH: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'detached')"
+            echo "REF: $ATOMGIT_REF"
+            echo "HEAD_REF: ${{ atomgit.head_ref }}"
+            echo "BASE_REF: ${{ atomgit.base_ref }}"
+        - name: verify checkout result
+          if: ${{ always() }}
+          run: |
+            if [ -f conflict.txt ]; then
+              echo "CONFLICT_FILE_CONTENT: $(cat conflict.txt)"
+            else
+              echo "CONFLICT_FILE: missing"
+            fi
+            echo "WORKSPACE_FILES: $(ls -1 | head -20)"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "checkout 后 workspace 有文件；记录是 merge commit 还是 head commit"
+  - type: nonfunctional
+    target: step_logs
+    eval: llm_assisted
+    rubric: "若 GitCode 不做 pre-merge：需在文档中明确声明此差异"
+
+teardown:
+  reset: fixture

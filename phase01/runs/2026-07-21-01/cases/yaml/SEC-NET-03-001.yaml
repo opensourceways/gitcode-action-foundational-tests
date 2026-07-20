@@ -1,0 +1,42 @@
+id: SEC-NET-03-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Runner 网络隔离——出站控制与 SSRF 防护"
+intent_ref: INTENT-SEC-048
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    net-isolate:
+      name: (SEC-NET-03-001) 验证网络隔离
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-NET-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-NET-03-001) 测试内部地址访问
+          run: |
+            echo "TEST_METADATA: $(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 5 http://169.254.169.254/ 2>/dev/null || echo 'blocked_or_timeout')"
+            echo "NET_ISOLATION_CHECK: done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "Runner 无法访问内部 metadata 服务，返回 blocked_or_timeout"
+
+teardown:
+  reset: none

@@ -1,0 +1,65 @@
+id: COMP-ACT-03-003
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "setup-pnpm 安装与版本选择——指定版本、默认版本、不存在版本、Node.js 兼容性"
+intent_ref: INTENT-ACT-003
+
+setup:
+  repo_fixture: with-node-project
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    pnpm-test:
+      name: "(COMP-ACT-03-003) 验证 setup-pnpm 安装与版本选择"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-003) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-003) setup node 18"
+          uses: setup-node
+          with:
+            node-version: "18"
+        - name: "(COMP-ACT-03-003) setup pnpm version 8"
+          uses: setup-pnpm
+          with:
+            pnpm-version: "8.x"
+        - name: "(COMP-ACT-03-003) verify pnpm version is 8.x"
+          run: |
+            ACTUAL=$(pnpm --version 2>&1)
+            echo "PNPM_VERSION: $ACTUAL"
+            if echo "$ACTUAL" | grep -q "^8\."; then
+              echo "PNPM_VERSION_MATCH: yes"
+            else
+              echo "PNPM_VERSION_MATCH: no"
+            fi
+        - name: "(COMP-ACT-03-003) test pnpm store"
+          if: ${{ always() }}
+          run: |
+            pnpm --version 2>&1
+            echo "PNPM_NODE_VERSION: $(node --version)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "pnpm --version 输出 8.x 系版本，PNPM_VERSION_MATCH=yes"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若下载失败（已知 #50/#98）则标记为 blocked-by-platform"
+
+teardown:
+  reset: fixture

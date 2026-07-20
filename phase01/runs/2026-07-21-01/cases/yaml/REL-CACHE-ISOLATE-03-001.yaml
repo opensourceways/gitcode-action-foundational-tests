@@ -1,0 +1,68 @@
+id: REL-CACHE-ISOLATE-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "cache key 隔离：job-A 的 cache 不污染 job-B"
+intent_ref: INTENT-REL-055
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    job_a:
+      name: cache-writer-job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write cache A
+          run: |
+            mkdir -p .cache-a
+            echo "cache-data-a" > .cache-a/data.txt
+            echo "CACHE_A_WRITTEN: yes"
+        - name: save cache
+          uses: cache
+          with:
+            key: cache-A-v1
+            path: .cache-a
+    job_b:
+      name: cache-reader-job
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [job_a]
+      steps:
+        - name: restore cache with different key
+          uses: cache
+          with:
+            key: cache-B-v1
+            path: .cache-b
+        - name: verify isolation
+          run: |
+            if [ -f .cache-b/data.txt ]; then
+              echo "CACHE_ISOLATION_BREACH: job-b read cache-a data"
+            else
+              echo "CACHE_ISOLATION_OK: different key not matched"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "CACHE_ISOLATION_OK: different key not matched"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "job-B 不应 hit cache-A 的数据——不应出现 CACHE_ISOLATION_BREACH"
+
+teardown:
+  reset: fixture

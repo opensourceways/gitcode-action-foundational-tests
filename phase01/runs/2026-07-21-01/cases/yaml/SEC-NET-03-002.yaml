@@ -1,0 +1,42 @@
+id: SEC-NET-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Self-hosted runner 在内网部署时的网络跳板风险"
+intent_ref: INTENT-SEC-049
+
+setup:
+  repo_fixture: with-fork
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    ssrf:
+      name: (SEC-NET-03-002) 验证 self-hosted runner 内网防护
+      runs-on: [self-hosted, arch=x64]
+      steps:
+        - name: (SEC-NET-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-NET-03-002) 内网访问测试
+          run: |
+            echo "INTERNAL_ACCESS: $(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 5 http://10.0.0.1/ 2>/dev/null || echo 'blocked_or_timeout')"
+            echo "SSRF_CHECK: done"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "self-hosted runner 上 fork PR 代码无法访问内网服务"
+
+teardown:
+  reset: none

@@ -1,0 +1,70 @@
+id: SEC-REGRESS-03-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: "[回归 #66] pull_request_target 的 fork PR secret 隔离"
+intent_ref: INTENT-SEC-051
+
+setup:
+  repo_fixture: with-fork-and-pull-request-target
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  permissions:
+    repository: read
+  jobs:
+    verify-source:
+      name: (SEC-REGRESS-03-002) 验证 pull_request_target workflow 来源
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-REGRESS-03-002) 检出默认分支 workflow
+          uses: checkout
+          with:
+            ref: ${{ atomgit.base_ref }}
+        - name: (SEC-REGRESS-03-002) 记录实际执行的 workflow 信息
+          run: |
+            echo "WORKFLOW_SHA: $ATOMGIT_SHA"
+            echo "BASE_REF: $ATOMGIT_BASE_REF"
+            echo "HEAD_REF: $ATOMGIT_HEAD_REF"
+            echo "EVENT_NAME: $ATOMGIT_EVENT_NAME"
+            echo "ACTUAL_STEPS: verify-source, log-workflow-info, check-secret-access"
+        - name: (SEC-REGRESS-03-002) 检查 Secret 访问（应来自 base 分支控制）
+          run: |
+            echo "SECRET_READ_ATTEMPT: attempted"
+            echo "SECRET_VALUE_LENGTH: ${#SECRET_VAL}"
+            if [ "${#SECRET_VAL}" -gt 0 ]; then
+              echo "SECRET_ACCESSIBLE: yes"
+              echo "NOTE: pull_request_target 下 secret 可访问是设计行为，关键验证点是 workflow 定义来源"
+            else
+              echo "SECRET_ACCESSIBLE: no"
+            fi
+          env:
+            SECRET_VAL: ${{ secrets.DEPLOY_TOKEN }}
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    fork_modified_workflow: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_list
+    eval: deterministic
+    rubric: "实际执行的 step 列表应只包含默认分支定义的三步，不含 fork 侧添加的恶意 step"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "BASE_REF 应为默认分支 ref，非 fork 侧分支"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "若 #66 未实现则标记 blocked-by-platform"
+
+teardown:
+  reset: fixture

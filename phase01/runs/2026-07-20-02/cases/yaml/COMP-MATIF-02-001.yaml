@@ -1,0 +1,59 @@
+id: COMP-MATIF-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 job 级 if 对 matrix 展开的独立求值"
+intent_ref: INTENT-COMP-025
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    matrix-if-test:
+      strategy:
+        matrix:
+          os:
+          - ubuntu
+          - windows
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      if: ${{ matrix.os == 'ubuntu' }}
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Log filtered matrix instance
+        run: echo "MATRIX_OS=${{ matrix.os }}"
+      name: Matrix If Test
+  name: 验证 job 级 if 对 matrix 展开的独立求值
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "仅 matrix.os == 'ubuntu' 的实例执行（日志含 MATRIX_OS=ubuntu）"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "matrix.os == 'windows' 的实例被 if 跳过"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "逐实例独立求值 if，不同实例可产生不同 if 结果"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,56 @@
+id: USE-SUMMARY-03-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: "Step Summary 的 Markdown 渲染与链接有效性——历史 #56/#73"
+intent_ref: INTENT-USE-041
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    summary-test:
+      name: step-summary-render-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write markdown summary
+          run: |
+            echo "## Test Results" >> $ATOMGIT_STEP_SUMMARY
+            echo "" >> $ATOMGIT_STEP_SUMMARY
+            echo "| Status | Count |" >> $ATOMGIT_STEP_SUMMARY
+            echo "|--------|-------|" >> $ATOMGIT_STEP_SUMMARY
+            echo "| PASS   | 10    |" >> $ATOMGIT_STEP_SUMMARY
+            echo "| FAIL   | 2     |" >> $ATOMGIT_STEP_SUMMARY
+            echo "" >> $ATOMGIT_STEP_SUMMARY
+            echo "[View Details](https://example.com/results)" >> $ATOMGIT_STEP_SUMMARY
+            echo "SUMMARY_WRITTEN: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "SUMMARY_WRITTEN=yes，运行详情页 Summary 区域可见 Markdown 渲染内容"
+  - type: positive
+    target: summary_ui
+    eval: llm_assisted
+    rubric: "Markdown 表格正确渲染，链接不被注入中间页/无关域名（历史 #56 回归）"
+  - type: negative
+    target: summary_ui
+    eval: deterministic
+    rubric: "Summary 内容不应为空或不显示（历史 #73 回归）"
+
+teardown:
+  reset: none

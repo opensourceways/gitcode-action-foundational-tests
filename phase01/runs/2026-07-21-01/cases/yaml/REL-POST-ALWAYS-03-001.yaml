@@ -1,0 +1,52 @@
+id: REL-POST-ALWAYS-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "post 阶段在 main job 失败时仍执行——通知/清理可靠性"
+intent_ref: INTENT-REL-046
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    main-job:
+      name: main-job-with-failure
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: fail intentionally
+          run: |
+            echo "MAIN_JOB_FAILING: yes"
+            exit 1
+  post:
+    run_always: true
+    steps:
+      - name: cleanup after failure
+        run: |
+          echo "POST_EXECUTED: yes"
+          echo "CLEANUP_DONE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "POST_EXECUTED=yes, CLEANUP_DONE=yes——post 在 main failure 后执行"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "post 不应被跳过"
+
+teardown:
+  reset: none

@@ -1,0 +1,65 @@
+id: COMP-ACT-03-009
+dimensions: [completeness, security]
+dimension: completeness
+priority: P1
+title: "SWR 上传/下载与 ak/sk 认证——已知认证待验证 #72/#73/#74、日志脱敏"
+intent_ref: INTENT-ACT-009
+
+setup:
+  repo_fixture: with-swr-config
+  secrets: [SWR_AK, SWR_SK]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    swr-test:
+      name: "(COMP-ACT-03-009) 验证 SWR 上传/下载与 ak/sk 认证"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-009) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-009) check docker daemon"
+          run: |
+            if docker info 2>&1; then
+              echo "DOCKER_DAEMON_AVAILABLE: yes"
+            else
+              echo "DOCKER_DAEMON_AVAILABLE: no"
+              echo "NOTE: 已知 #86——默认资源池不支持 Docker daemon"
+            fi
+        - name: "(COMP-ACT-03-009) login SWR with ak/sk"
+          uses: official_swr
+          with:
+            access_key: "${{ secrets.SWR_AK }}"
+            secret_key: "${{ secrets.SWR_SK }}"
+            region: "cn-north-4"
+          continue-on-error: true
+        - name: "(COMP-ACT-03-009) verify SWR login result"
+          if: ${{ always() }}
+          run: |
+            echo "SWR_AUTH_RESULT: check step log"
+            echo "NOTE: 已知 #72/#73/#74——ak/sk 认证待验证"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "SWR 登录 step 执行完成（成功或明确报错）"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: SWR_AK
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: SWR_SK
+
+teardown:
+  reset: fixture

@@ -1,0 +1,69 @@
+id: COMPAT-TOOLCHAIN-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "预装工具链版本差异：验证托管 Runner 上的工具版本矩阵"
+intent_ref: INTENT-COMPAT-061
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    toolchain-check:
+      name: check-preinstalled-toolchain
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: check node version
+          run: |
+            if command -v node &> /dev/null; then
+              echo "NODE_VERSION: $(node --version)"
+            else
+              echo "NODE_VERSION: not installed"
+            fi
+        - name: check python version
+          run: |
+            if command -v python3 &> /dev/null; then
+              echo "PYTHON_VERSION: $(python3 --version)"
+            else
+              echo "PYTHON_VERSION: not installed"
+            fi
+        - name: check java version
+          run: |
+            if command -v java &> /dev/null; then
+              echo "JAVA_VERSION: $(java -version 2>&1 | head -1)"
+            else
+              echo "JAVA_VERSION: not installed"
+            fi
+        - name: check go version
+          run: |
+            if command -v go &> /dev/null; then
+              echo "GO_VERSION: $(go version)"
+            else
+              echo "GO_VERSION: not installed"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "每种工具链版本可观测；预装版本与文档 runner-images-tools.md 对比"
+  - type: nonfunctional
+    target: step_logs
+    eval: llm_assisted
+    rubric: "版本差异记录供迁移摩擦清单使用"
+
+teardown:
+  reset: fixture

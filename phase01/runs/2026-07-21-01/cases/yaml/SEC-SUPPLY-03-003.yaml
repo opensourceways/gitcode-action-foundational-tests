@@ -1,0 +1,47 @@
+id: SEC-SUPPLY-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "composite action 内部的 run 步骤中引用不可信 inputs 不应导致注入"
+intent_ref: INTENT-SEC-031
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    composite-inject:
+      name: (SEC-SUPPLY-03-003) 验证 composite action 注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-SUPPLY-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-SUPPLY-03-003) 模拟 composite action 内行为
+          run: |
+            INJECT_INPUT="${{ atomgit.repository }}"
+            echo "INPUT_SAFE: ${INJECT_INPUT}"
+            echo "NO_INJECT: true"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "含注入字符的 inputs 传入 composite action 直接用于 run 不应执行注入命令"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "composite action 内通过 env 中间变量使用的 inputs 应安全"
+
+teardown:
+  reset: none

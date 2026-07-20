@@ -1,0 +1,45 @@
+id: SEC-TOKEN-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "ATOMGIT_TOKEN 在 job 结束后应自动失效"
+intent_ref: INTENT-SEC-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    token-expire:
+      name: (SEC-TOKEN-03-002) 验证 token 过期机制
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-TOKEN-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-TOKEN-03-002) 验证 token 可用
+          run: |
+            echo "TOKEN_VALID_DURING_JOB: true"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "job 运行期间 token 正常可用"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 完成后 token 不可再用，API 返回 401/403"
+
+teardown:
+  reset: none

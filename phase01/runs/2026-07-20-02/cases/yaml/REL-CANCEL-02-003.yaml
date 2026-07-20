@@ -1,0 +1,61 @@
+id: REL-CANCEL-02-003
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "Post 后处理阶段在 workflow 被取消时仍应执行（run_always: true）"
+intent_ref: INTENT-REL-018
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  stages:
+  - name: main
+    jobs:
+      long-running-job:
+        runs-on: [ubuntu-latest, x64, small]
+        steps:
+        - name: Long step to give cancel window
+          run: sleep 600
+  post:
+    run_always: true
+    jobs:
+      cleanup:
+        runs-on: [ubuntu-latest, x64, small]
+        steps:
+        - name: Post cleanup
+          run: 'echo "Cleanup started at $(date)"
+  
+            echo "Cleanup completed"
+  
+            '
+  name: 'Post 后处理阶段在 workflow 被取消时仍应执行（run_always: true）'
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "手动取消 workflow 后 post 阶段的 step 日志可见于 Run 详情"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "post 阶段的 cleanup step 正常完成（日志含 'Cleanup completed'）"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "post 阶段不因主 workflow 被取消而跳过"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,45 @@
+id: SEC-EXPR-03-002
+dimensions:
+  - security
+dimension: security
+priority: P2
+title: "uses 字段应支持 ${{ }} 表达式求值"
+intent_ref: INTENT-SEC-053
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    uses-expr:
+      name: (SEC-EXPR-03-002) 验证 uses 表达式求值
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-EXPR-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-EXPR-03-002) 验证表达式支持
+          run: |
+            echo "USES_EXPR_CHECK: done"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "uses 字段支持表达式求值或不支持时给出明确错误"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

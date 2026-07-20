@@ -1,0 +1,67 @@
+id: COMP-ACT-03-013
+dimensions: [completeness]
+dimension: completeness
+priority: P2
+title: "paths_filter 路径过滤——glob pattern、多 pattern 组合、if 条件联动、否定 pattern"
+intent_ref: INTENT-ACT-013
+
+setup:
+  repo_fixture: with-multi-dir-project
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    paths-filter-test:
+      name: "(COMP-ACT-03-013) 验证 paths_filter 路径过滤"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-013) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-013) apply paths filter src"
+          uses: official_paths_filter
+          id: filter
+          with:
+            filters: |
+              src:
+                - "src/**"
+              docs:
+                - "docs/**"
+        - name: "(COMP-ACT-03-013) step for src changes only"
+          if: ${{ steps.filter.outputs.src == 'true' }}
+          run: |
+            echo "SRC_CHANGED: yes"
+            echo "PATHS_FILTER_SRC_MATCH: true"
+        - name: "(COMP-ACT-03-013) step for docs changes only"
+          if: ${{ steps.filter.outputs.docs == 'true' }}
+          run: |
+            echo "DOCS_CHANGED: yes"
+            echo "PATHS_FILTER_DOCS_MATCH: true"
+        - name: "(COMP-ACT-03-013) record filter results"
+          if: ${{ always() }}
+          run: |
+            echo "PATHS_FILTER_CHECK: completed"
+            echo "NOTE: 否定 pattern (!docs/**) 支持范围未文档化"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "paths_filter step 执行完成，过滤结果可在后续 step if 条件中正确使用"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "变更 src 文件时 SRC_CHANGED=yes，变更 docs 时 DOCS_CHANGED=yes"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,47 @@
+id: SEC-INJECT-03-007
+dimensions: [security]
+dimension: security
+priority: P1
+title: "表达式双重求值——action 内部模板引擎不应二次解释 ${{ }} 的结果"
+intent_ref: INTENT-SEC-040
+
+setup:
+  repo_fixture: with-fork-and-pr-template
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    double-eval:
+      name: (SEC-INJECT-03-007) 验证双重表达式求值防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-007) 检出代码
+          uses: checkout
+        - name: (SEC-INJECT-03-007) echo PR 标题含模板语法
+          run: |
+            echo "TITLE: ${{ atomgit.event.pull_request.title }}"
+            echo "NO_TEMPLATE_EVAL: true"
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    pr_title: "{{ process.env.ATOMGIT_TOKEN }} injected"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "action 内部不应二次解释模板变量，日志不含 token 或 process.env"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "NO_TEMPLATE_EVAL 标记存在"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,43 @@
+id: COMPAT-YML-CACHE-03-001
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "YML 缓存未更新：子 workflow 修改后仍执行旧代码——历史 #85"
+intent_ref: INTENT-COMPAT-092
+
+setup:
+  repo_fixture: with-workflow-call-chain
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    caller:
+      name: call-reusable-workflow
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: call reusable
+          uses: ./.gitcode/workflows/reusable.yml@main
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "子 workflow 输出应为最新版本内容（修改后 v2 而非缓存的 v1）"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "不应出现旧代码输出（历史 #85 回归——YML 缓存陈旧）"
+
+teardown:
+  reset: fixture

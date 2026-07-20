@@ -1,0 +1,49 @@
+id: COMPAT-PATH-300-03-001
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "paths 过滤 300 文件上限边界：变更 301 个文件时第 301 个不触发"
+intent_ref: INTENT-COMPAT-033
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+    paths:
+    - src/**
+  jobs:
+    trigger-check:
+      name: check-path-trigger
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: log trigger info
+          run: |
+            echo "WORKFLOW_TRIGGERED: yes"
+            echo "PATHS_FILTER_MATCHED: src/**"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    changed_files: 301
+    target_file_position: 301
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "匹配文件在前 300 时 workflow 应触发；在第 301+ 时不触发"
+  - type: nonfunctional
+    target: trigger_behavior
+    eval: llm_assisted
+    rubric: "记录 300 文件上限边界行为，对比 GitHub 3000 上限差异"
+
+teardown:
+  reset: fixture

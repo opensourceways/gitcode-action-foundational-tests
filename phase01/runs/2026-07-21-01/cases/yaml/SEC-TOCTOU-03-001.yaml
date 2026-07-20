@@ -1,0 +1,62 @@
+id: SEC-TOCTOU-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "pull_request_target 的 TOCTOU 攻击——审批后恶意 commit 替换 PR 代码"
+intent_ref: INTENT-SEC-037
+
+setup:
+  repo_fixture: with-fork-and-toctou-scenario
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  permissions:
+    repository: read
+  jobs:
+    toctou-check:
+      name: (SEC-TOCTOU-03-001) 验证 TOCTOU 攻击防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-TOCTOU-03-001) 默认 checkout base 分支
+          uses: checkout
+        - name: (SEC-TOCTOU-03-001) 记录 base 分支 SHA
+          run: |
+            echo "BASE_CHECKOUT_SHA: $(git rev-parse HEAD)"
+            echo "ATOMGIT_SHA: $ATOMGIT_SHA"
+            echo "ATOMGIT_HEAD_REF: $ATOMGIT_HEAD_REF"
+        - name: (SEC-TOCTOU-03-001) 显式 checkout PR HEAD SHA（TOCTOU 高风险操作）
+          uses: checkout
+          with:
+            ref: ${{ atomgit.event.pull_request.head.sha }}
+            path: pr-head-code
+        - name: (SEC-TOCTOU-03-001) 记录 PR HEAD checkout SHA
+          if: ${{ always() }}
+          run: |
+            cd pr-head-code
+            echo "HEAD_CHECKOUT_SHA: $(git rev-parse HEAD)"
+            echo "TOCTOU_RISK: head_sha_may_differ_from_approval_time"
+            echo "NOTE: 安全实践是使用 PR 审批时的 MERGE_COMMIT SHA 而非 head.sha"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    toctou_attack: post_approval_malicious_push
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "BASE_CHECKOUT_SHA 应等于 ATOMGIT_SHA（默认 checkout 到 base 分支，天然免疫 TOCTOU）"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "显式 checkout head.sha 时，job 日志应提示 TOCTOU 风险或 checkout SHA 与审批时一致"
+
+teardown:
+  reset: fixture

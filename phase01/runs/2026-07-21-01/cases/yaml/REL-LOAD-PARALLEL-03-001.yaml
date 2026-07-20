@@ -1,0 +1,126 @@
+id: REL-LOAD-PARALLEL-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "单 workflow 含 10 个独立 job 全部正确并行分发"
+intent_ref: INTENT-REL-043
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    job_01:
+      name: parallel-job-01
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_01_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_01_DONE"
+    job_02:
+      name: parallel-job-02
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_02_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_02_DONE"
+    job_03:
+      name: parallel-job-03
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_03_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_03_DONE"
+    job_04:
+      name: parallel-job-04
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_04_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_04_DONE"
+    job_05:
+      name: parallel-job-05
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_05_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_05_DONE"
+    job_06:
+      name: parallel-job-06
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_06_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_06_DONE"
+    job_07:
+      name: parallel-job-07
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_07_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_07_DONE"
+    job_08:
+      name: parallel-job-08
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_08_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_08_DONE"
+    job_09:
+      name: parallel-job-09
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_09_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_09_DONE"
+    job_10:
+      name: parallel-job-10
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate work
+          run: |
+            echo "JOB_10_START: $(date -u +%H:%M:%S)"
+            sleep 10
+            echo "JOB_10_DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "10 个 job 全部 success，完成时间差异 < 30s，无明显饥饿"
+
+teardown:
+  reset: none

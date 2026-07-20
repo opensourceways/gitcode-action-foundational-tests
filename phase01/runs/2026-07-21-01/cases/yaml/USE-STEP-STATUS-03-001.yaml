@@ -1,0 +1,50 @@
+id: USE-STEP-STATUS-03-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: "Step 级别执行结果状态回写准确性——exit code 与展示状态一致性"
+intent_ref: INTENT-USE-040
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    status-test:
+      name: step-status-accuracy-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: succeed step
+          run: echo "THIS_STEP_SHOULD_SUCCEED: yes"
+        - name: fail step
+          run: |
+            echo "THIS_STEP_SHOULD_FAIL: yes"
+            exit 1
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: step_status
+    eval: deterministic
+    rubric: "exit 1 的 step 状态标记为 failure；exit 0 的 step 标记为 success"
+  - type: negative
+    target: step_status
+    eval: deterministic
+    rubric: "不应出现 exit 1 但 step 显示 success 的假绿（历史 #72 回归）"
+
+teardown:
+  reset: none

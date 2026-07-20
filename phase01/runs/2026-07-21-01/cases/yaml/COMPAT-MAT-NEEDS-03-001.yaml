@@ -1,0 +1,63 @@
+id: COMPAT-MAT-NEEDS-03-001
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "matrix job 的 needs 依赖导致任务初始化错误——历史 #101 回归验证"
+intent_ref: INTENT-COMPAT-091
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    build:
+      name: build-matrix-job
+      runs-on: [ubuntu-latest, x64, small]
+      strategy:
+        matrix:
+          node: [18, 20, 22]
+      steps:
+        - name: simulate build
+          run: |
+            echo "BUILD_NODE_VERSION: ${{ matrix.node }}"
+            echo "BUILD_COMPLETE: yes"
+            sleep 5
+    test:
+      name: test-depends-on-build
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [build]
+      steps:
+        - name: verify dependency resolved
+          run: |
+            echo "TEST_STARTED: yes"
+            echo "BUILD_RESULT: ${{ needs.build.result }}"
+            echo "ALL_BUILDS_DONE: depends_on_matrix_ok"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "TEST_STARTED=yes, ALL_BUILDS_DONE=depends_on_matrix_ok"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "test job 不应出现「任务初始化错误」（已知 #101 bug 回归）"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "build 和 test 均 success"
+
+teardown:
+  reset: fixture

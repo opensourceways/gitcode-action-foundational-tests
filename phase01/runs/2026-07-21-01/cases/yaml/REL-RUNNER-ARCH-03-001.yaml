@@ -1,0 +1,50 @@
+id: REL-RUNNER-ARCH-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "K8s runner 架构不匹配：runs-on 指定 arm64 但只有 x64 节点时的行为"
+intent_ref: INTENT-REL-028
+
+setup:
+  repo_fixture: with-k8s-runner-x64-only
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    arch-test:
+      name: architecture-mismatch-test
+      runs-on: [self-hosted, arm64, medium]
+      timeout-minutes: 5
+      steps:
+        - name: check actual arch
+          run: |
+            echo "ACTUAL_ARCH: $(uname -m)"
+            if [ "$(uname -m)" = "aarch64" ]; then
+              echo "ARCH_MATCH: yes"
+            else
+              echo "ARCH_MATCH: no (wrongly scheduled to $(uname -m))"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 不应在 x64 节点执行——不应出现 ARCH_MATCH: no"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "无匹配 runner 时 job 应在合理时间内 queued/failed 并提示 no matching runner"
+
+teardown:
+  reset: fixture

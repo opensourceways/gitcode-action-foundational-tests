@@ -1,0 +1,64 @@
+id: REL-STAGES-FF-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "stages 中前一个 stage 失败且 fail_fast=true 时后续 stage 全部跳过"
+intent_ref: INTENT-REL-053
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  stages:
+    - name: build
+      fail_fast: true
+      jobs:
+        build-job:
+          name: build-stage-job
+          runs-on: [ubuntu-latest, x64, small]
+          steps:
+            - name: fail build
+              run: |
+                echo "BUILD_FAILING: yes"
+                exit 1
+    - name: test
+      jobs:
+        test-job:
+          name: test-stage-job
+          runs-on: [ubuntu-latest, x64, small]
+          steps:
+            - name: test step
+              run: echo "TEST_RAN: should be skipped"
+    - name: deploy
+      jobs:
+        deploy-job:
+          name: deploy-stage-job
+          runs-on: [ubuntu-latest, x64, small]
+          steps:
+            - name: deploy step
+              run: echo "DEPLOY_RAN: should be skipped"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "build=failure, test=skipped, deploy=skipped"
+  - type: negative
+    target: job_status
+    eval: deterministic
+    rubric: "test 和 deploy 不进入 queued 状态"
+
+teardown:
+  reset: none

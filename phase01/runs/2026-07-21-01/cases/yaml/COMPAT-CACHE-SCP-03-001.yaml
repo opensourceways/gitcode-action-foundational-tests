@@ -1,0 +1,74 @@
+id: COMPAT-CACHE-SCP-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "cache 插件跨 job/跨 run 作用域与 key 行为"
+intent_ref: INTENT-COMPAT-052
+
+setup:
+  repo_fixture: with-package-json
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    write-cache:
+      name: write-cache-job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout
+          uses: checkout
+        - name: write test file and cache
+          run: |
+            mkdir -p .cache-test
+            echo "cache-data-v1" > .cache-test/data.txt
+            echo "CACHE_WRITE: done"
+        - name: save cache
+          uses: cache
+          with:
+            key: node-deps-linux-${{ hashFiles('package.json') }}
+            path: .cache-test
+    read-cache:
+      name: read-cache-job
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [write-cache]
+      steps:
+        - name: checkout
+          uses: checkout
+        - name: restore cache
+          uses: cache
+          with:
+            key: node-deps-linux-${{ hashFiles('package.json') }}
+            path: .cache-test
+            restore-keys: node-deps-
+        - name: verify cache hit
+          run: |
+            if [ -f .cache-test/data.txt ]; then
+              echo "CACHE_RESTORED: yes"
+              echo "CACHE_DATA: $(cat .cache-test/data.txt)"
+            else
+              echo "CACHE_RESTORED: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "read-cache-job 日志 CACHE_RESTORED=yes, CACHE_DATA=cache-data-v1"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "restore-keys 前缀降级匹配行为可观测"
+
+teardown:
+  reset: fixture

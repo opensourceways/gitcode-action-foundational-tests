@@ -1,0 +1,52 @@
+id: COMP-ADD-MASK-03-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P1
+title: "::add-mask:: 脱敏命令：验证后续日志中的值被正确遮蔽"
+intent_ref: INTENT-COMP-026
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    mask-test:
+      name: add-mask-command-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: register mask for sensitive value
+          run: echo "::add-mask::SECRET_VALUE_123"
+        - name: echo masked value
+          run: |
+            echo "MASKED_ECHO: SECRET_VALUE_123"
+            echo "SHOULD_NOT_SEE: the value above should appear as ***"
+        - name: verify mask in command output
+          run: |
+            printf "MASKED_PRINTF: SECRET_VALUE_123"
+            echo ""
+            echo "MASK_VERIFICATION_COMPLETE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "MASKED_ECHO 和 MASKED_PRINTF 行中 SECRET_VALUE_123 被 *** 遮蔽"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "原始值 SECRET_VALUE_123 不应在 add-mask 后的日志行中出现"
+
+teardown:
+  reset: none

@@ -1,0 +1,54 @@
+id: COMPAT-STRAT-CTX-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "strategy 上下文字段支持：验证 job-total / max-parallel 是否可用"
+intent_ref: INTENT-COMPAT-023
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-matrix:
+      name: test-strategy-context
+      runs-on: [ubuntu-latest, x64, small]
+      strategy:
+        matrix:
+          os: [ubuntu-latest]
+          variant: [1, 2, 3, 4]
+        max-parallel: 2
+      steps:
+        - name: echo strategy context
+          run: |
+            echo "JOB_INDEX: ${{ strategy.job-index }}"
+            echo "JOB_TOTAL: ${{ strategy.job-total }}"
+            echo "MAX_PARALLEL: ${{ strategy.max-parallel }}"
+        - name: verify last job pattern
+          if: ${{ strategy.job-index == 3 }}
+          run: echo "LAST_JOB: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "JOB_INDEX 在 0-3 范围，LAST_JOB=yes 在最后一个实例输出"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "JOB_TOTAL 应为 4 或记录为缺失字段"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,62 @@
+id: SEC-ISOLATE-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "共享文件系统不应跨 job 残留敏感文件"
+intent_ref: INTENT-SEC-047
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    job-writer:
+      name: (SEC-ISOLATE-03-003) 写入残留文件
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-ISOLATE-03-003) 写入敏感文件
+          run: |
+            echo "SENSITIVE_DATA" > /tmp/residue-test.txt
+            echo "SENSITIVE_DATA" > ~/residue-test.txt
+            echo "FILES_WRITTEN"
+    job-reader:
+      name: (SEC-ISOLATE-03-003) 尝试读取残留文件
+      needs: job-writer
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-ISOLATE-03-003) 检查文件残留
+          run: |
+            if [ -f /tmp/residue-test.txt ]; then
+              echo "RESIDUE_FOUND_IN_TMP: yes"
+            else
+              echo "RESIDUE_FOUND_IN_TMP: no"
+            fi
+            if [ -f ~/residue-test.txt ]; then
+              echo "RESIDUE_FOUND_IN_HOME: yes"
+            else
+              echo "RESIDUE_FOUND_IN_HOME: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "job B 不应看到 job A 写入的残留文件"
+
+teardown:
+  reset: full_instance

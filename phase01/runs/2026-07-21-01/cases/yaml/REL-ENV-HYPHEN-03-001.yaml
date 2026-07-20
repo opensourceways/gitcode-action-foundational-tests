@@ -1,0 +1,54 @@
+id: REL-ENV-HYPHEN-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "env 变量带中划线时渲染正确——历史 #38 回归"
+intent_ref: INTENT-REL-049
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    hyphen-test:
+      name: env-hyphen-variable-test
+      runs-on: [ubuntu-latest, x64, small]
+      env:
+        MY-VAR: hello
+        ANOTHER-VAR: world
+      steps:
+        - name: echo hypenated var via expression
+          run: echo "MY_HYPHEN_VAR: ${{ env.MY-VAR }}"
+        - name: verify value
+          run: |
+            VAL="${{ env.MY-VAR }}"
+            if [ "$VAL" = "hello" ]; then
+              echo "HYPHEN_VAR_OK: yes"
+            else
+              echo "HYPHEN_VAR_OK: no (got: $VAL)"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "MY_HYPHEN_VAR=hello, HYPHEN_VAR_OK=yes"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "不触发 bash bad substitution（历史 #38 回归）"
+
+teardown:
+  reset: none

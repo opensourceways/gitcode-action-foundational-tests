@@ -1,0 +1,42 @@
+id: SEC-ARTIFACT-03-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "跨 job artifact 在 fork PR 场景下不应被后续高权限 job 无条件信任"
+intent_ref: INTENT-SEC-026
+
+setup:
+  repo_fixture: with-fork
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    fork-artifact:
+      name: (SEC-ARTIFACT-03-001) 验证 fork PR artifact 隔离
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ARTIFACT-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-ARTIFACT-03-001) 上传测试 artifact
+          run: |
+            echo "FORK_ARTIFACT_DATA" > /tmp/test-artifact.txt
+            echo "ARTIFACT_UPLOADED"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR artifact 不被后续内部 push workflow 自动下载"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,50 @@
+id: REL-RES-MEM-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "container.options --memory 限制生效：容器内存超限时被 OOM kill"
+intent_ref: INTENT-REL-041
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    mem-limit-test:
+      name: container-memory-limit-test
+      runs-on: [ubuntu-latest, x64, small]
+      container:
+        image: ubuntu:latest
+        options: "--memory 512m --memory-swap 512m"
+      timeout-minutes: 3
+      steps:
+        - name: attempt memory overrun in container
+          run: |
+            echo "MEM_LIMIT_TEST_START: $(date -u +%H:%M:%S)"
+            dd if=/dev/zero of=/dev/null bs=100M count=10 2>&1 || echo "MEM_ALLOC_FAILED: likely OOM"
+            echo "MEM_LIMIT_TEST_END: $(date -u +%H:%M:%S)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "容器内存超限时进程被 kill，日志含 OOM 或 MEM_ALLOC_FAILED 信息"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "内存超限时 Run 状态正确反映 failure"
+
+teardown:
+  reset: fixture

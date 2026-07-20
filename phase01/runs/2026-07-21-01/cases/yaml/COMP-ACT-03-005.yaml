@@ -1,0 +1,72 @@
+id: COMP-ACT-03-005
+dimensions: [completeness]
+dimension: completeness
+priority: P2
+title: "setup-qemu 多架构仿真——平台列表、与 buildx 联用、daemon 不可用场景"
+intent_ref: INTENT-ACT-005
+
+setup:
+  repo_fixture: with-docker-build
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    qemu-test:
+      name: "(COMP-ACT-03-005) 验证 setup-qemu 多架构仿真"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-005) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-005) check docker daemon"
+          run: |
+            if docker info 2>&1; then
+              echo "DOCKER_DAEMON_AVAILABLE: yes"
+            else
+              echo "DOCKER_DAEMON_AVAILABLE: no"
+              echo "NOTE: 已知 #86——默认资源池不支持 Docker daemon"
+            fi
+        - name: "(COMP-ACT-03-005) setup qemu"
+          uses: docker/setup-qemu-action
+        - name: "(COMP-ACT-03-005) test arm64 emulation"
+          if: ${{ always() }}
+          run: |
+            if docker info 2>&1 > /dev/null; then
+              docker run --rm --platform linux/arm64 hello-world 2>&1 && echo "QEMU_ARM64: ok" || echo "QEMU_ARM64: failed"
+            else
+              echo "QEMU_TEST: skipped (no daemon)"
+            fi
+        - name: "(COMP-ACT-03-005) list supported platforms"
+          if: ${{ always() }}
+          run: |
+            echo "EXPECTED_PLATFORMS: linux/arm64,linux/arm/v7,linux/s390x"
+            if docker info 2>&1 > /dev/null; then
+              docker buildx ls 2>&1 || echo "BUILDX_LIST: failed"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "QEMU 安装 step 执行完成（成功或明确报错）"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "有 daemon 时 arm64 仿真成功；无 daemon 时跳过并说明原因"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "无 daemon 时不出现静默挂起或超时"
+
+teardown:
+  reset: fixture

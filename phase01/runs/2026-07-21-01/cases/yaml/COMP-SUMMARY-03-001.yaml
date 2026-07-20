@@ -1,0 +1,56 @@
+id: COMP-SUMMARY-03-001
+dimensions: [completeness, usability]
+dimension: completeness
+priority: P2
+title: "ATOMGIT_STEP_SUMMARY 的 Markdown 渲染与上传"
+intent_ref: INTENT-COMP-025
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    summary-test:
+      name: step-summary-format-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write markdown heading and table
+          run: |
+            echo "## CI Test Results" >> $ATOMGIT_STEP_SUMMARY
+            echo "" >> $ATOMGIT_STEP_SUMMARY
+            echo "| Check | Status |" >> $ATOMGIT_STEP_SUMMARY
+            echo "|-------|--------|" >> $ATOMGIT_STEP_SUMMARY
+            echo "| Lint  | PASS   |" >> $ATOMGIT_STEP_SUMMARY
+            echo "| Test  | PASS   |" >> $ATOMGIT_STEP_SUMMARY
+        - name: append code block
+          run: |
+            echo "" >> $ATOMGIT_STEP_SUMMARY
+            echo '```bash' >> $ATOMGIT_STEP_SUMMARY
+            echo "echo 'hello world'" >> $ATOMGIT_STEP_SUMMARY
+            echo '```' >> $ATOMGIT_STEP_SUMMARY
+            echo "SUMMARY_COMPLETE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: summary_ui
+    eval: llm_assisted
+    rubric: "Summary 区域可见 Markdown 表格、标题和代码块渲染"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "SUMMARY_COMPLETE=yes——写入操作成功"
+
+teardown:
+  reset: none

@@ -1,0 +1,52 @@
+id: COMPAT-CONCUR-SEM-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "concurrency 字段命名与语义差异：GitCode vs GitHub 模型对照"
+intent_ref: INTENT-COMPAT-072
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: QUEUE
+  jobs:
+    sequential:
+      name: test-concurrency-semantics
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: record run info
+          run: |
+            echo "RUN_NUMBER: $ATOMGIT_RUN_NUMBER"
+            echo "RUN_ID: ${{ atomgit.run_id }}"
+            echo "TRIGGER_TIME: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        - name: simulate work
+          run: sleep 15
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "max=1 + QUEUE 模式：Run 依次执行（非同时），按触发顺序排队"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "RUN_NUMBER 连续不跳号；排队 Run 在前序完成后自动调度"
+
+teardown:
+  reset: fixture

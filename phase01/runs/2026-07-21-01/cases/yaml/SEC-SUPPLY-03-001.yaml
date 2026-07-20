@@ -1,0 +1,48 @@
+id: SEC-SUPPLY-03-001
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "第三方 action 引用未 pin 到 commit SHA 时有平台警告"
+intent_ref: INTENT-SEC-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    pin-check:
+      name: (SEC-SUPPLY-03-001) 验证 action pin 安全机制
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-SUPPLY-03-001) 使用 SHA-pinned checkout
+          uses: checkout
+        - name: (SEC-SUPPLY-03-001) 确认 checkout 完成
+          run: echo "CHECKOUT_OK"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "SHA-pinned action 引用正常执行"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "平台对浮动引用提供可见 lint 警告或文档提示"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

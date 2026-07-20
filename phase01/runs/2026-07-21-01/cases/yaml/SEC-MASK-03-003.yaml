@@ -1,0 +1,56 @@
+id: SEC-MASK-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Secret 通过子字符串拼接后 echo 到日志应仍被脱敏"
+intent_ref: INTENT-SEC-007
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    mask-substr:
+      name: (SEC-MASK-03-003) 验证子字符串拼接后脱敏
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-003) 两半拼接 echo
+          run: |
+            LEN=${#MYSEC}
+            HALF=$(( LEN / 2 ))
+            P1="${MYSEC:0:$HALF}"
+            P2="${MYSEC:$HALF}"
+            echo "CONCAT: ${P1}${P2}"
+          env:
+            MYSEC: ${{ secrets.TEST_SECRET }}
+        - name: (SEC-MASK-03-003) 逐字符拼接 echo
+          run: |
+            R=""
+            for ((i=0; i<${#MYSEC}; i++)); do
+              R="${R}${MYSEC:$i:1}"
+            done
+            echo "CHAR: ${R}"
+          env:
+            MYSEC: ${{ secrets.TEST_SECRET }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 日志全文搜索 TEST_SECRET 完整明文值，命中数 = 0"
+
+teardown:
+  reset: none

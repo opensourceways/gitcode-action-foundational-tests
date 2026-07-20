@@ -1,0 +1,84 @@
+id: SEC-REGRESS-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "[回归 #51] fork 仓提 PR 应完全隔离主仓密钥"
+intent_ref: INTENT-SEC-050
+
+setup:
+  repo_fixture: with-fork-and-secrets
+  secrets: [DEPLOY_TOKEN, ORG_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    check-secret:
+      name: (SEC-REGRESS-03-001) 验证 fork PR secret 隔离
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-REGRESS-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-REGRESS-03-001) 尝试读取项目级 Secret
+          run: |
+            echo "PROJECT_SECRET_LENGTH: ${#DEPLOY_TOKEN_VALUE}"
+            if [ -n "${DEPLOY_TOKEN_VALUE}" ]; then
+              echo "SECRET_AVAILABLE: yes"
+              exit 1
+            else
+              echo "SECRET_AVAILABLE: no"
+            fi
+          env:
+            DEPLOY_TOKEN_VALUE: ${{ secrets.DEPLOY_TOKEN }}
+        - name: (SEC-REGRESS-03-001) 尝试读取组织级 Secret
+          if: ${{ always() }}
+          run: |
+            echo "ORG_SECRET_LENGTH: ${#ORG_TOKEN_VALUE}"
+            if [ -n "${ORG_TOKEN_VALUE}" ]; then
+              echo "ORG_SECRET_AVAILABLE: yes"
+              exit 1
+            else
+              echo "ORG_SECRET_AVAILABLE: no"
+            fi
+          env:
+            ORG_TOKEN_VALUE: ${{ secrets.ORG_TOKEN }}
+        - name: (SEC-REGRESS-03-001) 尝试用 Secret 做 HTTP 认证
+          if: ${{ always() }}
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${DEPLOY_TOKEN_VALUE}" \
+              "$ATOMGIT_API_URL/repos/$ATOMGIT_REPOSITORY" || echo "000")
+            echo "AUTH_HTTP_CODE: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "AUTH_SUCCESS: yes"
+              exit 1
+            else
+              echo "AUTH_SUCCESS: no"
+            fi
+          env:
+            DEPLOY_TOKEN_VALUE: ${{ secrets.DEPLOY_TOKEN }}
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "fork PR job 日志中 SECRET_AVAILABLE 必须为 no，AUTH_SUCCESS 必须为 no"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "fork PR job 中尝试输出 secret 应导致步骤标记 SECRET_AVAILABLE: no"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "内部 PR 下同一 workflow 应正常读取 secret（正向对照）"
+
+teardown:
+  reset: fixture

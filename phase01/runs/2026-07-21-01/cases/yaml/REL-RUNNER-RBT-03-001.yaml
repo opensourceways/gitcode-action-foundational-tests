@@ -1,0 +1,51 @@
+id: REL-RUNNER-RBT-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "自托管 runner 重启后自动恢复注册——重启免注册承诺验证"
+intent_ref: INTENT-REL-016
+
+setup:
+  repo_fixture: with-self-hosted-runner
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    verify-runner:
+      name: verify-self-hosted-runner-online
+      runs-on: [self-hosted, linux]
+      steps:
+        - name: echo runner identity
+          run: |
+            echo "RUNNER_NAME: ${{ runner.name }}"
+            echo "RUNNER_OS: ${{ runner.os }}"
+            echo "RUNNER_ONLINE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: pre_job
+  action: kill_runner
+  params:
+    restart_host: true
+    wait_recovery_seconds: 300
+  recovery_expectation: runner_auto_recovery_within_5min
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "RUNNER_ONLINE=yes——重启后 5min 内 runner 恢复在线并接受 job"
+
+teardown:
+  reset: fixture

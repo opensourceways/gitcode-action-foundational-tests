@@ -1,0 +1,52 @@
+id: REL-RUNNER-K8S-POD-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "K8s runner Pod 被意外删除后调度器感知失败并标记 Run failure"
+intent_ref: INTENT-REL-018
+
+setup:
+  repo_fixture: with-k8s-runner
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    long-run:
+      name: k8s-pod-deletion-test
+      runs-on: [self-hosted, kubernetes]
+      timeout-minutes: 10
+      steps:
+        - name: simulate long work
+          run: |
+            echo "POD_START: $(hostname) at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            for i in $(seq 1 60); do
+              echo "HEARTBEAT: $i"
+              sleep 5
+            done
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: mid_job
+  action: kill_runner
+  params: { delete_pod: true }
+  recovery_expectation: run_failure_within_5min
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "Run 不永久停留在 in_progress——5min 内变 failure"
+
+teardown:
+  reset: full_instance

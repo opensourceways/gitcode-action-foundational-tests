@@ -89,3 +89,14 @@ jobs:
 - 编译失败（如遇到无法映射的 trigger/语法）→ 标注该用例为 `COMPILE_ERROR`，不进入部署。
 - 遇到不确定的兼容性差异 → 查 `COMPAT-NOTES.md` 和 `gitcode-spec/`，找不到则标注 `# UNCERTAIN: <说明>` 供人工判断。
 - 不修改 Phase 01 的原始 YAML——编译产物是派生的，可随时由 `/phase01-compile` 重新生成。
+
+## 🚫 严禁：用 `yaml.dump()` 写 YAML 文件
+
+**绝对不能**使用 Python `yaml.dump()` 序列化含 `workflow:` 字段的 YAML。
+
+| 问题 | 根因 | 后果 |
+|---|---|---|
+| `on:` → `true:` | YAML 1.1 boolean 陷阱 | workflow 无法解析 |
+| block scalar `\|` → `\n` 转义 | dump 改变格式 | 不可读、不可执行 |
+
+**✅ 正确做法**：逐字段手动写入，workflow 使用 `|` block scalar。

@@ -1,0 +1,42 @@
+id: SEC-CACHE-03-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "fork PR 不应能写入或污染主分支的依赖缓存"
+intent_ref: INTENT-SEC-019
+
+setup:
+  repo_fixture: with-fork
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    fork-cache:
+      name: (SEC-CACHE-03-001) 验证 fork PR cache 隔离
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-CACHE-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-CACHE-03-001) 尝试写入缓存
+          run: |
+            echo "FORK_CACHE_DATA" > /tmp/cache-test.bin
+            echo "CACHE_WRITE_DONE"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 写入的缓存不应被主分支命中，后续 push 应 cache miss"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,57 @@
+id: COMP-RUNNER-EPH-03-001
+dimensions: [completeness, reliability, security]
+dimension: completeness
+priority: P1
+title: "Runner 是否 ephemeral：验证每次 job 分配全新实例"
+intent_ref: INTENT-COMP-013
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    ephemeral-test:
+      name: runner-ephemeral-check
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write marker to tmp
+          run: |
+            MARKER="/tmp/runner-ephemeral-test-$(date +%s)"
+            echo "MARKER_FILE: $MARKER"
+            echo "runner-instance-$(date +%s)" > "$MARKER"
+            echo "MARKER_WRITTEN: yes"
+        - name: check for previous markers
+          if: ${{ always() }}
+          run: |
+            echo "CHECKING_PREVIOUS_MARKERS"
+            PREV=$(find /tmp -name "runner-ephemeral-test-*" -mmin +1 2>/dev/null | head -5)
+            if [ -z "$PREV" ]; then
+              echo "RUNNER_EPHEMERAL: yes (no previous markers found)"
+            else
+              echo "RUNNER_EPHEMERAL: no (found $PREV)"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "RUNNER_EPHEMERAL=yes——前后两次 run 工作区独立"
+  - type: nonfunctional
+    target: step_logs
+    eval: llm_assisted
+    rubric: "若可复用：记录残留风险供 reliability 维度评估"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,75 @@
+id: SEC-RUNNER-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "fork PR 触发的 pull_request workflow 不应有持久的 runner 状态残留"
+intent_ref: INTENT-SEC-025
+
+setup:
+  repo_fixture: with-fork-and-state-isolation
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    residue-writer:
+      name: (SEC-RUNNER-03-001) fork PR 写入残留数据
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-RUNNER-03-001) 写入文件残留
+          run: |
+            echo "SECRET_RESIDUE_DATA" > /tmp/secret-residue.dat
+            echo "RESIDUE_WRITTEN: yes"
+        - name: (SEC-RUNNER-03-001) 设置环境变量残留
+          run: |
+            echo "MALICIOUS_ENV=evil" >> $ATOMGIT_ENV
+            echo "ENV_SET: yes"
+        - name: (SEC-RUNNER-03-001) 启动后台进程
+          run: |
+            (while true; do sleep 1; done) &
+            echo "BACKGROUND_PID: $!"
+            echo "BACKGROUND_STARTED: yes"
+    residue-reader:
+      name: (SEC-RUNNER-03-001) 内部 job 读取残留
+      needs: residue-writer
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-RUNNER-03-001) 检查文件残留
+          run: |
+            if [ -f /tmp/secret-residue.dat ]; then
+              echo "RESIDUE_FILE_FOUND: yes"
+              exit 1
+            else
+              echo "RESIDUE_FILE_FOUND: no"
+            fi
+        - name: (SEC-RUNNER-03-001) 检查环境变量残留
+          if: ${{ always() }}
+          run: |
+            if echo "$MALICIOUS_ENV" | grep -q "evil" 2>/dev/null; then
+              echo "RESIDUE_ENV_FOUND: yes"
+            else
+              echo "RESIDUE_ENV_FOUND: no"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "RESIDUE_FILE_FOUND 显示 no，RESIDUE_ENV_FOUND 显示 no"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "fork PR job 结束后残留数据对后续内部 job 不可见"
+
+teardown:
+  reset: full_instance

@@ -1,0 +1,54 @@
+id: SEC-ISOLATE-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "并发 workflow 下的 token/secret 隔离安全"
+intent_ref: INTENT-SEC-033
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [SECRET_A, SECRET_B]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      name: (SEC-ISOLATE-03-002) 并发隔离 job A
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-ISOLATE-03-002) echo 自己的 secret
+          run: |
+            echo "JOB_A_SECRET_OK"
+          env:
+            MY_SECRET: ${{ secrets.SECRET_A }}
+    job-b:
+      name: (SEC-ISOLATE-03-002) 并发隔离 job B
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ISOLATE-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-ISOLATE-03-002) 尝试读取 job A 信息
+          run: |
+            echo "JOB_B_NO_LEAK: true"
+          env:
+            MY_SECRET: ${{ secrets.SECRET_B }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "并发 job 间 token/secret 完全隔离，job A 无法读取 job B 的 secret"
+
+teardown:
+  reset: full_instance

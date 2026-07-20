@@ -1,0 +1,59 @@
+id: SEC-MASK-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "Secret 值直接 echo 到日志时应被脱敏为 ***"
+intent_ref: INTENT-SEC-005
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    mask-basic:
+      name: (SEC-MASK-03-001) 验证 secret 基础脱敏
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-001) 通过表达式 echo secret
+          run: echo "MASK_CHECK: ${{ secrets.TEST_SECRET }}"
+        - name: (SEC-MASK-03-001) 通过 env 中间变量 echo secret
+          run: echo "ENV_MASK: ${MY_SECRET}"
+          env:
+            MY_SECRET: ${{ secrets.TEST_SECRET }}
+        - name: (SEC-MASK-03-001) 多次引用同一 secret
+          run: |
+            echo "REF1: ${MY_SECRET}"
+            echo "REF2: ${MY_SECRET}"
+            echo "REF3: ${MY_SECRET}"
+          env:
+            MY_SECRET: ${{ secrets.TEST_SECRET }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 日志全文搜索 TEST_SECRET 已知明文值，命中数 = 0"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "多次引用同一 secret，每次出现均被遮蔽为 ***"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "echo 非 secret 文本时日志正常显示"
+
+teardown:
+  reset: none

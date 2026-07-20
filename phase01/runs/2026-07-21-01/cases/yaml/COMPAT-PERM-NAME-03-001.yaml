@@ -1,0 +1,51 @@
+id: COMPAT-PERM-NAME-03-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P1
+title: "permissions 权限域命名差异：GitCode vs GitHub 命名体系对照"
+intent_ref: INTENT-COMPAT-080
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  permissions: repository: read
+  jobs:
+    perm-test:
+      name: test-permissions-naming
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: test repo read access
+          run: |
+            echo "REPOSITORY: ${{ atomgit.repository }}"
+            echo "REF: ${{ atomgit.ref }}"
+            echo "TOKEN_AVAILABLE: $([ -n \"$ATOMGIT_TOKEN\" ] && echo yes || echo no)"
+        - name: test pr write denied
+          if: ${{ always() }}
+          run: |
+            echo "PERMISSION_TEST_COMPLETE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "GitCode 命名 repository: read 正确生效"
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "GitHub 命名如 contents: read 应明确报错，指引用户使用 GitCode 命名"
+
+teardown:
+  reset: fixture

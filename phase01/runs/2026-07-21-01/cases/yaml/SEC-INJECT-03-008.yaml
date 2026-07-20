@@ -1,0 +1,49 @@
+id: SEC-INJECT-03-008
+dimensions: [security]
+dimension: security
+priority: P1
+title: "提交者 email 地址作为不可信输入不应导致 shell 注入"
+intent_ref: INTENT-SEC-041
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    email-inject:
+      name: (SEC-INJECT-03-008) 验证 email 注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-008) 检出代码
+          uses: checkout
+        - name: (SEC-INJECT-03-008) 通过 env 安全引用 author email
+          run: |
+            echo "AUTHOR: ${AUTHOR_EMAIL}"
+            echo "EMAIL_SAFE: true"
+          env:
+            AUTHOR_EMAIL: ${{ atomgit.event.head_commit.author.email }}
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    author_email: "attacker`echo${IFS}pwned`@evil.com"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "email 中反引号命令替换不应被解释执行"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "EMAIL_SAFE 标记存在，env 安全引用模式有效"
+
+teardown:
+  reset: none

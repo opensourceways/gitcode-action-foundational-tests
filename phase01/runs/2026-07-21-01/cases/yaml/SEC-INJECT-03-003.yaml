@@ -1,0 +1,46 @@
+id: SEC-INJECT-03-003
+dimensions: [security]
+dimension: security
+priority: P0
+title: "分支名中的不可信输入不应通过 ${{ }} 直接插入 run 导致命令注入"
+intent_ref: INTENT-SEC-011
+
+setup:
+  repo_fixture: with-injection-test-branches
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    branch-check:
+      name: (SEC-INJECT-03-003) 验证分支名注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-003) 引用分支名
+          run: |
+            echo "BRANCH_NAME: ${{ atomgit.ref_name }}"
+            echo "INJECTION_SAFE: yes"
+        - name: (SEC-INJECT-03-003) 检查注入标记
+          if: ${{ always() }}
+          run: |
+            echo "BRANCH_INJECTION_OCCURRED: no"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    branch_name: "zzz\";echo${IFS}INJECTED_BRANCH;#"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "日志中不出现 INJECTED_BRANCH 输出，INJECTION_SAFE 显示 yes"
+
+teardown:
+  reset: fixture

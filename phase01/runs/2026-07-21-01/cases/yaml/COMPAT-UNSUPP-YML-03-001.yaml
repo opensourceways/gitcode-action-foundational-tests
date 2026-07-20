@@ -1,0 +1,51 @@
+id: COMPAT-UNSUPP-YML-03-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "不支持 YAML 字段（run-name/environment/runs.using:node20）的降级方式"
+intent_ref: INTENT-COMPAT-041
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  run-name: "Deploy to production"
+  environment: production
+  jobs:
+    test-unsupported:
+      name: test-unsupported-yaml-fields
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: echo basic info
+          run: |
+            echo "WORKFLOW_RUNNING: yes"
+            echo "ATOMGIT_REF: $ATOMGIT_REF"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "若 run-name 不支持：YAML 保存阶段应报错指出不支持字段"
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "若 environment 不支持：应报 unknown property（已知 TC-010）而非静默忽略"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "不支持字段不应被静默接受导致 success 状态"
+
+teardown:
+  reset: fixture

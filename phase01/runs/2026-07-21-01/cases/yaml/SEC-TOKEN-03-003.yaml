@@ -1,0 +1,41 @@
+id: SEC-TOKEN-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "ATOMGIT_TOKEN 触发的操作不应产生递归 workflow 运行"
+intent_ref: INTENT-SEC-024
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    no-recursion:
+      name: (SEC-TOKEN-03-003) 验证递归 workflow 防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-TOKEN-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-TOKEN-03-003) 标记递归检查
+          run: |
+            echo "RECURSION_CHECK: only_one_run_expected"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "token 操作不产生递归 workflow，仅 1 个 run 而非链式触发"
+
+teardown:
+  reset: none

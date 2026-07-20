@@ -1,0 +1,59 @@
+id: SEC-PERM-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "permissions: {} 空对象使 ATOMGIT_TOKEN 持有最小默认权限"
+intent_ref: INTENT-SEC-015
+
+setup:
+  repo_fixture: with-default-permissions
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    perm-check:
+      name: (SEC-PERM-03-001) 验证最小权限
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PERM-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-PERM-03-001) 尝试 git push 写操作
+          run: |
+            if git push origin HEAD:refs/heads/test-perm-push-03-001 2>&1; then
+              echo "PUSH_ALLOWED: yes"
+            else
+              echo "PUSH_ALLOWED: no"
+            fi
+        - name: (SEC-PERM-03-001) 尝试 API 写 PR
+          if: ${{ always() }}
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$ATOMGIT_API_URL/repos/$ATOMGIT_REPOSITORY/pulls" \
+              -H "Authorization: Bearer $ATOMGIT_TOKEN" \
+              -d '{"title":"test","head":"test","base":"main"}' 2>/dev/null || echo "000")
+            echo "API_HTTP_CODE: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "403" ] || [ "$HTTP_CODE" = "401" ]; then
+              echo "API_BLOCKED: yes"
+            else
+              echo "API_BLOCKED: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "PUSH_ALLOWED 显示 no，API_BLOCKED 显示 yes"
+
+teardown:
+  reset: fixture

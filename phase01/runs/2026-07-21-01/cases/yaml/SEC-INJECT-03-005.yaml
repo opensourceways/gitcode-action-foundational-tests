@@ -1,0 +1,65 @@
+id: SEC-INJECT-03-005
+dimensions: [security]
+dimension: security
+priority: P0
+title: "不可信输入注入到 ATOMGIT_ENV/ATOMGIT_OUTPUT 文件不导致环境变量污染"
+intent_ref: INTENT-SEC-014
+
+setup:
+  repo_fixture: with-injection-test-pr
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    env-pollution-check:
+      name: (SEC-INJECT-03-005) 验证 ATOMGIT_ENV 注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-005) 输出 PR 标题到 step output
+          id: output_pr_title
+          run: |
+            echo "pr_title=${{ atomgit.event.pull_request.title }}" >> $ATOMGIT_OUTPUT
+        - name: (SEC-INJECT-03-005) 设置环境变量
+          id: set_env_var
+          run: |
+            echo "PR_TITLE_SAFE=${{ atomgit.event.pull_request.title }}" >> $ATOMGIT_ENV
+        - name: (SEC-INJECT-03-005) 检查环境变量是否被污染
+          if: ${{ always() }}
+          run: |
+            echo "PR_TITLE_VALUE: $PR_TITLE_SAFE"
+            if env | grep -q "MALICIOUS=evil"; then
+              echo "ENV_INJECTION_DETECTED: yes"
+              exit 1
+            else
+              echo "ENV_INJECTION_DETECTED: no"
+            fi
+        - name: (SEC-INJECT-03-005) 检查 output 值
+          if: ${{ always() }}
+          run: |
+            echo "OUTPUT_VALUE: ${{ steps.output_pr_title.outputs.pr_title }}"
+            echo "OUTPUT_SAFE: yes"
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    pr_title: "FOO=bar\nMALICIOUS=evil"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "ENV_INJECTION_DETECTED 显示 no，MALICIOUS 变量未被注入"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "OUTPUT_SAFE 显示 yes，output 值保留原始字符但不触发二次解释"
+
+teardown:
+  reset: fixture

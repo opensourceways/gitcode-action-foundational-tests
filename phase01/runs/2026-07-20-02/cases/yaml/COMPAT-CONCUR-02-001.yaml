@@ -1,0 +1,55 @@
+id: COMPAT-CONCUR-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "concurrency 并发模型差异：验证 GitCode enable/max/exceed-action 模型与 GitHub group/cancel-in-progress 对应关系"
+intent_ref: INTENT-COMPAT-015
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch: null
+  concurrency:
+    enable: true
+    max: 2
+    exceed-action: QUEUE
+  jobs:
+    simulate-work:
+      name: Simulate Work
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: Simulate long work
+        run: sleep 60
+      - name: Mark complete
+        run: echo "Job completed at $(date)"
+      name: Simulate Work
+  name: concurrency 并发模型差异：验证 GitCode enable/max/exceed-ac
+
+trigger:
+  event: manual
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "max=2 QUEUE 下同时触发 3+ 个 run 时任意时刻 in_progress <= 2"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "排队的 run 在前一个完成后自动开始执行"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不会丢失触发（所有触发均产生可追踪的 run）"
+
+teardown:
+  reset: fixture

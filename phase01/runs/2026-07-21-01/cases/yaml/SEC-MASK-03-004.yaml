@@ -1,0 +1,52 @@
+id: SEC-MASK-03-004
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Secret 包含多行文本时应整体被脱敏"
+intent_ref: INTENT-SEC-008
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [MULTILINE_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    mask-multi:
+      name: (SEC-MASK-03-004) 验证多行 secret 脱敏
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-004) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-004) 逐行 echo 多行 secret
+          run: |
+            echo "${MYSEC}" | while IFS= read -r L; do
+              echo "LINE: ${L}"
+            done
+          env:
+            MYSEC: ${{ secrets.MULTILINE_SECRET }}
+        - name: (SEC-MASK-03-004) 整体 echo 多行 secret
+          run: |
+            echo "FULL_START"
+            echo "${MYSEC}"
+            echo "FULL_END"
+          env:
+            MYSEC: ${{ secrets.MULTILINE_SECRET }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 日志全文逐行搜索 MULTILINE_SECRET 各行值，命中数 = 0"
+
+teardown:
+  reset: none

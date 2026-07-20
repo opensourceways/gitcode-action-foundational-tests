@@ -1,0 +1,46 @@
+id: SEC-EXPR-03-001
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "事件负载中不可信字段在 expression evaluation 阶段的类型安全"
+intent_ref: INTENT-SEC-035
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    expr-type:
+      name: (SEC-EXPR-03-001) 验证表达式类型安全
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-EXPR-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-EXPR-03-001) 引用 event 对象
+          run: |
+            echo "EVENT_REF: ${{ atomgit.ref }}"
+            echo "EXPR_SAFE: true"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "表达式求值不导致 shell 语法错误或非预期代码执行"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

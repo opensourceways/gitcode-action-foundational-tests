@@ -1,0 +1,46 @@
+id: SEC-MASK-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Secret 经过 base64 编码后 echo 到日志仍应被脱敏"
+intent_ref: INTENT-SEC-006
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    mask-b64:
+      name: (SEC-MASK-03-002) 验证 base64 编码后脱敏
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-002) base64 编码后 echo
+          run: |
+            ENCODED=$(echo -n "${MYSEC}" | base64)
+            echo "B64: ${ENCODED}"
+            DECODED=$(echo -n "${ENCODED}" | base64 -d)
+            echo "DECODED: ${DECODED}"
+          env:
+            MYSEC: ${{ secrets.TEST_SECRET }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 日志全文搜索 TEST_SECRET 原始明文值，命中数 = 0"
+
+teardown:
+  reset: none

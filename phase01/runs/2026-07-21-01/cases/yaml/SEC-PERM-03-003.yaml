@@ -1,0 +1,60 @@
+id: SEC-PERM-03-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: "job 级 permissions 声明可覆盖 workflow 级声明"
+intent_ref: INTENT-SEC-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions:
+    repository: none
+  jobs:
+    read-job:
+      name: (SEC-PERM-03-003) job 级权限覆盖验证
+      permissions:
+        repository: read
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PERM-03-003) 尝试 clone
+          uses: checkout
+        - name: (SEC-PERM-03-003) 验证可读
+          run: echo "CLONE_OK"
+    no-perm-job:
+      name: (SEC-PERM-03-003) 继承 workflow 权限
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PERM-03-003) 尝试 clone 应失败
+          run: |
+            if git clone "$ATOMGIT_REPOSITORY_URL" /tmp/test 2>/dev/null; then
+              echo "UNEXPECTED_CLONE_OK"
+              exit 1
+            else
+              echo "EXPECTED_CLONE_FAIL"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "job 级 permissions 覆盖 workflow 级，有 permissions 声明的 job 可执行允许的操作"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "无 job 级 permissions 声明的 job 继承 workflow 级限制"
+
+teardown:
+  reset: none

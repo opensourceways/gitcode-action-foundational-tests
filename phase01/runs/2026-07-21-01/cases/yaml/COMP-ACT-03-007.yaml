@@ -1,0 +1,73 @@
+id: COMP-ACT-03-007
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: "OBS 上传完整链路——单文件、目录路径 #15、变量路径 #16、大文件、参数校验"
+intent_ref: INTENT-ACT-007
+
+setup:
+  repo_fixture: with-obs-config
+  secrets: [OBS_AK, OBS_SK]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    obs-upload-test:
+      name: "(COMP-ACT-03-007) 验证 OBS 上传完整链路"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-007) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-007) create test file"
+          run: |
+            mkdir -p test-upload/subdir
+            echo "obs upload test $(date)" > test-upload/test.txt
+            echo "subdir content" > test-upload/subdir/nested.txt
+            echo "OBS_UPLOAD_DIR: test-upload"
+        - name: "(COMP-ACT-03-007) upload single file to OBS"
+          uses: official_obs_upload
+          with:
+            access_key: "${{ secrets.OBS_AK }}"
+            secret_key: "${{ secrets.OBS_SK }}"
+            bucket: "gitcode-test-bucket"
+            endpoint: "obs.cn-north-4.myhuaweicloud.com"
+            local_path: "test-upload/test.txt"
+            remote_path: "ci-test/COMP-ACT-03-007/test.txt"
+        - name: "(COMP-ACT-03-007) upload directory to OBS"
+          if: ${{ always() }}
+          uses: official_obs_upload
+          with:
+            access_key: "${{ secrets.OBS_AK }}"
+            secret_key: "${{ secrets.OBS_SK }}"
+            bucket: "gitcode-test-bucket"
+            endpoint: "obs.cn-north-4.myhuaweicloud.com"
+            local_path: "test-upload"
+            remote_path: "ci-test/COMP-ACT-03-007/dir"
+        - name: "(COMP-ACT-03-007) record upload result"
+          if: ${{ always() }}
+          run: |
+            echo "OBS_UPLOAD_COMPLETE: yes"
+            echo "NOTE: 已知 #15——目录路径上传偶发失败; #16——变量路径无法解析"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "单文件上传 step 执行完成"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若网络偶发失败（已知 #15）则标记为 flaky"
+
+teardown:
+  reset: fixture

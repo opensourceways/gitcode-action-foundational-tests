@@ -1,0 +1,54 @@
+id: REL-RUNNER-K8S-SCALE-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "K8s runner 弹性伸缩：从 min=1 到 max=5 扩展后正确回收"
+intent_ref: INTENT-REL-017
+
+setup:
+  repo_fixture: with-k8s-runner
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    scale-test:
+      name: k8s-scale-test
+      runs-on: [self-hosted, kubernetes]
+      strategy:
+        matrix:
+          task: [1, 2, 3, 4, 5]
+      steps:
+        - name: simulate work
+          run: |
+            echo "TASK: ${{ matrix.task }}"
+            echo "POD_NAME: $(hostname)"
+            sleep 30
+        - name: verify completion
+          run: echo "TASK_${{ matrix.task }}_COMPLETE: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: pod_count
+    eval: deterministic
+    rubric: "5 个 job 并发时 Pod 扩展至 5，完成后 5min 内缩回 min=1"
+  - type: negative
+    target: pod_count
+    eval: deterministic
+    rubric: "无空闲 Pod 长期残留"
+
+teardown:
+  reset: fixture

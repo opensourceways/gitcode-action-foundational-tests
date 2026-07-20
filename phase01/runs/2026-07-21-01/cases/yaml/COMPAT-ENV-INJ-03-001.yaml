@@ -1,0 +1,69 @@
+id: COMPAT-ENV-INJ-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "env 变量注入不一致：${{ env.VAR }} vs Bash $VAR 行为差异——历史 #46/#533"
+intent_ref: INTENT-COMPAT-093
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    env-test:
+      name: test-env-injection-consistency
+      runs-on: [ubuntu-latest, x64, small]
+      env:
+        MY_VAR: hello
+        ANOTHER_VAR: world
+      steps:
+        - name: test expression level
+          run: echo "EXPR_LEVEL: ${{ env.MY_VAR }}"
+        - name: test shell level
+          run: |
+            echo "SHELL_LEVEL: $MY_VAR"
+            if [ -n "$MY_VAR" ]; then
+              echo "SHELL_INJECTION_OK: yes"
+            else
+              echo "SHELL_INJECTION_OK: no (var is empty or unset)"
+              echo "NOTE: 已知 TC-533 FAIL——Job env 未注入到 Shell"
+            fi
+        - name: compare both levels
+          if: ${{ always() }}
+          run: |
+            echo "EXPR_VAL: ${{ env.MY_VAR }}"
+            echo "SHELL_VAL: ${MY_VAR:-UNSET}"
+            if [ "${{ env.MY_VAR }}" = "${MY_VAR:-}" ]; then
+              echo "ENV_CONSISTENCY: match"
+            else
+              echo "ENV_CONSISTENCY: mismatch"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "EXPR_LEVEL=hello, SHELL_LEVEL=hello, SHELL_INJECTION_OK=yes"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "ENV_CONSISTENCY=match——表达式层和 shell 层一致"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "不应出现 SHELL_INJECTION_OK=no（已知 TC-533 FAIL 回归）"
+
+teardown:
+  reset: fixture

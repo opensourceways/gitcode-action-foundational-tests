@@ -1,0 +1,49 @@
+id: COMPAT-UNIQ-FN-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "substring/replace GitCode 独有函数：验证语义边界与迁移锁定风险"
+intent_ref: INTENT-COMPAT-013
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-unique:
+      name: test-gitcode-unique-functions
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: test substring sha
+          run: echo "SHORT_SHA: ${{ substring(atomgit.sha, 0, 7) }}"
+        - name: test replace ref
+          run: echo "BRANCH: ${{ replace(atomgit.ref, 'refs/heads/', '') }}"
+        - name: verify substring length
+          run: |
+            ACTUAL="${{ substring(atomgit.sha, 0, 7) }}"
+            if [ ${#ACTUAL} -eq 7 ]; then
+              echo "SUBSTRING_LEN_OK: yes"
+            else
+              echo "SUBSTRING_LEN_OK: no (len=${#ACTUAL})"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "SHORT_SHA 为 7 字符，BRANCH 为不含 refs/heads/ 的分支名，SUBSTRING_LEN_OK=yes"
+
+teardown:
+  reset: fixture

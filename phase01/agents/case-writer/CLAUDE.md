@@ -13,6 +13,7 @@
 - 本 run 的准入 intent（`intent-library.md` 中标记准入的项）
 - `phase01/inputs/existing-cases/cases.md`（**★ 已有用例清单**：按全集原则处理——高价值用例用 Phase 01 格式重表达并纳入产出；作用有限/冗余/已过时的显式标注淘汰原因。交付 Phase 02 时不存在「新用例 + 旧用例」两套清单。见 `rules.md` §9b。）
 - `phase01/templates/text-case.md`、`executable-case.yaml`、`phase01/schema/`
+- `phase01/schema/VALIDATION-RULES.md`（**★ 编译校验规则——写入每个 YAML 前的强制自检清单**。基于 GitCode 平台实测，含 runner 格式、job name、step 非法字符、if 表达式、steps 上限、on: boolean 陷阱等 12 条规则。遵守即可一次通过 schema check + 平台校验。）
 - `phase01/inputs/gitcode-spec/`（编译 YAML 时的语法依据）
 - `phase01/inputs/gitcode-spec/examples/`（**★ GitCode 官方示例**：编译 YAML 时**必须参考**这 6 份官方 workflow 样例——go-ci / java-gradle-ci / java-maven-ci / nodejs-ci / python-ci / pr-code-check-example。它们展示了 GitCode 真实支持的语法：`runs-on: {ubuntu-24,x64,small}` 格式、`uses: checkout`（非 `actions/checkout@v4`）、`concurrency: {max, exceed-action}`（非 GitHub group 模型）、`${{ atomgit.* }}` context、`$ATOMGIT_*` 环境变量、`pull_request` types 命名等。**你编译的 YAML 必须与此格式一致，不可照搬 GitHub Actions 语法。**）
 - `phase01/inputs/gitcode-api/api-reference.md`（**API 参考**：编译 YAML 时，若断言可经 API 确定性判定——如检查 run status、下载 job 日志验证内容——在 assert 块中标注可用的 API 端点与参数）
@@ -20,29 +21,29 @@
 
 ## 工作步骤
 
-### 0. 评估已有用例（全集原则，`rules.md` §9b）
-**先完整读取 `cases.md`**，逐条评估 631 条已有用例：
-- **吸收**：有独立验证价值的 → 用 Phase 01 格式重表达（统一 ID / dimensions / intent_ref / assertions），纳入 `cases/text/` 和 `cases/yaml/`
-- **合并**：已被新 intent 行为级覆盖的 → 将已有 TC 作为变体或合并进一个 Phase 01 用例，标注 `incorporates: <已有TC-ID>`
-- **淘汰**：满足 §9b 淘汰标准的 → 在 case-manifest 中标注 `deprecated: <原因>`，不产出文本/YAML
+### 0. 加载基底（加速入口 ★）
+**先读两级基底**：
+1. `phase01/baseline/case-base-detail.md` — 原始 631 条 TC 评估（260 KEEP + 307 DEPRECATE）
+2. **最近一次 `delivered` 状态 run 的 `cases/yaml/`**（如 Run 2026-07-20-02 的 128 条）— 已生成的 Phase 01 用例也是基底
 
-### 1. 展开 intent + 吸收已有用例
-- 对每条准入 intent，结合已吸收的已有用例，设计完整的用例变体组
-- 分配用例 ID（格式 `<维度>-<主题>-<run序列>-<序号>`，见 `rules.md` §1.3）
-- 从 intent 继承 `dimensions` 字段
+合并两级基底 = 完整已覆盖清单。KEEP 用例 + 已生成用例 → 直接纳入交付集，**不重新生成**。
 
-### 2. 先写文本用例 → `cases/text/<ID>.md`
-维度标签 / 前置条件 / 操作步骤（意图层）/ 预期结果 / 验证点 / 清理级别 / 溯源意图。
-从已有用例吸收的内容加注 `incorporates: <已有TC-ID>`。
+### 1. 意图映射（diff 已有基底）
+对每条准入 intent：
+- 扫描 KEEP 用例清单 → 已有 TC 是否已覆盖该 intent？
+  - **完全覆盖** → 在 KEEP 用例上追加 `intent_ref`，**不生成新用例**
+  - **部分覆盖** → 在保留已有 TC 的基础上，生成 1-2 条补充用例覆盖差异
+  - **未覆盖** → 生成新用例（这是唯一需要从零创建的场景）
 
-### 3. 再编译 YAML → `cases/yaml/<ID>.yaml`
-按 GitCode 规范编译，过 schema 校验。`dimensions` 必填、`id` 必含 run 序列。
+### 2. 增量生成（仅补充缺口）
+只对步骤 1 中「部分覆盖」或「未覆盖」的 intent 生成新用例。
+- 分配用例 ID（格式 `<维度>-<主题>-<run序列>-<序号>`）
+- 新用例量 = intent 差异数 × 变体数（通常每条 intent 1-3 条新用例）
 
-### 4. 去重与一致性检查
-同一 intent 不重复展开；变体用 `-Vn` 关联母 ID。
-
-### 5. 淘汰记录
-在 `case-manifest.md` 中列出所有被淘汰的已有 TC，含淘汰原因和替代用例 ID（如有）。交付 Phase 02 时不出现两套清单。
+### 3. 先写文本用例 → `cases/text/<ID>.md`
+### 4. 再编译 YAML → `cases/yaml/<ID>.yaml`
+### 5. 统一 manifest
+产出 `case-manifest.md` = KEEP 用例 + 新增用例 + DEPRECATE 记录。
 
 ## 输出
 - `cases/text/<ID>.md`（归档主体，人可读、与语法解耦）
@@ -64,3 +65,42 @@
 - 文本用例是 source of truth——**不要把 GitCode 语法细节写进文本层**，那会破坏其稳定性与可归档性。
 - YAML 是派生物——规范变更时应能只重编译 YAML（`/phase01-compile`）而基本不动文本用例。
 - 不放宽断言凑数；判不了的断言宁可标注也不含糊。
+
+## 🚫 严禁事项（两次重大事故教训）
+
+### ❌ 严禁 1：用 `yaml.dump()` 写 YAML 文件
+
+**绝对不能**使用 Python `yaml.dump()` 序列化包含 `workflow:` 字段的 YAML。
+
+| 问题 | 后果 |
+|---|---|
+| `on:` 是 YAML 1.1 boolean → `true:` | 124 个文件全部损坏 |
+| block scalar `\|` 变成 `\n` 转义字符串 | workflow 不可读不可执行 |
+| 格式化改变缩进和引号 | 整个文件需要重写 |
+
+**✅ 正确做法**：逐字段手动写入文件，workflow 字段使用 `|` block scalar：
+
+```python
+with open(fpath, 'w') as f:
+    f.write(f'id: {id}\n')
+    f.write(f'title: "{title}"\n')
+    # ... metadata fields ...
+    f.write('workflow: |\n')
+    for line in workflow_str.split('\n'):
+        f.write(f'  {line}\n')
+    # ... remaining fields
+```
+
+### ❌ 严禁 2：从零生成已有覆盖的用例
+
+**绝对不能**对新 run 的每个 intent 都从零生成文本+YAML。
+
+| 问题 | 后果 |
+|---|---|
+| 上次 run 已生成的用例被忽略 | 128 条用例重生成一遍 |
+| 只读 case-base 但不读上次 run | 108 个共享 intent 重复产出 |
+
+**✅ 正确做法**（见工作步骤 §0）：
+1. 先 `cp` 上一轮 delivered run 的 `cases/text/` 和 `cases/yaml/` 到本轮 run
+2. 再 diff 本轮 intent 与完整基底
+3. 只对全新 intent 生成新用例

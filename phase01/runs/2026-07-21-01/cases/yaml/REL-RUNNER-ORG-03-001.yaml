@@ -1,0 +1,45 @@
+id: REL-RUNNER-ORG-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "自托管 runner 组织级注册后授权项目可正确调度——历史 #37"
+intent_ref: INTENT-REL-029
+
+setup:
+  repo_fixture: with-org-runner
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    org-runner-test:
+      name: org-level-runner-test
+      runs-on: [self-hosted, org-group]
+      steps:
+        - name: verify runner identity
+          run: |
+            echo "RUNNER_NAME: ${{ runner.name }}"
+            echo "ORG_RUNNER_SCHEDULED: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "授权项目 ORG_RUNNER_SCHEDULED=yes（历史 #37 回归——权限传播）"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "未授权项目不应调度到组织 runner"
+
+teardown:
+  reset: fixture

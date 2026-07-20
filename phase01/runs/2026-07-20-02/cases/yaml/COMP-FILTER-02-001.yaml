@@ -1,0 +1,63 @@
+id: COMP-FILTER-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 trigger 过滤器 branches/paths/tags 的通配、否定与互斥规则"
+intent_ref: INTENT-COMP-002
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches:
+      - feature/**
+      - '!feature/experimental'
+  jobs:
+    filter-test:
+      name: Filter Test
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Log branch info
+        run: 'echo "BRANCH_REF=${{ atomgit.ref }}"
+  
+          echo "FILTER_MATCHED"
+  
+          '
+      name: Filter Test
+  name: 验证 trigger 过滤器 branches/paths/tags 的通配、否定与互斥规则
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    branch: feature/test-feature
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "匹配分支触发时日志含 FILTER_MATCHED"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "排除分支 feature/experimental 不应触发"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "** 和 * 通配语义正确"
+
+teardown:
+  reset: fixture

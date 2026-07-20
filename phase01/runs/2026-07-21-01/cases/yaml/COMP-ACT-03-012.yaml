@@ -1,0 +1,81 @@
+id: COMP-ACT-03-012
+dimensions: [completeness, security]
+dimension: completeness
+priority: P1
+title: "k8s_deploy 部署完整链路——kubeconfig 认证、namespace、资源清单、日志脱敏"
+intent_ref: INTENT-ACT-012
+
+setup:
+  repo_fixture: with-k8s-config
+  secrets: [KUBECONFIG_CONTENT]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    k8s-deploy-test:
+      name: "(COMP-ACT-03-012) 验证 k8s_deploy 部署完整链路"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-012) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-012) create test deployment manifest"
+          run: |
+            cat > /tmp/test-deploy.yaml << 'EOF'
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: ci-test-nginx
+              namespace: default
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: ci-test-nginx
+              template:
+                metadata:
+                  labels:
+                    app: ci-test-nginx
+                spec:
+                  containers:
+                  - name: nginx
+                    image: nginx:alpine
+            EOF
+            echo "MANIFEST_CREATED: yes"
+        - name: "(COMP-ACT-03-012) deploy to k8s"
+          uses: official_k8s_deploy
+          with:
+            kubeconfig: "${{ secrets.KUBECONFIG_CONTENT }}"
+            manifest: "/tmp/test-deploy.yaml"
+            namespace: "default"
+          continue-on-error: true
+        - name: "(COMP-ACT-03-012) verify deployment status"
+          if: ${{ always() }}
+          run: |
+            echo "K8S_DEPLOY_CHECK: completed"
+            echo "NOTE: kubeconfig 凭证安全性——日志脱敏需 harness 验证"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "k8s_deploy step 执行完成（成功部署或明确报错）"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: KUBECONFIG_CONTENT
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中 kubeconfig 凭证被脱敏处理，不含集群证书/密钥明文"
+
+teardown:
+  reset: fixture

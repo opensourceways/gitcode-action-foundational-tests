@@ -1,0 +1,57 @@
+id: REL-CHAOS-KILL-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "job 执行中被 kill runner 后 Run 状态正确标记为 failure"
+intent_ref: INTENT-REL-012
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    long-run:
+      name: long-running-job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: simulate long work
+          run: |
+            echo "JOB_STARTED: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            for i in $(seq 1 120); do
+              echo "HEARTBEAT: $i at $(date -u +%H:%M:%S)"
+              sleep 5
+            done
+        - name: should not reach here if killed
+          run: echo "JOB_COMPLETED_UNEXPECTEDLY: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: mid_job
+  action: kill_runner
+  params: { delay_seconds: 30 }
+  recovery_expectation: runner_disconnect_triggers_failure
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志含 runner disconnected 或等价提示，Run 在 5min 内变 failure"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "Run 状态不应永久停留在 in_progress"
+
+teardown:
+  reset: full_instance

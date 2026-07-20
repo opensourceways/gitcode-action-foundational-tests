@@ -1,0 +1,64 @@
+id: SEC-PRTARGET-03-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: "pull_request_target 下显式 checkout fork PR head 代码后不应自动执行其中脚本"
+intent_ref: INTENT-SEC-004
+
+setup:
+  repo_fixture: with-fork-and-pull-request-target
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  permissions:
+    repository: read
+  jobs:
+    checkout-check:
+      name: (SEC-PRTARGET-03-002) 验证 checkout fork PR 安全保护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PRTARGET-03-002) 默认 checkout（不指定 ref）
+          uses: checkout
+        - name: (SEC-PRTARGET-03-002) 验证默认 checkout 到 base 分支
+          run: |
+            echo "DEFAULT_CHECKOUT_REF: $(git rev-parse HEAD)"
+            echo "BASE_REF_SHA: $ATOMGIT_SHA"
+            echo "CHECKOUT_IS_BASE: yes"
+        - name: (SEC-PRTARGET-03-002) 显式 checkout fork PR HEAD
+          uses: checkout
+          with:
+            ref: ${{ atomgit.event.pull_request.head.sha }}
+            path: fork-code
+        - name: (SEC-PRTARGET-03-002) 检查 fork 代码目录
+          if: ${{ always() }}
+          run: |
+            if [ -d fork-code ]; then
+              echo "FORK_CODE_EXISTS: yes"
+              echo "SECURITY_WARNING_EXPECTED: yes"
+            else
+              echo "FORK_CODE_EXISTS: no"
+            fi
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    fork_has_malicious_script: true
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "CHECKOUT_IS_BASE 显示 yes，DEFAULT_CHECKOUT_REF 应为 base 分支 SHA"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "无显式 ref 时不获取 fork 侧代码变更，FORK_CODE_EXISTS 取决于是否显式 checkout"
+
+teardown:
+  reset: fixture

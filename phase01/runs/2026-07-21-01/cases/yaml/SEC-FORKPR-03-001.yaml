@@ -1,0 +1,65 @@
+id: SEC-FORKPR-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "fork PR 触发 pull_request 时 ATOMGIT_TOKEN 应为只读"
+intent_ref: INTENT-SEC-001
+
+setup:
+  repo_fixture: with-fork-and-token
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions:
+    repository: write
+    pr: write
+  jobs:
+    token-check:
+      name: (SEC-FORKPR-03-001) 验证 fork PR token 只读
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-FORKPR-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-FORKPR-03-001) 尝试 git push
+          run: |
+            if git push origin HEAD:refs/heads/test-fork-push-03-001 2>&1; then
+              echo "PUSH_ALLOWED: yes"
+            else
+              echo "PUSH_ALLOWED: no"
+            fi
+        - name: (SEC-FORKPR-03-001) 尝试 API 创建 PR 评论
+          if: ${{ always() }}
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$ATOMGIT_API_URL/repos/$ATOMGIT_REPOSITORY/issues/1/comments" \
+              -H "Authorization: Bearer $ATOMGIT_TOKEN" \
+              -d '{"body":"test-comment"}' 2>/dev/null || echo "000")
+            echo "COMMENT_HTTP_CODE: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "403" ] || [ "$HTTP_CODE" = "401" ]; then
+              echo "WRITE_BLOCKED: yes"
+            else
+              echo "WRITE_BLOCKED: no"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "PUSH_ALLOWED 显示 no，WRITE_BLOCKED 显示 yes"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "git clone 正常完成"
+
+teardown:
+  reset: fixture

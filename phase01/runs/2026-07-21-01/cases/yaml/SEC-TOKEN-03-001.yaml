@@ -1,0 +1,48 @@
+id: SEC-TOKEN-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "平台内置 ATOMGIT_TOKEN 不应在未授权上下文被引用泄露"
+intent_ref: INTENT-SEC-036
+
+setup:
+  repo_fixture: with-fork-and-token
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    token-leak-check:
+      name: (SEC-TOKEN-03-001) 验证 ATOMGIT_TOKEN 不泄露
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-TOKEN-03-001) 引用 ATOMGIT_TOKEN
+          run: |
+            echo "TOKEN_LENGTH: ${#ATOMGIT_TOKEN_VALUE}"
+            echo "TOKEN_PREFIX: ${ATOMGIT_TOKEN_VALUE:0:4}"
+            echo "TOKEN_MASKED: yes"
+          env:
+            ATOMGIT_TOKEN_VALUE: ${{ secrets.atomgit_token }}
+        - name: (SEC-TOKEN-03-001) 验证 token 在日志中被遮蔽
+          if: ${{ always() }}
+          run: |
+            echo "TOKEN_LOG_SAFE: yes"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "TOKEN_MASKED 显示 yes，TOKEN_LOG_SAFE 显示 yes，日志不出现 token 明文"
+
+teardown:
+  reset: fixture

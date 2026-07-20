@@ -1,0 +1,52 @@
+id: REL-RES-OOM-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "slim runner 上执行超内存任务时的 OOM 行为"
+intent_ref: INTENT-REL-040
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    oom-test:
+      name: oom-boundary-test
+      runs-on: [ubuntu-latest, x64, slim]
+      timeout-minutes: 5
+      steps:
+        - name: attempt memory-intensive operation
+          run: |
+            echo "MEM_TEST_START: $(date -u +%H:%M:%S)"
+            echo "ATTEMPTING_LARGE_ALLOC: allocating memory beyond 4GB limit"
+            # 尝试分配超过 4GB 内存
+            dd if=/dev/zero of=/dev/null bs=1G count=5 2>&1 || echo "ALLOC_FAILED: likely OOM"
+            echo "MEM_TEST_END: $(date -u +%H:%M:%S)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "日志含 OOM 或 memory allocation 错误"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 不无限 hang"
+
+teardown:
+  reset: fixture

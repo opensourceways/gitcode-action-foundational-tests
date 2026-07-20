@@ -1,0 +1,43 @@
+id: USE-ERR-MSG-02-006
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "表达式括号语法差异（failure() vs failed）的错误信息可诊断性"
+intent_ref: INTENT-USE-005
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-expression-syntax:
+      name: Test Expression Syntax
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - run: echo "Always runs"
+      - name: GitHub style expression
+        if: ${{ failure() }}
+        run: echo "This uses GitHub function syntax with parentheses"
+      name: Test Expression Syntax
+  name: 表达式括号语法差异（failure() vs failed）的错误信息可诊断性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "使用 failure() 带括号语法时应报错，消息应含表达式位置并暗示应使用 'failed' 替代（GitCode 不需要括号）"
+
+teardown:
+  reset: fixture

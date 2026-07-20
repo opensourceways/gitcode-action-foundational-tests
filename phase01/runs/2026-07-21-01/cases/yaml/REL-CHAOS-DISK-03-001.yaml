@@ -1,0 +1,56 @@
+id: REL-CHAOS-DISK-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "job 执行中磁盘写满后 step 应失败并有明确日志"
+intent_ref: INTENT-REL-014
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    disk-test:
+      name: disk-full-test
+      runs-on: [ubuntu-latest, x64, small]
+      timeout-minutes: 5
+      steps:
+        - name: fill disk
+          run: |
+            echo "DISK_FILL_START: $(date -u +%H:%M:%S)"
+            dd if=/dev/zero of=/tmp/bigfile bs=1M count=5000 2>&1 || echo "DD_FAILED: disk likely full"
+            echo "DISK_FILL_END: $(date -u +%H:%M:%S)"
+        - name: attempt write after disk full
+          if: ${{ always() }}
+          run: |
+            echo "WRITE_ATTEMPT: $(date -u +%H:%M:%S)"
+            echo "test data" > /tmp/test_after_full.txt 2>&1 || echo "WRITE_FAILED: No space left on device"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: mid_job
+  action: disk_full
+  params: {}
+  recovery_expectation: step_failure_with_enospc
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "日志含 'No space left on device' 或 ENOSPC 错误"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job 不应永久 hang 在写入操作"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,83 @@
+id: COMPAT-WF-CMD-02-001
+dimensions:
+  - compatibility
+  - usability
+dimension: compatibility
+priority: P1
+title: "验证 workflow 命令 ::group::/::error::/::warning::/::add-mask:: 对标可用性"
+intent_ref: INTENT-COMPAT-024
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-workflow-commands:
+      name: Test Workflow Commands
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Test group command
+        run: 'echo "::group::Build Section"
+  
+          echo "Building project..."
+  
+          echo "::endgroup::"
+  
+          echo "GROUP_TEST_DONE"
+  
+          '
+      - name: Test error annotation
+        run: 'echo "::error file=app.js,line=1::Missing semicolon"
+  
+          echo "ERROR_ANNOTATION_SENT"
+  
+          '
+      - name: Test warning annotation
+        run: 'echo "::warning::Deprecated API usage"
+  
+          echo "WARNING_ANNOTATION_SENT"
+  
+          '
+      - name: Test add-mask
+        run: 'echo "::add-mask::MASKED_VALUE_42"
+  
+          echo "MASKED_VALUE_42"
+  
+          echo "ADD_MASK_TEST_DONE"
+  
+          '
+      name: Test Workflow Commands
+  name: 验证 workflow 命令 ::group::/::error::/::warning::/::a
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "::group::/::endgroup:: 正确折叠日志，日志含 GROUP_TEST_DONE"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "::error:: 和 ::warning:: 生成注解"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "::add-mask:: 注册后日志中 MASKED_VALUE_42 被遮蔽"
+
+teardown:
+  reset: fixture

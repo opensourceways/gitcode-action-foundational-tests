@@ -1,0 +1,54 @@
+id: COMPAT-CTX-FULL-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "atomgit 上下文字段完备性：验证缺失字段行为"
+intent_ref: INTENT-COMPAT-021
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    ctx-check:
+      name: check-atomgit-context-fields
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: echo all context fields
+          run: |
+            echo "ACTOR: ${{ atomgit.actor }}"
+            echo "ACTOR_ID: ${{ atomgit.actor_id }}"
+            echo "WORKFLOW_REF: ${{ atomgit.workflow_ref }}"
+            echo "REF_PROTECTED: ${{ atomgit.ref_protected }}"
+            echo "TRIGGERING_ACTOR: ${{ atomgit.triggering_actor }}"
+            echo "REPOSITORY: ${{ atomgit.repository }}"
+            echo "REF: ${{ atomgit.ref }}"
+            echo "SHA: ${{ atomgit.sha }}"
+            echo "EVENT_NAME: ${{ atomgit.event_name }}"
+            echo "RUN_ID: ${{ atomgit.run_id }}"
+            echo "JOB: ${{ atomgit.job }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "所有 atomgit 上下文引用均可解析，不触发表达式错误"
+  - type: nonfunctional
+    target: step_logs
+    eval: llm_assisted
+    rubric: "缺失/空值的字段需在报告中标注，供 compat 差异清单使用"
+
+teardown:
+  reset: fixture

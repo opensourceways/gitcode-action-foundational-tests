@@ -1,0 +1,53 @@
+id: REL-LOG-LONG-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "长时间 job 执行中日志持续产生且完整——不因时长截断"
+intent_ref: INTENT-REL-025
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    log-test:
+      name: long-log-completeness-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: generate continuous logs
+          run: |
+            echo "LOG_SEQUENCE_START"
+            for i in $(seq 1 30); do
+              echo "ROUND:$i at $(date -u +%H:%M:%S)"
+              sleep 10
+            done
+            echo "LOG_SEQUENCE_END"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "日志含 ROUND:1 到 ROUND:30 全部输出，LOG_SEQUENCE_END 可见"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "日志行按时间顺序排列，无乱序"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "无日志截断或跳行"
+
+teardown:
+  reset: none

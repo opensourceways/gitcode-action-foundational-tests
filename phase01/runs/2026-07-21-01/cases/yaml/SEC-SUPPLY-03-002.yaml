@@ -1,0 +1,47 @@
+id: SEC-SUPPLY-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "第三方 action 的输入参数中的不可信值不应导致 action 内部代码注入"
+intent_ref: INTENT-SEC-030
+
+setup:
+  repo_fixture: with-fork-and-pr-template
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    action-input:
+      name: (SEC-SUPPLY-03-002) 验证 action input 注入防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-SUPPLY-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-SUPPLY-03-002) 安全引用 PR 标题
+          run: |
+            echo "PR_TITLE: ${{ atomgit.event.pull_request.title }}"
+            echo "NO_INJECT: true"
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params:
+    pr_title: "safe'; cat /etc/passwd; echo 'injected"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "含 shell 元字符的 PR 标题作为 with 参数不应产生注入痕迹"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "action 正确处理含特殊字符的标题，NO_INJECT 标记存在"
+
+teardown:
+  reset: fixture

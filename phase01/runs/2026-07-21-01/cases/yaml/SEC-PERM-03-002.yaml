@@ -1,0 +1,62 @@
+id: SEC-PERM-03-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: "未声明 permissions 时 ATOMGIT_TOKEN 使用仓库设置中的默认权限"
+intent_ref: INTENT-SEC-016
+
+setup:
+  repo_fixture: with-default-permissions-read
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    default-perm-check:
+      name: (SEC-PERM-03-002) 验证未声明 permissions 的默认行为
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PERM-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-PERM-03-002) 尝试 git push
+          run: |
+            if git push origin HEAD:refs/heads/test-default-perm-03-002 2>&1; then
+              echo "PUSH_ALLOWED: yes"
+            else
+              echo "PUSH_ALLOWED: no"
+            fi
+        - name: (SEC-PERM-03-002) 尝试 API 操作 PR
+          if: ${{ always() }}
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$ATOMGIT_API_URL/repos/$ATOMGIT_REPOSITORY/pulls" \
+              -H "Authorization: Bearer $ATOMGIT_TOKEN" \
+              -d '{"title":"test","head":"test","base":"main"}' 2>/dev/null || echo "000")
+            echo "API_HTTP_CODE: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "201" ]; then
+              echo "WRITE_ALLOWED: yes"
+            else
+              echo "WRITE_ALLOWED: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "仓库默认 read 时 PUSH_ALLOWED 和 WRITE_ALLOWED 应为 no"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "git clone 正常完成"
+
+teardown:
+  reset: fixture

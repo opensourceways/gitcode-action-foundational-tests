@@ -1,0 +1,64 @@
+id: REL-RUNNER-02-002
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "step 填充 runner 磁盘超过 50GB 上限时，job 失败并给出磁盘空间相关错误"
+intent_ref: INTENT-REL-013
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    fill-disk:
+      name: Fill Disk
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - name: Check initial disk space
+        run: df -h /tmp
+      - name: Fill disk to capacity
+        run: 'dd if=/dev/zero of=/tmp/fill bs=1M count=50000 2>&1 || true
+  
+          echo "dd exit code: $?"
+  
+          '
+      - name: Attempt to write after disk full
+        run: 'echo "This should fail due to no space" > /tmp/after-fill.txt 2>&1
+  
+          echo "Write exit code: $?"
+  
+          '
+      name: Fill Disk
+  name: step 填充 runner 磁盘超过 50GB 上限时，job 失败并给出磁盘空间相关错误
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "step 因磁盘满而失败（exit code != 0），job status = failure"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志中包含 'No space left' 或 'disk quota exceeded' 等价信息"
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "job 不应为 success"
+
+teardown:
+  reset: fixture

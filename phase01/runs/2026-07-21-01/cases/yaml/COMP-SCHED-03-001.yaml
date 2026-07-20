@@ -1,0 +1,60 @@
+id: COMP-SCHED-03-001
+dimensions: [completeness]
+dimension: completeness
+priority: P0
+title: "schedule cron 触发完整链路——已知 blocker S3x24+TC-391"
+intent_ref: INTENT-COMP-005
+
+setup:
+  repo_fixture: with-schedule-cron
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [schedule]
+  permissions: {}
+  jobs:
+    cron-check:
+      name: (COMP-SCHED-03-001) 验证 schedule 触发链路
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (COMP-SCHED-03-001) 验证 event_name 为 schedule
+          run: |
+            echo "EVENT_NAME: $ATOMGIT_EVENT_NAME"
+            if [ "$ATOMGIT_EVENT_NAME" = "schedule" ]; then
+              echo "SCHEDULE_TRIGGERED: yes"
+            else
+              echo "SCHEDULE_TRIGGERED: no"
+              echo "EVENT_NAME_ACTUAL: $ATOMGIT_EVENT_NAME"
+              echo "NOTE: 已知 S3x24+TC-391 blocker——scheduler 不工作"
+            fi
+        - name: (COMP-SCHED-03-001) 记录调度信息
+          if: ${{ always() }}
+          run: |
+            echo "ATOMGIT_SHA: $ATOMGIT_SHA"
+            echo "ATOMGIT_REF: $ATOMGIT_REF"
+            echo "RUN_NUMBER: $ATOMGIT_RUN_NUMBER"
+            echo "TRIGGER_TIME: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "SCHEDULE_EXPECTED_INTERVAL_5MIN: yes"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params:
+    cron_expression: "*/5 * * * *"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若 scheduler 已修复：EVENT_NAME=schedule，SCHEDULE_TRIGGERED=yes"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "若 scheduler 仍未修复（已知 blocker）：标记为 blocked-by-platform"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,75 @@
+id: COMP-ACT-03-014
+dimensions: [completeness, security]
+dimension: completeness
+priority: P2
+title: "codecov 覆盖率上报——文件路径、自动发现、token 认证、无 token 公开仓库、日志脱敏"
+intent_ref: INTENT-ACT-014
+
+setup:
+  repo_fixture: with-coverage-report
+  secrets: [CODECOV_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    codecov-test:
+      name: "(COMP-ACT-03-014) 验证 codecov 覆盖率上报"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-014) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-014) generate lcov coverage"
+          run: |
+            mkdir -p coverage
+            cat > coverage/lcov.info << 'EOF'
+            TN:
+            SF:src/main.js
+            FN:2,main
+            FNDA:5,main
+            DA:1,1
+            DA:2,5
+            DA:3,5
+            DA:4,0
+            LF:4
+            LH:3
+            end_of_record
+            EOF
+            echo "LCOV_GENERATED: yes"
+            echo "FILE_SIZE: $(wc -c < coverage/lcov.info) bytes"
+        - name: "(COMP-ACT-03-014) upload coverage with token"
+          uses: codecov-action
+          with:
+            token: "${{ secrets.CODECOV_TOKEN }}"
+            files: "coverage/lcov.info"
+            fail_ci_if_error: false
+        - name: "(COMP-ACT-03-014) record codecov result"
+          if: ${{ always() }}
+          run: |
+            echo "CODECOV_UPLOAD_CHECK: completed"
+            echo "NOTE: Codecov API 大陆连通性需验证"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "codecov upload step 执行完成（上传成功或给出明确错误）"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: CODECOV_TOKEN
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若 Codecov API 大陆不可达则标记为 blocked-by-network"
+
+teardown:
+  reset: fixture

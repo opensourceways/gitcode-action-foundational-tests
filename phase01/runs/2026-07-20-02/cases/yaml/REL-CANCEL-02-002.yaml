@@ -1,0 +1,69 @@
+id: REL-CANCEL-02-002
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "stages.fail_fasttrue 时，stage 内第一个 job 失败后同一 stage 内其他仍在运行的 job 被取消"
+intent_ref: INTENT-REL-020
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  stages:
+  - name: stage1
+    fail_fast: true
+    jobs:
+      fail-fast-job:
+        runs-on: [ubuntu-latest, x64, small]
+        steps:
+        - run: 'echo "Deliberately failing fast"
+  
+            exit 1
+  
+            '
+      long-job:
+        runs-on: [ubuntu-latest, x64, small]
+        steps:
+        - name: Long running step for cancel window
+          run: sleep 120
+        - run: echo "Should not reach here"
+  - name: stage2
+    jobs:
+      downstream-job:
+        runs-on: [ubuntu-latest, x64, small]
+        steps:
+        - run: echo "This should be skipped"
+  name: stages.fail_fast=true 时，stage 内第一个 job 失败后同一 stage
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "stage1 中 long-job 状态变更为 cancelled"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "stage2 中 downstream-job 状态为 skipped"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "workflow 终态为 failure（因 fail-fast-job 失败）"
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "long-job 不应跑到 completed(success)"
+
+teardown:
+  reset: fixture

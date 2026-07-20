@@ -1,0 +1,45 @@
+id: REL-TIMEOUT-02-003
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "timeout-minutes0 或负数的非法值被配置校验拒绝"
+intent_ref: INTENT-REL-011
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    invalid-timeout:
+      name: Invalid Timeout
+      runs-on: [ubuntu-latest, x64, small]
+      timeout-minutes: 0
+      steps:
+      - run: echo "This job should not be scheduled"
+      name: Invalid Timeout
+  name: timeout-minutes=0 或负数的非法值被配置校验拒绝
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "workflow 文件含 timeout-minutes: 0 时系统拒绝（保存失败/触发时解析报错/job 标记配置错误）"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "无 job 以 timeout-minutes=0 被实际调度执行"
+
+teardown:
+  reset: fixture

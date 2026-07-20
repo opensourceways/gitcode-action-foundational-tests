@@ -1,0 +1,50 @@
+id: COMPAT-POST-PROC-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "post 顶层后处理阶段（GitCode 独有）vs GitHub 仅 action 内 post"
+intent_ref: INTENT-COMPAT-071
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    main-job:
+      name: main-job-with-post
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: main step
+          run: |
+            echo "MAIN_JOB_RUNNING: yes"
+            exit 0
+  post:
+    run_always: true
+    steps:
+      - name: cleanup step
+        run: echo "POST_CLEANUP: executed after main job"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "POST_CLEANUP: executed after main job 在日志中可见"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "post 在 main job success 后执行，run 整体状态正确"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,61 @@
+id: REL-CONTERR-NEEDS-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "continue-on-error=true job 失败后下游 job 的 needs 依赖行为"
+intent_ref: INTENT-REL-051
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    flaky:
+      name: flaky-continue-on-error-job
+      runs-on: [ubuntu-latest, x64, small]
+      continue-on-error: true
+      steps:
+        - name: fail but continue
+          run: |
+            echo "FLAKY_FAILING: yes"
+            exit 1
+    job_a:
+      name: depends-default-if
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [flaky]
+      steps:
+        - name: should be skipped
+          run: echo "JOB_A_RAN_UNEXPECTEDLY: yes"
+    job_b:
+      name: depends-always-if
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [flaky]
+      if: ${{ always() }}
+      steps:
+        - name: should execute
+          run: echo "JOB_B_EXECUTED_CORRECTLY: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job_a=skipped（默认 if: success 不满足）"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "JOB_B_EXECUTED_CORRECTLY=yes（if: always 满足）"
+
+teardown:
+  reset: none

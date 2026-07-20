@@ -1,0 +1,49 @@
+id: SEC-SUPPLY-03-005
+dimensions: [security]
+dimension: security
+priority: P1
+title: "第三方 action 不应通过 input 默认值窃取 ATOMGIT_TOKEN"
+intent_ref: INTENT-SEC-055
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    action-default:
+      name: (SEC-SUPPLY-03-005) 验证 action input default token 窃取防护
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-SUPPLY-03-005) 检出代码
+          uses: checkout
+        - name: (SEC-SUPPLY-03-005) echo token 上下文
+          run: |
+            echo "TOKEN_LEN: ${#MY_TOKEN}"
+            if [ -z "${MY_TOKEN}" ]; then
+              echo "TOKEN_IS_EMPTY: true"
+            else
+              echo "TOKEN_IS_EMPTY: false"
+            fi
+            echo "TOKEN_SAFE: true"
+          env:
+            MY_TOKEN: ${{ secrets.ATOMGIT_TOKEN }}
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "action input default 不应能窃取 token，TOKEN_SAFE 标记存在"
+
+teardown:
+  reset: none

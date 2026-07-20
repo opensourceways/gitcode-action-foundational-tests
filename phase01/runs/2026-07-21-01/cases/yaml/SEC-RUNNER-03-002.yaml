@@ -1,0 +1,56 @@
+id: SEC-RUNNER-03-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Self-hosted runner 在 job 结束后应执行 workspace 清理"
+intent_ref: INTENT-SEC-056
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    write-job:
+      name: (SEC-RUNNER-03-002) 写入测试文件
+      runs-on: [self-hosted, arch=x64]
+      steps:
+        - name: (SEC-RUNNER-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-RUNNER-03-002) 写入标记文件
+          run: |
+            echo "MARKER_FROM_JOB_A" > workspace-marker.txt
+            echo "WRITE_DONE"
+    check-job:
+      name: (SEC-RUNNER-03-002) 检查残留文件
+      needs: write-job
+      runs-on: [self-hosted, arch=x64]
+      steps:
+        - name: (SEC-RUNNER-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-RUNNER-03-002) 查找残留文件
+          run: |
+            if [ -f workspace-marker.txt ]; then
+              echo "RESIDUE_FOUND: yes"
+            else
+              echo "RESIDUE_FOUND: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "job B 不应看到 job A 的 workspace 残留文件"
+
+teardown:
+  reset: full_instance

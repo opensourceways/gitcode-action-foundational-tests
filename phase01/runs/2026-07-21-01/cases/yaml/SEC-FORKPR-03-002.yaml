@@ -1,0 +1,72 @@
+id: SEC-FORKPR-03-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: "fork PR 触发 pull_request 时不可访问项目级和组织级 Secret"
+intent_ref: INTENT-SEC-002
+
+setup:
+  repo_fixture: with-fork-and-secrets
+  secrets: [DEPLOY_TOKEN, ORG_KEY]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: {}
+  jobs:
+    secret-check:
+      name: (SEC-FORKPR-03-002) 验证 fork PR secret 不可访问
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-FORKPR-03-002) 检查项目级 Secret 是否为空
+          run: |
+            if [ -n "${PROJ_SECRET}" ]; then
+              echo "PROJ_SECRET_EXPOSED: yes"
+              exit 1
+            else
+              echo "PROJ_SECRET_EXPOSED: no"
+            fi
+          env:
+            PROJ_SECRET: ${{ secrets.DEPLOY_TOKEN }}
+        - name: (SEC-FORKPR-03-002) 检查组织级 Secret 是否为空
+          if: ${{ always() }}
+          run: |
+            if [ -n "${ORG_SECRET}" ]; then
+              echo "ORG_SECRET_EXPOSED: yes"
+              exit 1
+            else
+              echo "ORG_SECRET_EXPOSED: no"
+            fi
+          env:
+            ORG_SECRET: ${{ secrets.ORG_KEY }}
+        - name: (SEC-FORKPR-03-002) 尝试 HTTP 认证
+          if: ${{ always() }}
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${PROJ_SECRET}" \
+              "$ATOMGIT_API_URL/repos/$ATOMGIT_REPOSITORY" 2>/dev/null || echo "000")
+            echo "AUTH_HTTP_CODE: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "AUTH_SUCCEEDED: yes"
+            else
+              echo "AUTH_SUCCEEDED: no"
+            fi
+          env:
+            PROJ_SECRET: ${{ secrets.DEPLOY_TOKEN }}
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "PROJ_SECRET_EXPOSED 和 ORG_SECRET_EXPOSED 均为 no，AUTH_SUCCEEDED 为 no"
+
+teardown:
+  reset: fixture

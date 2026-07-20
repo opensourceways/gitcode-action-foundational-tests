@@ -1,0 +1,43 @@
+id: COMPAT-USES-EXPR-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "uses 字段不支持 ${{ }} 表达式——历史 #82 回归验证"
+intent_ref: INTENT-COMPAT-090
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-uses-expr:
+      name: test-uses-with-expression
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout with expression in uses
+          uses: ${{ atomgit.repository }}/.gitcode/actions/test-action@main
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "uses 含 ${{ }} 表达式时应明确报错——消息含 uses 和 expression 关键词"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "不应出现误导性报错（如 'Self-hosted 执行机未注册' 历史 #68/82）"
+
+teardown:
+  reset: fixture

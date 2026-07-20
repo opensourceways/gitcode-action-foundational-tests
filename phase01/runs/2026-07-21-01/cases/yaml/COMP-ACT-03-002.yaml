@@ -1,0 +1,65 @@
+id: COMP-ACT-03-002
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "setup-yarn 安装与版本选择——指定版本、默认版本、不存在版本、Node.js 兼容性"
+intent_ref: INTENT-ACT-002
+
+setup:
+  repo_fixture: with-node-project
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    yarn-test:
+      name: "(COMP-ACT-03-002) 验证 setup-yarn 安装与版本选择"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-002) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-002) setup node 18"
+          uses: setup-node
+          with:
+            node-version: "18"
+        - name: "(COMP-ACT-03-002) setup yarn 1.22.19"
+          uses: setup-yarn
+          with:
+            yarn-version: "1.22.19"
+        - name: "(COMP-ACT-03-002) verify yarn version is 1.22.19"
+          run: |
+            ACTUAL=$(yarn --version 2>&1)
+            echo "YARN_VERSION: $ACTUAL"
+            if [ "$ACTUAL" = "1.22.19" ]; then
+              echo "YARN_VERSION_MATCH: yes"
+            else
+              echo "YARN_VERSION_MATCH: no"
+            fi
+        - name: "(COMP-ACT-03-002) test yarn init"
+          if: ${{ always() }}
+          run: |
+            yarn --version 2>&1
+            echo "YARN_NODE_VERSION: $(node --version)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "yarn --version 输出 1.22.19，YARN_VERSION_MATCH=yes"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若下载失败（已知 #50/#98）则标记为 blocked-by-platform"
+
+teardown:
+  reset: fixture

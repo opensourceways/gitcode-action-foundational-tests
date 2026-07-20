@@ -1,0 +1,60 @@
+id: COMP-ACT-03-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "setup-gradle 安装与版本选择——指定版本、默认版本、不存在版本、后续可用性"
+intent_ref: INTENT-ACT-001
+
+setup:
+  repo_fixture: with-java-gradle
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    gradle-test:
+      name: "(COMP-ACT-03-001) 验证 setup-gradle 安装与版本选择"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-001) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-001) setup gradle version 8.5"
+          uses: setup-gradle
+          with:
+            gradle-version: "8.5"
+        - name: "(COMP-ACT-03-001) verify gradle version is 8.5"
+          run: |
+            ACTUAL=$(gradle --version 2>&1 | head -1)
+            echo "GRADLE_VERSION: $ACTUAL"
+            if echo "$ACTUAL" | grep -q "8.5"; then
+              echo "GRADLE_VERSION_MATCH: yes"
+            else
+              echo "GRADLE_VERSION_MATCH: no"
+            fi
+        - name: "(COMP-ACT-03-001) test gradle init task"
+          if: ${{ always() }}
+          run: |
+            gradle init --type basic --no-daemon 2>&1 || echo "GRADLE_INIT: failed"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "gradle --version 输出含 8.5，GRADLE_VERSION_MATCH=yes"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若下载失败（已知 #50/#98）则标记为 blocked-by-platform"
+
+teardown:
+  reset: fixture

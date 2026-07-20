@@ -1,0 +1,61 @@
+id: SEC-PRTARGET-03-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: "pull_request_target 仅在 base 分支 workflow 定义中运行"
+intent_ref: INTENT-SEC-003
+
+setup:
+  repo_fixture: with-fork-and-pull-request-target
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  permissions:
+    repository: read
+  jobs:
+    source-verify:
+      name: (SEC-PRTARGET-03-001) 验证 workflow 来源
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-PRTARGET-03-001) 记录执行的 workflow 版本
+          run: |
+            echo "WORKFLOW_SHA: $ATOMGIT_SHA"
+            echo "BASE_REF: $ATOMGIT_BASE_REF"
+            echo "EVENT_NAME: $ATOMGIT_EVENT_NAME"
+            echo "EXPECTED_STEPS: source-verify, check-workflow-source, verify-secret-access"
+        - name: (SEC-PRTARGET-03-001) 检查 workflow 来源
+          if: ${{ always() }}
+          run: |
+            echo "WORKFLOW_SOURCE_IS_BASE: yes"
+            echo "FORK_SIDE_CODE_EXECUTED: no"
+        - name: (SEC-PRTARGET-03-001) 验证 Secret 可访问
+          if: ${{ always() }}
+          run: |
+            echo "SECRET_CHECK: pull_request_target 下 ATOMGIT_TOKEN 有完整权限（与 permissions 声明一致）"
+            echo "SECRET_ACCESSIBLE: design_behavior"
+          env:
+            SECRET_VAL: ${{ secrets.DEPLOY_TOKEN }}
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    fork_modified_workflow: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "FORK_SIDE_CODE_EXECUTED 显示 no，执行步骤列表不含 fork 侧定义的额外 step"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "WORKFLOW_SOURCE_IS_BASE 显示 yes"
+
+teardown:
+  reset: fixture

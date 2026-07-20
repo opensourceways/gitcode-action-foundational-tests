@@ -1,0 +1,61 @@
+id: REL-OUTPUT-PASS-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "ATOMGIT_OUTPUT 写入正常且下游 job 可正确读取——历史 #87/#94 回归"
+intent_ref: INTENT-REL-050
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    producer:
+      name: produce-output-job
+      runs-on: [ubuntu-latest, x64, small]
+      outputs:
+        key: ${{ steps.gen.outputs.key }}
+      steps:
+        - name: generate output
+          id: gen
+          run: |
+            echo "key=value123" >> $ATOMGIT_OUTPUT
+            echo "OUTPUT_WRITTEN: yes"
+    consumer:
+      name: consume-output-job
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [producer]
+      steps:
+        - name: read output
+          run: |
+            echo "RECEIVED_KEY: ${{ needs.producer.outputs.key }}"
+            if [ "${{ needs.producer.outputs.key }}" = "value123" ]; then
+              echo "OUTPUT_PASS_OK: yes"
+            else
+              echo "OUTPUT_PASS_OK: no"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "RECEIVED_KEY=value123, OUTPUT_PASS_OK=yes"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "outputs 不应为空（历史 #87/#94 回归）"
+
+teardown:
+  reset: none

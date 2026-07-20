@@ -1,0 +1,47 @@
+id: USE-ERR-MSG-02-005
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "未知字段/不支持属性时的错误信息可诊断性"
+intent_ref: INTENT-USE-003
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-unsupported:
+      name: Test Unsupported
+      runs-on: [ubuntu-latest, x64, small]
+      container:
+        credentials:
+          username: myuser
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      services:
+        redis:
+          image: redis:latest
+      steps:
+      - run: echo "test"
+      name: Test Unsupported
+  name: 未知字段/不支持属性时的错误信息可诊断性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "不支持的字段（container.credentials / services）应有可见提示（错误或 warning），消息应含字段路径和是否属于 'GitCode vs GitHub 差异' 的提示——不应完全静默忽略"
+
+teardown:
+  reset: fixture

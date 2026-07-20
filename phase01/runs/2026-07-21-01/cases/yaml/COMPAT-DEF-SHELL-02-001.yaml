@@ -1,0 +1,87 @@
+id: COMPAT-DEF-SHELL-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "默认值差异：验证 defaults.run.shell 与默认 permissions 行为是否与 GitHub 对齐"
+intent_ref: INTENT-COMPAT-014
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-default-shell:
+      name: Test Default Shell
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: Check default shell
+        run: 'echo "SHELL=$SHELL"
+  
+          echo "Current shell: $(readlink /proc/$$/exe || echo $0)"
+  
+          '
+      - name: Test bash -e behavior
+        run: 'echo "This step should cause failure due to exit 1"
+  
+          exit 1
+  
+          '
+      - name: This should not execute if bash -e is default
+        if: ${{ always }}
+        run: echo "This runs with always() despite previous step failure"
+      name: Test Default Shell
+    test-default-permissions:
+      name: Test Default Permissions
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: Check default token permissions
+        run: 'echo "Testing default permissions..."
+  
+          git remote -v
+  
+          ATOMGIT_TOKEN=${{ atomgit.token }}
+  
+          echo "Token available in default permissions context"
+  
+          '
+      - name: Check working directory
+        run: 'echo "Current dir: $(pwd)"
+  
+          echo "ATOMGIT_WORKSPACE=$ATOMGIT_WORKSPACE"
+  
+          '
+      name: Test Default Permissions
+  name: '默认值差异：验证 defaults.run.shell 与默认 permissions 行为是否与 '
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "未指定 shell 时 step 在 bash 中执行（SHELL 输出含 bash）"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "run: exit 1 导致 step 标记 failure（bash -e 行为）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "if: always() 的 step 在 exit 1 后仍执行"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应在非 bash shell（如 sh/dash）中执行"
+
+teardown:
+  reset: fixture

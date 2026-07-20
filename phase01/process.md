@@ -73,11 +73,21 @@
 
 过程全部写入 `gate-log.md`。**输出「准入意图清单」后 STOP**，请用户确认（可增补专家意图、否决低价值项）再继续。
 
-### 2.4 阶段 B — 展开 + 编译
+### 2.4 阶段 B — 基底 diff + 增量生成（加速模式 ★ 2026-07-21）
 
-`case-writer` 对准入 intent：
-1. 展开为**文本用例** → `cases/text/<ID>.md`（遵循 [`templates/text-case.md`](templates/text-case.md)）。
-2. 依据 GitCode 规范编译**可执行 YAML** → `cases/yaml/<ID>.yaml`（遵循 [`templates/executable-case.yaml`](templates/executable-case.yaml)，过 `schema/` 校验）。
+`case-writer` 采用**基底加速**模式（`rules.md` §9b）：
+
+0. **复制上一轮用例**（2026-07-21 新增）：`cp` 最近一次 `delivered` 状态 run 的 `cases/text/` 和 `cases/yaml/` 到本轮 run 目录。**这确保本轮 run 自包含全部历史用例，Phase 02 只需访问一个目录。**
+1. **加载基底**：读 `baseline/case-base-detail.md` + 上一轮 run 的已有用例，合并为完整基底。
+2. **意图映射**：将准入 intent 与完整基底做 diff——已覆盖的不重复生成；未覆盖的标记缺口。
+3. **增量生成**：仅对缺口 intent 展开文本用例 → `cases/text/<ID>.md` + 编译 YAML → `cases/yaml/<ID>.yaml`。
+4. **统一 manifest**：`case-manifest.md` = 历史用例 + 新增用例，一份全集清单。
+
+**加速效果**：首次 run 需评估 631 条生成 `case-base-detail.md`（一次性成本 ~5-10 min）。后续 run 仅做复制 + diff + 少量补充（~1-3 min，新增 10-50 条而非 100+ 条）。
+
+**🚫 禁止事项**：
+- 禁止用 `yaml.dump()` 序列化含 `workflow:` 的 YAML（`on:` → `true:` boolean 陷阱）
+- 禁止跳过步骤 0（复制上一轮用例）直接从零生成
 
 ### 2.5 验收（STOP②）
 

@@ -1,0 +1,45 @@
+id: SEC-ARTIFACT-03-002
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "workflow_run 事件下下载的 artifact 应被视为不可信输入"
+intent_ref: INTENT-SEC-042
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    artifact-trust:
+      name: (SEC-ARTIFACT-03-002) 验证 artifact 来源标记
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-ARTIFACT-03-002) 检出代码
+          uses: checkout
+        - name: (SEC-ARTIFACT-03-002) 检查 artifact 上下文
+          run: |
+            echo "ARTIFACT_SOURCE_CHECK: platform_behavior"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "artifact 元数据含来源信息，或标记为 N/A"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

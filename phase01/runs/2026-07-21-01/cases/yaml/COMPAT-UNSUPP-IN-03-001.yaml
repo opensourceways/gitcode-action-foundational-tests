@@ -1,0 +1,56 @@
+id: COMPAT-UNSUPP-IN-03-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "不支持 workflow_dispatch inputs 类型时的降级行为"
+intent_ref: INTENT-COMPAT-040
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - workflow_dispatch
+    inputs:
+      dry_run:
+        type: boolean
+        default: false
+      env_choice:
+        type: choice
+        options: [dev, staging, prod]
+        default: dev
+  jobs:
+    test-input:
+      name: test-unsupported-input-types
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: echo input values
+          if: ${{ always() }}
+          run: |
+            echo "DRY_RUN: ${{ inputs.dry_run }}"
+            echo "ENV_CHOICE: ${{ inputs.env_choice }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params:
+    dry_run: "true"
+    env_choice: "dev"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: yaml_validation
+    eval: deterministic
+    rubric: "YAML 保存阶段应拒绝非 string 类型 inputs，报错指明仅支持 string"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "若静默接受：标记为兼容性差异——GitHub 模式下行为不同"
+
+teardown:
+  reset: fixture

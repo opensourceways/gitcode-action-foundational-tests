@@ -1,0 +1,49 @@
+id: REL-RUNNER-IMG-TO-03-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "自托管 runner + 自定义 image：镜像拉取超时应有明确错误——历史 #7/#52/#54"
+intent_ref: INTENT-REL-026
+
+setup:
+  repo_fixture: with-self-hosted-runner
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    image-test:
+      name: image-pull-timeout-test
+      runs-on: [self-hosted, linux]
+      container:
+        image: nonexistent-registry.example.com/nonexistent:99
+      timeout-minutes: 10
+      steps:
+        - name: this step should not execute if image fails
+          run: echo "IMAGE_PULLED_UNEXPECTEDLY: yes"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "10min 内 Run failed，日志含 image pull 错误和镜像名"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "日志不应仅 1 行（历史 #7/#54——pending 1h 后失败无日志）"
+
+teardown:
+  reset: fixture

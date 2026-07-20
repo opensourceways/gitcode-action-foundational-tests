@@ -1,0 +1,54 @@
+id: COMPAT-FAIL-FN-03-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "failed vs failure() 命名差异：验证 GitCode 失败函数名与 GitHub 不同"
+intent_ref: INTENT-COMPAT-011
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    job_a:
+      name: fail-job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: exit with failure
+          run: exit 1
+    job_b:
+      name: depends-on-failure
+      runs-on: [ubuntu-latest, x64, small]
+      needs: [job_a]
+      if: ${{ failed }}
+      steps:
+        - name: should execute on failure
+          run: echo "job_b executed because job_a failed"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: job_status
+    equals:
+      job_a: failure
+      job_b: success
+  - type: positive
+    target: run_logs
+    equals: "job_b executed because job_a failed"
+
+teardown:
+  reset: fixture

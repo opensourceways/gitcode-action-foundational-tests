@@ -1,0 +1,56 @@
+id: COMP-RES-OVER-03-001
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: "托管 Runner 资源超限行为：内存/磁盘超出规格时的处理"
+intent_ref: INTENT-COMP-016
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    resource-test:
+      name: resource-overrun-test
+      runs-on: [ubuntu-latest, x64, small]
+      timeout-minutes: 5
+      steps:
+        - name: check runner specs
+          run: |
+            echo "CPU_COUNT: $(nproc)"
+            echo "MEM_TOTAL: $(free -m | awk '/^Mem:/{print $2}') MB"
+            echo "DISK_TOTAL: $(df -h / | awk 'NR==2{print $2}')"
+        - name: attempt memory overrun
+          run: |
+            echo "MEM_STRESS_START: $(date -u +%H:%M:%S)"
+            dd if=/dev/zero of=/tmp/largefile bs=1G count=10 2>&1 || echo "DISK_FULL_OR_OOM: yes"
+            echo "MEM_STRESS_END: $(date -u +%H:%M:%S)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "资源超限时日志含 OOM 或 disk full 明确信息"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "资源超限时 Run 标记 failure"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "不应泛化报错无具体原因（如仅 'step failed' 无细节）"
+
+teardown:
+  reset: fixture

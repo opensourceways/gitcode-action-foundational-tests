@@ -1,0 +1,45 @@
+id: SEC-LOG-03-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "Workflow 日志的安全生命周期——保留期、下载权限"
+intent_ref: INTENT-SEC-046
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    log-lifecycle:
+      name: (SEC-LOG-03-001) 验证日志安全生命周期
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-LOG-03-001) 检出代码
+          uses: checkout
+        - name: (SEC-LOG-03-001) 产生可验证日志
+          run: |
+            echo "LOG_LIFECYCLE_MARKER: secure"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志访问受权限控制，非授权用户无法下载"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "平台文档声明日志保留期"
+
+teardown:
+  reset: none

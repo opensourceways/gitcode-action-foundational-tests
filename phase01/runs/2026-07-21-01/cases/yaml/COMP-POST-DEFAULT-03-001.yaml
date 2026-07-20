@@ -1,0 +1,52 @@
+id: COMP-POST-DEFAULT-03-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "post 阶段的 run_always 默认行为：验证成功/失败/取消三种场景"
+intent_ref: INTENT-COMP-028
+
+setup:
+  repo_fixture: standard
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    main-job:
+      name: main-job-for-post-test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: succeed intentionally
+          run: |
+            echo "MAIN_JOB_SUCCESS: yes"
+            exit 0
+  post:
+    run_always: true
+    steps:
+      - name: post cleanup
+        run: |
+          echo "POST_RUN_AFTER_MAIN: yes"
+          echo "RUN_ALWAYS_BEHAVIOR_VERIFIED: default is true"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "POST_RUN_AFTER_MAIN=yes——post 在 main success 后执行"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "post 正确执行且不影响 workflow 整体状态"
+
+teardown:
+  reset: none

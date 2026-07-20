@@ -1,0 +1,64 @@
+id: COMP-ACT-03-004
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: "docker/login 登录认证与 daemon 可用性——已知默认资源池不支持 daemon #86"
+intent_ref: INTENT-ACT-004
+
+setup:
+  repo_fixture: with-docker-login
+  secrets: [DOCKER_USERNAME, DOCKER_PASSWORD]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    docker-login-test:
+      name: "(COMP-ACT-03-004) 验证 docker/login 登录与 daemon 可用性"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-004) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-004) docker login"
+          uses: official_docker_login
+          with:
+            username: "${{ secrets.DOCKER_USERNAME }}"
+            password: "${{ secrets.DOCKER_PASSWORD }}"
+        - name: "(COMP-ACT-03-004) check docker daemon"
+          if: ${{ always() }}
+          run: |
+            if docker info 2>&1; then
+              echo "DOCKER_DAEMON_AVAILABLE: yes"
+            else
+              echo "DOCKER_DAEMON_AVAILABLE: no"
+              echo "NOTE: 已知 #86——默认资源池不支持 Docker daemon"
+            fi
+        - name: "(COMP-ACT-03-004) check credential cleanup"
+          if: ${{ always() }}
+          run: |
+            echo "CREDENTIAL_CHECK: performed by harness (log scan)"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "docker login step 执行完成（成功或明确报错）"
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "daemon 不可用时给出明确报错而非静默挂起（已知 #86）"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DOCKER_PASSWORD
+
+teardown:
+  reset: fixture

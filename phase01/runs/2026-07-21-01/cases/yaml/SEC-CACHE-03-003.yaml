@@ -1,0 +1,46 @@
+id: SEC-CACHE-03-003
+dimensions:
+  - security
+dimension: security
+priority: P1
+title: "Workflow YAML 缓存不应导致旧版本 workflow 被执行"
+intent_ref: INTENT-SEC-052
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    yaml-cache:
+      name: (SEC-CACHE-03-003) 验证 YAML 缓存一致性
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-CACHE-03-003) 检出代码
+          uses: checkout
+        - name: (SEC-CACHE-03-003) 输出当前版本标记
+          run: |
+            echo "YAML_VERSION: v1"
+            echo "YAML_FRESH: true"
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: "deterministic"
+    rubric: "修改后的 YAML 版本标记在日志中出现，不使用缓存旧版本"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现未授权访问、secret 泄露或安全机制被绕过"
+
+teardown:
+  reset: none

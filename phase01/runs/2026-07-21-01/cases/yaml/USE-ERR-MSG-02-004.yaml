@@ -1,0 +1,41 @@
+id: USE-ERR-MSG-02-004
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "字段类型错误时的错误信息可诊断性"
+intent_ref: INTENT-USE-002
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-type-error:
+      name: Test Type Error
+      runs-on: ubuntu-latest
+      env: foo
+      steps:
+      - run: echo "test"
+      name: Test Type Error
+  name: 字段类型错误时的错误信息可诊断性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "类型错误消息应包含字段路径（如 jobs.test-type-error.runs-on）、期望类型、实际类型、文件与行号——非泛化 'type mismatch'"
+
+teardown:
+  reset: fixture

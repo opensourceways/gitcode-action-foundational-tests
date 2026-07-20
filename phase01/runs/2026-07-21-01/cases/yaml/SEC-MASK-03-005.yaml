@@ -1,0 +1,55 @@
+id: SEC-MASK-03-005
+dimensions: [security]
+dimension: security
+priority: P1
+title: "::add-mask:: workflow 命令的正确性与安全性"
+intent_ref: INTENT-SEC-027
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    addmask:
+      name: (SEC-MASK-03-005) 验证 add-mask 命令安全性
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (SEC-MASK-03-005) 检出代码
+          uses: checkout
+        - name: (SEC-MASK-03-005) 注册动态 mask 值
+          run: |
+            echo "::add-mask::DYN_MASK_42"
+            echo "REG_OK"
+        - name: (SEC-MASK-03-005) echo 被 mask 的值
+          run: |
+            echo "DYN_MASK_42"
+            echo "AFTER_ECHO"
+        - name: (SEC-MASK-03-005) stop-commands 后 echo
+          run: |
+            echo "::stop-commands::"
+            echo "DYN_MASK_42"
+            echo "AFTER_STOP"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "::add-mask:: 注册后 echo 该值应被遮蔽为 ***"
+  - type: negative
+    target: step_logs
+    eval: deterministic
+    rubric: "::stop-commands:: 后 echo 该值仍应被遮蔽"
+
+teardown:
+  reset: none

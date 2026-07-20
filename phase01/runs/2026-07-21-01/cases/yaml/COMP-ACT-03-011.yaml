@@ -1,0 +1,64 @@
+id: COMP-ACT-03-011
+dimensions: [completeness]
+dimension: completeness
+priority: P2
+title: "setup_terraform IaC 工具安装——指定版本、默认版本、不存在版本、terraform init 连通性"
+intent_ref: INTENT-ACT-011
+
+setup:
+  repo_fixture: with-terraform-project
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    terraform-test:
+      name: "(COMP-ACT-03-011) 验证 setup_terraform 工具安装"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-011) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-011) setup terraform 1.5.0"
+          uses: setup_terraform
+          with:
+            terraform-version: "1.5.0"
+        - name: "(COMP-ACT-03-011) verify terraform version is 1.5.0"
+          run: |
+            ACTUAL=$(terraform version 2>&1 | head -1)
+            echo "TERRAFORM_VERSION: $ACTUAL"
+            if echo "$ACTUAL" | grep -q "1.5.0"; then
+              echo "TERRAFORM_VERSION_MATCH: yes"
+            else
+              echo "TERRAFORM_VERSION_MATCH: no"
+              echo "TERRAFORM_ACTUAL: $ACTUAL"
+            fi
+        - name: "(COMP-ACT-03-011) test terraform init"
+          if: ${{ always() }}
+          run: |
+            mkdir -p /tmp/tf-test && cd /tmp/tf-test
+            echo 'terraform { required_version = ">= 1.0" }' > main.tf
+            terraform init 2>&1 || echo "TERRAFORM_INIT: failed (check network)"
+            echo "NOTE: HashiCorp 官方源大陆连通性需验证"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "terraform version 输出含 1.5.0，TERRAFORM_VERSION_MATCH=yes"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "若 HashiCorp 源大陆不可达则标记为 blocked-by-network"
+
+teardown:
+  reset: fixture

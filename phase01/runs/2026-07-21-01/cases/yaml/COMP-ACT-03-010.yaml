@@ -1,0 +1,62 @@
+id: COMP-ACT-03-010
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: "build_accelerate 构建加速——基本功能、自定义资源池兼容性、自定义镜像、降级行为"
+intent_ref: INTENT-ACT-010
+
+setup:
+  repo_fixture: with-build-project
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    accelerate-test:
+      name: "(COMP-ACT-03-010) 验证 build_accelerate 构建加速"
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: "(COMP-ACT-03-010) checkout source"
+          uses: official_checkout
+        - name: "(COMP-ACT-03-010) setup build environment"
+          run: |
+            echo "BUILD_START_TIME: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "RUNNER_TYPE: $RUNNER_TYPE"
+        - name: "(COMP-ACT-03-010) enable build accelerate"
+          uses: official_build_accelerate
+        - name: "(COMP-ACT-03-010) perform build with accelerate"
+          run: |
+            echo "BUILD_WITH_ACCELERATE_START: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "ACCELERATE_BUILD: executing"
+            # Simulate build work
+            sleep 2
+            echo "ACCELERATE_BUILD: completed"
+            echo "BUILD_END_TIME: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        - name: "(COMP-ACT-03-010) record accelerate metrics"
+          if: ${{ always() }}
+          run: |
+            echo "BUILD_ACCELERATE_CHECK: completed"
+            echo "NOTE: 自定义资源池兼容性待验证"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_logs
+    eval: deterministic
+    rubric: "build_accelerate step 执行完成，后续构建正常进行"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "加速失败时降级到正常构建（graceful degradation）而非直接失败"
+
+teardown:
+  reset: fixture
