@@ -1,0 +1,80 @@
+# 可执行用例 YAML 契约 schema（JSON-Schema 风格，供 case-writer 自校验 / 第二部分校验）
+# 这是与第二部分的唯一交接契约。字段增删须双方同步。
+$schema: "http://json-schema.org/draft-07/schema#"
+title: GitCode Action Executable Test Case
+type: object
+required: [id, dimensions, dimension, priority, title, intent_ref, setup, trigger, assertions, teardown]
+additionalProperties: false
+properties:
+  id:
+    type: string
+    pattern: "^(COMP|COMPAT|REL|SEC|USE)-[A-Z0-9]+-\\d{2}-\\d{3}(-V\\d+)?$"
+  dimensions:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      enum: [completeness, compatibility, reliability, security, usability]
+  dimension:
+    type: string
+    enum: [completeness, compatibility, reliability, security, usability]
+  priority:
+    type: string
+    enum: [P0, P1, P2]
+  title:
+    type: string
+    minLength: 1
+  intent_ref:
+    type: string
+    pattern: "^INTENT-(COMP|COMPAT|REL|SEC|USE)-[0-9]+$"
+  setup:
+    type: object
+    required: [repo_fixture]
+    properties:
+      repo_fixture: { type: string }
+      secrets: { type: array, items: { type: string } }
+      variables: { type: object }
+      branch_protection: { type: string }
+  workflow:
+    type: [string, "null"]         # 内联 workflow 定义；某些用例可为空（如纯触发/配置类）
+  trigger:
+    type: object
+    required: [event]
+    properties:
+      event: { type: string, enum: [push, pr, fork_pr, manual, schedule, tag] }
+      as: { type: string, enum: [maintainer, untrusted_contributor] }
+      params: { type: object }
+  fault_injection:
+    oneOf:
+      - type: "null"
+      - type: object
+        required: [at, action, recovery_expectation]
+        properties:
+          at: { type: string, enum: [pre_job, mid_job, post_job] }
+          action: { type: string, enum: [kill_runner, network_partition, disk_full, cpu_saturate, concurrent_flood] }
+          params: { type: object }
+          recovery_expectation: { type: string }
+  assertions:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required: [type, target]
+      properties:
+        type: { type: string, enum: [positive, negative, nonfunctional] }
+        target: { type: string }
+        # 断言值字段按 type/target 变化，以下为常见项（允许其一）：
+        equals: {}
+        must_not_contain_secret: { type: string }
+        eval: { type: string, enum: [deterministic, llm_assisted] }
+        rubric: { type: string }
+  teardown:
+    type: object
+    required: [reset]
+    properties:
+      reset: { type: string, enum: [fixture, full_instance, none] }
+
+# 校验要点（review/case-writer 须保证）：
+# 1. 安全用例（dimension=security）assertions 中至少一条 type=negative。
+# 2. 破坏性用例 teardown.reset 不得为 none（除非确无副作用）。
+# 3. 主观判据必须标 eval=llm_assisted 并给 rubric，否则视为 deterministic 且必须可机器判定。

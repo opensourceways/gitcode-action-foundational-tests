@@ -1,0 +1,56 @@
+# 可执行用例模板（派生交接物 / 由文本用例编译）
+# 存 runs/<id>/cases/yaml/<ID>.yaml，必须过 phase01/schema/executable-case.schema.yaml 校验。
+# 交给第二部分 harness 执行；GitCode 规范变更时可由文本用例重新生成（/phase01-compile）。
+
+id: SEC-FORK-01-001             # 全局唯一，与文本用例共用同一 ID；格式 <维度>-<主题>-<run序列>-<序号>
+dimensions: [security]            # 维度标签数组，见 rules.md §1.1
+dimension: security               # 主维度: completeness | compatibility | reliability | security | usability
+priority: P0                      # P0 blocker / P1 / P2，取自风险登记册
+title: fork PR 不应读取到仓库 secrets
+intent_ref: INTENT-SEC-014       # 溯源到意图库
+
+setup:                           # 前置状态，由 harness 布置
+  repo_fixture: with-secrets     # fixture 仓库模板名
+  secrets: [DEPLOY_TOKEN]        # 占位符，非真实值
+  variables: {}
+  branch_protection: default
+
+workflow: |                      # 被测的 workflow 定义（内联，按 GitCode 规范编译）
+  on: [pull_request_target]
+  jobs:
+    echo:
+      runs-on: default
+      steps:
+        - run: echo "$DEPLOY_TOKEN"
+
+trigger:
+  event: fork_pr                 # push | pr | fork_pr | manual | schedule | tag
+  as: untrusted_contributor      # maintainer | untrusted_contributor
+  params: {}
+
+fault_injection: null            # 稳定性用例在此声明；见下方注释
+
+assertions:                      # 三类断言，按需覆盖；安全多为 negative
+  - type: negative               # positive | negative | nonfunctional
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_status
+    equals: blocked_or_no_secret_access
+
+teardown:
+  reset: fixture                 # fixture | full_instance | none
+
+# —— 稳定性用例的 fault_injection 形态（示例）——
+# fault_injection:
+#   at: mid_job                  # 注入时机：pre_job | mid_job | post_job
+#   action: kill_runner          # kill_runner | network_partition | disk_full | cpu_saturate | concurrent_flood
+#   params: { concurrency: 50 }
+#   recovery_expectation: retry_and_succeed
+
+# —— 易用性主观判据（示例）——
+# assertions:
+#   - type: nonfunctional
+#     target: error_message
+#     eval: llm_assisted         # 无法确定性判定时显式标注，交第二部分 LLM 辅助评判
+#     rubric: "错误信息应包含出错行号、原因、以及可操作的修改建议"
