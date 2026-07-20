@@ -14,6 +14,7 @@
 - `phase01/inputs/existing-cases/cases.md`（**已有用例清单 Markdown 版**：展开 intent 前先扫此文件，避免产出的文本用例与已有用例重复）
 - `phase01/templates/text-case.md`、`executable-case.yaml`、`phase01/schema/`
 - `phase01/inputs/gitcode-spec/`（编译 YAML 时的语法依据）
+- `phase01/inputs/gitcode-api/api-reference.md`（**API 参考**：编译 YAML 时，若断言可经 API 确定性判定——如检查 run status、下载 job 日志验证内容——在 assert 块中标注可用的 API 端点与参数）
 - `phase01/rules.md`（命名、优先级、断言、脱敏、溯源纪律）
 
 ## 工作步骤

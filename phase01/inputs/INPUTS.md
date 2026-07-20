@@ -7,6 +7,7 @@
 
 | 子目录 | 必需度 | 放了吗 |
 |---|---|---|
+| `gitcode-api/` | **必需**（无则 case-writer 无 API 参考 ／ harness 无法组装接口调用） | ✅ 已补充（20 个 v8 Actions API 端点，2026-07-20） |
 | `gitcode-spec/` | **必需**（无则规格分析/编译 YAML 无依据） | ✅ 已补充（官方文档 50 页离线镜像，2026-07-20） |
 | `github-reference/` | **必需**（无则兼容性 diff 失去 oracle） | ✅ 已补充（GitHub Actions 核心规格 12 页，2026-07-20） |
 | `workflow-samples/` | 强烈建议（真实负载最能暴露差异） | ☐ |
@@ -19,6 +20,12 @@
 ---
 
 ## 各类输入明细
+
+### 0. `gitcode-api/` — GitCode Actions API 参考手册
+- **放什么**：GitCode 平台 API 文档（Actions 类 20 个端点），含 Base URL、认证方式、参数格式、调用示例。
+- **格式**：Markdown（从在线文档渲染抓取）。
+- **消费方**：case-writer（API 可验证断言标注）· 第二部分 harness（执行时组装 API 调用）。
+- **缺失影响**：无法基于 API 做确定性断言（如验证 run status、检查 job 日志内容）。
 
 ### 1. `gitcode-spec/` — GitCode Action 产品规格
 - **放什么**：GitCode Action 官方规格文档、YAML 语法说明、支持的触发器/表达式/内置 action 清单、权限模型、配额与容量说明、runner 架构说明、错误码表、产品文档。
