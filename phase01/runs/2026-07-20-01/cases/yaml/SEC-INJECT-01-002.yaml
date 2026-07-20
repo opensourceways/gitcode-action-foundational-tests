@@ -1,0 +1,55 @@
+id: SEC-INJECT-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: PR 正文（body）中的不可信输入不应通过 ${{ }} 直接插入 run: 导致命令注入
+intent_ref: INTENT-SEC-010
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-body-injection:
+      runs-on: default
+      steps:
+        - name: Unsafe direct interpolation
+          run: echo "PR Body: ${{ atomgit.event.pull_request.body }}"
+        - name: Safe intermediate env approach
+          run: echo "PR Body safely passed"
+          env:
+            PR_BODY: ${{ atomgit.event.pull_request.body }}
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+    pr_body: "Normal description.\n`id`; echo INJECTED_BY_BODY; #\n$(whoami)"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 INJECTED_BY_BODY（注入命令不应被执行）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 whoami 命令的实际输出"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "PR 正文中的 $(...) 命令替换不应被执行"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "安全引用方式（env 中间变量）的 step 应正常完成"
+
+teardown:
+  reset: fixture

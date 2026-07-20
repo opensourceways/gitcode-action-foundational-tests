@@ -1,0 +1,50 @@
+id: USE-PERMN-01-001
+dimensions: [usability, compatibility, security]
+dimension: usability
+priority: P0
+title: permissions 使用 GitHub 命名体系时的错误信息质量与不应静默忽略
+intent_ref: INTENT-USE-016
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions:
+    contents: read
+  jobs:
+    test-perm-error:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Verify token permissions
+          run: |
+            echo "Testing if GitHub-style permissions are rejected"
+            git fetch origin
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "使用 GitHub 权限域名（contents/pull-requests/actions 等）时，workflow 解析/校验阶段不应静默通过——应报错或至少产生 warning"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "若静默忽略，不应没有任何 warning 日志提示用户权限未按预期生效"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若报错，错误信息应包含不识别的权限项名称 + GitCode 可用权限项列表（project/pr/issue/note/repository/hook）（0=仅报语法错误, 1=指出不识别项但无建议, 2=明确指出差异并给出正确写法）"
+
+teardown:
+  reset: fixture

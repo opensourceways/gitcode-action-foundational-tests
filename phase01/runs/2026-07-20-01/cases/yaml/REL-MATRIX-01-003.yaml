@@ -1,0 +1,36 @@
+id: REL-MATRIX-01-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: strategy.fail-fast 取消其余实例
+intent_ref: INTENT-REL-007
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-test:
+      strategy:
+        matrix:
+          variant: [1, 2, 3]
+        fail-fast: true
+      runs-on: default
+      steps:
+        - run: |
+            if [ "${{ matrix.variant }}" = "1" ]; then exit 1; fi
+            sleep 60
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: matrix_fail_fast
+    eval: deterministic
+    rubric: "1 个实例失败后其余未完成实例在 30s 内 cancelled；已完成实例保留原状态"
+teardown:
+  reset: none

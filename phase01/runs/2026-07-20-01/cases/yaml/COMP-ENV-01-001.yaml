@@ -1,0 +1,38 @@
+id: COMP-ENV-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证环境变量四级优先级链: step > job > workflow > vars > ATOMGIT_*
+intent_ref: INTENT-COMP-011
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: { TEST_VAR: workflow-level }
+  branch_protection: default
+workflow: |
+  on: [push]
+  env:
+    TEST_VAR: workflow-level
+  jobs:
+    priority-test:
+      env:
+        TEST_VAR: job-level
+      runs-on: default
+      steps:
+        - env:
+            TEST_VAR: step-level
+          run: |
+            echo "Step env: $TEST_VAR"
+            echo "Expected: step-level"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中 TEST_VAR 值为 step-level（step env 优先级最高）"
+teardown:
+  reset: fixture

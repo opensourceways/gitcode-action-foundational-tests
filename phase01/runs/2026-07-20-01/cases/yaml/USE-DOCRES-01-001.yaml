@@ -1,0 +1,30 @@
+id: USE-DOCRES-01-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: 文档残留 GITHUB_* 措辞核对
+intent_ref: INTENT-USE-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: documentation_content
+    eval: deterministic
+    rubric: "grep GITHUB_ 在 gitcode-spec/*.md 非对比上下文中结果为零；所有匹配项均在明确的对比章节且有标注说明"
+
+teardown:
+  reset: none

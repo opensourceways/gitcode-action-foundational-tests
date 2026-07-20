@@ -1,0 +1,39 @@
+id: SEC-PERM-01-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: job 级 permissions 声明可覆盖 workflow 级声明
+intent_ref: INTENT-SEC-017
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  permissions:
+    repository: none
+  jobs:
+    override-test:
+      permissions:
+        repository: read
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: echo "Clone should succeed with job-level repository:read"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job 级 permissions repository:read 覆盖 workflow 级 none，clone 成功"
+  - type: negative
+    target: token_permissions
+    eval: deterministic
+    rubric: "job 级未声明时权限不意外放大"
+teardown:
+  reset: fixture

@@ -1,0 +1,37 @@
+id: SEC-MASK-01-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: Secret 通过子字符串拼接后 echo 到日志应仍被脱敏
+intent_ref: INTENT-SEC-007
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-concat-masking:
+      runs-on: default
+      steps:
+        - run: |
+            TOKEN="${{ secrets.DEPLOY_TOKEN }}"
+            HALF1="${TOKEN:0:5}"
+            HALF2="${TOKEN:5}"
+            echo "Concatenated: ${HALF1}${HALF2}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "拼接后的 echo 输出不应泄露完整 secret 明文"
+teardown:
+  reset: fixture

@@ -1,0 +1,52 @@
+id: USE-WFCMD-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: workflow 命令 ::group::/::error::/::warning:: 支持情况
+intent_ref: INTENT-USE-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-wf-commands:
+      runs-on: default
+      steps:
+        - name: Test group command
+          run: |
+            echo "::group::Build Step"
+            echo "building..."
+            echo "::endgroup::"
+        - name: Test error annotation
+          run: echo "::error file=app.js,line=10::Something went wrong"
+        - name: Test warning annotation
+          run: echo "::warning::This is a deprecation warning"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_logs
+    eval: deterministic
+    rubric: "::group:: 产生日志折叠效果（可截图判定）；若不支持，step 不应非零退出"
+  - type: nonfunctional
+    target: run_logs
+    eval: deterministic
+    rubric: "::error:: 产生 annotation 展示；若不支持应至少原样输出不吞掉"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "不支持的命令不应导致 step 非零退出或 workflow 失败"
+
+teardown:
+  reset: fixture

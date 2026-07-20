@@ -1,0 +1,59 @@
+id: SEC-FORK-01-004
+dimensions: [security]
+dimension: security
+priority: P0
+title: pull_request_target 下显式 checkout fork PR head 代码后不应自动执行其中脚本
+intent_ref: INTENT-SEC-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  jobs:
+    verify-checkout-safety:
+      runs-on: default
+      steps:
+        - name: Default checkout (should NOT get fork code)
+          uses: checkout
+        - name: Verify default checkout is base
+          run: |
+            echo "Default checkout should use base branch code"
+            git log -1 --oneline
+        - name: Explicitly checkout fork head (should warn)
+          uses: checkout
+          with:
+            ref: ${{ atomgit.event.pull_request.head.sha }}
+        - name: Run fork-side build script
+          run: |
+            if [ -f Makefile ]; then
+              make build 2>&1 || echo "MAKE_FAILED_OR_NOT_FOUND"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request_target
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "默认 checkout 应获取 base 分支代码，非 fork 侧代码"
+  - type: negative
+    target: checkout_warning
+    eval: deterministic
+    rubric: "显式 checkout head.sha 时 checkout action 应产生安全警告或要求 opt-in"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "未显式 checkout ref 时，不应自动获取执行 fork 侧代码变更"
+
+teardown:
+  reset: fixture

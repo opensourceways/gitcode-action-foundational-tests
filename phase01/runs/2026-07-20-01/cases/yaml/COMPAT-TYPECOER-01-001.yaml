@@ -1,0 +1,33 @@
+id: COMPAT-TYPECOER-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 表达式类型强转规则对标
+intent_ref: INTENT-COMPAT-006
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-type-coercion:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Empty string == 0: ${{ '' == 0 }}"
+            echo "Null in contains: ${{ contains(fromJSON('null'), 'test') }}"
+            echo "Contains in array: ${{ contains(fromJSON('[\"a\",\"b\"]'), 'a') }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "类型强转规则输出明确，与 GitHub 行为一致或文档化差异"
+teardown:
+  reset: fixture

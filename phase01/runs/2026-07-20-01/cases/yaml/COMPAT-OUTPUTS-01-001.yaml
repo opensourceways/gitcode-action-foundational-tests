@@ -1,0 +1,38 @@
+id: COMPAT-OUTPUTS-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: job outputs 传递协议对标
+intent_ref: INTENT-COMPAT-030
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    producer:
+      runs-on: default
+      outputs:
+        result: ${{ steps.set-output.outputs.value }}
+      steps:
+        - id: set-output
+          run: echo "value=hello-from-producer" >> $ATOMGIT_OUTPUT
+    consumer:
+      needs: [producer]
+      runs-on: default
+      steps:
+        - run: echo "Got: ${{ needs.producer.outputs.result }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: outputs_chain
+    eval: deterministic
+    rubric: "ATOMGIT_OUTPUT 协议、job.outputs 声明、needs 引用三级传递正确"
+teardown:
+  reset: fixture

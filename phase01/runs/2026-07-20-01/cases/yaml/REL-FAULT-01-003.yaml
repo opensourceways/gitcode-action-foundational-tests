@@ -1,0 +1,37 @@
+id: REL-FAULT-01-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: post 阶段 cancel 后仍执行
+intent_ref: INTENT-REL-018
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    main:
+      runs-on: default
+      steps:
+        - run: sleep 60
+  post:
+    run_always: true
+    jobs:
+      cleanup:
+        runs-on: default
+        steps:
+          - run: echo "Post cleanup executed after cancel"
+trigger:
+  event: push
+  as: maintainer
+  params: { cancel_after_seconds: 10 }
+fault_injection: null
+assertions:
+  - type: positive
+    target: post_execution
+    eval: deterministic
+    rubric: "workflow cancel 后 post 正常执行；post 日志在 Run 详情可见"
+teardown:
+  reset: none

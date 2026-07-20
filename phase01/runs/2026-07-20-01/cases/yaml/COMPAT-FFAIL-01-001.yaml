@@ -1,0 +1,36 @@
+id: COMPAT-FFAIL-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: matrix fail-fast 双层语义
+intent_ref: INTENT-COMPAT-029
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-job:
+      strategy:
+        matrix:
+          variant: [1, 2, 3]
+        fail-fast: true
+      runs-on: default
+      steps:
+        - run: |
+            if [ "${{ matrix.variant }}" = "2" ]; then exit 1; fi
+            echo "Variant ${{ matrix.variant }} OK"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: matrix_behavior
+    eval: deterministic
+    rubric: "strategy.fail-fast 取消语义正确；stages.fail_fast 跳过语义正确；两者同时设置行为可预测"
+teardown:
+  reset: fixture

@@ -1,0 +1,44 @@
+id: SEC-EXPR-01-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: 事件负载不可信字段在 expression evaluation 阶段的类型安全
+intent_ref: INTENT-SEC-035
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-expression-safety:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Event type: ${{ atomgit.event_name }}"
+            echo "PR title: ${{ atomgit.event.pull_request.title }}"
+        - run: |
+            echo "Event payload: ${{ toJSON(atomgit.event) }}" 2>&1 || echo "toJSON not available"
+        - if: ${{ atomgit.event.pull_request.title != '' }}
+          run: echo "IF condition with event field works"
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "expression evaluation 产物替换后不导致 shell 语法错误（如 unexpected token '('\")"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "workflow 正常完成，不因类型不匹配崩溃"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "嵌套对象字段在 if 条件中不导致解析器崩溃"
+teardown:
+  reset: fixture

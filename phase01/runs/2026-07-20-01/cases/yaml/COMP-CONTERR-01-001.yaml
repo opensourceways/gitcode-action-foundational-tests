@@ -1,0 +1,58 @@
+id: COMP-CONTERR-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 continue-on-error 对 job DAG 失败传播的影响
+intent_ref: INTENT-COMP-023
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      continue-on-error: true
+      runs-on: default
+      steps:
+        - run: |
+            echo "Job A will fail"
+            exit 1
+    job-b:
+      needs: [job-a]
+      runs-on: default
+      steps:
+        - run: echo "Job B should be skipped because A failed"
+    job-c:
+      needs: [job-a]
+      if: ${{ always }}
+      runs-on: default
+      steps:
+        - run: |
+            echo "Job C runs regardless"
+            echo "Job A result: ${{ needs.job-a.result }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job A 失败（failure），workflow 不中止"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job B 被 skipped（默认 if 条件不满足）"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job C（if: always()）正常执行并完成"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "needs.job-a.result = failure，反映真实状态"
+teardown:
+  reset: fixture

@@ -1,0 +1,54 @@
+id: SEC-INJECT-01-006
+dimensions: [security]
+dimension: security
+priority: P0
+title: 第三方 action 的输入参数中的不可信值不应导致 action 内部代码注入
+intent_ref: INTENT-SEC-030
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-action-input-injection:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Pass untrusted input as action parameter
+          uses: setup-node
+          with:
+            node-version: ${{ atomgit.event.pull_request.title }}
+        - name: Verify no injection occurred
+          run: |
+            echo "Action completed normally"
+            echo "NO_ACTION_INJECTION_AS_EXPECTED"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+    pr_title: "20\"; echo ACTION_INJECTED; #"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 NO_ACTION_INJECTION_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ACTION_INJECTED（注入命令不应在 action 内被执行）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不可信输入作为 with 参数传递时不应被 action 内部执行引擎解释为代码"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,42 @@
+id: COMPAT-ARTCAH-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 内置 artifact/cache 等价性
+intent_ref: INTENT-COMPAT-031
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    upload:
+      runs-on: default
+      steps:
+        - run: echo "data" > out.txt
+        - uses: upload-artifact
+          with:
+            name: test-artifact
+            path: out.txt
+    download:
+      needs: [upload]
+      runs-on: default
+      steps:
+        - uses: download-artifact
+          with:
+            name: test-artifact
+        - run: cat out.txt
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: artifact_cache
+    eval: deterministic
+    rubric: "artifact 跨 job 正确传递；cache 命中正确；fork PR cache 与主分支隔离"
+teardown:
+  reset: fixture

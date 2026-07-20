@@ -1,0 +1,76 @@
+id: SEC-PERM-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: permissions: {}（空对象）使 ATOMGIT_TOKEN 持有最小默认权限
+intent_ref: INTENT-SEC-015
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions: {}
+  jobs:
+    test-minimal-perms:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Test clone (should succeed)
+          run: |
+            git fetch origin
+            echo "CLONE_SUCCEEDED"
+        - name: Test push (should fail)
+          run: |
+            if git push origin HEAD:refs/heads/test-minimal-push 2>&1; then
+              echo "PUSH_SUCCEEDED_UNEXPECTEDLY"
+              exit 1
+            else
+              echo "PUSH_REJECTED_AS_EXPECTED"
+            fi
+        - name: Test PR operation (should fail)
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "PRIVATE-TOKEN: $ATOMGIT_TOKEN" \
+              "https://atomgit.com/api/v4/projects/REPO_PLACEHOLDER/merge_requests/1/notes" \
+              -d "body=test" 2>&1 || echo "CURL_FAILED")
+            if echo "$HTTP_CODE" | grep -qE "^(401|403)$"; then
+              echo "PR_WRITE_REJECTED_AS_EXPECTED"
+            else
+              echo "PR_WRITE_NOT_REJECTED_UNEXPECTEDLY"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 CLONE_SUCCEEDED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 PUSH_REJECTED_AS_EXPECTED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 PR_WRITE_REJECTED_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 PUSH_SUCCEEDED_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "permissions: {} 下 ATOMGIT_TOKEN 仅应拥有 repository:read 权限"
+
+teardown:
+  reset: fixture

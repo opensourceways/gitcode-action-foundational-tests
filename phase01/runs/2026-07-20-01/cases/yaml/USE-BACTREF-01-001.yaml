@@ -1,0 +1,40 @@
+id: USE-BACTREF-01-001
+dimensions: [usability, compatibility]
+dimension: usability
+priority: P1
+title: actions/checkout@v4 等 GitHub 风格引用报错
+intent_ref: INTENT-USE-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-bad-action-ref:
+      runs-on: default
+      steps:
+        - uses: actions/checkout@v4
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "配置 uses: actions/checkout@v4 时报错且是明确错误（非超时等待拉取）；消息应提示短名替代（0=仅报 not found, 1=提示需改但未给正确写法, 2=直接提示 use 'checkout' instead）"
+  - type: negative
+    target: step_status
+    eval: deterministic
+    rubric: "不应出现无限等待拉取不存在的 actions/* 仓库导致超时"
+
+teardown:
+  reset: fixture

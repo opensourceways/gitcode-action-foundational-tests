@@ -1,0 +1,44 @@
+id: SEC-MASK-01-004
+dimensions: [security]
+dimension: security
+priority: P1
+title: Secret 包含多行文本时应整体被脱敏
+intent_ref: INTENT-SEC-008
+setup:
+  repo_fixture: with-secrets
+  secrets: [MULTILINE_SECRET]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-multiline-masking:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Line-by-line:"
+            echo "${{ secrets.MULTILINE_SECRET }}" | while IFS= read -r line; do
+              echo "$line"
+            done
+        - run: |
+            cat <<'EOF'
+            ${{ secrets.MULTILINE_SECRET }}
+            EOF
+        - run: |
+            VAL="${{ secrets.MULTILINE_SECRET }}"
+            echo "Via variable: $VAL"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: MULTILINE_SECRET
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "多行 Secret 的每一行明文均不在日志中出现，无论逐行输出、heredoc 还是变量间接引用"
+teardown:
+  reset: fixture

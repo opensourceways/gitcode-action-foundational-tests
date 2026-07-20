@@ -1,0 +1,38 @@
+id: COMP-ACTION-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 Action 引用方式: 官方短名、第三方全路径、本地相对路径
+intent_ref: INTENT-COMP-022
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    action-test:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - uses: setup-node
+          with:
+            node-version: '20'
+        - run: node --version
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "checkout 成功拉取代码，setup-node 正确安装 Node 20"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "引用不存在的 action 应明确报错"
+teardown:
+  reset: fixture

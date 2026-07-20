@@ -1,0 +1,30 @@
+id: COMPAT-INJPRO-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P1
+title: 不可信输入注入防护对标
+intent_ref: INTENT-COMPAT-026
+setup:
+  repo_fixture: default
+  secrets: [TEST_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [pull_request]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "PR title: ${{ atomgit.event.pull_request.title }}"
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不可信输入中的 shell 元字符不被解释执行；secrets 在 if 中不可用"
+teardown:
+  reset: fixture

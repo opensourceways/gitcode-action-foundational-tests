@@ -1,0 +1,49 @@
+id: SEC-SUPPLY-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 第三方 action 引用未 pin 到 commit SHA 时有平台警告
+intent_ref: INTENT-SEC-018
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-action-pinning:
+      runs-on: default
+      steps:
+        - name: Float branch ref (should warn)
+          uses: some-owner/some-action@main
+          with:
+            param: test
+        - name: SHA-pinned ref (should be OK)
+          uses: checkout
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "使用 commit SHA 引用的 action 正常执行"
+  - type: negative
+    target: workflow_lint
+    eval: llm_assisted
+    rubric: "使用浮动分支（@main）或浮动 tag（@v1）引用的 action 应产生 lint 警告或安全提示（0=无警告, 1=有隐晦提示, 2=明确推荐使用 commit SHA）"
+  - type: nonfunctional
+    target: action_security
+    eval: deterministic
+    rubric: "tag 改写后引用该 tag 的 workflow 获取最新代码（证明可变性存在）"
+
+teardown:
+  reset: fixture

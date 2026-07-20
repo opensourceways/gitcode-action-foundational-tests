@@ -1,0 +1,43 @@
+id: COMP-SUMMARY-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 ATOMGIT_STEP_SUMMARY 输出 Markdown 到运行摘要页
+intent_ref: INTENT-COMP-019
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-summary:
+      runs-on: default
+      steps:
+        - run: |
+            echo "## Test Results" >> $ATOMGIT_STEP_SUMMARY
+            echo "" >> $ATOMGIT_STEP_SUMMARY
+            echo "| Test | Status |" >> $ATOMGIT_STEP_SUMMARY
+            echo "|------|--------|" >> $ATOMGIT_STEP_SUMMARY
+            echo "| unit | pass |" >> $ATOMGIT_STEP_SUMMARY
+            echo "| integration | pass |" >> $ATOMGIT_STEP_SUMMARY
+        - run: |
+            echo "## Build Info" >> $ATOMGIT_STEP_SUMMARY
+            echo "Commit: ${{ atomgit.sha }}" >> $ATOMGIT_STEP_SUMMARY
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_summary
+    eval: deterministic
+    rubric: "运行摘要页正确渲染 Markdown 表格和标题"
+  - type: positive
+    target: run_summary
+    eval: deterministic
+    rubric: "多个 step 写入的内容累计展示，不互相覆盖"
+teardown:
+  reset: fixture

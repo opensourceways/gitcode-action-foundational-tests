@@ -1,0 +1,52 @@
+id: COMP-DAG-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 job DAG: needs 依赖拓扑的正确执行与失败传播
+intent_ref: INTENT-COMP-003
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      runs-on: default
+      steps:
+        - run: echo "Job A success"
+    job-b:
+      runs-on: default
+      needs: [job-a]
+      steps:
+        - run: echo "Job B after A"
+    job-c:
+      runs-on: default
+      needs: [job-a, job-b]
+      steps:
+        - run: echo "Job C after A and B"
+    job-d:
+      runs-on: default
+      steps:
+        - run: echo "Parallel job with no needs"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job A success → job B success → job C success（线性依赖正确）"
+  - type: positive
+    target: job_order
+    eval: deterministic
+    rubric: "job-d 与 job-a 并行启动（无 needs 依赖）"
+  - type: positive
+    target: failure_propagation
+    eval: deterministic
+    rubric: "上游失败时下游默认 skipped"
+teardown:
+  reset: fixture

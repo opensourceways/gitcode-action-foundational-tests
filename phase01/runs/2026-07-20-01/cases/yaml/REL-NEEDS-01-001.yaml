@@ -1,0 +1,50 @@
+id: REL-NEEDS-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: needs 链 (A→B→C) 中 job A 失败时 B/C 被跳过，if: always() 仍可执行
+intent_ref: INTENT-REL-022
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    a:
+      runs-on: default
+      steps:
+        - run: exit 1
+    b:
+      runs-on: default
+      needs: [a]
+      steps:
+        - run: echo "B should be skipped"
+    c:
+      runs-on: default
+      needs: [b]
+      steps:
+        - run: echo "C should be skipped"
+    d:
+      runs-on: default
+      needs: [c]
+      if: ${{ always }}
+      steps:
+        - run: echo "D should execute with always"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job B 和 C 状态为 skipped；job D 状态为 success（always 覆盖）"
+  - type: negative
+    target: job_status
+    eval: deterministic
+    rubric: "job B 不为 success；job C 不为 success"
+teardown:
+  reset: fixture

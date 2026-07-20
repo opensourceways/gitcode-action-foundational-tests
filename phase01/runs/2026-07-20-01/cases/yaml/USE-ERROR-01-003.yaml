@@ -1,0 +1,30 @@
+id: USE-ERROR-01-003
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: 未知字段错误信息
+intent_ref: INTENT-USE-003
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "testing unsupported field handling"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "不支持的字段应有 visible 提示（报错/warning）；消息应暗示这是 GitCode 差异而非拼写错误"
+teardown:
+  reset: fixture

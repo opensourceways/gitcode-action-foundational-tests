@@ -1,0 +1,34 @@
+id: REL-ARTIFACT-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: artifact 上传中断
+intent_ref: INTENT-REL-029
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    upload:
+      runs-on: default
+      steps:
+        - run: dd if=/dev/zero of=bigfile bs=1M count=100
+        - uses: upload-artifact
+          with:
+            name: big-artifact
+            path: bigfile
+trigger:
+  event: push
+  as: maintainer
+  params: { cancel_after_seconds: 5 }
+fault_injection: null
+assertions:
+  - type: negative
+    target: artifact_integrity
+    eval: deterministic
+    rubric: "被取消 Run 的 artifact 不可下载；后续 Run 不误用损坏 artifact"
+teardown:
+  reset: none

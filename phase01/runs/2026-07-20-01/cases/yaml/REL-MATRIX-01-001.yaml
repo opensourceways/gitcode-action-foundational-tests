@@ -1,0 +1,35 @@
+id: REL-MATRIX-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 二维矩阵 16 实例展开
+intent_ref: INTENT-REL-005
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-test:
+      strategy:
+        matrix:
+          os: [ubuntu-24, ubuntu-22]
+          node: [18, 20, 22]
+        max-parallel: 8
+      runs-on: default
+      steps:
+        - run: echo "${{ matrix.os }}-${{ matrix.node }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: matrix_instances
+    eval: deterministic
+    rubric: "6 实例全部生成；matrix 上下文值正确注入；无初始化错误"
+teardown:
+  reset: none

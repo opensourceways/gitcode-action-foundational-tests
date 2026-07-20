@@ -1,0 +1,60 @@
+id: SEC-TOKEN-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 平台内置 secret（ATOMGIT_TOKEN）不应在未授权上下文被引用泄露
+intent_ref: INTENT-SEC-036
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push, pull_request]
+  jobs:
+    test-token-leak:
+      runs-on: default
+      steps:
+        - name: Echo ATOMGIT_TOKEN (should be masked)
+          run: |
+            echo "Token ref: ${{ secrets.atomgit_token }}"
+            echo "Token length: ${#ATOMGIT_TOKEN_VAL}"
+          env:
+            ATOMGIT_TOKEN_VAL: ${{ secrets.atomgit_token }}
+        - name: Test token usage
+          run: |
+            if [ -z "${ATOMGIT_TOKEN_VAL:-}" ]; then
+              echo "TOKEN_EMPTY_FORK_PR"
+            else
+              echo "TOKEN_PRESENT_INTERNAL_PUSH"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: atomgit_token
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 下日志中不应出现有效 ATOMGIT_TOKEN 明文（应为空或脱敏）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "任何场景下日志全文搜索 token 前缀模式命中数为 0"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 下 TOKEN_EMPTY_FORK_PR 应出现（ATOMGIT_TOKEN 为空）"
+
+teardown:
+  reset: fixture

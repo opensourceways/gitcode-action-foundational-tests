@@ -1,0 +1,41 @@
+id: REL-MATRIX-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: matrix include/exclude 计数正确
+intent_ref: INTENT-REL-006
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-test:
+      strategy:
+        matrix:
+          os: [ubuntu-24, ubuntu-22]
+          node: [18, 20]
+          include:
+            - os: ubuntu-24
+              node: 22
+              experimental: true
+        exclude:
+          - os: ubuntu-24
+            node: 18
+      runs-on: default
+      steps:
+        - run: echo "${{ matrix.os }}-${{ matrix.node }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: matrix_instances
+    eval: deterministic
+    rubric: "总 job 数 = 基础+include-exclude；include 额外变量仅对应实例可见；exclude 无 job"
+teardown:
+  reset: none

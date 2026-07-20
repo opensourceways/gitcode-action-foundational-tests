@@ -1,0 +1,36 @@
+id: COMPAT-INPTYPE-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: inputs 类型限制
+intent_ref: INTENT-COMPAT-016
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        name:
+          type: string
+          required: true
+          default: "world"
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Hello ${{ inputs.name }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: inputs_behavior
+    eval: deterministic
+    rubric: "type:string 正确传递和默认值；type:boolean/number/choice 明确报错"
+teardown:
+  reset: fixture

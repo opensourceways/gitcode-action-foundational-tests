@@ -1,0 +1,41 @@
+id: COMP-SCHEDULE-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 workflow 调度延迟与 schedule 最短间隔约束
+intent_ref: INTENT-COMP-021
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    schedule:
+      - cron: "*/5 * * * *"
+  jobs:
+    scheduled-job:
+      runs-on: default
+      steps:
+        - run: echo "Scheduled run at $(date -u)"
+trigger:
+  event: schedule
+  as: maintainer
+  params:
+    cron: "*/5 * * * *"
+fault_injection: null
+assertions:
+  - type: positive
+    target: schedule_trigger
+    eval: deterministic
+    rubric: "合法 cron 在默认分支上按 UTC 时区触发 schedule"
+  - type: negative
+    target: schedule_trigger
+    eval: deterministic
+    rubric: "非默认分支的 schedule workflow 不触发"
+  - type: nonfunctional
+    target: schedule_timing
+    eval: deterministic
+    rubric: "多次 schedule 触发间隔 >= 5 分钟；调度延迟在合理范围内"
+teardown:
+  reset: fixture

@@ -1,0 +1,71 @@
+id: SEC-FORK-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 触发 pull_request 时 ATOMGIT_TOKEN 应为只读
+intent_ref: INTENT-SEC-001
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  permissions: write-all
+  jobs:
+    test-fork-token:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Test clone (should succeed)
+          run: git fetch origin
+        - name: Test push (should fail)
+          run: |
+            if git push origin HEAD:refs/heads/test-fork-push 2>&1; then
+              echo "PUSH_SUCCEEDED_UNEXPECTEDLY"
+              exit 1
+            else
+              echo "PUSH_REJECTED_AS_EXPECTED"
+            fi
+        - name: Test secret access (should be empty)
+          run: |
+            SECRET_VAL="${{ secrets.DEPLOY_TOKEN }}"
+            if [ -z "$SECRET_VAL" ]; then
+              echo "SECRET_EMPTY_AS_EXPECTED"
+            else
+              echo "SECRET_NOT_EMPTY_UNEXPECTED"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 PUSH_REJECTED_AS_EXPECTED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 SECRET_EMPTY_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 PUSH_SUCCEEDED_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 SECRET_NOT_EMPTY_UNEXPECTED"
+
+teardown:
+  reset: fixture

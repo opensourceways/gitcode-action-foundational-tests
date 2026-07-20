@@ -1,0 +1,39 @@
+id: COMP-CONCUR-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证并发控制: concurrency max / exceed-action / preemption
+intent_ref: INTENT-COMP-005
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [workflow_dispatch]
+  concurrency:
+    enable: true
+    max: 3
+    exceed-action: QUEUE
+  jobs:
+    sleep-job:
+      runs-on: default
+      steps:
+        - run: sleep 30
+trigger:
+  event: manual
+  as: maintainer
+  params:
+    concurrent_count: 5
+fault_injection: null
+assertions:
+  - type: positive
+    target: concurrent_runs
+    eval: deterministic
+    rubric: "同时 in_progress 的 workflow 实例数不超过 max=3"
+  - type: positive
+    target: queue_behavior
+    eval: deterministic
+    rubric: "超额触发排队，前序完成后按序执行"
+teardown:
+  reset: fixture

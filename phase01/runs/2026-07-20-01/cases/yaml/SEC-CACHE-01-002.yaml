@@ -1,0 +1,40 @@
+id: SEC-CACHE-01-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: 跨事件类型 cache 隔离
+intent_ref: INTENT-SEC-020
+setup:
+  repo_fixture: with-cache
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    cache-cross-event:
+      runs-on: default
+      steps:
+        - uses: cache
+          with:
+            path: cached-data/
+            key: cross-event-test-${{ atomgit.run_id }}
+        - run: |
+            mkdir -p cached-data
+            echo "push-data-$(date +%s)" > cached-data/value.txt
+        - uses: cache
+          with:
+            path: cached-data/
+            key: cross-event-test-${{ atomgit.run_id }}
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR workflow 写入的 cache 不应被内部 push workflow 命中；同事件内 cache 正常命中"
+teardown:
+  reset: fixture

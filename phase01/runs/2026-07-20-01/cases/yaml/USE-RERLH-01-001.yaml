@@ -1,0 +1,50 @@
+id: USE-RERLH-01-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: Re-run 限制条件用户可见性与反馈
+intent_ref: INTENT-USE-021
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    quick-job:
+      runs-on: default
+      steps:
+        - run: |
+            echo "quick job that can fail"
+            exit 1
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: ui_re_run_button
+    eval: deterministic
+    rubric: "连续 re-run 3 次后按钮禁用/消失 + tooltip 说明原因（如 '已达最大重试次数 3 次'），可截图判定"
+  - type: nonfunctional
+    target: ui_re_run_button
+    eval: deterministic
+    rubric: "超过 6 小时的运行，Re-run 按钮禁用/消失 + 说明存在"
+  - type: nonfunctional
+    target: ui_state_display
+    eval: deterministic
+    rubric: "重跑详情页有提示说明使用的是原始 commit 的 workflow 配置"
+  - type: nonfunctional
+    target: ui_re_run_button
+    eval: llm_assisted
+    rubric: "tooltip/提示文字清晰易懂——用户能理解为什么不能重跑（0=模糊, 1=可以理解, 2=清晰明了）"
+
+teardown:
+  reset: fixture

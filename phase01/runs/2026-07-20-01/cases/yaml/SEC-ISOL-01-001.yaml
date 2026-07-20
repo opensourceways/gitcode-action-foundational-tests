@@ -1,0 +1,81 @@
+id: SEC-ISOL-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 触发的 pull_request workflow 不应有持久的 runner 状态残留
+intent_ref: INTENT-SEC-025
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request, push]
+  jobs:
+    fork-pr-job:
+      if: ${{ atomgit.event_name == 'pull_request' }}
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Leave marker file and env
+          run: |
+            echo "fork-residue" > /tmp/cross-job-marker
+            echo "FORK_JOB_ENV=residue" >> $ATOMGIT_ENV
+            sleep 9999 &
+            echo "BACKGROUND_PID=$!"
+        - name: Cleanup
+          if: ${{ always }}
+          run: echo "Job completed"
+    internal-push-job:
+      if: ${{ atomgit.event_name == 'push' }}
+      runs-on: default
+      needs: [fork-pr-job]
+      steps:
+        - uses: checkout
+        - name: Check for cross-job residue
+          run: |
+            if [ -f /tmp/cross-job-marker ]; then
+              echo "CROSS_JOB_MARKER_FOUND_UNEXPECTEDLY"
+            else
+              echo "NO_CROSS_JOB_RESIDUE_AS_EXPECTED"
+            fi
+            if [ -n "${FORK_JOB_ENV:-}" ]; then
+              echo "FORK_ENV_LEAKED_UNEXPECTEDLY"
+            else
+              echo "NO_FORK_ENV_AS_EXPECTED"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "后续 job 日志中应出现 NO_CROSS_JOB_RESIDUE_AS_EXPECTED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "后续 job 日志中应出现 NO_FORK_ENV_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "后续 job 日志中不应出现 CROSS_JOB_MARKER_FOUND_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "后续 job 日志中不应出现 FORK_ENV_LEAKED_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR job 的工作区文件/环境变量/后台进程在 job 结束后不应影响后续 job"
+
+teardown:
+  reset: full_instance

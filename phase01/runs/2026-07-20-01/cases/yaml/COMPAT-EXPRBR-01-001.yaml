@@ -1,0 +1,53 @@
+id: COMPAT-EXPRBR-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 状态函数括号语法差异
+intent_ref: INTENT-COMPAT-003
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-status-functions:
+      runs-on: default
+      steps:
+        - id: step1
+          run: echo "step1 success"
+        - if: ${{ success }}
+          run: echo "success() without brackets works"
+        - if: ${{ always }}
+          run: |
+            echo "always() without brackets works"
+            echo "success value: ${{ success }}"
+        - id: fail-step
+          run: exit 1
+        - if: ${{ failed }}
+          run: echo "failed() without brackets works after failure"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "${{ success }} 无括号语法在成功场景正确执行"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "${{ failed }} 无括号语法在失败场景正确执行"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "${{ always }} 无括号语法始终执行；${{ success }} 作为值输出 true/false"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "GitHub 带括号语法 ${{ success() }} 应有明确报错而非静默"
+teardown:
+  reset: fixture

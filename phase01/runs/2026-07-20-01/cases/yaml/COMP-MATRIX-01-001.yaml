@@ -1,0 +1,40 @@
+id: COMP-MATRIX-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证矩阵构建: include/exclude/fail-fast/max-parallel 语义
+intent_ref: INTENT-COMP-004
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-test:
+      strategy:
+        matrix:
+          os: [ubuntu-latest, ubuntu-24]
+          node: ['18', '20']
+        fail-fast: true
+        max-parallel: 2
+      runs-on: ${{ matrix.os }},x64,small
+      steps:
+        - run: echo "os=${{ matrix.os }} node=${{ matrix.node }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_count
+    eval: deterministic
+    rubric: "矩阵展开实例数 = 4（2×2）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "每个实例的 matrix 变量值正确注入"
+teardown:
+  reset: fixture

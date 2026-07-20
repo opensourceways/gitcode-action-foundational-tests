@@ -1,0 +1,50 @@
+id: COMPAT-CTXPROP-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: atomgit 上下文对象属性完整性：验证 atomgit.* 核心属性集是否对齐 github.*
+intent_ref: INTENT-COMPAT-001
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    context-audit:
+      runs-on: default
+      steps:
+        - run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "sha=${{ atomgit.sha }}"
+            echo "ref=${{ atomgit.ref }}"
+            echo "ref_name=${{ atomgit.ref_name }}"
+            echo "repository=${{ atomgit.repository }}"
+            echo "repository_owner=${{ atomgit.repository_owner }}"
+            echo "workspace=${{ atomgit.workspace }}"
+            echo "run_id=${{ atomgit.run_id }}"
+            echo "run_number=${{ atomgit.run_number }}"
+            echo "run_attempt=${{ atomgit.run_attempt }}"
+            echo "workflow=${{ atomgit.workflow }}"
+            echo "head_ref=${{ atomgit.head_ref }}"
+            echo "base_ref=${{ atomgit.base_ref }}"
+            echo "server_url=${{ atomgit.server_url }}"
+            echo "api_url=${{ atomgit.api_url }}"
+            echo "token_present=${{ atomgit.token != '' }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "每个已文档化的 atomgit.* 属性输出为非空合法值"
+  - type: nonfunctional
+    target: context_completeness
+    eval: deterministic
+    rubric: "未文档化属性的访问行为可判定（报错或文档标记不支持）"
+teardown:
+  reset: fixture

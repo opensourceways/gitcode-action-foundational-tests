@@ -1,0 +1,32 @@
+id: COMPAT-SCHED-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: schedule 定时触发差异
+intent_ref: INTENT-COMPAT-020
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    schedule:
+      - cron: "0 0 * * *"
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Scheduled at $(date -u)"
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: schedule_trigger
+    eval: deterministic
+    rubric: "UTC 时区触发；仅默认分支生效；timezone 字段报错"
+teardown:
+  reset: fixture

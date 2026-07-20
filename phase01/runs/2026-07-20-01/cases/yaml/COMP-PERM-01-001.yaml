@@ -1,0 +1,53 @@
+id: COMP-PERM-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P0
+title: 验证 permissions 权限模型的 6 个权限域与快捷语法
+intent_ref: INTENT-COMP-015
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_KEY]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions:
+    repository: read
+    pr: write
+  jobs:
+    clone-and-comment:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: |
+            echo "Testing permissions model"
+            git fetch origin
+        - name: Test PR write permission
+          run: |
+            # 使用 ATOMGIT_TOKEN 尝试创建 PR 评论
+            # 期望：pr:write 时成功，pr:none 时返回 403
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "permissions: {} 下 git push 应被拒绝；pr:none 下 PR 写操作应返回 403"
+  - type: nonfunctional
+    target: token_scope
+    eval: deterministic
+    rubric: "ATOMGIT_TOKEN 的实际权限范围与 permissions 声明一致"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,54 @@
+id: COMPAT-PRTGT-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P0
+title: pull_request_target 语义对齐：base 上下文运行 + fork PR 完整权限隔离
+intent_ref: INTENT-COMPAT-008
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request_target]
+  jobs:
+    verify:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: |
+            echo "This workflow is from base branch"
+            echo "ATOMGIT_TOKEN scope: ${{ secrets.atomgit_token != '' }}"
+            # 验证 Token 写权限：尝试推送 tag（期望成功）
+            git tag pull_request_target-test
+            git push origin pull_request_target-test || echo "Token has write access"
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request_target
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 'This workflow is from base branch'（base 分支定义），不应出现 fork 侧新增的命令"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 fork 侧 workflow YAML 中新增的任意自定义命令"
+  - type: positive
+    target: token_permissions
+    eval: deterministic
+    rubric: "ATOMGIT_TOKEN 拥有写权限（git push tag 成功或明确返回权限错误）"
+
+teardown:
+  reset: fixture

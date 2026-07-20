@@ -1,0 +1,33 @@
+id: USE-E2EMIG-01-001
+dimensions: [usability, compatibility]
+dimension: usability
+priority: P1
+title: 直接搬运 .github/workflows/ci.yml 到 .gitcode/workflows/ 后的开箱报错路径
+intent_ref: INTENT-USE-014
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - run: echo "Building..."
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "应尽量一次性暴露所有语法/语义问题（如 github.*→atomgit.* / runs-on格式 / permissions命名 / action引用），非逐错修复（0=仅1条报错, 1=2-4条, 2=5+条一次暴露）"
+teardown:
+  reset: fixture

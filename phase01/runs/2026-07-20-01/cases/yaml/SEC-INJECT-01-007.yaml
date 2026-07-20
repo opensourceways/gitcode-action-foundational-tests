@@ -1,0 +1,38 @@
+id: SEC-INJECT-01-007
+dimensions: [security]
+dimension: security
+priority: P1
+title: 通过环境变量安全引用不可信输入应不触发脚本注入
+intent_ref: INTENT-SEC-013
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-safe-env:
+      runs-on: default
+      steps:
+        - run: echo "Safe: $PR_TITLE"
+          env:
+            PR_TITLE: ${{ atomgit.event.pull_request.title }}
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+    pr_title: "fix\"; ls /; #"
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "workflow 正常完成（不因注入而崩溃）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ls 命令的输出（注入命令不被执行）"
+teardown:
+  reset: fixture

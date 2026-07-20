@@ -1,0 +1,34 @@
+id: COMP-TRIG-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 8 种触发事件类型的实际可用性
+intent_ref: INTENT-COMP-001
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push, pull_request, pull_request_target, workflow_dispatch]
+  jobs:
+    echo-trigger:
+      runs-on: default
+      steps:
+        - run: echo "Triggered by ${{ atomgit.event_name }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "每种事件类型均能够成功产生 Run"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中 event_name 与实际触发事件类型一致"
+teardown:
+  reset: fixture

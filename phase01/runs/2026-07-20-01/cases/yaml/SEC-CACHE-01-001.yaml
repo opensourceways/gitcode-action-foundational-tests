@@ -1,0 +1,65 @@
+id: SEC-CACHE-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 不应能写入或污染主分支的依赖缓存
+intent_ref: INTENT-SEC-019
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push, pull_request]
+  jobs:
+    test-cache-isolation:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Restore cache
+          uses: cache
+          with:
+            key: test-cache-isolation-001
+            path: .cache-test/
+        - name: Check cache content
+          run: |
+            if [ -f .cache-test/marker.txt ]; then
+              echo "CACHE_HIT: $(cat .cache-test/marker.txt)"
+            else
+              echo "CACHE_MISS"
+            fi
+        - name: Write to cache
+          run: |
+            mkdir -p .cache-test
+            echo "written-by-${ATOMGIT_EVENT_NAME}" > .cache-test/marker.txt
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "cache restore step 正常执行（hit 或 miss）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "主分支 push workflow 不应命中 fork PR 写入的缓存条目（cache miss 或不同作用域）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 不应能覆盖主分支已存在的缓存条目"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "主分支恢复的缓存内容不应包含 fork PR 注入的 'written-by-pull_request' 标记"
+
+teardown:
+  reset: fixture

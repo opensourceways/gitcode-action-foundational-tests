@@ -1,0 +1,40 @@
+id: SEC-TOKEN-01-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: ATOMGIT_TOKEN 在 job 结束后应自动失效
+intent_ref: INTENT-SEC-023
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    token-lifecycle:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Token active during job"
+            echo "TOKEN_ACTIVE"
+            # 验证 token 在 job 期间有效
+        - name: Save token for post-job check
+          run: |
+            echo "TOKEN_LENGTH=${#ATOMGIT_TOKEN}" >> $ATOMGIT_OUTPUT
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "job 运行期间 token 有效（TOKEN_ACTIVE）"
+  - type: negative
+    target: post_job_api
+    eval: deterministic
+    rubric: "job 结束后使用同一 token 的 API 调用返回 401/403"
+teardown:
+  reset: fixture

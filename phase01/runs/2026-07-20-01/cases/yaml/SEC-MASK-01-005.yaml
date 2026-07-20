@@ -1,0 +1,46 @@
+id: SEC-MASK-01-005
+dimensions: [security]
+dimension: security
+priority: P1
+title: ::add-mask:: workflow 命令的正确性与安全性
+intent_ref: INTENT-SEC-027
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-add-mask:
+      runs-on: default
+      steps:
+        - run: |
+            echo '::add-mask::MY_DYNAMIC_SECRET'
+            echo "After add-mask registration"
+        - run: |
+            echo "Echo masked value: MY_DYNAMIC_SECRET"
+        - run: |
+            echo '::add-mask::SECOND_DYNAMIC_SECRET'
+            echo "Masked1: MY_DYNAMIC_SECRET"
+            echo "Masked2: SECOND_DYNAMIC_SECRET"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "::add-mask:: 注册后，动态敏感值 MY_DYNAMIC_SECRET 在日志中被遮蔽为 ***"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "多个 mask 值独立生效，不互相覆盖；SECOND_DYNAMIC_SECRET 同样被遮蔽"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "mask 注册后跨 step 持续有效，不出现明文泄露"
+teardown:
+  reset: fixture

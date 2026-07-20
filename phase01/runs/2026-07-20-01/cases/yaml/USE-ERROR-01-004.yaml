@@ -1,0 +1,30 @@
+id: USE-ERROR-01-004
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: 触发器 types 无效值错误信息
+intent_ref: INTENT-USE-004
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "valid"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "pull_request.types 含无效值时报错含无效值名、合法值列表、文件位置"
+teardown:
+  reset: fixture

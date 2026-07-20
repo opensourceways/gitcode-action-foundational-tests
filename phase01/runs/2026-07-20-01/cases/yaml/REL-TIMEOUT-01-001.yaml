@@ -1,0 +1,31 @@
+id: REL-TIMEOUT-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: timeout-minutes=5 超时终止
+intent_ref: INTENT-REL-009
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    timeout-test:
+      timeout-minutes: 5
+      runs-on: default
+      steps:
+        - run: sleep 600
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_timeout
+    eval: deterministic
+    rubric: "job 在 5min +/- 30s 内终止；状态 cancelled；日志含超时原因"
+teardown:
+  reset: fixture

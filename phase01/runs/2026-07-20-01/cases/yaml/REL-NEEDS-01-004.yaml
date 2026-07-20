@@ -1,0 +1,38 @@
+id: REL-NEEDS-01-004
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: needs 指向 matrix 父 job
+intent_ref: INTENT-REL-024
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    a:
+      strategy:
+        matrix:
+          os: [ubuntu-24, ubuntu-22]
+      runs-on: default
+      steps:
+        - run: echo "Matrix: ${{ matrix.os }}"
+    c:
+      needs: [a]
+      runs-on: default
+      steps:
+        - run: echo "Waited for all matrix instances"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: needs_matrix
+    eval: deterministic
+    rubric: "C 等待所有 matrix 实例完成后执行；无'任务初始化错误'（TC-486）"
+teardown:
+  reset: none

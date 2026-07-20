@@ -1,0 +1,34 @@
+id: REL-CONCUR-01-004
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: concurrency max=1 IGNORE 拒绝超限
+intent_ref: INTENT-REL-004
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [workflow_dispatch]
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: IGNORE
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: { trigger_count: 2 }
+fault_injection: null
+assertions:
+  - type: positive
+    target: concurrency_ignore
+    eval: deterministic
+    rubric: "新 Run 被拒绝（skipped/cancelled），不排队，无 job 被调度"
+teardown:
+  reset: none

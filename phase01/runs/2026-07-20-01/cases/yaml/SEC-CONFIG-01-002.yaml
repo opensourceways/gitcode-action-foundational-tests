@@ -1,0 +1,47 @@
+id: SEC-CONFIG-01-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: PAT 权限模型文档声明
+intent_ref: INTENT-SEC-034
+setup:
+  repo_fixture: with-pat
+  secrets: [MANUAL_PAT]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  permissions:
+    repository: none
+  jobs:
+    test-token-contrast:
+      runs-on: default
+      steps:
+        - run: |
+            curl -s -o /dev/null -w "ATOMGIT_TOKEN_STATUS=%{http_code}\n" \
+              -H "Authorization: Bearer ${{ secrets.atomgit_token }}" \
+              "${{ atomgit.api_url }}/repos/${{ atomgit.repository }}"
+        - run: |
+            curl -s -o /dev/null -w "MANUAL_PAT_STATUS=%{http_code}\n" \
+              -H "Authorization: Bearer ${{ secrets.MANUAL_PAT }}" \
+              "${{ atomgit.api_url }}/repos/${{ atomgit.repository }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "ATOMGIT_TOKEN 受 permissions:repository:none 约束 → API 调用返回 403"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "手动 PAT 不受 permissions 约束 → API 调用成功（若 PAT 有权限）"
+  - type: nonfunctional
+    target: documentation
+    eval: llm_assisted
+    rubric: "文档是否明确声明 permissions 仅控制 ATOMGIT_TOKEN，手动 token 需自行管理权限"
+teardown:
+  reset: fixture

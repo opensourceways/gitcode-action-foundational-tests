@@ -1,0 +1,34 @@
+id: COMPAT-CONCMOD-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: concurrency 并发控制模型差异
+intent_ref: INTENT-COMPAT-015
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: QUEUE
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: sleep 30
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: concurrency_behavior
+    eval: deterministic
+    rubric: "QUEUE 排队、CANCEL 取消语义正确；超限行为与文档一致"
+teardown:
+  reset: fixture

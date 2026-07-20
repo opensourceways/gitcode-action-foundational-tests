@@ -1,0 +1,43 @@
+id: SEC-SUPPLY-01-004
+dimensions: [security]
+dimension: security
+priority: P1
+title: reusable workflow 调用方传入的 secrets 不被被调用方泄露到日志
+intent_ref: INTENT-SEC-032
+setup:
+  repo_fixture: with-reusable-workflows
+  secrets: [SHARED_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_call:
+      secrets:
+        CALLER_TOKEN:
+          required: true
+  jobs:
+    echo-secret:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Direct echo: ${{ secrets.CALLER_TOKEN }}"
+        - run: |
+            ENCODED=$(echo '${{ secrets.CALLER_TOKEN }}' | base64)
+            echo "Base64: $ENCODED"
+trigger:
+  event: workflow_call
+  as: maintainer
+  params:
+    caller_secrets:
+      CALLER_TOKEN: SHARED_TOKEN
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: SHARED_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "被调用方日志中传入的 Secret 被遮蔽为 ***；base64 编码后也不泄露原始值"
+teardown:
+  reset: fixture

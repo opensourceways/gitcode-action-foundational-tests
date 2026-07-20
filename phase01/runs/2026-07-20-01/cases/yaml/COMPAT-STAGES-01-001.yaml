@@ -1,0 +1,44 @@
+id: COMPAT-STAGES-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: stages 阶段机制
+intent_ref: INTENT-COMPAT-017
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  stages: [build, test, deploy]
+  build:
+    fail_fast: true
+  jobs:
+    build-job:
+      stage: build
+      runs-on: default
+      steps:
+        - run: echo "build"
+    test-job:
+      stage: test
+      runs-on: default
+      steps:
+        - run: echo "test"
+    deploy-job:
+      stage: deploy
+      runs-on: default
+      steps:
+        - run: echo "deploy"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: stages_execution
+    eval: deterministic
+    rubric: "stages 按顺序执行；阶段内 job 并行；fail_fast 正确跳过后续阶段"
+teardown:
+  reset: fixture

@@ -1,0 +1,30 @@
+id: COMPAT-RUNON-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: runs-on 标签格式差异
+intent_ref: INTENT-COMPAT-010
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Runner: ${{ runner.os }}, Arch: ${{ runner.arch }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "runs-on: default 正确分配 runner；GitHub 单标签格式有明确报错"
+teardown:
+  reset: fixture

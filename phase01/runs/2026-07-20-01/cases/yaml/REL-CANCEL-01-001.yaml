@@ -1,0 +1,32 @@
+id: REL-CANCEL-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 手动取消清理 step 执行
+intent_ref: INTENT-REL-019
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: sleep 600
+        - if: ${{ always }}
+          run: echo "Cleanup executed"
+trigger:
+  event: push
+  as: maintainer
+  params: { cancel_after_seconds: 10 }
+fault_injection: null
+assertions:
+  - type: positive
+    target: cancel_cleanup
+    eval: deterministic
+    rubric: "step 被 terminated；if:always() 清理 step 执行；job status = cancelled"
+teardown:
+  reset: none

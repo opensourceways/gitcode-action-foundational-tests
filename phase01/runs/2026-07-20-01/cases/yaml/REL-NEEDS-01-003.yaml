@@ -1,0 +1,39 @@
+id: REL-NEEDS-01-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: fan-in 汇聚失败传播
+intent_ref: INTENT-REL-023
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    a:
+      runs-on: default
+      steps:
+        - run: echo "A success"
+    b:
+      runs-on: default
+      steps:
+        - run: exit 1
+    c:
+      needs: [a, b]
+      runs-on: default
+      steps:
+        - run: echo "C should be skipped"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: fan_in
+    eval: deterministic
+    rubric: "A success + B failure → C skipped；C 不为 success"
+teardown:
+  reset: none

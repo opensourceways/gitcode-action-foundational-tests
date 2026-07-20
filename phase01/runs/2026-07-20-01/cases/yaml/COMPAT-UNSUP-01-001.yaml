@@ -1,0 +1,30 @@
+id: COMPAT-UNSUP-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 不支持特征的降级行为
+intent_ref: INTENT-COMPAT-022
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Testing unsupported feature handling"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: feature_handling
+    eval: deterministic
+    rubric: "不支持特征（environment/container/runs.using非node16/services）明确报错，不静默忽略"
+teardown:
+  reset: fixture

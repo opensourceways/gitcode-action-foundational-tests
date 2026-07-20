@@ -1,0 +1,43 @@
+id: USE-DOCRUN-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: runner.os/arch 文档与实际返回值一致性
+intent_ref: INTENT-USE-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    check-runner-context:
+      runs-on: default
+      steps:
+        - name: Echo runner context values
+          run: |
+            echo "runner.os=${{ runner.os }}"
+            echo "runner.arch=${{ runner.arch }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "runner.os 实际输出值与文档声明一致（文档说 Linux 则输出 Linux，文档说 linux 则输出 linux，不得有大小写差异）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "runner.arch 实际输出值与文档声明一致（文档说 X64 则输出 X64，文档说 x86_64 则输出 x86_64，不得有命名差异）"
+
+teardown:
+  reset: fixture

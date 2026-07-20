@@ -1,0 +1,49 @@
+id: COMP-ARTIFACT-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 artifact 跨 job 上传/下载及保留策略
+intent_ref: INTENT-COMP-006
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    upload:
+      runs-on: default
+      steps:
+        - run: mkdir -p dist && echo "test-content" > dist/file.txt
+        - uses: upload-artifact
+          with:
+            name: test-artifact
+            path: dist/
+    download:
+      runs-on: default
+      needs: [upload]
+      steps:
+        - uses: download-artifact
+          with:
+            name: test-artifact
+            path: ./downloaded
+        - run: |
+            diff dist/file.txt ./downloaded/dist/file.txt || echo "FILES_DIFFER"
+            cat ./downloaded/dist/file.txt
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "下载的文件内容与上传一致（test-content）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 FILES_DIFFER"
+teardown:
+  reset: fixture

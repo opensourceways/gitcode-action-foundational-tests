@@ -1,0 +1,38 @@
+id: USE-MIGDOC-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: 官方迁移指南完整性与可操作性
+intent_ref: INTENT-USE-019
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: documentation_existence
+    eval: deterministic
+    rubric: "存在 '从 GitHub 迁移' / 'Migrate from GitHub Actions' 关键词的官方文档页面"
+  - type: positive
+    target: documentation_content
+    eval: deterministic
+    rubric: "迁移指南覆盖至少 5/7 个阻断性差异点：上下文命名、permissions 命名、runs-on 格式、PR types 命名、表达式函数语法、inputs 类型限制、内置 action 引用"
+  - type: nonfunctional
+    target: documentation_content
+    eval: llm_assisted
+    rubric: "每个差异点的改写示例可直接复制使用；说明是否够具体（0=仅列差异无示例, 1=有示例但不完整, 2=差异说明+GitHub写法+GitCode写法+报错现象全配齐）"
+
+teardown:
+  reset: none

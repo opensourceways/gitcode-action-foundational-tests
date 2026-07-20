@@ -1,0 +1,36 @@
+id: REL-TIMEOUT-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 多 job 独立超时时钟
+intent_ref: INTENT-REL-010
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      timeout-minutes: 5
+      runs-on: default
+      steps:
+        - run: sleep 600
+    job-b:
+      timeout-minutes: 360
+      runs-on: default
+      steps:
+        - run: echo "Job B done"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_timeout_isolation
+    eval: deterministic
+    rubric: "A 超时 cancelled，B 正常 success；A 超时不触发 B 取消"
+teardown:
+  reset: fixture

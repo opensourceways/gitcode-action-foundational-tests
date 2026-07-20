@@ -1,0 +1,55 @@
+id: COMP-STAGES-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 stages 阶段机制: 串行推进、fail_fast 与 job 并行
+intent_ref: INTENT-COMP-009
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  stages:
+    - name: build
+      fail_fast: true
+    - name: test
+    - name: deploy
+  jobs:
+    build-a:
+      runs-on: default
+      stage: build
+      steps:
+        - run: echo "Building A"
+    build-b:
+      runs-on: default
+      stage: build
+      steps:
+        - run: echo "Building B"
+    test:
+      runs-on: default
+      stage: test
+      steps:
+        - run: echo "Testing"
+    deploy:
+      runs-on: default
+      stage: deploy
+      steps:
+        - run: echo "Deploying"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "build stage 全部完成后 test stage 才开始"
+  - type: positive
+    target: job_order
+    eval: deterministic
+    rubric: "同 stage 内 build-a 和 build-b 并行执行"
+teardown:
+  reset: fixture

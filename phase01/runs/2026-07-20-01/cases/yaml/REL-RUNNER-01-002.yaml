@@ -1,0 +1,30 @@
+id: REL-RUNNER-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: runner 磁盘满 job failure
+intent_ref: INTENT-REL-013
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: {ubuntu-24,x64,small}
+      steps:
+        - run: dd if=/dev/zero of=/tmp/fill bs=1M count=50000
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job failure (ENOSPC)；日志含 'No space left' 等价信息"
+teardown:
+  reset: fixture

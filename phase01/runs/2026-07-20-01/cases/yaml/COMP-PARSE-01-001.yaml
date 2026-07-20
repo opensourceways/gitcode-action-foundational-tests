@@ -1,0 +1,34 @@
+id: COMP-PARSE-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 workflow 文件解析: YAML 合法性检查与错误信息可操作性
+intent_ref: INTENT-COMP-018
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    valid-job:
+      runs-on: default
+      steps:
+        - run: echo "Valid workflow"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "合法 YAML 正确解析并触发"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "非法 YAML 的报错信息应含文件路径、行号、具体原因（0=泛化报错, 1=部分信息, 2=含全部要素）"
+teardown:
+  reset: fixture

@@ -1,0 +1,48 @@
+id: USE-CONQ-01-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: concurrency 排队等待信息可见性
+intent_ref: INTENT-USE-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: QUEUE
+  jobs:
+    slow-worker:
+      runs-on: default
+      steps:
+        - run: sleep 120
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: ui_state_display
+    eval: deterministic
+    rubric: "Actions 列表页显示 queued 状态标签（可截图判定）；排队信息在列表页即见无需点进详情"
+  - type: nonfunctional
+    target: ui_state_display
+    eval: deterministic
+    rubric: "排队信息含排队序号（如 '2nd in queue' / '第 2 位'）"
+  - type: nonfunctional
+    target: ui_state_display
+    eval: llm_assisted
+    rubric: "排队信息是否足以让用户判断该等还是该取消（0=仅显示 queued 无额外信息, 1=有排队位置但无预估时间, 2=有位置+预估等待时间）"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,30 @@
+id: REL-RERUN-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 最大 3 次 Re-run
+intent_ref: INTENT-REL-026
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: exit 1
+trigger:
+  event: push
+  as: maintainer
+  params: { rerun_count: 4 }
+fault_injection: null
+assertions:
+  - type: positive
+    target: rerun_limit
+    eval: deterministic
+    rubric: "前 3 次 Re-run 正常执行；第 4 次被拒绝"
+teardown:
+  reset: none

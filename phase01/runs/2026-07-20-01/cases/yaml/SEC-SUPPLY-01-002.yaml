@@ -1,0 +1,73 @@
+id: SEC-SUPPLY-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 的 workflow 不应能修改目标仓库的 workflow 文件
+intent_ref: INTENT-SEC-029
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-workflow-tamper:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Attempt to modify workflow via git push
+          run: |
+            echo "# tampered" >> .gitcode/workflows/ci.yml
+            git config user.email "test@test.com"
+            git config user.name "test"
+            git add .gitcode/workflows/ci.yml
+            if git commit -m "tamper workflow" && git push origin HEAD:main 2>&1; then
+              echo "WORKFLOW_TAMPER_SUCCEEDED_UNEXPECTEDLY"
+              exit 1
+            else
+              echo "WORKFLOW_TAMPER_REJECTED_AS_EXPECTED"
+            fi
+        - name: Attempt to modify workflow via API
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X PUT \
+              -H "PRIVATE-TOKEN: $ATOMGIT_TOKEN" \
+              "https://atomgit.com/api/v4/projects/REPO_PLACEHOLDER/repository/files/.gitcode%2Fworkflows%2Fci.yml" \
+              -d "content=tampered&branch=main&commit_message=tamper" 2>&1 || echo "CURL_FAILED")
+            if echo "$HTTP_CODE" | grep -qE "^(401|403)$"; then
+              echo "API_TAMPER_REJECTED_AS_EXPECTED"
+            else
+              echo "API_TAMPER_NOT_REJECTED"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 WORKFLOW_TAMPER_REJECTED_AS_EXPECTED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 API_TAMPER_REJECTED_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 WORKFLOW_TAMPER_SUCCEEDED_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 的 workflow run 不能直接修改目标仓库的 .gitcode/workflows/ 目录"
+
+teardown:
+  reset: fixture

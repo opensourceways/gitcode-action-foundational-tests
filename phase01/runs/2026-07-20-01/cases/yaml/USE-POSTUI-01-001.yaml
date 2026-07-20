@@ -1,0 +1,55 @@
+id: USE-POSTUI-01-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: post 阶段运行详情页展示
+intent_ref: INTENT-USE-013
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  stages:
+    - name: build
+      jobs:
+        build-job:
+          runs-on: default
+          steps:
+            - run: echo "build success"
+  post:
+    run_always: true
+    jobs:
+      notify:
+        runs-on: default
+        steps:
+          - run: |
+              echo "sending notification"
+              exit 1
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: ui_state_display
+    eval: deterministic
+    rubric: "post 阶段有独立展示区域，标注 'post' 或 '后处理'（可截图判定）"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "post 失败时主 workflow 状态仍为 success（post 失败不标记主 workflow 为 failure）"
+  - type: nonfunctional
+    target: ui_state_display
+    eval: llm_assisted
+    rubric: "post 阶段 UI 呈现直观——用户能一眼看出这是后处理而非主流程 stage"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,65 @@
+id: SEC-INJECT-01-005
+dimensions: [security]
+dimension: security
+priority: P0
+title: 不可信输入注入到 GITHUB_ENV / GITHUB_OUTPUT 文件不导致环境变量污染
+intent_ref: INTENT-SEC-014
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-env-pollution:
+      runs-on: default
+      steps:
+        - name: Write untrusted input to ATOMGIT_ENV
+          run: |
+            echo "SAFE_VAR=normal_value" >> $ATOMGIT_ENV
+            echo "UNTRUSTED=${{ atomgit.event.pull_request.title }}" >> $ATOMGIT_ENV
+        - name: Verify no extra env injection
+          run: |
+            echo "SAFE_VAR=$SAFE_VAR"
+            echo "Checking for INJECTED_VAR..."
+            if [ -z "${INJECTED_VAR:-}" ]; then
+              echo "NO_EXTRA_VAR_INJECTED_AS_EXPECTED"
+            else
+              echo "EXTRA_VAR_INJECTED_UNEXPECTEDLY=$INJECTED_VAR"
+            fi
+        - name: Write to ATOMGIT_OUTPUT with special chars
+          run: |
+            echo "result=${{ atomgit.event.pull_request.title }}" >> $ATOMGIT_OUTPUT
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+    pr_title: "fix\nINJECTED_VAR=malicious_value; echo POLLUTED"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 NO_EXTRA_VAR_INJECTED_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 EXTRA_VAR_INJECTED_UNEXPECTEDLY"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "INJECTED_VAR 环境变量不应存在（不应被注入）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现因 ATOMGIT_ENV 写入导致的环境变量污染"
+
+teardown:
+  reset: fixture

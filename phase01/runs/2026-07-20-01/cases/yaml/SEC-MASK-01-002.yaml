@@ -1,0 +1,38 @@
+id: SEC-MASK-01-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: Secret 经过 base64 编码后 echo 到日志仍应被脱敏
+intent_ref: INTENT-SEC-006
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-base64-masking:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Direct: ${{ secrets.DEPLOY_TOKEN }}"
+            echo "Base64: $(echo '${{ secrets.DEPLOY_TOKEN }}' | base64)"
+        - run: |
+            ENCODED=$(echo '${{ secrets.DEPLOY_TOKEN }}' | base64)
+            echo "Decoded: $(echo $ENCODED | base64 -d)"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "base64 编码/解码输出的日志中不应出现 secret 原始明文"
+teardown:
+  reset: fixture

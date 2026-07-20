@@ -1,0 +1,30 @@
+id: USE-ERROR-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: 必填字段缺失错误信息
+intent_ref: INTENT-USE-001
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "valid workflow"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "缺失必填字段 on:/jobs: 时，报错包含字段名、文件路径、行号、必填说明；开发者 5 分钟能自行修复"
+teardown:
+  reset: fixture

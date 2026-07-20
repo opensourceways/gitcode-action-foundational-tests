@@ -1,0 +1,38 @@
+id: COMP-EXPR-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证表达式状态函数不带括号的语法: success/always/failed/cancelled
+intent_ref: INTENT-COMP-012
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    expr-test:
+      runs-on: default
+      steps:
+        - run: echo "Step 1 - always succeeds"
+        - if: ${{ success }}
+          run: echo "Step 2 - should run"
+        - if: ${{ always }}
+          run: echo "Step 3 - always runs"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中出现 'Step 2 - should run'（success 语义正确）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中出现 'Step 3 - always runs'（always 语义正确）"
+teardown:
+  reset: fixture

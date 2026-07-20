@@ -1,0 +1,35 @@
+id: COMPAT-CTXMAT-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 上下文可用性矩阵
+intent_ref: INTENT-COMPAT-025
+setup:
+  repo_fixture: default
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  env:
+    WF_VAR: "workflow-level"
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: |
+            echo "env.WF_VAR=$WF_VAR"
+            echo "runner.os=${{ runner.os }}"
+            echo "job.status=${{ job.status }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: context_availability
+    eval: deterministic
+    rubric: "各上下文在 GitHub 定义的可用作用域中正常可用，不可用处有明确报错"
+teardown:
+  reset: fixture

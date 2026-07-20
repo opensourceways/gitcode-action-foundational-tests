@@ -1,0 +1,34 @@
+id: COMPAT-STRCASE-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: startsWith/endsWith 大小写敏感性
+intent_ref: INTENT-COMPAT-005
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-case-sensitivity:
+      runs-on: default
+      steps:
+        - run: |
+            echo "startsWith(Hello, He): ${{ startsWith('Hello', 'He') }}"
+            echo "startsWith(Hello, hello): ${{ startsWith('Hello', 'hello') }}"
+            echo "endsWith(Hello, LO): ${{ endsWith('Hello', 'LO') }}"
+            echo "contains(Hello, ELL): ${{ contains('Hello', 'ELL') }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "startsWith('Hello','He')=true, startsWith('Hello','hello')=false, endsWith('Hello','LO')=false"
+teardown:
+  reset: fixture

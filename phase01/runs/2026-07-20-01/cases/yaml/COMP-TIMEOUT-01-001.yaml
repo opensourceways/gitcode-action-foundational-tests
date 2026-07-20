@@ -1,0 +1,47 @@
+id: COMP-TIMEOUT-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 timeout-minutes 超时终止与 job 状态标记
+intent_ref: INTENT-COMP-024
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    timeout-job:
+      timeout-minutes: 5
+      runs-on: default
+      steps:
+        - run: sleep 600
+    normal-job:
+      runs-on: default
+      steps:
+        - run: echo "This job should not be affected by other job timeout"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "超时 job 在 timeout-minutes 后终止，状态为 cancelled"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "超时 job 日志包含明确的超时原因说明"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "未设 timeout 的 job 正常完成，不受其他 job 超时影响"
+  - type: negative
+    target: job_status
+    eval: deterministic
+    rubric: "超时 job 不应被标记为 success"
+teardown:
+  reset: fixture

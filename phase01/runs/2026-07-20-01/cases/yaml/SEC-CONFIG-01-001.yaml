@@ -1,0 +1,42 @@
+id: SEC-CONFIG-01-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: Secret 命名遵守约束校验
+intent_ref: INTENT-SEC-021
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    verify:
+      runs-on: default
+      steps:
+        - run: echo "Secret naming constraint validation tested via creation API/UI"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: secret_creation_api
+    eval: deterministic
+    rubric: "创建 ATOMGIT_ 开头的 Secret → 返回明确拒绝错误"
+  - type: negative
+    target: secret_creation_api
+    eval: deterministic
+    rubric: "创建数字开头的 Secret → 被拒绝"
+  - type: negative
+    target: secret_creation_api
+    eval: deterministic
+    rubric: "创建含小写字母或特殊字符的 Secret → 被拒绝"
+  - type: positive
+    target: secret_creation_api
+    eval: deterministic
+    rubric: "创建符合约束的合法名称 → 创建成功"
+teardown:
+  reset: fixture

@@ -1,0 +1,37 @@
+id: SEC-INJECT-01-008
+dimensions: [security]
+dimension: security
+priority: P1
+title: composite action 内部的 run 步骤中引用不可信 inputs 不应导致注入
+intent_ref: INTENT-SEC-031
+setup:
+  repo_fixture: with-composite-action
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-composite-injection:
+      runs-on: default
+      steps:
+        - uses: ./.gitcode/actions/test-composite
+          with:
+            user_input: "${{ atomgit.event.head_commit.message }}"
+trigger:
+  event: push
+  as: maintainer
+  params:
+    commit_message: "test\"; ls /; echo \"injected"
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "composite action 内 run 步骤中注入字符不应导致额外命令（如 ls /）被执行"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "composite action 正常完成或产生明确的校验错误，不因注入导致非预期行为"
+teardown:
+  reset: fixture

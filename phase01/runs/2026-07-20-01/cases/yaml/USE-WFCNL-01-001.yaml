@@ -1,0 +1,34 @@
+id: USE-WFCNL-01-001
+dimensions: [usability, compatibility]
+dimension: usability
+priority: P2
+title: workflow_call 超 2 层嵌套报错可诊断性
+intent_ref: INTENT-USE-022
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    call-b:
+      uses: .gitcode/workflows/b.yml
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "workflow_call 嵌套超 2 层时报错含 '2'（最大层级）和 'nest'/'level' 等层级关键词；消息让用户意识到需精简层级而非怀疑是 bug（0=仅报 call failed 无层级信息, 1=提及层级但未明确限制, 2=明确说最多 2 层+哪层超出+"建议合并"）"
+
+teardown:
+  reset: fixture

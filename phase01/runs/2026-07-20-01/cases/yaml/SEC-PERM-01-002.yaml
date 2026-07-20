@@ -1,0 +1,55 @@
+id: SEC-PERM-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: 未声明 permissions 时 ATOMGIT_TOKEN 使用仓库设置中的默认权限
+intent_ref: INTENT-SEC-016
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-default-perms:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Test clone
+          run: |
+            git fetch origin
+            echo "CLONE_SUCCEEDED"
+        - name: Test push
+          run: |
+            if git push origin HEAD:refs/heads/test-default-perms 2>&1; then
+              echo "PUSH_SUCCEEDED_TOKEN_HAS_WRITE"
+            else
+              echo "PUSH_REJECTED_TOKEN_READONLY"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 CLONE_SUCCEEDED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "push 结果（PUSH_SUCCEEDED 或 PUSH_REJECTED）应与仓库默认权限设置一致"
+  - type: nonfunctional
+    target: token_scope
+    eval: deterministic
+    rubric: "未声明 permissions 时 ATOMGIT_TOKEN 权限 = 仓库默认值（非硬编码固定值）"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,31 @@
+id: COMPAT-E2EMIG-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 端到端迁移摩擦清单
+intent_ref: INTENT-COMPAT-027
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    build:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: echo "Running on ${{ atomgit.ref }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: migration_path
+    eval: deterministic
+    rubric: "搬运标准 GitHub workflow 后报错包含所有差异点；逐项修改后正常执行"
+teardown:
+  reset: fixture

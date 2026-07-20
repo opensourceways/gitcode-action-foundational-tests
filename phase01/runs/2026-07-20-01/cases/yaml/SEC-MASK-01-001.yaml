@@ -1,0 +1,58 @@
+id: SEC-MASK-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: Secret 值直接 echo 到日志时应被脱敏为 `***`
+intent_ref: INTENT-SEC-005
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-secret-masking:
+      runs-on: default
+      steps:
+        - name: Direct echo of secret
+          run: echo "Direct: ${{ secrets.DEPLOY_TOKEN }}"
+        - name: Indirect echo via env
+          run: echo "Indirect: $DEPLOY_TOKEN_VAL"
+          env:
+            DEPLOY_TOKEN_VAL: ${{ secrets.DEPLOY_TOKEN }}
+        - name: Multiple references
+          run: |
+            echo "Ref1: ${{ secrets.DEPLOY_TOKEN }}"
+            echo "Ref2: ${{ secrets.DEPLOY_TOKEN }}"
+        - name: Non-secret echo (control)
+          run: echo "Normal text should display"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志全文搜索 Secret 已知明文值，命中数应为 0"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "所有 echo Secret 的行输出显示为 *** 或等效遮蔽"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "非 Secret 文本（控制组）正常显示未被遮蔽"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,33 @@
+id: COMPAT-PATHS-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: paths 过滤器语义差异
+intent_ref: INTENT-COMPAT-019
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    push:
+      paths: ['src/**']
+      paths-ignore: ['docs/**']
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Path filter triggered"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: path_filter
+    eval: deterministic
+    rubric: "paths/paths-ignore 过滤正确；300 文件上限行为与文档一致"
+teardown:
+  reset: fixture

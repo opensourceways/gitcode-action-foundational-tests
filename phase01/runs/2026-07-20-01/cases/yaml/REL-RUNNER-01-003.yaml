@@ -1,0 +1,39 @@
+id: REL-RUNNER-01-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: runner 隔离
+intent_ref: INTENT-REL-014
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      runs-on: default
+      steps:
+        - run: |
+            echo "marker-data" > /tmp/cross-job-marker
+            echo "JOB_A_VAR=present" >> $ATOMGIT_ENV
+    job-b:
+      needs: [job-a]
+      runs-on: default
+      steps:
+        - run: |
+            echo "Marker exists: $([ -f /tmp/cross-job-marker ] && echo YES || echo NO)"
+            echo "JOB_A_VAR=$JOB_A_VAR"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "job B workspace 无 A 的 marker 文件；env 无 A 自定义变量"
+teardown:
+  reset: fixture

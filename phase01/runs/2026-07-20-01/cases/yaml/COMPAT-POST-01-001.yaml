@@ -1,0 +1,37 @@
+id: COMPAT-POST-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: post 后处理阶段
+intent_ref: INTENT-COMPAT-018
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    main-job:
+      runs-on: default
+      steps:
+        - run: exit 1
+  post:
+    run_always: true
+    jobs:
+      cleanup:
+        runs-on: default
+        steps:
+          - run: echo "Post cleanup executed"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: post_execution
+    eval: deterministic
+    rubric: "run_always:true 时 workflow 失败后 post 仍执行；false 时失败后不执行"
+teardown:
+  reset: fixture

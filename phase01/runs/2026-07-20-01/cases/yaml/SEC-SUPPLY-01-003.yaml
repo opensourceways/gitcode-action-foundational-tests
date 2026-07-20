@@ -1,0 +1,52 @@
+id: SEC-SUPPLY-01-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: 跨 job artifact 在 fork PR 场景下不应被后续高权限 job 无条件信任
+intent_ref: INTENT-SEC-026
+setup:
+  repo_fixture: with-artifacts
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    upload:
+      runs-on: default
+      steps:
+        - run: echo "internal-build-output" > build.txt
+        - uses: upload-artifact
+          with:
+            name: internal-artifact
+            path: build.txt
+    download:
+      needs: [upload]
+      runs-on: default
+      steps:
+        - uses: download-artifact
+          with:
+            name: internal-artifact
+        - run: |
+            if [ -f build.txt ]; then
+              echo "ARTIFACT_SAME_WORKFLOW=OK"
+              cat build.txt
+            else
+              echo "ARTIFACT_SAME_WORKFLOW=NOT_FOUND"
+            fi
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "同 workflow 内 artifact 可正常下载和传递"
+  - type: negative
+    target: cross_workflow_artifact
+    eval: deterministic
+    rubric: "fork PR workflow 上传的 artifact 不应被内部 push workflow 隐式继承；需显式跨 workflow 引用"
+teardown:
+  reset: fixture

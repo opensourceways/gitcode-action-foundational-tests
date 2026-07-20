@@ -1,0 +1,32 @@
+id: COMPAT-PRCMT-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: pull_request_comment 事件
+intent_ref: INTENT-COMPAT-023
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    pull_request_comment:
+      comments: ".*"
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Comment event triggered: ${{ atomgit.event.comment.body }}"
+trigger:
+  event: pull_request_comment
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: event_trigger
+    eval: deterministic
+    rubric: "PR 评论触发事件；Issue 评论不触发；正则过滤正确"
+teardown:
+  reset: fixture

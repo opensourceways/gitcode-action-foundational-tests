@@ -1,0 +1,34 @@
+id: COMP-RUNNER-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 runner 标签匹配: 官方三段式标签、default 等效、自托管全匹配
+intent_ref: INTENT-COMP-017
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    default-runner:
+      runs-on: default
+      steps:
+        - run: echo "Running on default runner"
+    explicit-runner:
+      runs-on: ubuntu-latest,x64,small
+      steps:
+        - run: echo "Running on explicit runner"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "default 和 显式三段标签均成功分配到 runner"
+teardown:
+  reset: fixture

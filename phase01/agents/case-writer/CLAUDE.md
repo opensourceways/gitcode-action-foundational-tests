@@ -11,25 +11,44 @@
 
 ## 输入
 - 本 run 的准入 intent（`intent-library.md` 中标记准入的项）
-- `phase01/inputs/existing-cases/cases.md`（**已有用例清单 Markdown 版**：展开 intent 前先扫此文件，避免产出的文本用例与已有用例重复）
+- `phase01/inputs/existing-cases/cases.md`（**★ 已有用例清单**：按全集原则处理——高价值用例用 Phase 01 格式重表达并纳入产出；作用有限/冗余/已过时的显式标注淘汰原因。交付 Phase 02 时不存在「新用例 + 旧用例」两套清单。见 `rules.md` §9b。）
 - `phase01/templates/text-case.md`、`executable-case.yaml`、`phase01/schema/`
 - `phase01/inputs/gitcode-spec/`（编译 YAML 时的语法依据）
+- `phase01/inputs/gitcode-spec/examples/`（**★ GitCode 官方示例**：编译 YAML 时**必须参考**这 6 份官方 workflow 样例——go-ci / java-gradle-ci / java-maven-ci / nodejs-ci / python-ci / pr-code-check-example。它们展示了 GitCode 真实支持的语法：`runs-on: {ubuntu-24,x64,small}` 格式、`uses: checkout`（非 `actions/checkout@v4`）、`concurrency: {max, exceed-action}`（非 GitHub group 模型）、`${{ atomgit.* }}` context、`$ATOMGIT_*` 环境变量、`pull_request` types 命名等。**你编译的 YAML 必须与此格式一致，不可照搬 GitHub Actions 语法。**）
 - `phase01/inputs/gitcode-api/api-reference.md`（**API 参考**：编译 YAML 时，若断言可经 API 确定性判定——如检查 run status、下载 job 日志验证内容——在 assert 块中标注可用的 API 端点与参数）
-- `phase01/rules.md`（命名、优先级、断言、脱敏、溯源纪律）
+- `phase01/rules.md`（命名、优先级、断言、脱敏、溯源纪律。★ 特别注意 §9b 全集原则）
 
 ## 工作步骤
-0. **先读 `cases.md`**：已有用例的 ID / 标题 / 维度（从`测试分类`列推断）/ 状态。后续展开 intent 前先检查等价性——若已有用例覆盖了该 intent，标注 `已有覆盖: <已有用例ID>`，不重复展开文本用例和 YAML。
-1. 对每条准入 intent，判断需展开成几条用例（正常/边界/负向变体），分配用例 ID（**格式 `<维度>-<主题>-<run序列>-<序号>`，见 `rules.md` §1.3**）。
-2. 从 intent 中继承 `dimensions`（维度标签），写入文本用例的「维度标签」字段——不可遗漏。
-3. **先写文本用例** → `cases/text/<ID>.md`：维度标签 / 前置条件 / 操作步骤（意图层）/ 预期结果 / 验证点（正向+负向）/ 清理级别 / 溯源意图。
-4. **再编译 YAML** → `cases/yaml/<ID>.yaml`：按 GitCode 规范把意图层落成 `setup/workflow/trigger/fault_injection/assertions/teardown`，过 schema 校验。YAML 中 `dimensions` 必填、`id` 必含 run 序列。
-5. 去重与一致性检查：同一 intent 不重复展开；变体用 `-Vn` 关联母 ID。
+
+### 0. 评估已有用例（全集原则，`rules.md` §9b）
+**先完整读取 `cases.md`**，逐条评估 631 条已有用例：
+- **吸收**：有独立验证价值的 → 用 Phase 01 格式重表达（统一 ID / dimensions / intent_ref / assertions），纳入 `cases/text/` 和 `cases/yaml/`
+- **合并**：已被新 intent 行为级覆盖的 → 将已有 TC 作为变体或合并进一个 Phase 01 用例，标注 `incorporates: <已有TC-ID>`
+- **淘汰**：满足 §9b 淘汰标准的 → 在 case-manifest 中标注 `deprecated: <原因>`，不产出文本/YAML
+
+### 1. 展开 intent + 吸收已有用例
+- 对每条准入 intent，结合已吸收的已有用例，设计完整的用例变体组
+- 分配用例 ID（格式 `<维度>-<主题>-<run序列>-<序号>`，见 `rules.md` §1.3）
+- 从 intent 继承 `dimensions` 字段
+
+### 2. 先写文本用例 → `cases/text/<ID>.md`
+维度标签 / 前置条件 / 操作步骤（意图层）/ 预期结果 / 验证点 / 清理级别 / 溯源意图。
+从已有用例吸收的内容加注 `incorporates: <已有TC-ID>`。
+
+### 3. 再编译 YAML → `cases/yaml/<ID>.yaml`
+按 GitCode 规范编译，过 schema 校验。`dimensions` 必填、`id` 必含 run 序列。
+
+### 4. 去重与一致性检查
+同一 intent 不重复展开；变体用 `-Vn` 关联母 ID。
+
+### 5. 淘汰记录
+在 `case-manifest.md` 中列出所有被淘汰的已有 TC，含淘汰原因和替代用例 ID（如有）。交付 Phase 02 时不出现两套清单。
 
 ## 输出
-- `cases/text/<ID>.md`（归档主体，人可读、与语法解耦）。
-- `cases/yaml/<ID>.yaml`（派生，schema 合规）。
-- 编译失败/规范缺口清单：哪些 intent 因规范不明无法编译，回报 orchestrator。
-- 已有用例关联清单：哪些准入 intent 被已有用例覆盖（标注已有用例 ID），本文本用例集不重复产出。
+- `cases/text/<ID>.md`（归档主体，人可读、与语法解耦）
+- `cases/yaml/<ID>.yaml`（派生，schema 合规）
+- `case-manifest.md`（全集清单，含淘汰记录）
+- 编译失败/规范缺口清单
 
 ## 质量清单
 - [ ] 每条文本用例含 `维度标签` 字段（继承自 intent），且维度标签非空——这用于后续按维度审视完整性。

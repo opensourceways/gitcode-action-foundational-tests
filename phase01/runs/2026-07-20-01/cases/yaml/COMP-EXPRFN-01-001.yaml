@@ -1,0 +1,33 @@
+id: COMP-EXPRFN-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证表达式函数的边界行为: contains/startsWith/endsWith/format/hashFiles/toJson
+intent_ref: INTENT-COMP-013
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    expr-boundary:
+      runs-on: default
+      steps:
+        - run: |
+            echo "contains empty: ${{ contains('hello', '') }}"
+            echo "startsWith: ${{ startsWith('test', 'te') }}"
+        - run: echo "hashFiles: ${{ hashFiles('*.txt') }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "各表达式函数边界行为确定且不崩溃"
+teardown:
+  reset: fixture

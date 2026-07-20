@@ -1,0 +1,38 @@
+id: COMP-OUTPUT-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 outputs 三级传递链: step → job → workflow
+intent_ref: INTENT-COMP-008
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    producer:
+      runs-on: default
+      outputs:
+        result: ${{ steps.build.outputs.version }}
+      steps:
+        - id: build
+          run: echo "version=1.0.0" >> $ATOMGIT_OUTPUT
+    consumer:
+      runs-on: default
+      needs: [producer]
+      steps:
+        - run: echo "Got version: ${{ needs.producer.outputs.result }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "consumer job 日志中应出现 'Got version: 1.0.0'"
+teardown:
+  reset: fixture

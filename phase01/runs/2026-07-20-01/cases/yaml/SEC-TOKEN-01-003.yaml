@@ -1,0 +1,41 @@
+id: SEC-TOKEN-01-003
+dimensions: [security]
+dimension: security
+priority: P1
+title: ATOMGIT_TOKEN 触发的操作不应产生递归 workflow 运行
+intent_ref: INTENT-SEC-024
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    prevent-recursion:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: |
+            echo "test" > recursion-test.txt
+            git config user.email "ci@test.com"
+            git config user.name "CI"
+            git add recursion-test.txt
+            git commit -m "CI: recursive test"
+            git push origin HEAD:main 2>&1 || echo "PUSH_FAILED_OR_NO_RECURSION"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_count
+    eval: deterministic
+    rubric: "token 推送后不应产生递归 workflow 运行（仅 1 个 run）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "PUSH_FAILED_OR_NO_RECURSION 出现（推送被阻止或无递归触发）"
+teardown:
+  reset: fixture

@@ -1,0 +1,39 @@
+id: SEC-ISOL-01-002
+dimensions: [security]
+dimension: security
+priority: P1
+title: 并发 workflow 下的 token/secret 隔离
+intent_ref: INTENT-SEC-033
+setup:
+  repo_fixture: with-multiple-secrets
+  secrets: [SECRET_A, SECRET_B]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test-concurrent-isolation:
+      runs-on: default
+      steps:
+        - run: |
+            echo "Job uses SECRET_A: ${{ secrets.SECRET_A != '' }}"
+            env | grep -i atomgit || echo "No ATOMGIT vars leaked from other jobs"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "并发 workflow 中，job A 无法通过环境变量读取到 job B 的 Secret"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: SECRET_B
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "每个 job 仅能访问自身绑定的 Secret 和 ATOMGIT_TOKEN"
+teardown:
+  reset: full_instance

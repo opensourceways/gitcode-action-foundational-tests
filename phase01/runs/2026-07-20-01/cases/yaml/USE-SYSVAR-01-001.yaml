@@ -1,0 +1,54 @@
+id: USE-SYSVAR-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: ATOMGIT_* 系统变量注入完整性
+intent_ref: INTENT-USE-012
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    verify-atomgit-vars:
+      runs-on: default
+      steps:
+        - name: Echo all ATOMGIT_* variables
+          run: |
+            echo "ATOMGIT_REPOSITORY=$ATOMGIT_REPOSITORY"
+            echo "ATOMGIT_EVENT_NAME=$ATOMGIT_EVENT_NAME"
+            echo "ATOMGIT_REF=$ATOMGIT_REF"
+            echo "ATOMGIT_SHA=$ATOMGIT_SHA"
+            echo "ATOMGIT_ACTOR=$ATOMGIT_ACTOR"
+            echo "ATOMGIT_RUN_ID=$ATOMGIT_RUN_ID"
+            echo "ATOMGIT_RUN_NUMBER=$ATOMGIT_RUN_NUMBER"
+        - name: Assert all vars non-empty
+          run: |
+            [ -n "$ATOMGIT_REPOSITORY" ] || { echo "MISSING ATOMGIT_REPOSITORY"; exit 1; }
+            [ -n "$ATOMGIT_EVENT_NAME" ] || { echo "MISSING ATOMGIT_EVENT_NAME"; exit 1; }
+            [ -n "$ATOMGIT_REF" ] || { echo "MISSING ATOMGIT_REF"; exit 1; }
+            [ -n "$ATOMGIT_SHA" ] || { echo "MISSING ATOMGIT_SHA"; exit 1; }
+            [ -n "$ATOMGIT_ACTOR" ] || { echo "MISSING ATOMGIT_ACTOR"; exit 1; }
+            [ -n "$ATOMGIT_RUN_ID" ] || { echo "MISSING ATOMGIT_RUN_ID"; exit 1; }
+            [ -n "$ATOMGIT_RUN_NUMBER" ] || { echo "MISSING ATOMGIT_RUN_NUMBER"; exit 1; }
+            echo "All ATOMGIT_* variables present"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "全部 8 个 ATOMGIT_* 变量值非空；ATOMGIT_REPOSITORY 格式为 owner/repo；ATOMGIT_ACTOR 匹配触发用户"
+
+teardown:
+  reset: fixture

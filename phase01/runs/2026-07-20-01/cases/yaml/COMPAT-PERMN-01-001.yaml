@@ -1,0 +1,53 @@
+id: COMPAT-PERMN-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: permissions 权限域命名差异：GitCode project/pr/repository vs GitHub contents/pull-requests
+intent_ref: INTENT-COMPAT-009
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  permissions:
+    repository: read
+    pr: write
+  jobs:
+    verify:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: |
+            echo "Testing GitCode permission naming"
+            echo "Repository read should allow clone"
+            echo "PR write should allow PR operations"
+        - name: Test GitHub-style permission naming
+          run: |
+            # 此 step 验证：GitHub 命名的 permissions 应报错（如 contents/pull-requests）
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "使用 GitHub 权限域名（contents/pull-requests/actions 等）时 workflow 解析/校验阶段应报错，非静默忽略"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "GitCode 命名的权限域（repository/pr/issue/note/project/hook）正常生效"
+
+teardown:
+  reset: fixture

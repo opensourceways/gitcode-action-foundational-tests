@@ -1,0 +1,30 @@
+id: REL-CONCUR-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 高频 push 触发洪泛排队行为
+intent_ref: INTENT-REL-001
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Run: ${{ atomgit.run_number }}"
+trigger:
+  event: push
+  as: maintainer
+  params: { push_count: 20, window_seconds: 10 }
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_list
+    eval: deterministic
+    rubric: "20 次触发全部产生 Run；run_number 连续；无 Run 被静默丢弃"
+teardown:
+  reset: none

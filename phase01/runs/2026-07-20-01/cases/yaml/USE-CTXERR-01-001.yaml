@@ -1,0 +1,37 @@
+id: USE-CTXERR-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: github.* 上下文报错可诊断性
+intent_ref: INTENT-USE-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-ctx-err:
+      runs-on: default
+      steps:
+        - name: Use github.ref (GitHub style)
+          run: echo "${{ github.ref }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "使用 ${{ github.* }} 上下文时报错含 github 不被识别的说明；消息应暗示用户替换为 atomgit（0=仅报 unknown context, 1=指出 github 不存在但未提示替代, 2=直接提示改用 atomgit）"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,46 @@
+id: COMP-WFCALL-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证可重用工作流 workflow_call 的调用传参与 2 层嵌套限制（含 COMPAT-021 合并内容）
+intent_ref: INTENT-COMP-016
+setup:
+  repo_fixture: with-secrets
+  secrets: [PASS_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_call:
+      inputs:
+        build-version:
+          type: string
+          default: "1.0"
+      secrets:
+        NPM_TOKEN:
+          required: false
+  jobs:
+    build:
+      runs-on: default
+      steps:
+        - run: echo "Building version ${{ inputs.build-version }}"
+trigger:
+  event: manual
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "inputs 传参正确到达被调用方"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "第 3 层嵌套明确报错，非静默跳过"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "A call B call A 循环调用被检测并报错（COMPAT-021 内容）"
+teardown:
+  reset: fixture

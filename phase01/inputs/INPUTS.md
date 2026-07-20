@@ -11,11 +11,11 @@
 | `gitcode-spec/` | **必需**（无则规格分析/编译 YAML 无依据） | ✅ 已补充（官方文档 50 页离线镜像，2026-07-20） |
 | `github-reference/` | **必需**（无则兼容性 diff 失去 oracle） | ✅ 已补充（GitHub Actions 核心规格 12 页，2026-07-20） |
 | `workflow-samples/` | 强烈建议（真实负载最能暴露差异） | ☐ |
-| `security-knowledge/` | 建议（安全维度深度依赖它） | ☐ |
+| `security-knowledge/` | 建议（安全维度深度依赖它） | ✅ 已补充（issues.md 5类安全问题 + github-actions-security-series.md 4篇安全系列文章摘要，2026-07-20） |
 | `platform-config/` | 建议（配额/容量/规格 → 稳定性边界用例） | ☐ |
 | `business-context/` | 建议（部署方式/迁移场景/历史问题 → 贴合实际） | ☐ |
 | `existing-cases/` | 建议（已有用例列表 → 去重/查漏/继承覆盖） | ✅ 已补充（631 条用例，已预转为 cases.md） |
-| `history/` | 可选（有则火力分配更准） | ☐ |
+| `history/` | 可选（有则火力分配更准） | ✅ 已补充（issues-encountered.md 95条历史问题 + gitcode-actions-list.md 25个官方Action清单，2026-07-20） |
 
 ---
 

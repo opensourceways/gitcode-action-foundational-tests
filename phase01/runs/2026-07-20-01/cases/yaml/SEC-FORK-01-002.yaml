@@ -1,0 +1,63 @@
+id: SEC-FORK-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 触发 pull_request 时不可访问项目/组织级 Secret
+intent_ref: INTENT-SEC-002
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN, ORG_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-secret-isolation:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - name: Echo secret (expects empty)
+          run: |
+            echo "Secret length: ${#DEPLOY_TOKEN_VALUE}"
+          env:
+            DEPLOY_TOKEN_VALUE: ${{ secrets.DEPLOY_TOKEN }}
+        - name: Test HTTP auth with secret (expects failure)
+          run: |
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
+              https://atomgit.com/api/v4/user 2>&1 || echo "CURL_FAILED")
+            echo "HTTP_STATUS: $HTTP_CODE"
+            # Fork PR下token应为空，导致401
+            if echo "$HTTP_CODE" | grep -qE "^(401|403|000)$"; then
+              echo "AUTH_REJECTED_AS_EXPECTED"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 AUTH_REJECTED_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "Secret 长度应变空（Secret length: 0）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "基于 Secret 的 API 认证请求不应返回 2xx"
+
+teardown:
+  reset: fixture

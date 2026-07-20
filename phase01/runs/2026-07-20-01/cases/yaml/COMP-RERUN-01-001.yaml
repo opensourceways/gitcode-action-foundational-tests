@@ -1,0 +1,46 @@
+id: COMP-RERUN-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证重运行机制：re-run all / re-run failed 的隔离性与状态保持
+intent_ref: INTENT-COMP-020
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    job-a:
+      runs-on: default
+      steps:
+        - run: echo "Job A success"
+    job-b:
+      runs-on: default
+      steps:
+        - run: exit 1
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: rerun_failed
+    eval: deterministic
+    rubric: "Re-run failed jobs 后仅 job B 重新执行，job A 保持 cached 状态"
+  - type: positive
+    target: rerun_all
+    eval: deterministic
+    rubric: "Re-run all jobs 后所有 job 重新执行，run_number 递增"
+  - type: positive
+    target: rerun_config
+    eval: deterministic
+    rubric: "重运行使用原始 commit 的 workflow 配置，不读最新修改"
+  - type: negative
+    target: rerun_limit
+    eval: deterministic
+    rubric: "第 4 次 Re-run 被拒绝（UI 按钮禁用或 API 返回错误）"
+teardown:
+  reset: fixture

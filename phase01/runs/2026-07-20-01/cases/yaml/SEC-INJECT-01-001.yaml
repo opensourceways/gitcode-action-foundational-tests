@@ -1,0 +1,51 @@
+id: SEC-INJECT-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: PR 标题中的不可信输入不应通过 ${{ }} 直接插入 run: 导致命令注入
+intent_ref: INTENT-SEC-009
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [pull_request]
+  jobs:
+    test-title-injection:
+      runs-on: default
+      steps:
+        - name: Unsafe direct interpolation
+          run: echo "PR Title: ${{ atomgit.event.pull_request.title }}"
+        - name: Safe intermediate env approach
+          run: echo "PR Title safely: $PR_TITLE"
+          env:
+            PR_TITLE: ${{ atomgit.event.pull_request.title }}
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+    pr_title: "fix\"; echo INJECTED_BY_TITLE; #"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 INJECTED_BY_TITLE（注入命令不应被执行）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现因注入导致的额外 shell 命令执行痕迹"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "安全引用方式（env 中间变量）的 step 应正常完成，标题作为字面字符串输出"
+
+teardown:
+  reset: fixture

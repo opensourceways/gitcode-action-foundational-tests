@@ -1,0 +1,41 @@
+id: USE-DOCENV-01-001
+dimensions: [usability]
+dimension: usability
+priority: P1
+title: environment 字段文档与行为一致性
+intent_ref: INTENT-USE-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    test-env-field:
+      runs-on: default
+      environment: staging
+      steps:
+        - run: echo "testing environment field"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: workflow_parse
+    eval: deterministic
+    rubric: "平台是否接受 environment 字段（不报 unknown property）；若仍不接受，文档该处必须标注能力状态"
+  - type: nonfunctional
+    target: documentation_content
+    eval: deterministic
+    rubric: "若 platform 仍报 unknown property，文档 using-secrets.md 对应处须标注规划中/暂不支持"
+
+teardown:
+  reset: fixture

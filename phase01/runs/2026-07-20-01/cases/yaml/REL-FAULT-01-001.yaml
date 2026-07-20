@@ -1,0 +1,36 @@
+id: REL-FAULT-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 网络故障注入 step 恢复
+intent_ref: INTENT-REL-016
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: curl -s --connect-timeout 10 https://example.com || echo "Network step failed"
+        - if: ${{ always }}
+          run: echo "This step runs regardless"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection:
+  at: mid_job
+  action: network_partition
+  params: { duration_seconds: 60 }
+  recovery_expectation: retry_and_succeed
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "网络不可用期间 step 失败；if:always() step 正常执行"
+teardown:
+  reset: fixture

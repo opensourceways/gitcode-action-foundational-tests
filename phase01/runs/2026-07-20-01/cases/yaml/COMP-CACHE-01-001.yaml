@@ -1,0 +1,42 @@
+id: COMP-CACHE-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证缓存: cache key 精确/前缀匹配与跨 run 持久性
+intent_ref: INTENT-COMP-007
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    cache-test:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - uses: cache
+          with:
+            key: test-cache-001-${{ atomgit.run_id }}
+            restore-keys: test-cache-001-
+            path: .cache/
+        - run: |
+            if [ -d .cache/ ]; then echo "CACHE_RESTORED"; else echo "CACHE_MISS"; fi
+            mkdir -p .cache && echo "data" > .cache/test.txt
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "二次运行相同 key 时应出现 CACHE_RESTORED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "首次运行时出现 CACHE_MISS"
+teardown:
+  reset: fixture

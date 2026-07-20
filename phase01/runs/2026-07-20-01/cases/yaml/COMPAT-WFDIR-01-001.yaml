@@ -1,0 +1,30 @@
+id: COMPAT-WFDIR-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 工作流文件目录差异
+intent_ref: INTENT-COMPAT-013
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "Workflow from .gitcode/workflows/ triggered correctly"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: workflow_discovery
+    eval: deterministic
+    rubric: ".gitcode/workflows/*.yml/.yaml 被正确识别触发；.github/workflows/ 下文件不被识别"
+teardown:
+  reset: fixture

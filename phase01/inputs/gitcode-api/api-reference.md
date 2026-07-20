@@ -257,6 +257,61 @@ DELETE /api/v8/repos/{owner}/{repo}/actions/artifacts/{artifact_id}
 → 用例 teardown 阶段清理
 ```
 
+### 响应 Schema（以 runs 列表接口为例）
+
+```json
+{
+  "total_count": 0,
+  "workflow_runs": [
+    {
+      "workflow_run_id": "string",
+      "workflow_id": "string",
+      "workflow_name": "string",
+      "file_path": "string",
+      "title": "string",
+      "status": "string",
+      "event": "string",
+      "run_number": 0,
+      "head_branch": "string",
+      "head_sha": "string",
+      "actor": {
+        "id": "string",
+        "object_id": "string",
+        "login": "string",
+        "name": "string"
+      },
+      "start_time": 0,
+      "end_time": 0,
+      "pause_time": 0
+    }
+  ]
+}
+```
+
+**响应字段说明：**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `total_count` | integer | 总数量 |
+| `workflow_runs` | object[] | 流水线运行记录数组 |
+| `workflow_runs[].workflow_run_id` | string | 运行记录 ID（用于获取详情） |
+| `workflow_runs[].workflow_id` | string | 流水线定义 ID |
+| `workflow_runs[].workflow_name` | string | 流水线名称 |
+| `workflow_runs[].file_path` | string | Workflow YAML 文件路径 |
+| `workflow_runs[].title` | string | 运行标题 |
+| `workflow_runs[].status` | string | 运行状态（COMPLETED/RUNNING/FAILED/CANCELED/IGNORED/PAUSED/SUSPEND） |
+| `workflow_runs[].event` | string | 触发事件类型（MR/Push/Manual） |
+| `workflow_runs[].run_number` | integer | 运行序号 |
+| `workflow_runs[].head_branch` | string | 触发分支 |
+| `workflow_runs[].head_sha` | string | 触发 commit SHA |
+| `workflow_runs[].actor` | object | 触发人信息 |
+| `workflow_runs[].actor.id` | string | 触发人 ID |
+| `workflow_runs[].actor.login` | string | 触发人用户名 |
+| `workflow_runs[].actor.name` | string | 触发人显示名 |
+| `workflow_runs[].start_time` | integer | 开始时间（Unix 时间戳） |
+| `workflow_runs[].end_time` | integer | 结束时间（Unix 时间戳） |
+| `workflow_runs[].pause_time` | integer | 暂停时间（Unix 时间戳） |
+
 ## curl 调用示例
 
 ```bash

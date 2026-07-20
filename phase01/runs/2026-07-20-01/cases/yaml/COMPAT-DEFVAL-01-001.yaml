@@ -1,0 +1,34 @@
+id: COMPAT-DEFVAL-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 默认值差异
+intent_ref: INTENT-COMPAT-014
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: |
+            echo "SHELL=$SHELL"
+            echo "BASH_VERSION=$BASH_VERSION"
+        - run: exit 1
+      continue-on-error: true
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "未指定 shell 时使用 bash且行为与 bash -e 一致；exit 1 导致 step 失败"
+teardown:
+  reset: fixture

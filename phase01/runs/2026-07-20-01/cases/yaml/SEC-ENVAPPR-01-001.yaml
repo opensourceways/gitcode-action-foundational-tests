@@ -1,0 +1,40 @@
+id: SEC-ENVAPPR-01-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: 环境级 Secret 受审批规则保护
+intent_ref: INTENT-SEC-022
+setup:
+  repo_fixture: with-environment-secrets
+  secrets: [PROD_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    deploy-prod:
+      environment: prod
+      runs-on: default
+      steps:
+        - run: |
+            echo "Deploying to production..."
+            echo "Token available: ${{ secrets.PROD_TOKEN != '' }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job 在审批前处于 queued/waiting 状态"
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "审批通过后 job 进入 in_progress 并完成"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: PROD_TOKEN
+teardown:
+  reset: fixture

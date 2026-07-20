@@ -1,0 +1,44 @@
+id: REL-CANCEL-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: stages.fail_fast 级联取消
+intent_ref: INTENT-REL-020
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  stages: [build, test]
+  build:
+    fail_fast: true
+  jobs:
+    job-a:
+      stage: build
+      runs-on: default
+      steps:
+        - run: exit 1
+    job-b:
+      stage: build
+      runs-on: default
+      steps:
+        - run: sleep 120
+    job-c:
+      stage: test
+      runs-on: default
+      steps:
+        - run: echo "Should be skipped"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: fail_fast_cascade
+    eval: deterministic
+    rubric: "job B cancelled；stage test skipped；workflow 终态 failure"
+teardown:
+  reset: none

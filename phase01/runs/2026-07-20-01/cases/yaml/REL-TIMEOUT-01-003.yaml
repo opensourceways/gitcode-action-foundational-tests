@@ -1,0 +1,31 @@
+id: REL-TIMEOUT-01-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: timeout-minutes=0 配置校验拒绝
+intent_ref: INTENT-REL-011
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      timeout-minutes: 0
+      runs-on: default
+      steps:
+        - run: echo "should not run"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: workflow_validation
+    eval: deterministic
+    rubric: "timeout-minutes=0 被配置校验拒绝；无 job 被调度"
+teardown:
+  reset: fixture

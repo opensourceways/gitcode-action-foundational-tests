@@ -1,0 +1,39 @@
+id: SEC-MASK-01-006
+dimensions: [security]
+dimension: security
+priority: P1
+title: fork PR 下 ::add-mask:: 注册不影响主分支 job 的 mask 表
+intent_ref: INTENT-SEC-028
+setup:
+  repo_fixture: default
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    verify-mask-isolation:
+      runs-on: default
+      steps:
+        - run: |
+            echo "FORK_PR_SENSITIVE_VALUE should appear in plain text here (not masked)"
+            echo "Own secret should be masked: ${{ secrets.DEPLOY_TOKEN }}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "内部 job 日志中 FORK_PR_SENSITIVE_VALUE 应显示为明文（证明 mask 表隔离正确）"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 注册的 mask 不跨 job 传播到内部 job"
+teardown:
+  reset: fixture

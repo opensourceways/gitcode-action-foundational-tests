@@ -1,0 +1,48 @@
+id: USE-INTYPE-01-001
+dimensions: [usability, compatibility]
+dimension: usability
+priority: P1
+title: workflow_dispatch inputs 非 string 类型报错
+intent_ref: INTENT-USE-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        dry_run:
+          description: "Dry run mode"
+          required: false
+          type: boolean
+          default: false
+  jobs:
+    test-input-type:
+      runs-on: default
+      steps:
+        - run: echo "dry_run=${{ inputs.dry_run }}"
+
+trigger:
+  event: manual
+  as: maintainer
+  params:
+    dry_run: "true"
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "workflow_dispatch.inputs 使用 type: boolean 时报错且提示仅支持 string；不应静默将 boolean 当 string 处理（0=静默通过无提示, 1=报错但不指明类型限制, 2=明确报错提示仅支持 string）"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "非 string 类型的 inputs 不应被静默接受和执行"
+
+teardown:
+  reset: fixture

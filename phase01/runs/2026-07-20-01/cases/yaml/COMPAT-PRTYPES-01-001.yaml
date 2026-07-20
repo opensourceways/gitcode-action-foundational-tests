@@ -1,0 +1,36 @@
+id: COMPAT-PRTYPES-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: pull_request types 命名差异
+intent_ref: INTENT-COMPAT-007
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    pull_request:
+      types: [open, update, reopen, merge]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - run: echo "PR action: ${{ atomgit.event.action }}"
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: event_trigger
+    eval: deterministic
+    rubric: "open/update/reopen/merge 各 types 正确触发；默认 types 行为一致"
+  - type: negative
+    target: event_trigger
+    eval: deterministic
+    rubric: "GitHub 命名 types 应有明确报错而非静默忽略"
+teardown:
+  reset: fixture

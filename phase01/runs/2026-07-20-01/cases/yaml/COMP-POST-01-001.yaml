@@ -1,0 +1,41 @@
+id: COMP-POST-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 post 后处理阶段: run_always 与时序保证
+intent_ref: INTENT-COMP-010
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    main-job:
+      runs-on: default
+      steps:
+        - run: echo "Main job"
+  post:
+    run_always: true
+    jobs:
+      cleanup:
+        runs-on: default
+        steps:
+          - run: echo "Post cleanup executed"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "post 阶段在 main-job 完成后执行，日志出现 'Post cleanup executed'"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "run_always:true 时 post 在失败场景下也执行"
+teardown:
+  reset: fixture

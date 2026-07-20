@@ -1,0 +1,42 @@
+id: COMP-FILTER-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 trigger 过滤器: branches/paths/tags 的通配、否定与互斥规则
+intent_ref: INTENT-COMP-002
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    push:
+      branches: ['feature/**', '!feature/experimental']
+      paths: ['src/**']
+  jobs:
+    test-filter:
+      runs-on: default
+      steps:
+        - run: echo "Filtered trigger: ${{ atomgit.ref }}"
+trigger:
+  event: push
+  as: maintainer
+  params:
+    branch: feature/test-branch
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "合法过滤器组合下 workflow 正确触发"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "branches+branches-ignore 或 paths+paths-ignore 同时使用时报错"
+  - type: nonfunctional
+    target: trigger_behavior
+    eval: deterministic
+    rubric: "仅否定模式 !pattern 不触发 workflow"
+teardown:
+  reset: fixture

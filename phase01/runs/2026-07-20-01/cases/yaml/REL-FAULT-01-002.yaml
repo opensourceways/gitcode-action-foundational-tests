@@ -1,0 +1,35 @@
+id: REL-FAULT-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: runner 崩溃恢复
+intent_ref: INTENT-REL-017
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    test:
+      runs-on: default
+      steps:
+        - uses: checkout
+        - run: echo "checkout done"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection:
+  at: pre_job
+  action: kill_runner
+  params: { delay_seconds: 5 }
+  recovery_expectation: retry_and_succeed
+assertions:
+  - type: positive
+    target: job_status
+    eval: deterministic
+    rubric: "job 心跳超时后到达 failure/cancelled；Re-run all jobs 全部 success"
+teardown:
+  reset: full_instance

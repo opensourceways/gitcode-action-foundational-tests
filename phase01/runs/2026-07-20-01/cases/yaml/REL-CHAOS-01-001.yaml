@@ -1,0 +1,71 @@
+id: REL-CHAOS-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P0
+title: 在 job 执行过程中 kill runner 进程，依赖该 job 的下游 job 应在超时后标记为失败，且被 kill 的 job 可重新运行恢复
+intent_ref: INTENT-REL-015
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on: [push]
+  jobs:
+    long-job:
+      runs-on: default
+      steps:
+        - name: Long running step (target for kill)
+          run: |
+            echo "Job started, PID: $$"
+            sleep 600
+        - name: Post-kill cleanup
+          if: ${{ always }}
+          run: echo "If reached, job was not killed"
+    downstream-job:
+      runs-on: default
+      needs: [long-job]
+      steps:
+        - name: Should be skipped
+          run: echo "This should not execute if long-job failed"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: mid_job
+  action: kill_runner
+  params:
+    target: runner_agent
+    signal: SIGKILL
+    delay_after_job_start_s: 10
+  recovery_expectation: retry_and_succeed
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job A 在 180s 内到达 failure/cancelled 终态（非永久 in_progress）"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "job A 不保持 in_progress 超过 300s"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job B（needs [A]）状态为 skipped"
+  - type: positive
+    target: re_run_status
+    eval: deterministic
+    rubric: "Re-run failed jobs 后 job A 在新 runner 上成功完成"
+  - type: nonfunctional
+    target: recovery_time
+    eval: deterministic
+    rubric: "心跳超时到 job 状态变更之间的延迟 <= 120s"
+
+teardown:
+  reset: full_instance

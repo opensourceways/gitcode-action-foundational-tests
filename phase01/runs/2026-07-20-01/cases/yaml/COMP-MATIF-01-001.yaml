@@ -1,0 +1,44 @@
+id: COMP-MATIF-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 验证 job 级 if 对矩阵展开的独立求值
+intent_ref: INTENT-COMP-025
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on: [push]
+  jobs:
+    matrix-if-job:
+      strategy:
+        matrix:
+          java-version: [17, 21]
+      if: ${{ matrix.java-version != '21' }}
+      runs-on: default
+      steps:
+        - run: |
+            echo "Running with Java version: ${{ matrix.java-version }}"
+            echo "This instance should only run if java-version != 21"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: matrix_instances
+    eval: deterministic
+    rubric: "java-version=17 的矩阵实例正常执行"
+  - type: positive
+    target: matrix_instances
+    eval: deterministic
+    rubric: "java-version=21 的矩阵实例因 if 条件被跳过"
+  - type: positive
+    target: if_evaluation
+    eval: deterministic
+    rubric: "job 级 if 在矩阵展开后对每个实例独立求值，if 中使用 ${{ matrix.var }} 正常工作"
+teardown:
+  reset: fixture
