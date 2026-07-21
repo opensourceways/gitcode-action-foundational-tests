@@ -1,0 +1,27 @@
+name: yyl session3 schedule
+
+on:
+  workflow_dispatch:
+  schedule:
+    # One-time baseline: 2026-07-19 14:15 UTC.
+    - cron: '15 14 19 7 *'
+
+jobs:
+  verify:
+    name: Yulin S3 schedule baseline verification
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: Record event and timing evidence
+        run: |
+          event="${{ atomgit.event_name }}"
+          actual_utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          actual_epoch=$(date -u '+%s')
+          timezone=$(date '+%z')
+          printf 'event=%s\n' "$event"
+          printf 'run_id=%s\n' "${{ atomgit.run_id }}"
+          printf 'head_sha=%s\n' "${ATOMGIT_SHA:-UNSET}"
+          printf 'planned_utc=2026-07-19T14:15:00Z\n'
+          printf 'actual_utc=%s\n' "$actual_utc"
+          printf 'actual_epoch=%s\n' "$actual_epoch"
+          printf 'runner_timezone=%s\n' "$timezone"
+          test "$timezone" = "+0000"

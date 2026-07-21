@@ -1,0 +1,15 @@
+name: yyl TC-006 isolation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_006_var_isolation:
+    name: TC-006 variable isolation
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-006 assert project var not available in other project
+        run: |
+          vars_val="${{ vars.YYL_TEST }}"
+          test -z "$vars_val"
+          printf 'cross_project_var_unavailable=true\n'

@@ -1,0 +1,39 @@
+id: COMP-ST-CTXTOKEN-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "atomgit.token 上下文非空（harness 自测）"
+intent_ref: INTENT-COMP-36
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  name: COMP-ST-CTXTOKEN-01-001
+  on:
+    push:
+      branches: [main]
+  jobs:
+    assert:
+      name: ctx-token-nonempty
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: assert atomgit token non-empty
+          env:
+            TOKENV: ${{ atomgit.token }}
+          run: |
+            echo "token_len=${#TOKENV}"
+            test -n "$TOKENV"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job/step 成功即证 atomgit.token 非空（workflow 内 shell test 断言，status 绿=通过）"
+teardown:
+  reset: fixture

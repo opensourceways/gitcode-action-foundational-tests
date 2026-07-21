@@ -1,0 +1,39 @@
+id: COMP-ST-CHECKOUT-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "checkout 后仓库内容存在（harness 自测）"
+intent_ref: INTENT-COMP-304
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  name: COMP-ST-CHECKOUT-01-001
+  on:
+    push:
+      branches: [main]
+  jobs:
+    assert:
+      name: checkout-content
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: checkout
+          uses: checkout
+        - name: assert repo content present
+          run: |
+            ls -la
+            test -d .gitcode/workflows
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job/step 成功即证 checkout 检出了仓库内容（.gitcode/workflows 存在）"
+teardown:
+  reset: fixture

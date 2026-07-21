@@ -9,6 +9,3 @@ tmp/
 # Phase 02 单次执行的运行结果/报告（本地产物，不入库）
 phase02/runs/
 phase02/reports/
-
-# 人工测试交接材料（本地参考，不入库）
-handoff/

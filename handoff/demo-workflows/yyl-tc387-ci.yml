@@ -1,0 +1,22 @@
+name: yyl TC-387 CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  tc_387_ci_scenario:
+    name: TC-387 CI scenario
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-387 checkout repository
+        uses: checkout
+        with:
+          repository: ${{ atomgit.repositoryUrl }}
+          token: ${{ secrets.YULIN_ATOMGIT_TOKEN }}
+      - name: TC-387 verify CI pipeline
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          test -f .gitcode/workflows/yyl-tc387-ci.yml
+          printf 'ci_pipeline_run=true\n'

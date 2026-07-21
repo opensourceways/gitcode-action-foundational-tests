@@ -1,0 +1,19 @@
+name: yyl TC-533 priority
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_533:
+    name: TC-533 env priority
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      PROBE: env_val
+    steps:
+      - name: TC-533 assert env injected to shell
+        run: |
+          printf 'shell_PROBE=%s\n' "${PROBE:-UNSET}"
+          printf 'env_PROBE=%s\n' "${{ env.PROBE }}"
+          test "${{ env.PROBE }}" = "env_val"
+          test "${PROBE:-}" = "env_val"
+          printf 'env_shell_ok=true\n'

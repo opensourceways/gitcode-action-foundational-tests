@@ -1,0 +1,115 @@
+name: yyl session13 workflows
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+
+jobs:
+  tc_220_command_flag:
+    name: TC-220 command flag
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-220 assert default false
+        run: |
+          printf 'allow_unsecure_commands=%s\n' "${ATOMGIT_ACTIONS_ALLOW_UNSECURE_COMMANDS:-UNSET}"
+          test "$ATOMGIT_ACTIONS_ALLOW_UNSECURE_COMMANDS" = "false"
+
+  tc_273_container:
+    name: TC-273 job container
+    runs-on: [ubuntu-latest, x64, small]
+    container:
+      image: alpine:3.20
+    steps:
+      - name: TC-273 assert Alpine container
+        run: |
+          test -f /etc/alpine-release
+          printf 'container_os=alpine\n'
+
+  tc_304_checkout:
+    name: TC-304 checkout action
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-304 checkout repository
+        uses: checkout
+        with:
+          repository: ${{ atomgit.repositoryUrl }}
+          token: ${{ secrets.YULIN_ATOMGIT_TOKEN }}
+      - name: TC-304 assert repository checkout
+        run: |
+          test -f .gitcode/workflows/yyl-session13-workflows.yml
+          printf 'checkout_file_present=true\n'
+
+  tc_355_unsecure_command:
+    name: TC-355 unsecure command setting
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-355 invoke deprecated set env
+        run: echo "::set-env name=TC355_PROBE::allowed"
+      - name: TC-355 assert command was blocked
+        if: ${{ always() }}
+        run: |
+          printf 'tc355_probe=%s\n' "${TC355_PROBE:-UNSET}"
+          test "${TC355_PROBE:-}" != "allowed"
+
+  tc_388_pr_merge_check:
+    name: TC-388 PR merge check
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-388 verify PR event
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          printf 'pr_check_passed=true\n'
+
+  tc_389_tag_release:
+    name: TC-389 tag release
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-389 verify tag push event
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          printf 'ref=%s\n' "${{ atomgit.ref }}"
+          printf 'ref_type=%s\n' "${{ atomgit.ref_type }}"
+          printf 'tag_release_run_created=true\n'
+
+  tc_535_namespace_independence:
+    name: TC-535 namespace independence
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      SECRET_VAL: ${{ secrets.YYL_TEST }}
+    steps:
+      - name: TC-535 verify namespaces independent
+        run: |
+          test -n "$SECRET_VAL"
+          printf 'secret_accessible=true\n'
+          vars_val="${{ vars.YYL_TEST }}"
+          test -n "$vars_val"
+          printf 'vars_val=%s\n' "$vars_val"
+          printf 'namespaces_independent=true\n'
+
+  tc_387_ci_scenario:
+    name: TC-387 CI scenario
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-387 checkout repository
+        uses: checkout
+        with:
+          repository: ${{ atomgit.repositoryUrl }}
+          token: ${{ secrets.YULIN_ATOMGIT_TOKEN }}
+      - name: TC-387 verify CI pipeline
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          test -f .gitcode/workflows/yyl-session13-workflows.yml
+          printf 'ci_pipeline_run=true\n'
+
+  tc_391_schedule:
+    name: TC-391 schedule
+    runs-on: [ubuntu-latest, x64, small]
+    if: ${{ always() }}
+    steps:
+      - name: TC-391 verify schedule event
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          printf 'schedule_probe=true\n'

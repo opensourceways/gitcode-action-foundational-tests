@@ -1,0 +1,36 @@
+name: yyl TC retest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_534_system_override:
+    name: TC-534 system override
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-534 assert system variable value
+        run: |
+          printf 'atomgit_sha=%s\n' "${ATOMGIT_SHA:-UNSET}"
+          test -n "$ATOMGIT_SHA"
+          printf 'system_var_present=true\n'
+
+  tc_220_command_flag:
+    name: TC-220 command flag
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-220 assert default false
+        run: |
+          printf 'allow_unsecure_commands=%s\n' "${ATOMGIT_ACTIONS_ALLOW_UNSECURE_COMMANDS:-UNSET}"
+          test "$ATOMGIT_ACTIONS_ALLOW_UNSECURE_COMMANDS" = "false"
+          printf 'command_flag_ok=true\n'
+
+  tc_273_container:
+    name: TC-273 job container
+    runs-on: [ubuntu-latest, x64, small]
+    container:
+      image: alpine:3.20
+    steps:
+      - name: TC-273 assert Alpine container
+        run: |
+          test -f /etc/alpine-release
+          printf 'container_os=alpine\n'
