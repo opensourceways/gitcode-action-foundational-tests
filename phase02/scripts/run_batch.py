@@ -4,7 +4,7 @@
 run_batch.py — Phase 02 批量执行器（确定性；slash 命令与 CI 共用入口）
 
 读 queue.json，逐条调 run_case.py 真跑。**每条前后更新 state.json**，使 status.py
-可在执行中途读到进度（done/total/current）。编译产物（compiled/）由上游 yaml-compiler
+可在执行中途读到进度（done/total/current）。编译产物（compiled/）由上游 yaml-checker
 产出——本脚本不编译；缺编译产物的用例 run_case 会判 NOT_CONFIGURED。
 
 用法:

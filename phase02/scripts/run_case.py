@@ -174,15 +174,8 @@ def main():
         return
 
     cfg = wr.RunnerConfig(branch=None)  # branch 从 env / 默认 main
-    # trigger 目前仅支持 push（其余事件类型待 workflow-runner 扩展）
+    # 触发方式支持性由 workflow_runner.TRIGGER_STATUS 统一裁定（push 已实现，其余→INCONCLUSIVE+具体原因）
     ev = (contract.get("trigger") or {}).get("event", "push")
-    if ev not in ("push",):
-        wr.log(f"{cid}: trigger.event={ev} 暂不支持 → INCONCLUSIVE")
-        verdict = {"verdict": "INCONCLUSIVE", "verdict_flags": [],
-                   "reason": f"触发方式 {ev} 尚未实现（当前仅 push）", "assertion_results": []}
-        rec = write_result(run_dir, contract, verdict, {"status": "INCONCLUSIVE"})
-        update_summary(run_dir, rec)
-        return
 
     # 预检：push 前本地校验 workflow（拦编译错误，省一次真跑；零 API 依赖）
     ok, verr = wr.preflight_validate(wf)
@@ -199,7 +192,8 @@ def main():
     reset = (contract.get("teardown") or {}).get("reset", "fixture")
     wr.log(f"=== 原生执行 {cid} → {cfg.owner}/{cfg.repo}@{cfg.branch} (teardown={reset}) ===")
     with wr.Workspace(cfg) as ws:
-        rr = wr.run_case(ws, cfg, cid, wf, fetch_logs=fetch_logs, teardown_reset=reset)
+        rr = wr.run_case(ws, cfg, cid, wf, fetch_logs=fetch_logs, teardown_reset=reset,
+                         trigger_event=ev)
     rr["case_id"] = cid
 
     # 无编译断言时退化：用契约 assertions 数量提示（这里只做状态型兜底）

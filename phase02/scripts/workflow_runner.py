@@ -309,6 +309,39 @@ def collect(cfg, run, fetch_logs=False):
 
 
 # ── 高层：一条用例 部署→轮询→采集 ─────────────────────────────────
+# ── 触发适配器（确定性；把 trigger.event 翻译成对 GitCode 的操作）──────
+# ★ 架构：所有"触发前置操作"（建 PR / 建 tag / dispatch）都是**确定性**的，归属本模块，
+#   不交给任何 LLM agent（LLM 只做只读的检查/归因）。push 已实现；其余为可确定性实现的
+#   扩展点——需先验证 GitCode 对应 API/语义，未实现前如实返回 unsupported 原因（→ INCONCLUSIVE）。
+TRIGGER_STATUS = {
+    "push":                 {"supported": True},
+    "tag":                  {"supported": False,
+                             "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配 run（确定性，待验证 GitCode tag 触发语义）"},
+    "manual":               {"supported": False,
+                             "reason": "manual 触发：需调 GitCode workflow_dispatch API（待确认端点）"},
+    "workflow_dispatch":    {"supported": False,
+                             "reason": "workflow_dispatch：需 dispatch API（待确认端点）"},
+    "pr":                   {"supported": False,
+                             "reason": "pr 触发：需建分支+开 PR（确定性，待确认 PR 创建端点与 run 关联方式）"},
+    "pull_request":         {"supported": False,
+                             "reason": "pull_request 触发：需建分支+开 PR（待确认 PR API 与 run 关联）"},
+    "pull_request_target":  {"supported": False,
+                             "reason": "pull_request_target：同 PR，且需注意 base 上下文语义"},
+    "fork_pr":              {"supported": False,
+                             "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
+    "schedule":             {"supported": False,
+                             "reason": "schedule：cron 无法按需触发（基础设施限制）"},
+}
+
+
+def trigger_supported(event):
+    """返回 (supported: bool, reason: str)。未知事件视为不支持。"""
+    info = TRIGGER_STATUS.get(event)
+    if info is None:
+        return False, f"未知触发事件 '{event}'"
+    return info["supported"], info.get("reason", "")
+
+
 def teardown(ws, cfg, wf_filename):
     """删除本次部署的 workflow 文件并 push（fixture 级清理，防仓库污染）。
 
@@ -326,20 +359,27 @@ def teardown(ws, cfg, wf_filename):
     return rc == 0
 
 
-def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture"):
+def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
+             trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
 
     执行层状态（映射 rules.md §11 的执行类判定）：
-      NO_RUN    触发后没等到对应 run
-      TIMEOUT   轮询超时且从未见到终态
-      ENV_ERROR API/网络错误（重试后仍失败）
-      其余      平台终态（COMPLETED/FAILED/...），交 assertion_engine 判定
+      NO_RUN       触发后没等到对应 run
+      TIMEOUT      轮询超时且从未见到终态
+      ENV_ERROR    API/网络错误（重试后仍失败）
+      INCONCLUSIVE 触发方式尚未实现（见 TRIGGER_STATUS）
+      其余         平台终态（COMPLETED/FAILED/...），交 assertion_engine 判定
 
-    teardown_reset：`fixture`/`full_instance` → 跑完删除本次 push 的 workflow 文件（防污染）；
-    `none` → 保留。注：workflow 合法性应在 push 前经 preflight_validate 拦截。
+    trigger_event：触发方式；push 已实现，其余（见 TRIGGER_STATUS）未实现 → INCONCLUSIVE + 具体原因。
+    teardown_reset：`fixture`/`full_instance` → 跑完删除本次 push 的 workflow 文件（防污染）；`none` → 保留。
+    注：workflow 合法性应在 push 前经 preflight_validate 拦截。
     """
     t0 = time.time()
     wf_filename = None
+    # 触发适配：非 push 事件目前未实现 → 如实返回具体原因（不糊弄）
+    ok, reason = trigger_supported(trigger_event)
+    if not ok:
+        return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
     try:
         sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:

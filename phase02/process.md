@@ -20,7 +20,7 @@ Phase 01 YAML 用例（含 Phase 01 编写的可运行 workflow）
         ▼
 [执行] /phase02-exec
         │  逐条用例（run_case.py，读契约的 workflow 原样执行）：
-        │  ① workflow 合规检查 (preflight_validate + 可选 yaml-compiler 检查器)
+        │  ① workflow 合规检查 (preflight_validate + 可选 yaml-checker 检查器)
         │       └─ 不合规 → COMPILE_ERROR，不 push，回报 Phase 01
         │  ② 部署 + 触发 (workflow_runner)
         │  ③ 等待 + 采集（v8 download_log zip） (workflow_runner)
@@ -80,7 +80,7 @@ runs/<run-id>/
 > ★ 由 `run_case.py` 编排；workflow 直接取自 Phase 01 契约的 `workflow:` 字段（Phase 02 不编译/不改写）。
 
 ```
-① workflow 合规检查 (preflight_validate；可选 yaml-compiler 检查器)
+① workflow 合规检查 (preflight_validate；可选 yaml-checker 检查器)
    ├─ 取契约的 workflow: 字段（Phase 01 编写的可运行 workflow）
    ├─ 本地确定性检查：on: 映射形式、run: 冒号、runs-on 数组、step name、steps≤16、vars.* 等
    ├─ 不合规 → 判 COMPILE_ERROR，不 push，回报 Phase 01（不代改）

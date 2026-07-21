@@ -25,7 +25,7 @@
 
 - **来源**：Phase 01 通过 DoD 验收后，`runs/<run-id>/cases/yaml/*.yaml`
 - **格式**：符合 `phase01/schema/executable-case.schema.yaml` 的 YAML 文件
-- **消费方**：主链路（schema_check → run_case[preflight 检查+执行] → assertion_engine → report_builder）；yaml-compiler 为**检查器**（合规检查，不编译）
+- **消费方**：主链路（schema_check → run_case[preflight 检查+执行] → assertion_engine → report_builder）；yaml-checker 为**检查器**（合规检查，不编译）
 - **缺失影响**：无输入则无法执行——这是 Phase 02 的唯一合法输入。
 - **版本追踪**：执行时记录 Phase 01 run-id + YAML 文件 hash 清单 → `runs/<run-id>/run.md`
 
@@ -45,7 +45,7 @@
 
 - **来源**：Phase 01 的 L0 基线产物 `phase01/baseline/parity-matrix.md`
 - **格式**：Markdown 表格（能力清单 × 支持状态）
-- **消费方**：report-builder（报告分维度聚合的参照）、yaml-compiler（兼容性检查的参照）
+- **消费方**：report-builder（报告分维度聚合的参照）、yaml-checker（兼容性检查的参照）
 - **Phase 02 不修改此文件**
 
 ### 4. 风险登记册（必需）
@@ -66,21 +66,21 @@
 
 - **来源**：Phase 01 `inputs/gitcode-api/api-reference.md`（已补充，20 个 v8 Actions 端点）
 - **格式**：Markdown
-- **消费方**：api-client（API 调用参照）、yaml-compiler（API 断言型用例）
+- **消费方**：api-client（API 调用参照）、yaml-checker（API 断言型用例）
 - **Phase 02 直接引用 Phase 01 的文件，不复制一份。**
 
 ### 7. GitCode Actions 规格（必需）
 
 - **来源**：Phase 01 `inputs/gitcode-spec/`（官方文档离线镜像）
 - **格式**：Markdown
-- **关键文件**（yaml-compiler 尤其需要）：
+- **关键文件**（yaml-checker 尤其需要）：
   - `top-level-fields.md`（顶层字段定义）
   - `trigger-events.md`（触发器语法）
   - `core-concepts/workflow-job-step-action.md`（workflow 结构）
   - `core-concepts/variables-secrets-context-expressions.md`（secrets/表达式）
   - `COMPAT-NOTES.md`（已知兼容性差异）
   - `examples/`（官方示例）
-- **消费方**：yaml-compiler 检查器（合规检查的权威语法依据）、failure-analyst（对照规格判断产品缺陷）、run_case 的 preflight（VALIDATION-RULES 来源）
+- **消费方**：yaml-checker 检查器（合规检查的权威语法依据）、failure-analyst（对照规格判断产品缺陷）、run_case 的 preflight（VALIDATION-RULES 来源）
 - **Phase 02 直接引用 Phase 01 的文件。**
 
 ### 8. 平台配置（建议）
@@ -94,8 +94,8 @@
   - 最大并发 workflow 数
   - Job/run 超时上限
   - Artifact/cache 大小限制
-- **消费方**：env-manager（fixture 选择、环境配置）、workflow-runner（超时/并发控制）、yaml-compiler（runner 标签映射）
-- **缺失影响**：yaml-compiler 使用默认 runner 标签（可能不可用），workflow-runner 使用默认超时。
+- **消费方**：env-manager（fixture 选择、环境配置）、workflow-runner（超时/并发控制）、yaml-checker（runner 标签映射）
+- **缺失影响**：yaml-checker 使用默认 runner 标签（可能不可用），workflow-runner 使用默认超时。
 
 ### 9. Runner 访问凭证（条件必需）
 

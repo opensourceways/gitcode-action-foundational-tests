@@ -130,7 +130,7 @@
 | `FAIL`（failure-analyst 判为用例/断言自身问题）| **不可测试** 或 **未发现问题** | 回流 Phase 01 修用例；不甩锅平台 |
 | `INCONCLUSIVE` | **未发现问题** | 说明证据局限，**不得表述为通过或风险消除** |
 | `COMPILE_ERROR`（预检/平台判为我方编译产物非法）| **不可测试** | 我方编译错误，回流修编译；不甩锅平台 |
-| `COMPILE_ERROR`（failure-analyst 判为「按 GitCode 文档写法编不出合法 YAML」）| **问题发现** | 文档缺口/能力边界，附证据（见 yaml-compiler `DOC-UNSUPPORTED`）|
+| `COMPILE_ERROR`（failure-analyst 判为「按 GitCode 文档写法编不出合法 YAML」）| **问题发现** | 文档缺口/能力边界，附证据（见 yaml-checker `DOC-UNSUPPORTED`）|
 | `NOT_CONFIGURED` / `NO_RUN` / `ENV_ERROR` / `TIMEOUT` | **不可测试** | 说明缺失条件与保留风险 |
 | `FLAKY` | **问题发现**（平台不稳定）或 **不可测试**（用例不可靠）| 由 failure-analyst 初判方向，人工确认 |
 

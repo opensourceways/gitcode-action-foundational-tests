@@ -2,7 +2,7 @@
 
 > Phase 02 harness 的一等输入。**作用**：把 Phase 01 契约 YAML 里抽象的夹具占位名
 > （如 `repo_fixture: with-secrets` / `secrets: [TEST_SECRET]`）绑定到当前测试实例上
-> **真实已配置**的资源与已知明文值——供 yaml-compiler 编译时替换 secret/var 引用、
+> **真实已配置**的资源与已知明文值——供 yaml-checker 编译时替换 secret/var 引用、
 > 供 assertion-binder 把 rubric 里的"已知明文值"绑成具体串。
 >
 > **为什么需要它**：契约 YAML 有意抽象（`TEST_SECRET` 是占位符）；真实 bingo 仓里的
