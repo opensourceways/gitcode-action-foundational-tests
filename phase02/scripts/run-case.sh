@@ -73,7 +73,7 @@ import json, os, sys
 sys.path.insert(0, os.path.dirname('${VALIDATE_SCRIPT}'))
 from validate_workflow import _get_workflow_list, _load_env_file
 env = _load_env_file()
-cookie = env.get('GITCODE_COOKIE') or env.get('GITCODE_ACCESS_TOKEN') or os.environ.get('GITCODE_COOKIE') or os.environ.get('GITCODE_ACCESS_TOKEN','')
+cookie = env.get('GITCODE_COOKIE') or env.get('GITCODE_ACCESS_TOKEN')
 wfs = _get_workflow_list('${GITCODE_OWNER}/${GITCODE_REPO}', cookie, 'web-api.gitcode.com')
 target = '${WF_BASENAME}'
 for w in wfs:
