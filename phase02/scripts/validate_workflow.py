@@ -147,7 +147,7 @@ def main():
     parser.add_argument("yaml_file", help="待校验的 YAML 文件路径")
     parser.add_argument("--cookie", help="GITCODE_COOKIE (从浏览器 F12 抓包获取)")
     parser.add_argument("--token", help="Bearer token (备选认证方式)")
-    parser.add_argument("--workflow-id", default=None, help="工作流 ID")
+    parser.add_argument("--workflow-id", default="b03a4b84cd784ddea00c5270eba62c7f", help="工作流 ID")
     parser.add_argument("--auto-wf", action="store_true", help="自动从 API 获取 workflow_id（按文件名匹配）")
     parser.add_argument("--project", default="ComputingActionTest/foundational-tests", help="项目路径")
     parser.add_argument("--file-path", default=None, help="文件相对路径 (默认从 yaml_file 推导)")
@@ -155,10 +155,10 @@ def main():
     args = parser.parse_args()
 
     # ── Resolve cookie ──────────────────────────────────
-    cookie = args.cookie or os.environ.get("GITCODE_COOKIE") or os.environ.get("GITCODE_ACCESS_TOKEN")
+    cookie = args.cookie or os.environ.get("GITCODE_COOKIE")
     if not cookie:
         env_vars = _load_env_file()
-        cookie = env_vars.get("GITCODE_COOKIE") or env_vars.get("GITCODE_ACCESS_TOKEN")
+        cookie = env_vars.get("GITCODE_COOKIE")
     if not cookie:
         print("[!] 请提供 --cookie、--token、GITCODE_COOKIE 环境变量，或在项目根目录 .env 中设置", file=sys.stderr)
         sys.exit(1)
