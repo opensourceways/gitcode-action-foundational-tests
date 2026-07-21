@@ -62,6 +62,22 @@ source "$ENV_FILE"
 _log "CASE: $CASE_ID — $CASE_TITLE ($CASE_DIM/$CASE_PRI)"
 START_TIME=$(date +%s)
 
+# ── 1.5 Validate workflow YAML before deploy ─────────────
+_log "Validating workflow YAML..."
+VALIDATE_SCRIPT="${SCRIPT_DIR}/validate_workflow.py"
+if [ -f "$VALIDATE_SCRIPT" ]; then
+  VALIDATE_OUTPUT=$($VENV_PY "$VALIDATE_SCRIPT" "$WORKFLOW_FILE" --auto-wf 2>&1) || {
+    _log "YAML VALIDATION FAILED:"
+    echo "$VALIDATE_OUTPUT" | while IFS= read -r line; do _log "  $line"; done
+    _log "Aborting — fix YAML before deploying."
+    rm -rf "$WORK_DIR" 2>/dev/null || true
+    exit 1
+  }
+  _log "YAML validation: PASS"
+else
+  _log "WARNING: validate_workflow.py not found, skipping pre-deploy validation"
+fi
+
 # ── 2. Deploy workflow ──────────────────────────────────
 _log "Deploying to ${GITCODE_OWNER}/${GITCODE_REPO}"
 
