@@ -1,3 +1,4 @@
 # IDE config
 .idea/
 .playwright-mcp/
+__pycache__
