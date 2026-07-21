@@ -26,7 +26,13 @@ _log "Loading case: $(basename $CASE_YAML)"
 
 ENV_FILE="/tmp/case-env.sh"
 $VENV_PY << PYEOF > "$ENV_FILE"
-import yaml, json
+import yaml, json, re
+
+def _fix_runs_on(m):
+    indent = m.group(1)
+    labels = re.findall(r'-\s+(\S+)', m.group(2))
+    return f'{indent}runs-on: [{", ".join(labels)}]\n'
+
 with open('${CASE_YAML}') as f:
     c = yaml.safe_load(f)
 print(f'export CASE_ID="{c["id"]}"')
@@ -37,6 +43,13 @@ print(f'export CASE_INTENT="{c["intent_ref"]}"')
 print(f'export CASE_RESET="{c["teardown"]["reset"]}"')
 print(f'export TRIGGER_EVENT="{c["trigger"]["event"]}"')
 wf = c.get('workflow', '') or ''
+
+# Normalize workflow YAML: fix common Phase 01 output issues
+# 1. "on:\n- push" or "on:\n  - push" (list) → "on:\n  push:\n  workflow_dispatch:" (GitCode compatible)
+wf = re.sub(r'^on:\s*\n\s*-\s+(\w+)', r'on:\n  \1:\n  workflow_dispatch:', wf, flags=re.MULTILINE)
+# 2. "runs-on:\n    - label1\n    - label2" (multi-line list) → "runs-on: [label1, label2]" (inline)
+wf = re.sub(r'^(\s+)runs-on:\s*\n((?:\s+-\s+\S+\n?)+)', _fix_runs_on, wf, flags=re.MULTILINE)
+
 print(f'export WORKFLOW_FILE="/tmp/workflow-case.yml"')
 with open('/tmp/workflow-case.yml', 'w') as wf_f:
     wf_f.write(wf)
@@ -60,36 +73,63 @@ mkdir -p .gitcode/workflows
 WF_NAME=$(echo "$CASE_ID" | tr '[:upper:]' '[:lower:]' | sed 's/_/-/g').yml
 cp "$WORKFLOW_FILE" ".gitcode/workflows/${WF_NAME}"
 
-if git diff --quiet && git diff --cached --quiet; then
-  _log "No changes, re-triggering with empty commit"
-  git add .gitcode/workflows/
-  git commit --allow-empty -m "test: re-run ${CASE_ID}"
-else
-  git add .gitcode/workflows/
-  git commit -m "test: ${CASE_ID}"
-fi
+# Always ensure a content change so push triggers a new workflow run.
+# Append a timestamp comment to the workflow file.
+echo "" >> ".gitcode/workflows/${WF_NAME}"
+echo "# trigger: $(date +%s)" >> ".gitcode/workflows/${WF_NAME}"
+
+git add .gitcode/workflows/
+git commit -m "test: ${CASE_ID}"
 git push origin "$GITCODE_BRANCH" 2>&1 | tail -1
 _log "Pushed: .gitcode/workflows/${WF_NAME}"
 
 # ── 3. Poll for run ─────────────────────────────────────
-_log "Polling for run completion..."
-sleep 8
+# Strategy: record baseline run ID before push, then wait for a NEW run to appear.
+# This prevents picking up stale runs from previous pushes.
+BASELINE_RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=1&branch=${GITCODE_BRANCH}")
+BASELINE_RUN_ID=$(echo "$BASELINE_RESP" | python3 -c "import sys,json; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0].get('workflow_run_id','') if runs else '')" 2>/dev/null || echo "")
+_log "Baseline run: ${BASELINE_RUN_ID:-<none>}"
 
+_log "Waiting for new run to appear..."
 RUN_ID_GC=""
 ELAPSED=0
+
+# Phase A: wait for a run ID different from baseline
 while [ $ELAPSED -lt $TIMEOUT_SECONDS ]; do
-  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=3&branch=${GITCODE_BRANCH}")
-  RUN_ID_GC=$(echo "$RESP" | python3 -c "import sys,json; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0].get('workflow_run_id','') if runs else '')" 2>/dev/null || echo "")
+  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=5&branch=${GITCODE_BRANCH}")
+  RUN_ID_GC=$(echo "$RESP" | python3 -c "
+import sys, json
+runs = json.load(sys.stdin).get('workflow_runs', [])
+baseline = '${BASELINE_RUN_ID}'
+for r in runs:
+    rid = r.get('workflow_run_id', '')
+    if rid and rid != baseline:
+        print(rid)
+        break
+" 2>/dev/null || echo "")
 
   if [ -n "$RUN_ID_GC" ]; then
-    DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
-    STATUS=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
-    _log "Run #${RUN_ID_GC}: $STATUS ($((ELAPSED))s)"
-
-    case "$STATUS" in
-      COMPLETED|FAILED|CANCELED) break ;;
-    esac
+    _log "New run detected: #${RUN_ID_GC}"
+    break
   fi
+
+  sleep $POLL_INTERVAL
+  ELAPSED=$((ELAPSED + POLL_INTERVAL))
+done
+
+if [ -z "$RUN_ID_GC" ]; then
+  _log "ERROR: No new run appeared within ${TIMEOUT_SECONDS}s"
+fi
+
+# Phase B: poll the new run until terminal state
+while [ -n "$RUN_ID_GC" ] && [ $ELAPSED -lt $TIMEOUT_SECONDS ]; do
+  DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
+  STATUS=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+  _log "Run #${RUN_ID_GC}: $STATUS ($((ELAPSED))s)"
+
+  case "$STATUS" in
+    COMPLETED|FAILED|CANCELED) break ;;
+  esac
 
   sleep $POLL_INTERVAL
   ELAPSED=$((ELAPSED + POLL_INTERVAL))
