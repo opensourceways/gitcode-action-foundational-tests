@@ -39,7 +39,7 @@
 3. **runs-on**：数组形式 `[ubuntu-latest, x64, small]`（文档不接受对象/裸 `default`）。
 4. **job/step name**：每个 job/step 必须有 `name`；step name 不含非法字符 `[ ] | ! > & # ? * = < ' " @ $ { } +`；长度 ≤ 128。
 5. **steps 数量** ≤ 16。
-6. **上下文/表达式**：`vars.*` GitCode 不支持（应 `atomgit.*`）；`${{ }}` 用法符合文档。
+6. **上下文/表达式**：`vars.*` **可用**（实测支持，引用仓库/组织 Variable 如 `${{ vars.DUP }}`；早前"不支持"已被推翻），`atomgit.*` 亦可用；`${{ }}` 用法符合文档。
 7. **能力可表达性**：用例要验的行为，能否用 GitCode 文档记载的语法表达；不能 → `DOC-UNSUPPORTED`。
 
 ## 工作步骤

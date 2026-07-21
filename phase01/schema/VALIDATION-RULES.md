@@ -111,9 +111,13 @@ if: ${{ always() }}
 
 ---
 
-## 7. `vars` 上下文不支持 [平台限制]
+## 7. `vars` 上下文**可用** [实测更正 2026-07-21]
 
-GitCode 平台不支持 `vars.*` 上下文。引用 `vars` 的用例标注 SKIP 或改用 `atomgit.*`。
+> ⚠️ 早前本条称"不支持"，**已被实测推翻**：run 03 的 `${{ vars.DUP }}` 与 handoff、
+> harness 自测（`phase01/runs/harness-selftest/COMP-ST-VARPREC-01-001`）均真跑 **PASS**。
+
+GitCode **支持 `vars.*` 上下文**，可引用仓库/组织级 Variable（如 `${{ vars.DUP }}`）。
+无需改写为 `atomgit.*`，也不应因 `vars.*` 判用例不可测。
 
 ---
 

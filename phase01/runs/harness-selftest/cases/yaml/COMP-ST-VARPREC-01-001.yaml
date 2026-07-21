@@ -1,0 +1,40 @@
+id: COMP-ST-VARPREC-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "项目 vars 覆盖组织 vars（harness 自测 · 验证 vars.* 上下文可用）"
+intent_ref: INTENT-COMP-194
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  name: COMP-ST-VARPREC-01-001
+  on:
+    push:
+      branches: [main]
+  jobs:
+    assert:
+      name: vars-precedence
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: assert vars.DUP is project value
+          env:
+            V: ${{ vars.DUP }}
+          run: |
+            echo "dup=[$V]"
+            test "$V" = "project_value"
+            test "$V" != "org_value"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "vars.DUP 解析为项目级值 project_value（覆盖组织级）；同时证 vars.* 上下文可用（实测支持，非不支持）"
+teardown:
+  reset: fixture

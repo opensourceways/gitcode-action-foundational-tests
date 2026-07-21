@@ -210,9 +210,9 @@ def preflight_validate(workflow_yaml):
                 if len(str(nm)) > 128:
                     errors.append(f"job '{jid}' step name 超 128 字符")
 
-    # 4) vars.* 上下文不支持（§7）——扫原文提示（不阻断，标注为警告级 error 供人判断）
-    if re.search(r"\$\{\{\s*vars\.", workflow_yaml):
-        errors.append("使用了 vars.* 上下文，GitCode 平台不支持（§7），须改 atomgit.* 或标 NOT_CONFIGURED")
+    # 注：早期 VALIDATION-RULES §7 称 vars.* 上下文不支持——**已被实测推翻**
+    # （run 03 的 vars.DUP + handoff 均真跑 PASS）。GitCode 支持 vars.* 引用仓库/组织变量，
+    # 故此处**不再拦截** vars.*（曾误判合法 workflow 为 COMPILE_ERROR）。
 
     return (len(errors) == 0), errors
 

@@ -17,6 +17,7 @@
 | COMP-ST-CTXTOKEN-01-001 | completeness | `atomgit.token` 上下文非空 |
 | COMP-ST-CHECKOUT-01-001 | completeness | `uses: checkout` 检出仓库内容 |
 | COMP-ST-TRIGPUSH-01-001 | completeness | push 触发 + `atomgit.event_name` 可读 |
+| COMP-ST-VARPREC-01-001 | completeness | 项目 `vars.DUP` 覆盖组织值（并证 `vars.*` 上下文可用）|
 | SEC-ST-SETENV-01-001 | security | 废弃 `::set-env::` 默认不传播 |
 | SEC-ST-SECRETUNDEF-01-001 | security | 未定义 secret 展开为空 |
 
@@ -42,7 +43,7 @@ python phase02/scripts/report_builder.py 2026-XX-XX-01
 
 （或用 slash 命令 `/phase02-schema-check`、`/phase02-exec`、`/phase02-status`、`/phase02-report`。）
 
-**预期**：5 条全部 PASS（completeness 3/3、security 2/2，门禁 GO）。若某条 FAIL/INCONCLUSIVE，
+**预期**：6 条全部 PASS（completeness 4/4、security 2/2，门禁 GO）。若某条 FAIL/INCONCLUSIVE，
 即暴露 harness 在新环境的问题（token 权限 / 网络 / 平台变更），正是本自测要检出的。
 
 > 运行产物落 `phase02/runs/<p2-run-id>/`（已 gitignore，不入库）。
