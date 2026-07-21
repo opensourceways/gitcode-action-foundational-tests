@@ -25,7 +25,7 @@
 
 - **来源**：Phase 01 通过 DoD 验收后，`runs/<run-id>/cases/yaml/*.yaml`
 - **格式**：符合 `phase01/schema/executable-case.schema.yaml` 的 YAML 文件
-- **消费方**：所有脚本（schema-validator → yaml-compiler → workflow-runner → assertion-engine → report-builder）
+- **消费方**：主链路（schema_check → run_case[preflight 检查+执行] → assertion_engine → report_builder）；yaml-compiler 为**检查器**（合规检查，不编译）
 - **缺失影响**：无输入则无法执行——这是 Phase 02 的唯一合法输入。
 - **版本追踪**：执行时记录 Phase 01 run-id + YAML 文件 hash 清单 → `runs/<run-id>/run.md`
 
@@ -80,7 +80,7 @@
   - `core-concepts/variables-secrets-context-expressions.md`（secrets/表达式）
   - `COMPAT-NOTES.md`（已知兼容性差异）
   - `examples/`（官方示例）
-- **消费方**：yaml-compiler（编译 YAML 的权威语法依据）、failure-analyst（对照规格判断产品 bug）
+- **消费方**：yaml-compiler 检查器（合规检查的权威语法依据）、failure-analyst（对照规格判断产品缺陷）、run_case 的 preflight（VALIDATION-RULES 来源）
 - **Phase 02 直接引用 Phase 01 的文件。**
 
 ### 8. 平台配置（建议）

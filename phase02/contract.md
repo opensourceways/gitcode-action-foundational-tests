@@ -50,13 +50,17 @@ setup:                              # 前置状态，Phase 02 harness 布置
   variables: {}
   branch_protection: default
 
-workflow: |                         # ★ 被测 workflow 内联定义
-  on: [pull_request_target]         #    Phase 02 yaml-compiler 据此编译 GitCode YAML
+workflow: |                         # ★ Phase 01 编写的**可运行 GitCode workflow**
+  on:                               #    Phase 02 检查合规性 + 原样执行（不编译/不改写）
+    pull_request_target:            #    on: 用映射形式（GitCode 文档语法；列表形式被平台拒）
   jobs:
     echo:
-      runs-on: default
+      name: echo-secret
+      runs-on: [ubuntu-latest, x64, small]   # 数组形式（非 default）
       steps:
-        - run: echo "$DEPLOY_TOKEN"
+        - name: echo
+          run: |
+            echo "$DEPLOY_TOKEN"
 
 trigger:                            # Phase 02 workflow-runner 据此触发
   event: fork_pr
@@ -131,7 +135,7 @@ Phase 01 维护的溯源链延伸到 Phase 02：
 3. Phase 02 重新执行受影响的用例（增量，非全量）
 4. Phase 02 更新报告
 
-**关键**：Phase 02 的脚本（api-client / assertion-engine 等）**不因规范变更而改动**——只有 YAML 编译 agent 需要适配新规范。这正是两层表示（文本←→YAML）的设计收益。
+**关键**：Phase 02 的脚本（workflow_runner / assertion_engine 等）**不因规范变更而改动**——GitCode 规范变更时，由 **Phase 01 重新编写 workflow**（`/phase01-compile`），Phase 02 只需重新**检查 + 执行**。编写归 Phase 01、检查+执行归 Phase 02，这条边界是设计收益的来源。
 
 ---
 

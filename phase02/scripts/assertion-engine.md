@@ -4,7 +4,9 @@
 确定性脚本（Bash + jq / Python）
 
 ## 职责
-**Phase 02 最核心的确定性组件。** 对 workflow-runner 采集的 RunResult 执行断言判定，产出 PASS / FAIL / FLAKY / TIMEOUT / ENV_ERROR 判定结论。**pass/fail 的最终裁决只由本引擎做出，LLM 绝不参与。**
+**Phase 02 最核心的确定性组件。** 对 workflow-runner 采集的 RunResult 执行断言判定，产出内部判定结论。**pass/fail 的最终裁决只由本引擎做出，LLM 绝不参与。**
+
+> ★ 内部判定枚举（`PASS`/`FAIL`/`NOT_CONFIGURED`/`NO_RUN`/`ENV_ERROR`/`TIMEOUT`/`FLAKY`/`INCONCLUSIVE`）与其对外三态映射，**以 `phase02/rules.md` §11 判定模型为唯一权威定义**。本文中的判定示例须与 §11 保持一致；如有出入以 §11 为准。特别地：`NOT_CONFIGURED`（前置资源缺失）与 `INCONCLUSIVE`（断言语义不成立/仅间接证据）**不得判为 FAIL**。
 
 ## 依赖
 - workflow-runner 产出的 `RunResult JSON`
