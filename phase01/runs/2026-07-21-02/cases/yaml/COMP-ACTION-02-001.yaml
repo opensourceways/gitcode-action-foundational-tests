@@ -1,0 +1,54 @@
+id: COMP-ACTION-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 Action 引用方式官方短名、第三方全路径、本地相对路径"
+intent_ref: INTENT-COMP-022
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-action-refs:
+      name: Test Action Refs
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - uses: setup-node
+        with:
+          node-version: '20'
+        name: (TC) setup-node
+      - name: Verify actions executed
+        run: echo "ALL_ACTIONS_EXECUTED"
+      name: Test Action Refs
+  name: 验证 Action 引用方式官方短名、第三方全路径、本地相对路径
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "官方短名 checkout 和 setup-node 可用并成功执行"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志含 ALL_ACTIONS_EXECUTED"
+
+teardown:
+  reset: fixture

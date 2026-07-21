@@ -1,0 +1,70 @@
+id: REL-CONTERR-02-001
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "continue-on-error: true 后 job 失败不阻断 workflow 但下游 if: success() 不满足"
+intent_ref: INTENT-REL-028
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    job-a:
+      continue-on-error: true
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - run: exit 1
+      name: Job A
+    job-b:
+      needs: job-a
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - run: echo "JOB_B_SHOULD_BE_SKIPPED"
+      name: Job B
+    job-c:
+      needs: job-a
+      if: ${{ always }}
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - run: echo "JOB_C_ALWAYS_EXECUTED"
+      name: Job C
+  name: 'continue-on-error: true 后 job 失败不阻断 workflow 但下游 i'
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "job-a 失败但不中止 workflow 整体"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "job-b 状态为 skipped（默认 if: success() 不满足）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "job-c（if: always()）状态为 success，日志含 JOB_C_ALWAYS_EXECUTED"
+
+teardown:
+  reset: fixture

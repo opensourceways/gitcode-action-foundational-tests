@@ -1,0 +1,61 @@
+id: SEC-JOB-ISOLATE-02-001
+dimensions: [security, reliability]
+dimension: security
+priority: P1
+title: "同主机 Runner 并发 job 间的隔离（进程/文件/环境互不可见）"
+intent_ref: INTENT-SEC-033
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Concurrent Job Isolation
+  on:
+  - push
+  jobs:
+    isolate-a:
+      name: Isolate A
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Create marker
+        run: |
+          echo "A_MARKER" > /tmp/isolate_marker.txt
+          echo "PID_A=$$"
+    isolate-b:
+      name: Isolate B
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Check isolation
+        run: |
+          if [ -f /tmp/isolate_marker.txt ]; then
+            echo "ISOLATION_BROKEN"
+          else
+            echo "ISOLATION_INTACT"
+          fi
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志出现 ISOLATION_INTACT"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志不出现 ISOLATION_BROKEN"
+
+teardown:
+  reset: fixture

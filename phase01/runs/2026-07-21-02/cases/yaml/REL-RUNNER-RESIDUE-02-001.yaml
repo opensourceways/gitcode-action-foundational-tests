@@ -1,0 +1,62 @@
+id: REL-RUNNER-RESIDUE-02-001
+dimensions: [reliability, security]
+dimension: reliability
+priority: P1
+title: "托管 Runner 跨 job 复用的残留污染——去 flaky 隔离验证"
+intent_ref: INTENT-REL-033
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Runner Residue Check
+  on:
+  - push
+  jobs:
+    residue-a:
+      name: Residue A
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Write marker
+        run: |
+          echo "RESIDUE_MARKER" > /tmp/residue_marker.txt
+          echo "ENV_A=123" >> $ATOMGIT_ENV
+    residue-b:
+      name: Residue B
+      needs: residue-a
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Check residue
+        run: |
+          if [ -f /tmp/residue_marker.txt ]; then
+            echo "RESIDUE_FOUND"
+          else
+            echo "NO_RESIDUE"
+          fi
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志出现 NO_RESIDUE"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志不出现 RESIDUE_FOUND"
+
+teardown:
+  reset: fixture

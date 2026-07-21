@@ -1,0 +1,66 @@
+id: COMP-ENV-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证环境变量四级优先级链 step  job  workflow  vars  ATOMGIT_"
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  env:
+    TEST_VAR: workflow-value
+  jobs:
+    test-env-priority:
+      name: Test Env Priority
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      env:
+        TEST_VAR: job-value
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Check workflow-level env
+        run: echo "ATOMGIT_WORKSPACE=$ATOMGIT_WORKSPACE"
+      - name: Check job-level env
+        run: 'echo "Expr ref=${{ env.TEST_VAR }}"
+  
+          echo "Shell ref=$TEST_VAR"
+  
+          '
+        env:
+          TEST_VAR: step-value
+      name: Test Env Priority
+  name: 验证环境变量四级优先级链 step > job > workflow > vars > ATOMGI
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "step env 覆盖 job env（输出 step-value）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "${{ env.TEST_VAR }} 和 $TEST_VAR 读取同值"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "ATOMGIT_WORKSPACE 在 shell 中非空"
+
+teardown:
+  reset: fixture

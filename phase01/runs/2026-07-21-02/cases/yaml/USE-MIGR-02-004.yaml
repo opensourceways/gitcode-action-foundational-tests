@@ -1,0 +1,47 @@
+id: USE-MIGR-02-004
+dimensions:
+  - usability
+  - compatibility
+dimension: usability
+priority: P1
+title: "uses: actions/checkoutv4 等 GitHub 风格内置 action 引用在 GitCode 下的行为与报错"
+intent_ref: INTENT-USE-017
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    test-github-style-uses:
+      name: Test Github Style Uses
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - uses: actions/checkout@v4
+        name: (TC) actions/checkoutv4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+        name: (TC) actions/setup-nodev4
+      - run: echo "Test"
+      name: Test Github Style Uses
+  name: 'uses: actions/checkout@v4 等 GitHub 风格内置 action 引用在'
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "使用 actions/checkout@v4 等 GitHub 风格引用时应报错，且错误消息提示 GitCode 等价短名写法（如 'use checkout instead of actions/checkout@v4'）"
+
+teardown:
+  reset: fixture

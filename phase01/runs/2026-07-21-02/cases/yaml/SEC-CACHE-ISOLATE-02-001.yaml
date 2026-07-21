@@ -1,0 +1,52 @@
+id: SEC-CACHE-ISOLATE-02-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "cache key 跨项目/跨仓库作用域隔离（无横向污染）"
+intent_ref: INTENT-SEC-020
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Cross Repo Cache Isolation
+  on:
+  - push
+  jobs:
+    cache-write:
+      name: Cache Write
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Write cache
+        uses: cache
+        with:
+          key: cross-repo-isolation-test
+          path: ./cached-data.txt
+      - name: Create cache data
+        run: echo "REPO_A_SECRET_DATA" > cached-data.txt
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    cross_repo_check: "true"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "同仓库第二次运行出现 CACHE_HIT"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "跨仓库运行不出现 REPO_A_SECRET_DATA"
+
+teardown:
+  reset: fixture

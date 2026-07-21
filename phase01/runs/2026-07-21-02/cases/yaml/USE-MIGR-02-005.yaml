@@ -1,0 +1,46 @@
+id: USE-MIGR-02-005
+dimensions:
+  - usability
+  - compatibility
+dimension: usability
+priority: P1
+title: "workflow_dispatch inputs 使用 GitHub 支持的非 string 类型时的行为与报错"
+intent_ref: INTENT-USE-018
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        dry_run:
+          type: boolean
+          default: true
+          description: Dry run mode
+  jobs:
+    test:
+      name: Test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - run: echo "Boolean input test"
+      name: Test
+  name: workflow_dispatch inputs 使用 GitHub 支持的非 string 类型时
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "使用 type: boolean 时应明确报错，且错误消息指出 'GitCode 仅支持 string 类型'——不应静默将 boolean 当 string 处理"
+
+teardown:
+  reset: fixture

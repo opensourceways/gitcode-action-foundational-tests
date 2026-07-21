@@ -1,0 +1,52 @@
+id: COMPAT-RUNNER-NAME-02-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "RUNNER_OS/ARCH 双命名混乱——RUNNER_* vs ATOMGIT_RUNNER_* 及 GitHub 对齐"
+intent_ref: INTENT-COMPAT-033
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Runner Name Confusion
+  on:
+  - push
+  jobs:
+    runner-name:
+      name: Runner Name
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Check runner OS names
+        run: |
+          echo "RUNNER_OS=$RUNNER_OS"
+          echo "ATOMGIT_RUNNER_OS=$ATOMGIT_RUNNER_OS"
+      - name: Check runner ARCH names
+        run: |
+          echo "RUNNER_ARCH=$RUNNER_ARCH"
+          echo "ATOMGIT_RUNNER_ARCH=$ATOMGIT_RUNNER_ARCH"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "至少一个 OS 变量非空"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "至少一个 ARCH 变量非空"
+
+teardown:
+  reset: fixture

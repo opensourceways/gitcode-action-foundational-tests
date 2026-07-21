@@ -1,0 +1,60 @@
+id: SEC-DISK-LEAK-02-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "共享盘（/tmp、workspace）不跨 job 泄露敏感文件"
+intent_ref: INTENT-SEC-026
+
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DISK_TEST_SECRET"]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Disk Leak Test
+  on:
+  - push
+  jobs:
+    disk-a:
+      name: Disk A
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Write secret to tmp
+        run: echo "${{ secrets.DISK_TEST_SECRET }}" > /tmp/disk_secret.txt
+    disk-b:
+      name: Disk B
+      needs: disk-a
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Check tmp file
+        run: |
+          if [ -f /tmp/disk_secret.txt ]; then
+            echo "DISK_LEAK_FOUND"
+          else
+            echo "DISK_NO_LEAK"
+          fi
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志出现 DISK_NO_LEAK"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志不出现 DISK_LEAK_FOUND"
+
+teardown:
+  reset: fixture
