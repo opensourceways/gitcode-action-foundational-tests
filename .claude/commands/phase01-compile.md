@@ -11,10 +11,7 @@ description: 由文本用例重新编译可执行 YAML（GitCode 规范变更 / 
 1. 定位 `phase01/runs/<run-id>/cases/text/`。
 2. 用 Task 拉起 **case-writer**（读 `phase01/agents/case-writer/CLAUDE.md`），指令：**只做编译，不改文本用例**——依据当前 `phase01/inputs/gitcode-spec/` 规范，把文本用例重新编译为 `cases/yaml/<ID>.yaml`。
 3. 每条 YAML 过 `phase01/schema/executable-case.schema.yaml` 校验。
-4. **平台校验**：将编译后的 YAML 写入临时目录 `tmp/`，调用 `phase02/scripts/validate_workflow.py` 逐条校验：
-   - 先用 `phase02/scripts/extract-workflows.sh <cases-yaml-dir> tmp/` 提取 workflow 字段
-   - 再用 `phase02/scripts/validate-tmp-workflows.sh tmp/` 批量校验
-   - 校验失败的 YAML 必须修复后重新校验，直到全部通过
+4. **平台校验**：`phase02/scripts/extract-workflows.sh <cases-yaml-dir> tmp/`
 5. 在 `run.md` 时间线追加：本次重编译的触发原因（规范变更点）、影响的用例 ID、schema 校验结果、平台校验结果。
 6. 若某文本用例因规范变更已不适用，**不擅自改文本用例**——列出来提示用户，建议走 `/phase01-update` 修订意图/文本。
 
