@@ -1,4 +1,4 @@
-# GitCode Actions 外部测试策略
+# GitCode Actions 测试策略
 
 ## 1. 目的与边界
 
