@@ -13,32 +13,26 @@ setup:
   branch_protection: default
 
 workflow: |
+  name: USE-DOC-02-003-runner-context
   on:
-  - push
+    workflow_dispatch:
+
   jobs:
     check-runner-values:
-      name: Check Runner Values
+      name: check-runner-values
       runs-on: [ubuntu-latest, x64, small]
       steps:
-      - name: Output and compare runner context
-        run: 'echo "runner.os=${{ runner.os }}"
-  
-          echo "runner.arch=${{ runner.arch }}"
-  
-          echo "runner.name=${{ runner.name }}"
-  
-          echo "---"
-  
-          echo "Expected (per docs): runner.os=Linux, runner.arch=X64"
-  
-          echo "Actual:    runner.os=${{ runner.os }}, runner.arch=${{ runner.arch }}"
-  
-          '
-      name: Check Runner Values
-  name: 文档声明的 runner.os / runner.arch 返回值与平台实际返回值的一致性
+        - name: 输出 runner 上下文并对比文档声明
+          run: |
+            echo "runner.os=${{ runner.os }}"
+            echo "runner.arch=${{ runner.arch }}"
+            echo "runner.name=${{ runner.name }}"
+            echo "---"
+            echo "Expected (per docs): runner.os=Linux, runner.arch=X64"
+            echo "Actual:    runner.os=${{ runner.os }}, runner.arch=${{ runner.arch }}"
 
 trigger:
-  event: push
+  event: workflow_dispatch
   as: maintainer
 
 fault_injection: null
@@ -50,7 +44,7 @@ assertions:
     rubric: "runner.os 和 runner.arch 返回值与文档声明完全一致（字符串精确匹配，大小写敏感）"
   - type: negative
     target: run_logs
-    eval: "determistic"
+    eval: "deterministic"
     rubric: "若实际值为 linux（全小写）而文档声明为 Linux，则为 FAIL"
 
 teardown:

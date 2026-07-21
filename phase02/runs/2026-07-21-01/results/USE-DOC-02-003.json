@@ -1,0 +1,29 @@
+{
+  "case_id": "USE-DOC-02-003",
+  "title": "文档声明的 runner.os / runner.arch 返回值与平台实际返回值的一致性",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-009",
+  "phase02_run": "2026-07-21-01",
+  "start_time": 1784618192,
+  "end_time": 1784618205,
+  "duration_seconds": 13,
+  "verdict": "PASS",
+  "gitcode_run_id": "39af8f0103874545bb80432d96600386",
+  "run_conclusion": "COMPLETED",
+  "job_count": 1,
+  "assertion_results": [
+    {
+      "type": "positive",
+      "target": "run_logs",
+      "pass": true,
+      "rubric": "runner.os 和 runner.arch 返回值与文档声明完全一致（字符串精确匹配，大小写敏感）"
+    },
+    {
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "rubric": "若实际值为 linux（全小写）而文档声明为 Linux，则为 FAIL"
+    }
+  ]
+}

@@ -26,7 +26,7 @@ properties:
     minLength: 1
   intent_ref:
     type: string
-    pattern: "^INTENT-(COMP|COMPAT|REL|SEC|USE)-[0-9]+$"
+    pattern: "^INTENT-(COMP|COMPAT|REL|SEC|USE|ACT)-[0-9]+$"
   setup:
     type: object
     required: [repo_fixture]

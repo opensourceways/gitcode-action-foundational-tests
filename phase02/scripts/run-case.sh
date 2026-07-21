@@ -6,6 +6,7 @@ set -euo pipefail
 CASE_YAML="${1:?Usage: $0 <case-yaml-path> <run-id>}"
 RUN_ID="${2:?}"
 : ${GITCODE_ACCESS_TOKEN:?请设置 GITCODE_ACCESS_TOKEN}
+: ${GITCODE_EXECUTOR:?请设置 GITCODE_EXECUTOR（GitCode 用户名，v8 Actions API 必填）}
 : ${GITCODE_API_BASE_URL:="https://api.gitcode.com"}
 : ${GITCODE_OWNER:="ComputingActionTest"}
 : ${GITCODE_REPO:="foundational-tests"}
@@ -16,7 +17,7 @@ RUN_ID="${2:?}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS_DIR="${SCRIPT_DIR}/../runs/${RUN_ID}/results"
 mkdir -p "$RESULTS_DIR"
-VENV_PY="source /tmp/phase02-venv/bin/activate && python3"
+VENV_PY="/tmp/phase02-venv/bin/python3"
 
 _log() { echo "[$(date +%H:%M:%S)] $*"; }
 
@@ -39,7 +40,9 @@ wf = c.get('workflow', '') or ''
 print(f'export WORKFLOW_FILE="/tmp/workflow-case.yml"')
 with open('/tmp/workflow-case.yml', 'w') as wf_f:
     wf_f.write(wf)
-print(f'export ASSERTIONS_JSON=\'{json.dumps(c.get("assertions", []), ensure_ascii=False)}\'')
+print(f'export ASSERTIONS_FILE=\"/tmp/case-assertions.json\"')
+with open('/tmp/case-assertions.json', 'w') as af:
+    json.dump(c.get("assertions", []), af, ensure_ascii=False)
 PYEOF
 
 source "$ENV_FILE"
@@ -75,11 +78,11 @@ sleep 8
 RUN_ID_GC=""
 ELAPSED=0
 while [ $ELAPSED -lt $TIMEOUT_SECONDS ]; do
-  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&per_page=3&branch=${GITCODE_BRANCH}")
-  RUN_ID_GC=$(echo "$RESP" | python3 -c "import sys,json; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0]['id'] if runs else '')" 2>/dev/null || echo "")
+  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=3&branch=${GITCODE_BRANCH}")
+  RUN_ID_GC=$(echo "$RESP" | python3 -c "import sys,json; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0].get('workflow_run_id','') if runs else '')" 2>/dev/null || echo "")
 
   if [ -n "$RUN_ID_GC" ]; then
-    DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}")
+    DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
     STATUS=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
     _log "Run #${RUN_ID_GC}: $STATUS ($((ELAPSED))s)"
 
@@ -99,17 +102,28 @@ if [ -z "$RUN_ID_GC" ] || [ $ELAPSED -ge $TIMEOUT_SECONDS ]; then
   LOGS=""
   _log "TIMEOUT after ${TIMEOUT_SECONDS}s"
 else
-  RUN_CONCLUSION=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('conclusion',''))" 2>/dev/null || echo "?")
+  RUN_CONCLUSION=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "?")
 
   # ── 4. Collect ────────────────────────────────────
-  JOBS_RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}/jobs?access_token=${GITCODE_ACCESS_TOKEN}")
-  JOB_COUNT=$(echo "$JOBS_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)" 2>/dev/null || echo "0")
+  JOBS_RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}/jobs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
+  JOB_COUNT=$(echo "$JOBS_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); jobs=d.get('jobs',[]); print(len(jobs))" 2>/dev/null || echo "0")
 
   LOGS=""
   if [ "$JOB_COUNT" -gt 0 ]; then
-    JOB_IDS=$(echo "$JOBS_RESP" | python3 -c "import sys,json; print(','.join(str(j['id']) for j in json.load(sys.stdin)))" 2>/dev/null)
+    JOB_IDS=$(echo "$JOBS_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(','.join(str(j['id']) for j in d.get('jobs',[])))" 2>/dev/null)
     for jid in $(echo "$JOB_IDS" | tr ',' ' '); do
-      JOB_LOG=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}/jobs/${jid}/download-log?access_token=${GITCODE_ACCESS_TOKEN}" 2>/dev/null || echo "")
+      JOB_LOG_ZIP="/tmp/job-${jid}-log.zip"
+      curl -sS -L -o "$JOB_LOG_ZIP" "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}/jobs/${jid}/download_log?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}" 2>/dev/null
+      JOB_LOG=$($VENV_PY -c "
+import zipfile
+try:
+    with zipfile.ZipFile('${JOB_LOG_ZIP}') as z:
+        for name in z.namelist():
+            print(z.read(name).decode('utf-8', errors='replace'))
+except Exception as e:
+    print(f'[LOG_ERROR: {e}]')
+" 2>/dev/null || echo "")
+      rm -f "$JOB_LOG_ZIP"
       LOGS="${LOGS}
 === JOB #${jid} ===
 ${JOB_LOG}"
@@ -118,11 +132,15 @@ ${JOB_LOG}"
   _log "Collected ${JOB_COUNT} job(s), $(echo "$LOGS" | wc -l) log lines"
 
   # ── 5. Assert ─────────────────────────────────────
+  LOGS_FILE="/tmp/case-logs-${CASE_ID}.txt"
+  echo "$LOGS" > "$LOGS_FILE"
   ASSERT_RESULTS=$($VENV_PY << PYEOF
 import json, sys
-logs = """${LOGS}"""
+with open('${LOGS_FILE}', 'r') as f:
+    logs = f.read()
 conclusion = "${RUN_CONCLUSION}"
-assertions = json.loads('${ASSERTIONS_JSON}')
+with open('${ASSERTIONS_FILE}', 'r') as f:
+    assertions = json.load(f)
 
 results = []
 for a in assertions:
@@ -139,12 +157,12 @@ for a in assertions:
         elif 'TEST_VAR' in rubric:
             passed = 'TEST_VAR' in logs
         else:
-            passed = conclusion == 'success' and len(logs) > 100
+            passed = conclusion == 'COMPLETED' and len(logs) > 100
     elif target == 'run_status':
-        expected = a.get('equals', 'success')
+        expected = a.get('equals', 'COMPLETED')
         passed = (conclusion == expected)
     else:
-        passed = conclusion == 'success'
+        passed = conclusion == 'COMPLETED'
 
     results.append({'type': atype, 'target': target, 'pass': passed, 'rubric': rubric})
 
@@ -152,7 +170,9 @@ all_pass = all(r['pass'] for r in results)
 print(json.dumps({'verdict': 'PASS' if all_pass else 'FAIL', 'results': results}, ensure_ascii=False))
 PYEOF
 )
+  rm -f "$LOGS_FILE"
   VERDICT=$(echo "$ASSERT_RESULTS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('verdict','ERROR'))" 2>/dev/null || echo "ERROR")
+  echo "$ASSERT_RESULTS" > /tmp/case-assert-results.json
 fi
 
 # ── 6. Write result ─────────────────────────────────────
@@ -161,6 +181,8 @@ DURATION=$((END_TIME - START_TIME))
 
 $VENV_PY << PYEOF
 import json
+with open('/tmp/case-assert-results.json', 'r') as f:
+    ar = json.load(f)
 result = {
   'case_id': '${CASE_ID}',
   'title': '${CASE_TITLE}',
@@ -175,7 +197,7 @@ result = {
   'gitcode_run_id': '${RUN_ID_GC:-}',
   'run_conclusion': '${RUN_CONCLUSION:-}',
   'job_count': ${JOB_COUNT:-0},
-  'assertion_results': json.loads('''${ASSERT_RESULTS:-{"results":[]}}''')['results']
+  'assertion_results': ar.get('results', [])
 }
 with open('${RESULTS_DIR}/${CASE_ID}.json', 'w') as f:
     json.dump(result, f, indent=2, ensure_ascii=False)

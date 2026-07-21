@@ -2,3 +2,4 @@
 .idea/
 .playwright-mcp/
 __pycache__
+.env
