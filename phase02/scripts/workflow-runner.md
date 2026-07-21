@@ -42,6 +42,11 @@ git push origin <branch>
 
 ### 阶段二：触发
 
+> ⚠️ **实测约束（见 `phase02/PLATFORM-NOTES.md` §2）**：在测试仓库上 **push 不会可靠自动触发**流水线
+> （所有 `event=PUSH` 的 run 都 ~1s 失败或不创建 run），**只有手动触发 / `workflow_dispatch` 能真正跑起来**
+> （PILOT-BASIC #1、USE-DOC-02-003 #2 均为 Manual → COMPLETED）。而 `workflow_dispatch` 的 dispatch API
+> 目前全部 404、PAT 只能读不能触发。**批量执行前触发方式必须先定**。下方 `push` 分支按现状不可靠。
+
 根据 `trigger.event` 选择触发方式：
 
 ```bash
@@ -59,7 +64,8 @@ case "$TRIGGER_EVENT" in
     ;;
   manual)
     # 调 API 手动触发 workflow_dispatch
-    # 注：GitCode API 是否支持 workflow_dispatch 需确认，若无则用 tag/push 替代
+    # ★ 实测：dispatch API 全部 404（v8/v5 均试），PAT 触发不了。当前只能网页登录后点「运行工作流」。
+    #   平台真正的 dispatch 接口待确认；确认前 manual 无法脚本化。见 PLATFORM-NOTES.md §2。
     RUN_ID=$(trigger_manual "$OWNER" "$REPO" "$WORKFLOW_ID")
     ;;
   schedule)

@@ -81,27 +81,72 @@ jobs:
 
 ---
 
-## 4. `if:` 表达式必须使用 `${{ }}` [平台实测]
+## 4. `if:` 表达式：`${{ }}` 包裹 + `always()` 带括号 [平台实测 2026-07-21]
 
-```yaml
-# ❌ 裸关键字
-if: always
+⚠️ **官方文档与平台部署的校验器不一致，以平台实测为准。** 官方 `configure-conditional-execution.md`
+写裸关键字 `${{ always }}`，但 ComputingActionTest 仓库实测部署的校验器**拒绝**裸关键字，只认 `always()`（带括号）。
 
-# ✅ 函数调用格式
-if: ${{ always() }}
-```
+实测结果（pilot 3 版 push 的网页校验错误，API 把错误藏在 `message:null`，须看网页 UI）：
 
-常见转换：
-- `always` → `${{ always() }}`
-- `success()` → `${{ success() }}`
-- `failure()` → `${{ failure() }}`
-- `cancelled()` → `${{ cancelled() }}`
+| 写法 | 平台校验结果 |
+|---|---|
+| `if: ${{ always() }}` | ✅ **接受**（目前唯一确认可用的状态函数） |
+| `if: ${{ always }}`（文档写法·裸） | ❌ 拒绝：`表达式：always 第1位出现不支持的关键字` |
+| `if: ${{ failed }}`（文档写法·裸） | ❌ 拒绝：`表达式：failed 第1位出现不支持的关键字` |
+| `if: ${{ success() }}` | ❌ 拒绝：`表达式：success() 第1位出现不支持的函数` |
+
+- ✅ **清理/兜底步骤**（无论成败都执行）用 `if: ${{ always() }}`。
+- ⚠️ **success / failure 门控暂无确认可用写法**：文档的裸 `success`/`failed` 与 GitHub 的 `success()` 平台都拒。
+  未实测确认前，**不要写状态门控**；需要条件时改用 `${{ atomgit.* }}` 显式表达式
+  （如 `if: ${{ atomgit.ref == 'refs/heads/main' }}`）或 job 级 `needs`。
+- ⚠️ 表达式函数 `startsWith()` / `contains()` / `endsWith()` 带括号——是否被平台接受同样待实测。
+
+> 教训：曾据官方文档把本规则从 `always()` 改成裸 `always`，随后 pilot 实测证明平台拒绝裸关键字——
+> **文档在此处是错的，平台校验器才是 ground truth。** 已改回 `always()`。
+
+---
+
+## 4b. `uses:` Action 引用格式 [官方文档]
+
+三种合法引用（`writing-pipelines/using-actions.md`）：
+
+| 类型 | 语法 | 例 |
+|---|---|---|
+| 官方插件 | **裸插件名** | `uses: checkout` / `uses: setup-node` / `uses: cache` |
+| 开源插件 | `owner/repo[/path]@ref` | `uses: docker/build-push-action@v6` |
+| 本仓 Action | `./path` | `uses: ./.gitcode/actions/my-action` |
+
+- ❌ **禁止 `official_` 前缀**：GitCode 官方插件就是裸名。`official_checkout` 不是合法语法，应写 `checkout`。
+- ❌ **禁止 GitHub 内置全名** `actions/checkout@v4` / `actions/setup-node@v4`——**除非**该用例本身在测 GitHub 格式是否报错（COMPAT 负向用例，须在 rubric 明示预期报错）。
+- 已知官方内置插件名：`checkout` `setup-node` `setup-go` `setup-java` `setup-python` `cache` `upload-artifact` `download-artifact`。
+- 云集成类插件（OBS/SWR/k8s/docker 登录等）exact 名称以 **GitCode 插件市场**为准；未确认前用 hyphen 命名（如 `obs-upload`）并登记 spec-gap，**勿臆造**。
 
 ---
 
 ## 5. Job steps 数量限制 ≤ 16 [平台限制]
 
 超出 16 个 step 必须拆分 job（加 `-b`、`-c` 后缀）。
+
+---
+
+## 4c. 单行 `run:` 含冒号必须用 block scalar `|` [平台实测 2026-07-21]
+
+GitCode 的 workflow 解析器对**单行 `run:` 值里的冒号**会误判为嵌套映射，即使值已用双引号包裹也报错：
+`Nested mappings are not allowed in compact mappings`。
+
+```yaml
+# ❌ 单行 run 含冒号 → 平台报 Nested mappings 错误（双引号也救不了）
+- name: demo
+  run: echo "ALWAYS_OK: done"
+
+# ✅ 用 block scalar |（多行）——已实测通过
+- name: demo
+  run: |
+    echo "ALWAYS_OK: done"
+```
+
+规则：**所有 `run:` 一律写成 `run: |` block scalar**（哪怕只有一行）。这样冒号、引号、`$` 全部安全。
+来源：pilot `pilot-format.yml` 实测（line 19 冒号触发该错误，改 block scalar 后消失）。
 
 ---
 
