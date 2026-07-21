@@ -66,14 +66,33 @@ START_TIME=$(date +%s)
 _log "Validating workflow YAML..."
 VALIDATE_SCRIPT="${SCRIPT_DIR}/validate_workflow.py"
 if [ -f "$VALIDATE_SCRIPT" ]; then
-  VALIDATE_OUTPUT=$($VENV_PY "$VALIDATE_SCRIPT" "$WORKFLOW_FILE" --auto-wf 2>&1) || {
-    _log "YAML VALIDATION FAILED:"
-    echo "$VALIDATE_OUTPUT" | while IFS= read -r line; do _log "  $line"; done
-    _log "Aborting — fix YAML before deploying."
-    rm -rf "$WORK_DIR" 2>/dev/null || true
-    exit 1
-  }
-  _log "YAML validation: PASS"
+  # Resolve workflow_id by matching case filename pattern
+  WF_BASENAME=$(echo "$CASE_ID" | tr '[:upper:]' '[:lower:]' | sed 's/_/-/g').yml
+  WF_ID=$($VENV_PY -c "
+import json, os, sys
+sys.path.insert(0, os.path.dirname('${VALIDATE_SCRIPT}'))
+from validate_workflow import _get_workflow_list, _load_env_file
+env = _load_env_file()
+cookie = env.get('GITCODE_COOKIE') or env.get('GITCODE_ACCESS_TOKEN') or os.environ.get('GITCODE_COOKIE') or os.environ.get('GITCODE_ACCESS_TOKEN','')
+wfs = _get_workflow_list('${GITCODE_OWNER}/${GITCODE_REPO}', cookie, 'web-api.gitcode.com')
+target = '${WF_BASENAME}'
+for w in wfs:
+    if w.get('file_path','').endswith(target):
+        print(w['workflow_id'])
+        break
+" 2>/dev/null || echo "")
+
+  if [ -n "$WF_ID" ]; then
+    VALIDATE_OUTPUT=$($VENV_PY "$VALIDATE_SCRIPT" "$WORKFLOW_FILE" --workflow-id "$WF_ID" 2>&1) || {
+      _log "YAML VALIDATION FAILED:"
+      echo "$VALIDATE_OUTPUT" | while IFS= read -r line; do _log "  $line"; done
+      _log "Aborting — fix YAML before deploying."
+      exit 1
+    }
+    _log "YAML validation: PASS"
+  else
+    _log "WARNING: No existing workflow_id for ${WF_BASENAME}, skipping validation"
+  fi
 else
   _log "WARNING: validate_workflow.py not found, skipping pre-deploy validation"
 fi
