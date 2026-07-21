@@ -15,7 +15,11 @@
 - `phase01/templates/text-case.md`、`executable-case.yaml`、`phase01/schema/`
 - `phase01/schema/VALIDATION-RULES.md`（**★ 编译校验规则——写入每个 YAML 前的强制自检清单**。基于 GitCode 平台实测，含 runner 格式、job name、step 非法字符、if 表达式、steps 上限、on: boolean 陷阱等 12 条规则。遵守即可一次通过 schema check + 平台校验。）
 - `phase01/inputs/gitcode-spec/`（编译 YAML 时的语法依据）
-- `phase01/inputs/gitcode-spec/examples/`（**★ GitCode 官方示例**：编译 YAML 时**必须参考**这 6 份官方 workflow 样例——go-ci / java-gradle-ci / java-maven-ci / nodejs-ci / python-ci / pr-code-check-example。它们展示了 GitCode 真实支持的语法：`runs-on: {ubuntu-24,x64,small}` 格式、`uses: checkout`（非 `actions/checkout@v4`）、`concurrency: {max, exceed-action}`（非 GitHub group 模型）、`${{ atomgit.* }}` context、`$ATOMGIT_*` 环境变量、`pull_request` types 命名等。**你编译的 YAML 必须与此格式一致，不可照搬 GitHub Actions 语法。**）
+- `phase01/inputs/gitcode-spec/examples/`（**★ GitCode 官方示例**：编译 YAML 时**必须参考**这 6 份官方 workflow 样例——go-ci / java-gradle-ci / java-maven-ci / nodejs-ci / python-ci / pr-code-check-example。它们展示了 GitCode 真实支持的语法：`uses: checkout`（裸插件名，**非** `actions/checkout@v4`，**非** `official_checkout`）、`concurrency: {max, exceed-action}`（非 GitHub group 模型）、`${{ atomgit.* }}` context、`$ATOMGIT_*` 环境变量、`pull_request` types 命名等。**你编译的 YAML 必须与此格式一致，不可照搬 GitHub Actions 语法。**
+    ⚠️ **两处 examples/ 与规范文档不一致，以规范文档为准**（`phase01/schema/VALIDATION-RULES.md` 权威）：
+    (1) `runs-on` 用**数组** `[ubuntu-latest, x64, small]`（canonical `writing-pipelines/configure-jobs.md` + demo 实测），examples/ 里的 `{ubuntu-24,x64,small}` 花括号是个例，勿用；
+    (2) `if:` 状态**实测只认 `${{ always() }}`（带括号）**——平台拒绝文档里的裸 `${{ always }}`/`${{ failed }}`，也拒绝 `${{ success() }}`；success/failure 门控暂无可用写法，需要条件改用 `${{ atomgit.* }}` 显式表达式。详见 `VALIDATION-RULES.md` §4。
+    另外：所有 `run:` 一律用 `run: |` block scalar（单行含冒号会触发 `Nested mappings` 错误，见 §4c）。）
 - `phase01/inputs/gitcode-api/api-reference.md`（**API 参考**：编译 YAML 时，若断言可经 API 确定性判定——如检查 run status、下载 job 日志验证内容——在 assert 块中标注可用的 API 端点与参数）
 - `phase01/rules.md`（命名、优先级、断言、脱敏、溯源纪律。★ 特别注意 §9b 全集原则）
 
