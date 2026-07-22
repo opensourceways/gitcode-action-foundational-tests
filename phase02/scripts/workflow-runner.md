@@ -4,7 +4,13 @@
 确定性脚本（Bash + git + api-client）
 
 ## 职责
-执行用例链路中的「③ 部署 + 触发」和「④ 等待 + 采集」。负责将 yaml-compiler 产出的 workflow YAML 部署到测试仓库、按 trigger 方式触发执行、轮询等待完成、采集全量结果。
+执行用例链路中的「部署 + 触发」和「等待 + 采集」。将 Phase 01 契约的 `workflow:` 部署到测试仓库、按 trigger 方式触发、轮询等待、采集结果、teardown 清理。**实现见 `workflow_runner.py`（本 .md 为规格说明，以 .py 为准）。**
+
+> ★ **触发适配器归属本模块（确定性），不交给任何 LLM agent。** 建 PR / 建 tag / dispatch 等
+> 触发前置操作都是机械的 git/API 操作，必须可复现、可 CI（headless），故锁在这里。各 trigger
+> 事件的支持状态见 `workflow_runner.py` 的 `TRIGGER_STATUS`：`push` 已实现；`tag`/`manual`/`pr`/
+> `fork_pr`/`schedule` 为扩展点（需先验证 GitCode 对应 API/身份/cron，未实现前 → INCONCLUSIVE +
+> 具体原因）。LLM agent 只做**只读**辅助（yaml-checker 检查、failure-analyst 归因），绝不做触发变更操作。
 
 ## 依赖
 - `api-client` 脚本（调用 GitCode API）
@@ -14,7 +20,7 @@
 
 ## 输入
 - 用例 YAML（单条）
-- 编译后的 workflow YAML 文件内容（由 yaml-compiler 产出）
+- 编译后的 workflow YAML 文件内容（由 yaml-checker 产出）
 - 测试仓库上下文：`{ owner, repo, branch, fixture_type }`（由 env-manager 提供）
 - API token（环境变量）
 

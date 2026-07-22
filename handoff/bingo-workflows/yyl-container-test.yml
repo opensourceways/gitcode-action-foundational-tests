@@ -1,0 +1,27 @@
+name: yyl container test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_273_x86:
+    name: TC-273 x86 container
+    runs-on: [dedicate-hosted, x64, large]
+    container:
+      image: alpine:3.20
+    steps:
+      - name: assert Alpine container
+        run: |
+          test -f /etc/alpine-release
+          printf 'x86_container_ok=true\n'
+
+  tc_273_arm:
+    name: TC-273 arm container
+    runs-on: [dedicate-hosted, arm64, large]
+    container:
+      image: alpine:3.20
+    steps:
+      - name: assert Alpine container
+        run: |
+          test -f /etc/alpine-release
+          printf 'arm_container_ok=true\n'

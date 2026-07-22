@@ -1,0 +1,21 @@
+name: yyl TC-533 env vs vars
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_533_test:
+    name: TC-533 env vs vars
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      YYL_TEST: env_value
+    steps:
+      - name: TC-533 verify env overrides vars
+        run: |
+          printf 'shell_val=%s\n' "${YYL_TEST:-UNSET}"
+          printf 'env_val=%s\n' "${{ env.YYL_TEST }}"
+          printf 'vars_val=%s\n' "${{ vars.YYL_TEST }}"
+          test "${{ env.YYL_TEST }}" = "env_value"
+          test "${{ vars.YYL_TEST }}" = "1234"
+          test "${YYL_TEST:-}" = "env_value"
+          printf 'env_overrides_vars=true\n'

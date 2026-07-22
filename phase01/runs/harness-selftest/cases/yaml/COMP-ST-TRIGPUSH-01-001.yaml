@@ -1,0 +1,39 @@
+id: COMP-ST-TRIGPUSH-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: "push 事件触发并可读 event_name（harness 自测）"
+intent_ref: INTENT-COMP-387
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  name: COMP-ST-TRIGPUSH-01-001
+  on:
+    push:
+      branches: [main]
+  jobs:
+    assert:
+      name: push-event-name
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: assert push event name non-empty
+          env:
+            EV: ${{ atomgit.event_name }}
+          run: |
+            echo "event_name=[$EV]"
+            test -n "$EV"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "job/step 成功即证 push 触发并可读 atomgit.event_name"
+teardown:
+  reset: fixture

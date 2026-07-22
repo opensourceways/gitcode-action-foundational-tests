@@ -1,0 +1,16 @@
+name: yyl TC-009 isolation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tc_009_secret_isolation:
+    name: TC-009 secret isolation
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      SECRET_VAL: ${{ secrets.YYL_TEST }}
+    steps:
+      - name: TC-009 assert project secret not available in other project
+        run: |
+          test -z "$SECRET_VAL"
+          printf 'cross_project_secret_unavailable=true\n'

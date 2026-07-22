@@ -1,0 +1,40 @@
+id: SEC-ST-SETENV-01-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "废弃 set-env 命令默认不传播（harness 自测）"
+intent_ref: INTENT-SEC-355
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  name: SEC-ST-SETENV-01-001
+  on:
+    push:
+      branches: [main]
+  jobs:
+    assert:
+      name: set-env-disabled
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: emit deprecated set-env
+          run: |
+            echo "::set-env name=TC355_PROBE::leaked"
+        - name: assert set-env did not propagate
+          run: |
+            echo "probe=[${TC355_PROBE:-UNSET}]"
+            test -z "${TC355_PROBE:-}"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "废弃的 ::set-env:: 不应传播到后续 step 环境（TC355_PROBE 应为空）；step 成功即证未传播"
+teardown:
+  reset: fixture

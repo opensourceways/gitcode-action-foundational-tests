@@ -7,26 +7,27 @@
 ## 0. 角色与编排机制
 
 - 编排者：Claude Code（主会话）读取本文件与各命令，**调用确定性脚本**执行主链路，**用 Task 工具拉起 agent** 做 LLM 辅助工作。
-- 脚本**串行**执行（同一用例的环境准备→编译→触发→采集→断言→清理不可并行）；不同用例之间**可并行**（互不依赖）。
+- 脚本**串行**执行（同一用例的检查→触发→采集→断言→清理不可并行）；不同用例之间**可并行**（互不依赖）。
 - 关键处设 **STOP**：校验不通过 / 安全事件 / 全量失败率超阈值时暂停，等人工决策。
+- ★ 边界：**编写 workflow 归 Phase 01**；Phase 02 只**检查 + 执行**，不编译/不改写 workflow。
 
 ```
-Phase 01 YAML 用例
+Phase 01 YAML 用例（含 Phase 01 编写的可运行 workflow）
         │
         ▼
 [闸门] /phase02-schema-check ── 拒收清单 → Phase 01
         │
         ▼
 [执行] /phase02-exec
-        │  逐条用例：
-        │  ① 环境准备 (env-manager)
-        │  ② YAML 编译 (yaml-compiler agent)
-        │  ③ 部署 + 触发 (workflow-runner)
-        │  ④ 等待 + 采集 (workflow-runner)
-        │  ⑤ 断言判定 (assertion-engine)
-        │  ⑥ 落库 (report-builder)
-        │  ⑦ 清理 (env-manager)
-        │  ⑧ 如需 → 失败分析 (failure-analyst agent)
+        │  逐条用例（run_case.py，读契约的 workflow 原样执行）：
+        │  ① workflow 合规检查 (preflight_validate + 可选 yaml-checker 检查器)
+        │       └─ 不合规 → COMPILE_ERROR，不 push，回报 Phase 01
+        │  ② 部署 + 触发 (workflow_runner)
+        │  ③ 等待 + 采集（v8 download_log zip） (workflow_runner)
+        │  ④ 断言判定 (assertion_engine, §11)
+        │  ⑤ 落库 (run_case)
+        │  ⑥ 清理 teardown：删本次 push 的 workflow 文件 (workflow_runner)
+        │  ⑦ 如需 → 失败根因初判 (failure-analyst 子 agent)
         ▼
    runs/<run-id>/results/
         │
@@ -76,63 +77,41 @@ runs/<run-id>/
 
 每条用例按以下链路串行执行：
 
+> ★ 由 `run_case.py` 编排；workflow 直接取自 Phase 01 契约的 `workflow:` 字段（Phase 02 不编译/不改写）。
+
 ```
-① 环境准备 (env-manager)
-   ├─ 读取 setup.repo_fixture → 创建/重置临时仓库
-   ├─ 配置 setup.secrets / setup.variables
-   ├─ 设置 setup.branch_protection
-   ├─ 获得 owner/repo 标识
-   └─ 产出：测试仓库上下文 { owner, repo, branch }
+① workflow 合规检查 (preflight_validate；可选 yaml-checker 检查器)
+   ├─ 取契约的 workflow: 字段（Phase 01 编写的可运行 workflow）
+   ├─ 本地确定性检查：on: 映射形式、run: 冒号、runs-on 数组、step name、steps≤16、vars.* 等
+   ├─ 不合规 → 判 COMPILE_ERROR，不 push，回报 Phase 01（不代改）
+   └─ (可选) 加载断言绑定 sidecar compiled/<id>.asserts.json（rubric→kind+夹具明文）
 
-② YAML 编译 (yaml-compiler agent)
-   ├─ 读用例 YAML 的 workflow: 字段
-   ├─ 读 trigger 字段确定文件路径/触发方式
-   ├─ 编译为符合 GitCode 规范的 .gitcode/workflows/<name>.yml
-   ├─ 处理：事件映射、runner 标签、secrets 引用、表达式适配
-   └─ 产出：完整的 GitCode workflow YAML 文件内容
+② 部署 + 触发 (workflow_runner)
+   ├─ 将契约 workflow 原样写入 .gitcode/workflows/<case-id>.yml（git push）
+   ├─ 按 trigger.event 触发（当前主支持 push；pr/fork_pr/manual/schedule 待扩展）
+   └─ 产出：本次 push 的 head_sha + 文件名（用于精确匹配 run）
 
-③ 部署 + 触发 (workflow-runner)
-   ├─ 将 workflow YAML 写入仓库（git push）
-   ├─ 按 trigger.event 选择触发方式：
-   │   push → git push 自然触发
-   │   pr / fork_pr → 创建 PR（按 trigger.as 切换身份）
-   │   manual → 调 API 手动触发
-   │   schedule → 配置 cron 等待
-   │   tag → 创建 tag 触发
-   ├─ 记录 run_id（从 API 响应或 git push 返回获取）
-   └─ 产出：GitCode run_id
+③ 等待 + 采集 (workflow_runner)
+   ├─ 轮询 /actions/runs，按 (head_sha AND file_path) **精确匹配**本次 run（共享仓防抓错）
+   ├─ 超时控制（默认 300s，用例级可覆盖）
+   ├─ 终态后：list_jobs（stages.jobs[].id）取 job/step 状态 + v8 download_log(zip) 取日志正文
+   └─ 产出：RunResult { status, conclusion, jobs[], logs, ... }
 
-④ 等待 + 采集 (workflow-runner)
-   ├─ 轮询 GET /api/v8/repos/:owner/:repo/actions/runs/:run_id
-   ├─ 超时控制（默认 30 min，用例级可覆盖）
-   ├─ 状态变为 COMPLETED/FAILED/CANCELED 后：
-   │   ├─ 获取 run 详情（状态/结论/耗时）
-   │   ├─ 获取 job 列表 + 每个 job 详情
-   │   ├─ 下载全量日志
-   │   └─ 列出 artifacts
-   ├─ 如有 fault_injection：在 at 时机执行注入动作
-   └─ 产出：RunResult { status, conclusion, duration, jobs, logs, artifacts }
+④ 断言判定 (assertion_engine, §11)
+   ├─ 逐条判定：mask/leak/value/status/run_status/config_probe（确定性，LLM 不参与）
+   ├─ 假绿守卫：无 job/step 或空日志不得判 PASS
+   └─ 产出：verdict ∈ §11 枚举 + assertion_results[]
 
-⑤ 断言判定 (assertion-engine)
-   ├─ 逐条 assertions 判定：
-   │   positive → 比对 status/产物/退出码
-   │   negative → 全文扫描日志（secret 泄露/越权）
-   │   nonfunctional → 阈值比对/并发隔离/错误信息
-   ├─ 安全用例 extra check：日志中 secret 占位符是否被遮蔽
-   ├─ 判定结论：PASS / FAIL / FLAKY / TIMEOUT / ENV_ERROR
-   └─ 产出：AssertionResult[] + 总体判定
+⑤ 落库 (run_case)
+   └─ 写 results/<case-id>.json + .md；合并 summary.json；更新 state.json（供 status 中途查看）
 
-⑥ 落库 (report-builder 局部)
-   └─ 将 RunResult + AssertionResult[] 写入 results/<case-id>.md
+⑥ 清理 teardown (workflow_runner)
+   ├─ fixture / full_instance → 删除本次 push 的 workflow 文件并 push（防仓库污染）
+   └─ none → 保留
 
-⑦ 清理 (env-manager)
-   ├─ fixture → 删除临时仓库
-   ├─ full_instance → 触发实例全量重置（IaC）
-   └─ none → 跳过
-
-⑧ 失败分析（条件触发）
-   └─ 若判定为 FAIL → 调 failure-analyst agent 做根因初判
-      分类：产品 bug / 用例问题 / 环境问题 / 需人工判断
+⑦ 失败归因（条件触发，LLM 辅助，不改判定）
+   └─ 若 FAIL → 派 failure-analyst 子 agent 根因初判
+      分类：产品缺陷 / 用例问题 / 环境问题 / 文档缺口（以 GitCode 文档为准绳）
 ```
 
 ### 2.3 并发控制

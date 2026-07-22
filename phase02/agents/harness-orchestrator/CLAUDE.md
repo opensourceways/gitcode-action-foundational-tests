@@ -21,7 +21,7 @@
 3. **逐用例分派**：
    - 同一维度内串行分派
    - 不同维度可并行（最多 N 并发）
-   - 每条用例调用完整的执行链路（env-manager → yaml-compiler → workflow-runner → assertion-engine → report-builder → env-manager）
+   - 每条用例调用完整的执行链路（env-manager → yaml-checker → workflow-runner → assertion-engine → report-builder → env-manager）
 4. **异常处理**：
    - API 5xx/网络超时 → 重试（最多 2 次），超过标记 `ENV_ERROR`
    - 环境重置失败 → **阻断**后续用例，标记当前 run `aborted`

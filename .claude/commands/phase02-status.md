@@ -1,79 +1,32 @@
-# /phase02-status — 查看 Phase 02 执行进度
+# /phase02-status — 查看执行进度（可中途查看）
 
 ## 用途
-查看当前或某次 Phase 02 run 的执行进度与结果摘要。不执行任何操作，只读。
+查看某个 Phase 02 run 的当前进度快照。**可在 `/phase02-exec` 执行过程中随时运行**——因为 `run_batch.py` 每跑完一条就增量更新 `state.json`，本命令只读该状态，不阻塞、不干扰正在进行的执行。
 
-## 何时使用
-- 执行过程中想了解进度
-- 执行完成后想看结果摘要
-- 对比多次 run 的结果
+## 如何中途查看
+`/phase02-exec` 是一次较长的批量真跑。想看进度时，**另开一个终端/会话**输入 `/phase02-status <run-id>` 即可看到「已完成 n/m、当前正在跑哪条、暂态判定分布」。状态随执行实时推进。
 
-## 执行步骤
-
-1. **确定目标 run**：若用户未指定 run-id，自动选最新的 Phase 02 run。
-
-2. **读取状态**：
-   - 读 `runs/<run-id>/run.md` 获取：状态（running/completed/aborted）、开始时间、总用例数
-   - 读 `runs/<run-id>/queue.md` 获取：执行队列及各用例状态
-   - 读 `runs/<run-id>/summary.json`（如存在）获取：统计汇总
-
-3. **计算进度**：
-   - 已执行 n / 总 m 条
-   - 暂态通过率
-   - 预估剩余时间（基于已完成用例的平均耗时）
-
-4. **输出快照**：
-
-```
-## Phase 02 执行状态 · <run-id>
-
-**状态**: 🟢 running
-**开始时间**: 2026-07-20 14:30
-**已运行**: 45m
-
-### 进度
-▓▓▓▓▓▓▓▓▓▓▓░░░░░░░ 65/120 (54.2%)
-
-### 暂态统计
-| 指标 | 数值 |
-|---|---|
-| ✅ 通过 | 55 |
-| ❌ 失败 | 5 |
-| ⏱️ 超时 | 2 |
-| 🔧 环境错误 | 1 |
-| ⏳ 等待执行 | 55 |
-
-### 暂态分维度通过率
-| 维度 | 完成/总数 | 通过率 |
-|---|---|---|
-| security | 14/14 | 78.5% ⛔ |
-| completeness | 20/40 | 95.0% ✅ |
-| compatibility | 15/30 | 93.3% ✅ |
-| reliability | 10/20 | 90.0% ✅ |
-| usability | 6/16 | 83.3% ✅ |
-
-### 最近失败
-| 时间 | 用例 ID | 判定 |
-|---|---|---|
-| 15:12 | SEC-INJ-01-003 | FAIL |
-| 15:08 | REL-TIMEOUT-01-001 | TIMEOUT |
-
-### 预估剩余
-~30 分钟 (基于平均 42s/条)
-```
-
-5. **若已完成**：展示最终统计 + 门禁结论 + 报告路径。
+## 确定性内核
+`phase02/scripts/status.py`（只读 `state.json` + `summary.json` + `queue.json`）。
 
 ## 参数
-- `<run-id>`：Phase 02 run-id（可选，默认最新）
-- `--dims`：只显示指定维度的统计
-- `--failures`：只显示失败用例详情
+- `<phase02-run-id>`：要查看的批次 id（必需）
+
+## 执行步骤
+```
+python phase02/scripts/status.py <phase02-run-id>
+```
+展示：
+- 状态（ready / running / completed）
+- 进度条 `done/total` + 百分比
+- 当前正在执行的用例（running 时）
+- 暂态判定累计（PASS/FAIL/NOT_CONFIGURED/…）
+- 最近几条结果
+
+## 输出
+- 终端进度快照（不写文件）
 
 ## 示例
 ```
-/phase02-status                       # 查看最新 run
-/phase02-status 2026-07-20-01         # 指定 run
-/phase02-status --dims security       # 只看安全维度
-/phase02-status --failures            # 只看失败详情
-/phase02-status all                   # 列出所有历史 run
+/phase02-status 2026-07-21-10      # 查看进度（执行中或完成后均可）
 ```

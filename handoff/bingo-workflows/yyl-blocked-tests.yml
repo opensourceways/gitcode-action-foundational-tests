@@ -1,0 +1,73 @@
+name: yyl blocked tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  tc_008_org_secret:
+    name: TC-008 org secret
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      SECRET_VAL: ${{ secrets.SECRET_ORG }}
+    steps:
+      - name: TC-008 assert org secret available
+        run: |
+          test "$SECRET_VAL" = "org_secret"
+          printf 'org_secret_present=true\n'
+
+  tc_005_org_var:
+    name: TC-005 org variable
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-005 assert org variable available
+        run: |
+          value="${{ vars.ORG_VAR }}"
+          test "$value" = "org_value"
+          printf 'org_var_value=%s\n' "$value"
+          printf 'org_var_present=true\n'
+
+  tc_007_project_var_override:
+    name: TC-007 project var override
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-007 assert project var overrides org var
+        run: |
+          value="${{ vars.DUP }}"
+          test "$value" = "project_value"
+          printf 'resolved_dup=%s\n' "$value"
+          printf 'project_var_override=true\n'
+
+  tc_194_vars_precedence:
+    name: TC-194 vars precedence
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: TC-194 assert project vars override org vars
+        run: |
+          value="${{ vars.DUP }}"
+          test "$value" = "project_value"
+          test "$value" != "org_value"
+          printf 'resolved_dup=%s\n' "$value"
+          printf 'vars_precedence_confirmed=true\n'
+
+  tc_195_secret_precedence:
+    name: TC-195 secret precedence
+    runs-on: [ubuntu-latest, x64, small]
+    env:
+      SECRET_VAL: ${{ secrets.DUP }}
+    steps:
+      - name: TC-195 assert project secret overrides org secret
+        run: |
+          test "$SECRET_VAL" = "project_secret"
+          printf 'project_secret_override=true\n'
+
+  tc_391_schedule:
+    name: TC-391 schedule test
+    runs-on: [ubuntu-latest, x64, small]
+    if: ${{ always() }}
+    steps:
+      - name: TC-391 verify schedule event created run
+        run: |
+          printf 'event_name=%s\n' "${{ atomgit.event_name }}"
+          printf 'schedule_run_created=true\n'

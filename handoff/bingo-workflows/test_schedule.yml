@@ -1,0 +1,17 @@
+name: test-schedule
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  test:
+    name: Schedule Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show schedule event
+        run: |
+          echo "Event: ${{ atomgit.event_name }}"
+          echo "Schedule Test - cron schedule works!"

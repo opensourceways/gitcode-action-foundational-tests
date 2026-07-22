@@ -37,11 +37,30 @@ api_list_jobs <owner> <repo> <run_id> [per_page] [page]
 api_get_job <owner> <repo> <run_id> <job_id>
 # GET /api/v8/repos/:owner/:repo/actions/runs/:run_id/jobs/:job_id
 
-# 下载 job 日志
+# 下载 job 日志（★ 端点名是 download_log 下划线，不是 download-log 连字符）
 api_download_job_log <owner> <repo> <run_id> <job_id> [output_file]
-# GET /api/v8/repos/:owner/:repo/actions/runs/:run_id/jobs/:job_id/download-log
-# 返回: 日志文本
+# GET /api/v8/repos/:owner/:repo/actions/runs/:run_id/jobs/:job_id/download_log
+# ✅ 2026-07-21 实测可用：返回 302 → raw.gitcode.com → 200 application/zip
+#    zip 内每个 step 一个 `{seq}_{step_name}.log`（UTF-8 无 BOM），内容为完整 runner 输出。
 ```
+
+> **日志正文取法（已跑通，用 OAuth token，无需浏览器会话）**
+>
+> ```
+> GET /api/v8/repos/:owner/:repo/actions/runs/:run_id/jobs/:job_id/download_log?access_token=<TOKEN>
+> → 302 重定向到 raw.gitcode.com → 200 application/zip
+> → 解压：每 step 一个 .log 文件
+> ```
+> **三个坑（都踩过）**：
+> 1. 端点名 **`download_log`（下划线）** 才对；`download-log`（连字符）恒 404——早期只测连字符导致误判"平台缺陷"。
+> 2. 必须**跟随 302 重定向**（curl -L / urllib 默认跟随）；不跟只看到 302 空响应。
+> 3. job id：`/actions/runs/{run}/jobs` 的 `jobs[].id` 在某些场景为空串；以 **run detail 的 `stages.jobs[].id`** 为准更可靠。
+>
+> - 鉴权：**OAuth token**（`?access_token=`），不需要浏览器 cookie，不受 WAF、不会几天过期。
+> - 封装见 **`log_fetcher.py`**（`list_jobs` / `download_job_log_zip` / `fetch_job_logs` / `render_job_logs`）。
+> - 已验证**掩码真实生效**（secret 值在日志显示为 `***`）→ 负向 `must_not_contain_secret` 与掩码类用例可确定性判定。
+>
+> ⚠️ 旧方案（web-api.gitcode.com + 浏览器 Bearer/cookie + 过 WAF）**已废弃**——它能用但依赖会过期的浏览器会话。zip 方案只需 OAuth token，更稳，取代之。
 
 ### Artifacts（制品）
 
