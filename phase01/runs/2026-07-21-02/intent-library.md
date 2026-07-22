@@ -203,3 +203,97 @@
 | INTENT-USE-023 | [usability] | workflow 命令注解 ::error::/::warning:: 能否在运行详情中可见并定位 | 可观测性（testing-focus §9）；risk-register 模板态 | — | 待定 |
 | INTENT-USE-024 | [usability] | PR 场景状态回写（Checks/commit status）到 PR 页的可见性与可理解性 | 可观测性 + PR 工作流迁移（testing-focus §9/§11）；ri | — | 待定 |
 | INTENT-USE-025 | [usability] | inputs 默认值在 shell 中以 ${var} 直接引用（真实样本写法）是否可用/失败可诊断 | 迁移摩擦 + 静默空值陷阱（testing-focus §1/§11）；risk | — | 待定 |
+
+---
+
+## 增量更新补充（/phase01-update · 2026-07-21 第1轮）
+
+> 本次补充针对 `coverage.md` 高严重度盲区 BLIND-07 与 BLIND-08，由 reliability + compat-diff agent 并行发散，局部门禁后准入。
+
+### 稳定性增补（3 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 对齐方向 | 门禁 |
+|---|---|---|---|---|---|
+| INTENT-REL-034 | [reliability, completeness] | cron 表达式运算符边界——标准运算符生效、静默忽略或报错 | BLIND-07 高严重度；历史 TC-471~474/505-512 NEEDS-UPDATE | 一致性（POSIX cron 语义） | **准入(P1)** |
+| INTENT-REL-035 | [reliability] | schedule 最小调度间隔 enforcement——低于 5 分钟的拒绝/排队/降级行为 | BLIND-07 高严重度；历史 TC-429 NEEDS-UPDATE | 一致性（规格声明 5min 阈值） | **准入(P1)** |
+| INTENT-REL-036 | [reliability, completeness] | schedule 触发收敛与取消语义——Scheduler 修复后调度运行可达终态 | BLIND-07 高严重度；历史 TC-391/427-430 NEEDS-UPDATE | 一致性（C-TRIG-08 + C-EXEC-24） | **准入(P1)** |
+
+### 兼容性增补（3 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 对齐方向 | 门禁 |
+|---|---|---|---|---|---|
+| INTENT-COMPAT-062 | [compatibility, reliability] | RUNNER_* / ATOMGIT_* 系统变量 Shell 真实注入回归验证——历史 TC-441/442/206 FAIL 重验 | BLIND-08 高严重度；历史 TC-441/442/206 FAIL | 一致性（系统变量应默认注入且可读） | **准入(P1)** |
+| INTENT-COMPAT-063 | [compatibility, reliability] | env > vars 优先级链在 Shell 中的真实覆盖回归验证——历史 TC-533「env 不注入 Shell」重验 | BLIND-08 高严重度；历史 TC-533/534 FAIL | 一致性（env 三级覆盖 + vars 不直接介入） | **准入(P1)** |
+| INTENT-COMPAT-064 | [compatibility, reliability] | 缺失系统变量引用行为与注入时机验证——「未定义报错 vs 空串」及「启动前注入 vs 延迟注入」 | BLIND-08 高严重度；历史 TC-206 FAIL | 一致性（缺失变量空串、启动前注入、不可覆盖） | **准入(P1)** |
+
+### 补充统计（第1轮）
+
+| 项目 | 数值 |
+|---|---|
+| 新增 intent | 6 |
+| 准入 | 6（P1=6） |
+| 打回 | 0 |
+| 合并 | 0 |
+| **第1轮后 intent 总数** | **166**（原 160 + 新增 6） |
+
+---
+
+## 增量更新补充（/phase01-update · 2026-07-21 第2轮）
+
+> 用户要求补齐所有剩余盲区。BLIND-04 标为 out-of-scope（action 开发侧）。> 由 reliability/security/completeness/compatibility/usability 五维度 agent 并行发散，局部门禁后准入。
+
+### 稳定性增补（4 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 门禁 |
+|---|---|---|---|---|
+| INTENT-REL-037 | [reliability] | 手动取消时运行中 step 进程的终止信号与 grace period 行为 | BLIND-01 高严重度；历史 #39/TC-391 | **准入(P1)** |
+| INTENT-REL-038 | [reliability] | 取消后运行终态收敛与 runner 资源释放时限 | BLIND-01 高严重度；历史 #39/TC-391 | **准入(P1)** |
+| INTENT-REL-039 | [reliability] | preemption 抢占触发条件——事件匹配范围与作用域边界 | BLIND-11 中严重度 | **准入(P1)** |
+| INTENT-REL-040 | [reliability] | preemption 被抢占 job/run 的终态、日志完整性与 runner 释放时效 | BLIND-11 中严重度 | **准入(P1)** |
+
+### 安全性增补（4 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 门禁 |
+|---|---|---|---|---|
+| INTENT-SEC-037 | [security, completeness] | 验证保护分支上下文标志 `atomgit.ref_protected` 的可用性与正确性 | BLIND-05 中严重度 | **准入(P1)** |
+| INTENT-SEC-038 | [security, reliability] | 验证环境保护 wait timer 倒计时期间环境 Secret 不可访问 | BLIND-11 中严重度 | **准入(P1)** |
+| INTENT-SEC-039 | [security] | 验证私有 container 镜像拉取凭证的安全传递与日志不泄露 | BLIND-02 高严重度；历史 TC-273 | **准入(P1)** |
+| INTENT-SEC-040 | [security, completeness] | 验证 container 运行时 step 对宿主机环境变量/Secret 的隔离有效性 | BLIND-02 高严重度 | **准入(P1)** |
+
+### 完备性增补（5 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 门禁 |
+|---|---|---|---|---|
+| INTENT-COMP-009 | [completeness, security] | 验证 job 级 container 自定义镜像执行能力（含私有镜像认证） | BLIND-02 高严重度；历史 TC-273 FAIL | **准入(P1)** |
+| INTENT-COMP-010 | [completeness, compatibility] | 验证 matrix include 向已有组合追加额外变量及新增组合的正确展开 | BLIND-03 中严重度；历史 TC-325-328 | **准入(P1)** |
+| INTENT-COMP-011 | [completeness, compatibility] | 验证 matrix exclude 排除特定组合后剩余组合的正确性 | BLIND-03 中严重度；历史 TC-325-328 | **准入(P1)** |
+| INTENT-COMP-012 | [completeness, compatibility] | 验证 matrix 动态 runs-on——不同组合是否调度到对应 Runner 标签 | BLIND-03 中严重度 | **准入(P1)** |
+| INTENT-COMP-013 | [completeness, usability] | 验证 atomgit.actor 存在性与上下文种类数一致性（12 种声明 vs 实际表） | BLIND-10 中严重度 | **准入(P1)** |
+
+### 兼容性增补（3 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 对齐方向 | 门禁 |
+|---|---|---|---|---|---|
+| INTENT-COMPAT-065 | [compatibility] | matrix include/exclude 展开语义与动态 runs-on 兼容性 | BLIND-03 中严重度 | 一致性 + 差异确认 | **准入(P1)** |
+| INTENT-COMPAT-066 | [compatibility] | 表达式函数 format 边界行为——参数不足/过剩、转义、非字符串参数 | BLIND-09 中严重度 | 一致性 | **准入(P1)** |
+| INTENT-COMPAT-067 | [compatibility] | 表达式函数 substring/replace/toJson 边界行为——越界、全局/首匹配、JSON 输出格式 | BLIND-09 中严重度 | 差异确认 + 一致性 | **准入(P1)** |
+
+### 易用性增补（2 条）
+
+| 意图 ID | 维度标签 | 标题 | 优先级线索 | 门禁 |
+|---|---|---|---|---|
+| INTENT-USE-026 | [usability] | Step Summary 可写性与可见性 | BLIND-06 低严重度 | **准入(P2)** |
+| INTENT-USE-027 | [usability] | Badge 状态徽标可用性 | BLIND-06 低严重度 | **准入(P2)** |
+
+### 补充统计（第2轮）
+
+| 项目 | 数值 |
+|---|---|
+| 新增 intent | 18 |
+| 准入 | 18（P1=16 / P2=2） |
+| 打回 | 0 |
+| 合并 | 0 |
+| out-of-scope | 1（BLIND-04） |
+| **更新后 intent 总数** | **184**（原 160 + 第1轮 6 + 第2轮 18） |
+
+*更新原因：补齐 coverage.md 全部剩余盲区（BLIND-01/02/03/05/06/09/10/11），BLIND-04 判 out-of-scope。*

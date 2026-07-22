@@ -1,0 +1,58 @@
+id: USE-BADGE-02-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: "Workflow 状态徽标 badge SVG 的可用性、分支过滤与状态同步及时性"
+intent_ref: INTENT-USE-027
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    badge-test:
+      name: Badge Test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Pass marker
+        run: echo "BADGE_TEST_PASS"
+      name: Badge Test
+
+  name: Workflow 状态徽标 badge SVG 的可用性
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    badge_url_template: "https://gitcode.com/{owner}/{repo}/workflows/{workflow_name}/badge.svg"
+    observe_refresh: true
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: badge_response
+    eval: deterministic
+    rubric: "badge URL 返回有效 SVG，且状态文本/颜色与最近运行结果一致"
+  - type: negative
+    target: badge_response
+    eval: deterministic
+    rubric: "运行状态变更后 badge 不应长期显示旧状态"
+  - type: nonfunctional
+    target: badge_response
+    eval: deterministic
+    rubric: "分支过滤参数若支持则返回对应分支状态；不支持则文档明确说明"
+  - type: nonfunctional
+    target: documentation
+    eval: llm_assisted
+    rubric: "badge 嵌入文档的清晰度与分支过滤支持的够用程度"
+
+teardown:
+  reset: fixture

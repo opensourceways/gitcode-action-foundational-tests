@@ -1,0 +1,69 @@
+id: COMPAT-VAR-02-001
+dimensions:
+  - compatibility
+  - reliability
+dimension: compatibility
+priority: P1
+title: "RUNNER_* / ATOMGIT_* 系统变量 Shell 真实注入回归验证"
+intent_ref: INTENT-COMPAT-062
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    sysenv-inject:
+      name: Sysenv Inject
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - name: Echo RUNNER and ATOMGIT variables
+        run: |
+          echo "RUNNER_OS=$RUNNER_OS"
+          echo "RUNNER_ARCH=$RUNNER_ARCH"
+          echo "RUNNER_NAME=$RUNNER_NAME"
+          echo "RUNNER_TEMP=$RUNNER_TEMP"
+          echo "RUNNER_TOOL_CACHE=$RUNNER_TOOL_CACHE"
+          echo "RUNNER_ENVIRONMENT=$RUNNER_ENVIRONMENT"
+          echo "ATOMGIT_RUNNER_OS=$ATOMGIT_RUNNER_OS"
+          echo "ATOMGIT_RUNNER_ARCH=$ATOMGIT_RUNNER_ARCH"
+          echo "ATOMGIT_REPOSITORY_OWNER=$ATOMGIT_REPOSITORY_OWNER"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "RUNNER_OS 输出非空且为预期值（如 Linux）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "RUNNER_ARCH 输出非空且为预期值（如 X64）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "RUNNER_NAME、RUNNER_TEMP、RUNNER_TOOL_CACHE、RUNNER_ENVIRONMENT 均非空"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "ATOMGIT_RUNNER_OS、ATOMGIT_RUNNER_ARCH、ATOMGIT_REPOSITORY_OWNER 均非空"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现未定义变量提示或空值输出（历史 TC-441/442/206 不应复现）"
+
+teardown:
+  reset: none

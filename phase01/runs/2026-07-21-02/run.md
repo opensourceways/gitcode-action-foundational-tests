@@ -39,3 +39,11 @@
 | 阶段B完成 | case-writer 增量生成完成：新增 **45 条用例**（SEC 14 / COMPAT 25 / REL 4 / USE 2）；总用例数 **173 条**；无编译失败；产出 case-manifest.md |
 | → 验收 | 进入 STOP②：生成 `coverage.md` + `dod-checklist.md`；DoD 7 项全绿 |
 | STOP② 确认 | 用户确认交付；接受 11 项盲区为已知遗留（4 项高严重度待下轮补齐）；状态→**delivered** |
+| /phase01-update | 用户要求补齐高严重度盲区 BLIND-07 + BLIND-08；并行拉起 reliability + compat-diff agent 发散 intent |
+| 阶段A-补充 | reliability-supplement.md（REL-034~036）+ compat-supplement.md（COMPAT-062~064）生成，共 **6 条 intent** |
+| 局部门禁 | 6 条补充 intent 全部准入 P1，无打回；intent-library.md 追加补充章节；旧盲区结论标 **superseded** |
+| 局部展开完成 | case-writer 对 6 条准入 intent 增量生成完成：新增 **6 条用例**（REL 3 / COMPAT 3）；总用例数 **179 条**；无编译失败；coverage.md 与 dod-checklist.md 已更新；BLIND-07/08 标已覆盖 |
+| /phase01-update 第2轮 | 用户要求补齐所有剩余盲区；BLIND-04 标 out-of-scope；并行拉起 reliability/security/completeness/compatibility/usability 五维度 agent |
+| 阶段A-补充完成 | 五维度补充 intent 全部完成：reliability 4 / security 4 / completeness 5 / compatibility 3 / usability 2 = **18 条 intent** |
+| 局部门禁 | 18 条补充 intent 全部准入（P1=16 / P2=2），无打回；intent-library.md 已追加第2轮补充章节；BLIND-01/02/03/05/06/09/10/11 标已覆盖 |
+| 局部展开完成 | case-writer 对 18 条准入 intent 增量生成完成：新增 **18 条用例**（REL 4 / SEC 4 / COMP 5 / COMPAT 3 / USE 2）；总用例数 **197 条**；无编译失败；coverage.md 声明**零盲区**；dod-checklist.md 追加第2轮记录 |

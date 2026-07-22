@@ -2,8 +2,8 @@
 
 > 阶段 B 产出全集 = 历史复用 + 本轮新增 + DEPRECATE 记录。
 > 历史复用 = 上轮 Run 2026-07-20-02 的 128 条用例（已复制到本轮 cases/）。
-> 本轮新增 = 45 条（SEC 14 + COMPAT 25 + REL 4 + USE 2）。
-> 总用例数 = 173 条。
+> 本轮新增 = 69 条（SEC 18 + COMPAT 31 + REL 11 + USE 4 + COMP 5，含第1轮增量 6 条 + 第2轮增量 18 条）。
+> 总用例数 = 197 条。
 
 ---
 
@@ -89,6 +89,26 @@
 | USE-PR-CHECKS-02-001 | INTENT-USE-024 | P2 | PR 场景状态回写（Checks/commit status）到 PR 页的可见性与可理解性 |
 | USE-INPUTS-DEFAULT-02-001 | INTENT-USE-025 | P2 | inputs 默认值在 shell 中以 ${var} 直接引用是否可用/失败可诊断 |
 
+### 2.5 增量更新补充（6 条）
+
+> 本次增量更新针对 6 条新准入 intent 展开，均来自 Run 2026-07-21-02 补充意图库。
+
+#### 稳定性（3 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| REL-CRON-02-001 | INTENT-REL-034 | P1 | cron 表达式运算符边界——标准运算符生效、非标准运算符处理与非法格式拒绝 |
+| REL-SCHED-02-001 | INTENT-REL-035 | P1 | schedule 最小调度间隔 enforcement——低于 5 分钟的拒绝/排队/降级行为 |
+| REL-CONV-02-001 | INTENT-REL-036 | P1 | schedule 触发收敛与取消语义——Scheduler 修复后调度运行可达终态 |
+
+#### 兼容性（3 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| COMPAT-VAR-02-001 | INTENT-COMPAT-062 | P1 | RUNNER_* / ATOMGIT_* 系统变量 Shell 真实注入回归验证 |
+| COMPAT-VAR-02-002 | INTENT-COMPAT-063 | P1 | env > vars 优先级链在 Shell 中的真实覆盖回归验证 |
+| COMPAT-VAR-02-003 | INTENT-COMPAT-064 | P1 | 缺失系统变量引用行为与注入时机验证 |
+
 ---
 
 ## 3. DEPRECATE 记录
@@ -110,17 +130,67 @@
 
 | 类别 | 数量 |
 |---|---|
-| 准入 intent（独立展开） | 109 |
+| 准入 intent（独立展开） | 127 |
 | 合并变体（随母展开） | 12 |
 | 已有基底覆盖（复用） | 14 |
 | 打回 | 4 |
-| **输入 intent 总数** | **160** |
+| **输入 intent 总数** | **178** |
+
+#### 增量更新第2轮补充（18 条）
+
+> 本次增量更新第2轮针对 18 条新准入 intent 展开，覆盖 reliability/security/completeness/compatibility/usability 五维度。
+
+##### 稳定性（4 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| REL-CANCEL-02-004 | INTENT-REL-037 | P1 | 手动取消时运行中 step 进程的终止信号与 grace period 行为 |
+| REL-CANCEL-02-005 | INTENT-REL-038 | P1 | 取消后运行终态收敛与 runner 资源释放时限 |
+| REL-PREEMPT-02-001 | INTENT-REL-039 | P1 | preemption 抢占触发条件——事件匹配范围与作用域边界 |
+| REL-PREEMPT-02-002 | INTENT-REL-040 | P1 | preemption 被抢占 job/run 的终态、日志完整性与 runner 释放时效 |
+
+##### 安全性（4 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| SEC-REFPROT-02-001 | INTENT-SEC-037 | P1 | 保护分支上下文标志 atomgit.ref_protected 的可用性与正确性 |
+| SEC-ENV-WAIT-02-001 | INTENT-SEC-038 | P1 | 环境保护 wait timer 倒计时期间环境 Secret 不可访问 |
+| SEC-CONT-CRED-02-001 | INTENT-SEC-039 | P1 | 私有 container 镜像拉取凭证的安全传递与日志不泄露 |
+| SEC-CONT-ISOLATE-02-001 | INTENT-SEC-040 | P1 | container 运行时 step 对宿主机环境变量/Secret 的隔离有效性 |
+
+##### 完备性（5 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| COMP-CONTAINER-02-001 | INTENT-COMP-009 | P1 | 验证 job 级 container 自定义镜像执行能力（含私有镜像认证） |
+| COMP-MATRIX-02-005 | INTENT-COMP-010 | P1 | 验证 matrix include 向已有组合追加额外变量及新增组合的正确展开 |
+| COMP-MATRIX-02-006 | INTENT-COMP-011 | P1 | 验证 matrix exclude 排除特定组合后剩余组合的正确性 |
+| COMP-MATRIX-02-007 | INTENT-COMP-012 | P1 | 验证 matrix 动态 runs-on——不同组合是否调度到对应 Runner 标签 |
+| COMP-ACTOR-02-001 | INTENT-COMP-013 | P1 | 验证 atomgit.actor 存在性与上下文种类数一致性 |
+
+##### 兼容性（3 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| COMPAT-MATRIX-02-001 | INTENT-COMPAT-065 | P1 | matrix include/exclude 展开语义与动态 runs-on 兼容性 |
+| COMPAT-EXPRFN-02-002 | INTENT-COMPAT-066 | P1 | 表达式函数 format 边界行为 |
+| COMPAT-EXPRFN-02-003 | INTENT-COMPAT-067 | P1 | 表达式函数 substring/replace/toJson 边界行为 |
+
+##### 易用性（2 条）
+
+| 用例 ID | intent_ref | 优先级 | 标题 |
+|---|---|---|---|
+| USE-SUMMARY-02-001 | INTENT-USE-026 | P2 | Step Summary 可写性与可见性 |
+| USE-BADGE-02-001 | INTENT-USE-027 | P2 | Badge 状态徽标可用性 |
+
+---
 
 本轮新增用例覆盖的准入 intent：
-- 安全 12 独立 + 2 变体 = 14（覆盖 SEC-020~026,028,030~033）
-- 兼容 25（覆盖 COMPAT-032~035,037~051,056~061 + COMPAT-036 delta）
-- 稳定 4（覆盖 REL-030~033）
-- 易用 2（覆盖 USE-024~025）
+- 安全 12 独立 + 2 变体 + 4 第2轮 = 18（覆盖 SEC-020~026,028,030~033,037~040）
+- 兼容 25 + 3 增量 + 3 第2轮 = 31（覆盖 COMPAT-032~035,037~051,056~061 + COMPAT-036 delta + COMPAT-062~067）
+- 稳定 4 + 3 增量 + 4 第2轮 = 11（覆盖 REL-030~040）
+- 易用 2 + 2 第2轮 = 4（覆盖 USE-024~027）
+- 完备 5 第2轮 = 5（覆盖 COMP-009~013）
 
 跨维度合并变体（不独立新建，母用例已覆盖）：
 - COMPAT-052 → SEC-002-V1

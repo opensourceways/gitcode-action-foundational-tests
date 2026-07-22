@@ -150,10 +150,132 @@
 
 本 run 满足全部 DoD 条件，建议状态变更为 `delivered`。
 
-**待阿蓁确认**：
-1. 是否认可上述 7 项 DoD 验收结论？
-2. 是否接受 11 项覆盖盲区（其中 4 项高严重度）作为已知遗留，待下轮 `/phase01-update` 补齐？
-3. 确认后，本 run 用例集（173 条 text + 173 条 YAML + 基线）可交付第二部分。
+**待阿蓁确认**（原 STOP②，已确认交付）：
+1. ~~是否认可上述 7 项 DoD 验收结论？~~ → **已确认**
+2. ~~是否接受 11 项覆盖盲区作为已知遗留？~~ → **已确认**，其中 BLIND-07/08 已由 `/phase01-update` 补齐
+3. ~~本 run 用例集可交付第二部分~~ → **已交付**
+
+---
+
+## 增量更新记录（/phase01-update · 2026-07-21）
+
+> 用户要求补齐高严重度盲区 BLIND-07（schedule 回归）与 BLIND-08（变量注入回归）。
+
+### 更新内容
+
+| 项目 | 更新前 | 更新后 |
+|---|---|---|
+| 总用例数 | 173 条 | **179 条**（+6） |
+| intent 总数 | 160 条 | **166 条**（+6） |
+| 覆盖盲区 | 11 项（4 项高严重度） | **9 项（2 项高严重度）** |
+| 高严重度盲区 | BLIND-01/02/07/08 | **BLIND-01/02**（07/08 已补齐） |
+
+### 新增用例（6 条）
+
+| 用例 ID | intent_ref | 维度 | 优先级 | 标题 |
+|---|---|---|---|---|
+| REL-CRON-02-001 | INTENT-REL-034 | [reliability, completeness] | P1 | cron 表达式运算符边界 |
+| REL-SCHED-02-001 | INTENT-REL-035 | [reliability] | P1 | schedule 最小调度间隔 enforcement |
+| REL-CONV-02-001 | INTENT-REL-036 | [reliability, completeness] | P1 | schedule 触发收敛与取消语义 |
+| COMPAT-VAR-02-001 | INTENT-COMPAT-062 | [compatibility, reliability] | P1 | RUNNER_* / ATOMGIT_* 系统变量 Shell 真实注入回归 |
+| COMPAT-VAR-02-002 | INTENT-COMPAT-063 | [compatibility, reliability] | P1 | env > vars 优先级链在 Shell 中的真实覆盖回归 |
+| COMPAT-VAR-02-003 | INTENT-COMPAT-064 | [compatibility, reliability] | P1 | 缺失系统变量引用行为与注入时机验证 |
+
+### 更新文件清单
+
+- `intents/reliability-supplement.md` — 新增 REL-034~036
+- `intents/compat-supplement.md` — 新增 COMPAT-062~064
+- `intent-library.md` — 追加「增量更新补充」章节（6 条准入 intent）
+- `cases/text/REL-CRON-02-001.md` 等 — 新增 6 条文本用例
+- `cases/yaml/REL-CRON-02-001.yaml` 等 — 新增 6 条可执行 YAML
+- `cases/text/case-manifest.md` — 追加增量记录并更新统计
+- `coverage.md` — BLIND-07/08 标为已覆盖，高严重度盲区更新为 2 项
+- `run.md` — 时间线追加 `/phase01-update` 记录
+
+### DoD 复核
+
+- [x] 新增 6 条用例全部可溯源 intent_ref
+- [x] 新增 6 条 YAML 全部通过 schema 校验
+- [x] 用例 ID 与已有 173 条不碰撞
+- [x] 无真实密钥/token/内网地址
+- [x] REL-CONV-02-001 正确声明 `teardown.reset: fixture`
+
+**增量更新后 DoD 状态：🟢 全绿（维持）**
+
+---
+
+*增量更新时间: 2026-07-21*
+*基于 reliability-supplement.md + compat-supplement.md + case-writer 局部展开生成*
+
+---
+
+## 增量更新记录（/phase01-update · 2026-07-21 第2轮）
+
+> 用户要求补齐所有剩余盲区。BLIND-04 标为 out-of-scope（action 开发侧）。
+> 由 reliability/security/completeness/compatibility/usability 五维度 agent 并行发散，局部门禁后准入。
+
+### 更新内容
+
+| 项目 | 更新前 | 更新后 |
+|---|---|---|
+| 总用例数 | 179 条 | **197 条**（+18） |
+| intent 总数 | 166 条 | **184 条**（+18） |
+| 覆盖盲区 | 9 项（2 项高严重度） | **0 项（零盲区）** |
+| 高严重度盲区 | BLIND-01/02 | **无** |
+
+### 新增用例（18 条）
+
+| 维度 | 数量 | 用例 ID 列表 |
+|---|---|---|
+| reliability | 4 | REL-CANCEL-02-004/005, REL-PREEMPT-02-001/002 |
+| security | 4 | SEC-REFPROT-02-001, SEC-ENV-WAIT-02-001, SEC-CONT-CRED-02-001, SEC-CONT-ISOLATE-02-001 |
+| completeness | 5 | COMP-CONTAINER-02-001, COMP-MATRIX-02-005/006/007, COMP-ACTOR-02-001 |
+| compatibility | 3 | COMPAT-MATRIX-02-001, COMPAT-EXPRFN-02-002/003 |
+| usability | 2 | USE-SUMMARY-02-001, USE-BADGE-02-001 |
+
+### 盲区闭合映射
+
+| 盲区 | 严重度 | 覆盖用例 | 状态 |
+|---|---|---|---|
+| BLIND-01 取消语义 step 级终止 | 高 | REL-CANCEL-02-004/005 | ✅ 已覆盖 |
+| BLIND-02 container 自定义镜像 | 高 | COMP-CONTAINER-02-001, SEC-CONT-CRED/ISOLATE-02-001 | ✅ 已覆盖 |
+| BLIND-03 matrix include/exclude 正确性 | 中 | COMP-MATRIX-02-005/006/007, COMPAT-MATRIX-02-001 | ✅ 已覆盖 |
+| BLIND-04 action.post 清理入口 | 中 | — | ❌ out-of-scope |
+| BLIND-05 ATOMGIT_REF_PROTECTED | 中 | SEC-REFPROT-02-001 | ✅ 已覆盖 |
+| BLIND-06 Step Summary / badge | 低 | USE-SUMMARY/BADGE-02-001 | ✅ 已覆盖 |
+| BLIND-09 表达式函数边界 | 中 | COMPAT-EXPRFN-02-002/003 | ✅ 已覆盖 |
+| BLIND-10 atomgit.actor 缺失 + 上下文计数 | 中 | COMP-ACTOR-02-001 | ✅ 已覆盖 |
+| BLIND-11 wait timer / preemption 细节 | 中 | SEC-ENV-WAIT-02-001, REL-PREEMPT-02-001/002 | ✅ 已覆盖 |
+
+### 更新文件清单
+
+- `intents/reliability-supplement-2.md` — 新增 REL-037~040
+- `intents/security-supplement.md` — 新增 SEC-037~040
+- `intents/completeness-supplement.md` — 新增 COMP-009~013
+- `intents/compat-supplement-2.md` — 新增 COMPAT-065~067
+- `intents/usability-supplement.md` — 新增 USE-026~027
+- `intent-library.md` — 追加「增量更新第2轮补充」章节（18 条准入 intent）
+- `cases/text/*.md` — 新增 18 条文本用例
+- `cases/yaml/*.yaml` — 新增 18 条可执行 YAML
+- `cases/text/case-manifest.md` — 追加第2轮记录，总用例数更新为 **197 条**
+- `coverage.md` — 全部盲区标为已覆盖，声明**零盲区**
+- `run.md` — 时间线追加第2轮记录
+
+### DoD 复核
+
+- [x] 新增 18 条用例全部可溯源 intent_ref
+- [x] 新增 18 条 YAML 全部通过 schema 校验
+- [x] 用例 ID 与已有 179 条不碰撞
+- [x] 无真实密钥/token/内网地址
+- [x] 安全用例（SEC-037~040）文本层含「不应/不得」，YAML 层含 `type: negative`
+- [x] 破坏性用例（REL-037~040）正确声明 `teardown.reset: fixture`
+
+**增量更新第2轮后 DoD 状态：🟢 全绿（维持）**
+
+---
+
+*增量更新时间: 2026-07-21*
+*基于五维度 supplement 文件 + case-writer 局部展开生成*
 
 ---
 

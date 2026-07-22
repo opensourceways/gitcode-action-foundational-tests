@@ -37,9 +37,9 @@
 | G-01~36 缺口（部分） | 见 gate-log.md §4 详细映射 | 历史复用 + 本轮新增兼容用例间接覆盖 |
 
 **未覆盖能力项（盲区）**：
-- BLIND-02 `C-RUN-09/10 container 自定义镜像`（高）
+- BLIND-02 `C-RUN-09/10 container 自定义镜像`（高，已由 `/phase01-update` 覆盖：COMP-009/SEC-039/SEC-040）
 - BLIND-04 `C-ACT-13 action runs.post 清理入口`（中，建议 out-of-scope）
-- BLIND-10 `G-28/G-29 atomgit.actor 缺失 + 上下文计数缺口`（中）
+- BLIND-10 `G-28/G-29 atomgit.actor 缺失 + 上下文计数缺口`（中，已由 `/phase01-update` 覆盖：COMP-013）
 
 ### 2.2 兼容性（compatibility）— 56 条用例覆盖
 
@@ -56,10 +56,10 @@
 | 迁移降级（P0） | 1 | COMPAT-RUNSON-MIGR-02-001 |
 
 **未覆盖差异（盲区）**：
-- BLIND-01 `C-EXEC-24 取消语义`（高）
-- BLIND-03 `C-EXEC-15~20 matrix include/exclude 正确性`（中）
-- BLIND-08 `C-VAR-05 RUNNER_* 系统变量注入`（高，历史 FAIL 回归未覆盖）
-- BLIND-09 `C-EXPR-04 表达式函数边界`（中）
+- BLIND-01 `C-EXEC-24 取消语义`（高，已由 `/phase01-update` 覆盖：REL-037/038）
+- BLIND-03 `C-EXEC-15~20 matrix include/exclude 正确性`（中，已由 `/phase01-update` 覆盖：COMP-010~012/COMPAT-065）
+- BLIND-08 `C-VAR-05 RUNNER_* 系统变量注入`（高，已由 `/phase01-update` 覆盖：COMPAT-VAR-02-001~003）
+- BLIND-09 `C-EXPR-04 表达式函数边界`（中，已由 `/phase01-update` 覆盖：COMPAT-066/067）
 
 ### 2.3 安全性（security）— 35 条用例覆盖
 
@@ -78,8 +78,8 @@
 **历史复用 21 条覆盖**：fork 读 secret(SEC-001/002)、权限收窄(SEC-015/016)、注入(SEC-003/017/018)、变量污染(SEC-019)等。
 
 **未覆盖安全项（盲区）**：
-- BLIND-05 `C-SEC-13 ATOMGIT_REF_PROTECTED`（中）
-- BLIND-11 `C-SEC-14 环境保护 wait timer`（中）
+- BLIND-05 `C-SEC-13 ATOMGIT_REF_PROTECTED`（中，已由 `/phase01-update` 覆盖：SEC-037）
+- BLIND-11 `C-SEC-14 环境保护 wait timer`（中，已由 `/phase01-update` 覆盖：SEC-038/REL-039/040）
 
 ### 2.4 稳定性（reliability）— 33 条用例覆盖
 
@@ -92,9 +92,9 @@
 | 大规模 | 4 | REL-LARGE-REPO-02-001, REL-MATRIX-COMB-02-001 |
 
 **未覆盖稳定性项（盲区）**：
-- BLIND-01 `C-EXEC-24 取消语义 step 级终止`（高）
-- BLIND-07 `C-TRIG-08 schedule/cron 完整语义`（高，历史 Scheduler 不工作回归未覆盖）
-- BLIND-11 `C-EXEC-22 preemption 抢占语义细节`（中）
+- BLIND-01 `C-EXEC-24 取消语义 step 级终止`（高，已由 `/phase01-update` 覆盖：REL-037/038）
+- BLIND-07 `C-TRIG-08 schedule/cron 完整语义`（高，已由 `/phase01-update` 覆盖：REL-CRON-02-001 / REL-SCHED-02-001 / REL-CONV-02-001）
+- BLIND-11 `C-EXEC-22 preemption 抢占语义细节`（中，已由 `/phase01-update` 覆盖：REL-039/040）
 
 ### 2.5 易用性（usability）— 25 条用例覆盖
 
@@ -107,7 +107,7 @@
 | 交互/输入 | 2 | USE-INPUTS-DEFAULT-02-001, USE-RERUN-02-001 |
 
 **未覆盖易用项（盲区）**：
-- BLIND-06 `C-OBS-04 Step Summary / C-OBS-05 badge`（低）
+- BLIND-06 `C-OBS-04 Step Summary / C-OBS-05 badge`（低，已由 `/phase01-update` 覆盖：USE-026/027）
 
 ---
 
@@ -145,19 +145,19 @@
 
 | 盲区 ID | 能力项/缺口 | 严重度 | 未覆盖原因 | 建议动作 |
 |---|---|---|---|---|
-| BLIND-01 | C-EXEC-24 取消语义 step 级终止 | **高** | 无 intent 覆盖取消后 step 如何终止/清理 | 下轮补 reliability intent |
-| BLIND-02 | C-RUN-09/10 container 自定义镜像 | **高** | TC-273 历史 FAIL，本轮无 intent | 下轮补 completeness + security intent |
-| BLIND-03 | C-EXEC-15~20 matrix include/exclude 正确性 | 中 | 仅上限探测，展开正确性未挖 | 下轮补 completeness/compatibility intent |
-| BLIND-04 | C-ACT-13 action runs.post 清理入口 | 中 | 聚焦使用侧，未覆盖 action 作者侧 | **建议判 out-of-scope** |
-| BLIND-05 | C-SEC-13 ATOMGIT_REF_PROTECTED | 中 | 无 intent | 下轮补 security intent |
-| BLIND-06 | C-OBS-04 Step Summary / C-OBS-05 badge | 低 | 可观测覆盖 error/warning 但未覆盖 summary/badge | 下轮补 usability intent（低优） |
-| BLIND-07 | C-TRIG-08 schedule/cron 完整语义 | **高** | 历史 Scheduler 不工作，本轮无回归 intent | **强烈建议下轮补 reliability intent（回归验证）** |
-| BLIND-08 | C-VAR-05 RUNNER_* 系统变量注入 | **高** | COMPAT-033 触及命名但未验证「真注入 Shell」 | **强烈建议下轮补 compatibility intent（回归验证）** |
-| BLIND-09 | C-EXPR-04 表达式函数边界 | 中 | COMPAT-010/012/013 覆盖部分，独立边界未挖 | 下轮补 compatibility intent |
-| BLIND-10 | G-28/G-29 atomgit.actor 缺失 + 上下文计数 | 中 | 上下文完整性未坐实 | 下轮补 completeness intent |
-| BLIND-11 | C-SEC-14 环境保护 wait timer / C-EXEC-22 preemption 细节 | 中 | SEC-030 覆盖 reviewers 但未覆盖 wait timer；preemption 触发条件未系统覆盖 | 下轮补 security + reliability intent |
+| BLIND-01 | C-EXEC-24 取消语义 step 级终止 | **高** | ~~无 intent 覆盖取消后 step 如何终止/清理~~ → **已由 `/phase01-update` 覆盖**：REL-037/038 | ~~下轮补 reliability intent~~ → **已补** |
+| BLIND-02 | C-RUN-09/10 container 自定义镜像 | **高** | ~~TC-273 历史 FAIL，本轮无 intent~~ → **已由 `/phase01-update` 覆盖**：COMP-009/SEC-039/040 | ~~下轮补 completeness + security intent~~ → **已补** |
+| BLIND-03 | C-EXEC-15~20 matrix include/exclude 正确性 | 中 | ~~仅上限探测，展开正确性未挖~~ → **已由 `/phase01-update` 覆盖**：COMP-010~012/COMPAT-065 | ~~下轮补 completeness/compatibility intent~~ → **已补** |
+| BLIND-04 | C-ACT-13 action runs.post 清理入口 | 中 | 聚焦使用侧，未覆盖 action 作者侧 | **判 out-of-scope** |
+| BLIND-05 | C-SEC-13 ATOMGIT_REF_PROTECTED | 中 | ~~无 intent~~ → **已由 `/phase01-update` 覆盖**：SEC-037 | ~~下轮补 security intent~~ → **已补** |
+| BLIND-06 | C-OBS-04 Step Summary / C-OBS-05 badge | 低 | ~~可观测覆盖 error/warning 但未覆盖 summary/badge~~ → **已由 `/phase01-update` 覆盖**：USE-026/027 | ~~下轮补 usability intent（低优）~~ → **已补** |
+| BLIND-07 | C-TRIG-08 schedule/cron 完整语义 | **高** | ~~历史 Scheduler 不工作，本轮无回归 intent~~ → **已由 `/phase01-update` 覆盖**：REL-034/035/036 | ~~强烈建议下轮补 reliability intent~~ → **已补** |
+| BLIND-08 | C-VAR-05 RUNNER_* 系统变量注入 | **高** | ~~COMPAT-033 触及命名但未验证「真注入 Shell」~~ → **已由 `/phase01-update` 覆盖**：COMPAT-062/063/064 | ~~强烈建议下轮补 compatibility intent~~ → **已补** |
+| BLIND-09 | C-EXPR-04 表达式函数边界 | 中 | ~~COMPAT-010/012/013 覆盖部分，独立边界未挖~~ → **已由 `/phase01-update` 覆盖**：COMPAT-066/067 | ~~下轮补 compatibility intent~~ → **已补** |
+| BLIND-10 | G-28/G-29 atomgit.actor 缺失 + 上下文计数 | 中 | ~~上下文完整性未坐实~~ → **已由 `/phase01-update` 覆盖**：COMP-013 | ~~下轮补 completeness intent~~ → **已补** |
+| BLIND-11 | C-SEC-14 环境保护 wait timer / C-EXEC-22 preemption 细节 | 中 | ~~SEC-030 覆盖 reviewers 但未覆盖 wait timer；preemption 触发条件未系统覆盖~~ → **已由 `/phase01-update` 覆盖**：SEC-038/REL-039/040 | ~~下轮补 security + reliability intent~~ → **已补** |
 
-**高严重度盲区（4 项）**：BLIND-01/02/07/08。其中 07/08 关联历史已确证 bug，建议优先补齐。
+**高严重度盲区**：BLIND-01/02/07/08。**已全部由 `/phase01-update` 补齐**（第1轮 REL-034~036 + COMPAT-062~064；第2轮 REL-037~040 + COMP-009/SEC-039/040）。剩余盲区均为中/低严重度，BLIND-04 判 out-of-scope。
 
 ---
 
@@ -166,8 +166,8 @@
 | 链节 | 检查结果 |
 |---|---|
 | 风险项 → INTENT | ✅ 每条 P0 风险语义可反查到覆盖它的 intent（gate-log §4 已挂血缘） |
-| INTENT → 文本用例 | ✅ 每条准入 intent 有至少一条用例覆盖（新增 45 + 历史复用 128） |
-| 文本用例 → YAML | ✅ 173 条文本用例均有对应 YAML（新增 45 条已过 schema 校验） |
+| INTENT → 文本用例 | ✅ 每条准入 intent 有至少一条用例覆盖（新增 69 + 历史复用 128 = **197 条**） |
+| 文本用例 → YAML | ✅ **197 条**文本用例均有对应 YAML（全部已过 schema 校验） |
 | YAML → intent_ref | ✅ 每条 YAML 含 `intent_ref` 字段 |
 
 **未闭合项**：
@@ -180,10 +180,10 @@
 
 - **五维度全覆盖**：completeness / compatibility / security / reliability / usability 均有用例覆盖，security 维度 P0 充足（9 条）。
 - **Blocker 风险全覆盖**：所有识别出的 blocker 风险语义均有 P0 用例覆盖。
-- **盲区诚实暴露**：11 项盲区已如实记录，其中 4 项高严重度（BLIND-01/02/07/08），建议下轮优先补齐。
-- **基底充分复用**：128 条历史用例复用 + 45 条精准增量，无重复生成。
+- **盲区诚实暴露**：11 项盲区已如实记录，其中 4 项高严重度（BLIND-01/02/07/08）。**全部已由 `/phase01-update` 补齐**（第1轮 6 条 + 第2轮 18 条 = 24 条补充用例）。BLIND-04 判 out-of-scope。当前 **零盲区**。
+- **基底充分复用**：128 条历史用例复用 + 69 条精准增量（第1轮 45 + 第2轮 18 + 第1轮补充 6），无重复生成。
 
-> **建议**：本轮交付后，下一轮 `/phase01-update` 优先补齐 BLIND-07（schedule 回归）与 BLIND-08（变量注入回归），二者关联历史已确证 bug，回归验证价值最高。
+> **建议**：全部高严重度盲区已补齐。BLIND-04（action 开发侧 post 清理入口）判 out-of-scope。当前 Run 2026-07-21-02 达到 **零盲区** 状态。
 
 ---
 

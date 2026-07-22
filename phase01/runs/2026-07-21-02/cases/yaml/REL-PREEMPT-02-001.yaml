@@ -1,0 +1,74 @@
+id: REL-PREEMPT-02-001
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "preemption 抢占触发条件——事件匹配范围与作用域边界"
+intent_ref: INTENT-REL-039
+
+setup:
+  repo_fixture: preemption-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  concurrency:
+    enable: true
+    max: 1
+    preemption:
+      enable: true
+      events:
+      - mr_id
+  jobs:
+    preempt-test:
+      name: Preempt Test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Running marker
+        run: |
+          for i in $(seq 1 300); do
+            echo "TICK_$i"
+            sleep 1
+          done
+      name: Preempt Test
+
+  name: preemption 抢占触发条件——事件匹配范围与作用域边界
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    preemption_scenarios:
+      - same_workflow_same_mr
+      - same_workflow_diff_mr
+      - diff_workflow_same_mr
+      - same_workflow_diff_user
+    stagger_seconds: 30
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "场景 (a) 旧运行终态为 cancelled，被同一 MR 新运行抢占"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "场景 (b) 旧运行不应被不同 MR 的运行抢占"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "场景 (c)(d) 旧运行不应被跨 workflow 或跨用户触发抢占"
+  - type: nonfunctional
+    target: run_logs
+    eval: deterministic
+    rubric: "被抢占运行日志或 UI 中有 cancelled/preempted 归因标记"
+
+teardown:
+  reset: fixture
