@@ -15,17 +15,22 @@ setup:                           # 前置状态，由 harness 布置
   variables: {}
   branch_protection: default
 
+# ☆ 约定：不测 trigger 时 on 用 workflow_dispatch；不测 runs-on 时用 [dedicate-hosted, x64, large]
+#    详见 phase01/schema/VALIDATION-RULES.md §1a、§8a
 workflow: |                      # 被测的 workflow 定义（内联，按 GitCode 规范编译）
-  on: [pull_request_target]
+  on:
+    workflow_dispatch:
   jobs:
     echo:
-      runs-on: default
+      runs-on: [dedicate-hosted, x64, large]
       steps:
-        - run: echo "$DEPLOY_TOKEN"
+        - name: echo
+          run: |
+            echo "hello"
 
 trigger:
-  event: fork_pr                 # push | pr | fork_pr | manual | schedule | tag
-  as: untrusted_contributor      # maintainer | untrusted_contributor
+  event: workflow_dispatch        # 默认：不测 trigger 语义时用 workflow_dispatch
+  as: maintainer                  # maintainer | untrusted_contributor
   params: {}
 
 fault_injection: null            # 稳定性用例在此声明；见下方注释
