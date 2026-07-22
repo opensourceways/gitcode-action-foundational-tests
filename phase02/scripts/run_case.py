@@ -10,7 +10,7 @@ run_case.py — Phase 02 原生执行驱动（通用、确定性）
     Phase01 契约 YAML 的 workflow: 字段  ← workflow 由 Phase 01 编写，本驱动原样使用、不改写
         │  (可选) compiled/<id>.asserts.json  ← Phase02 执行前的断言绑定 sidecar（非编写 workflow）
         ▼
-    preflight_validate 检查 → 不合规判 COMPILE_ERROR（不 push，回报 Phase01）
+    preflight_validate(契约字段 + workflow 语法 + API 校验) → 不合规判 COMPILE_ERROR（不 push，回报 Phase01）
         ▼
     workflow_runner(部署+触发+采集+teardown) ──▶ assertion_engine(§11 判定) ──▶ results/<id>.json + .md
 
@@ -164,21 +164,10 @@ def main():
     run_dir = os.path.join(PHASE02, "runs", run_id)
     os.makedirs(run_dir, exist_ok=True)
 
-    wf, asserts = load_execution_inputs(contract, run_dir, cid)
-    if not wf:
-        wr.log(f"{cid}: 契约无 workflow 字段 → NOT_CONFIGURED（纯配置/非运行类，无可执行 workflow）")
-        verdict = {"verdict": "NOT_CONFIGURED", "verdict_flags": [],
-                   "reason": "Phase 01 契约无 workflow 字段", "assertion_results": []}
-        rec = write_result(run_dir, contract, verdict, {"status": "NOT_CONFIGURED"})
-        update_summary(run_dir, rec)
-        return
-
     cfg = wr.RunnerConfig(branch=None)  # branch 从 env / 默认 main
-    # 触发方式支持性由 workflow_runner.TRIGGER_STATUS 统一裁定（push 已实现，其余→INCONCLUSIVE+具体原因）
-    ev = (contract.get("trigger") or {}).get("event", "push")
 
-    # 预检：push 前本地校验 workflow（拦编译错误，省一次真跑；零 API 依赖）
-    ok, verr = wr.preflight_validate(wf)
+    # 预检：契约字段 + workflow 本地语法 + GitCode API 校验（合并 schema_check + preflight + validate_workflow）
+    ok, verr = wr.preflight_validate(contract, cfg=cfg)
     if not ok:
         wr.log(f"{cid}: 预检不通过（{len(verr)} 项）→ COMPILE_ERROR，不 push")
         for e in verr:
@@ -188,6 +177,18 @@ def main():
         rec = write_result(run_dir, contract, verdict, {"status": "COMPILE_ERROR"})
         update_summary(run_dir, rec)
         return
+
+    wf, asserts = load_execution_inputs(contract, run_dir, cid)
+    if not wf:
+        wr.log(f"{cid}: 契约无 workflow 字段 → NOT_CONFIGURED（纯配置/非运行类，无可执行 workflow）")
+        verdict = {"verdict": "NOT_CONFIGURED", "verdict_flags": [],
+                   "reason": "Phase 01 契约无 workflow 字段", "assertion_results": []}
+        rec = write_result(run_dir, contract, verdict, {"status": "NOT_CONFIGURED"})
+        update_summary(run_dir, rec)
+        return
+
+    # 触发方式支持性由 workflow_runner.TRIGGER_STATUS 统一裁定（push 已实现，其余→INCONCLUSIVE+具体原因）
+    ev = (contract.get("trigger") or {}).get("event", "push")
 
     reset = (contract.get("teardown") or {}).get("reset", "fixture")
     wr.log(f"=== 原生执行 {cid} → {cfg.owner}/{cfg.repo}@{cfg.branch} (teardown={reset}) ===")

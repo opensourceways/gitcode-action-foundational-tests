@@ -41,13 +41,16 @@ import urllib.error
 
 import yaml
 
-# log_fetcher 与本文件同目录（phase02/scripts/）
+# log_fetcher / validate_workflow 与本文件同目录（phase02/scripts/）
 try:
     import log_fetcher
+    import validate_workflow as _vwf
 except ImportError:  # 允许从别处 import 时按路径补齐
     import sys
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    _here = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, _here)
     import log_fetcher  # noqa
+    import validate_workflow as _vwf  # noqa
 
 
 # ── 配置 ──────────────────────────────────────────────────────────
@@ -56,7 +59,8 @@ class RunnerConfig:
 
     def __init__(self, owner=None, repo=None, branch=None,
                  api_base=None, token=None,
-                 timeout=None, poll_interval=None, executor=None):
+                 timeout=None, poll_interval=None, executor=None,
+                 cookie=None, workflow_id=None):
         self.owner = owner or os.environ.get("GITCODE_OWNER", "ComputingActionTest")
         self.repo = repo or os.environ.get("GITCODE_REPO", "bingo")
         self.branch = branch or os.environ.get("GITCODE_BRANCH", "main")
@@ -65,9 +69,9 @@ class RunnerConfig:
         self.token = token or self._load_token()
         self.timeout = int(timeout or os.environ.get("PHASE02_CASE_TIMEOUT", 300))
         self.poll_interval = int(poll_interval or os.environ.get("PHASE02_POLL_INTERVAL", 12))
-        # ⚠️ 未验证点：run-case.sh 给每个 v8 调用附加 &executor=<用户名>，而经实测
-        #    跑通的 execute_*.py 并不带此参数。默认不带；如平台要求可经环境变量启用。
         self.executor = executor or os.environ.get("GITCODE_EXECUTOR", "")
+        self.cookie = cookie or os.environ.get("GITCODE_COOKIE", "")
+        self.workflow_id = workflow_id or os.environ.get("GITCODE_WORKFLOW_ID", "b03a4b84cd784ddea00c5270eba62c7f")
 
     @staticmethod
     def _load_token():
@@ -151,27 +155,128 @@ class Workspace:
 # GitCode step name 禁止字符（VALIDATION-RULES §3b）
 _STEP_NAME_FORBIDDEN = set('[]|!>&#?*=<\'"@${}+')
 
+# Phase 01 可执行用例契约 schema 校验常量（来自 schema_check.py + executable-case.schema.yaml）
+_CASE_ID_RE = re.compile(r"^(COMP|COMPAT|REL|SEC|USE)-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d{2}-\d{3}(-V\d+)?$")
+_CASE_DIMS = {"completeness", "compatibility", "reliability", "security", "usability"}
+_CASE_PRIOS = {"P0", "P1", "P2"}
+_CASE_ATYPES = {"positive", "negative", "nonfunctional"}
+_CASE_INTENT_RE = re.compile(r"^INTENT-(COMP|COMPAT|REL|SEC|USE|ACT)-[0-9]+$")
+_CASE_TRIGGER_EVENTS = {"push", "pr", "pull_request", "fork_pr", "pull_request_target",
+                        "pull_request_comment", "manual", "schedule", "tag",
+                        "workflow_dispatch", "issue_comment"}
+_CASE_TRIGGER_AS = {"maintainer", "untrusted_contributor"}
+_CASE_RESETS = {"fixture", "full_instance", "none"}
+_CASE_FI_AT = {"pre_job", "mid_job", "post_job"}
+_CASE_FI_ACTION = {"kill_runner", "network_partition", "disk_full", "cpu_saturate", "concurrent_flood"}
 
-def preflight_validate(workflow_yaml):
-    """push 前本地校验编译产物是否为合法且合规的 GitCode workflow。
 
-    返回 (ok: bool, errors: list[str])。ok=False → run_case 应判 COMPILE_ERROR，
-    **不 push**（省一次真跑）。依据 phase01/schema/VALIDATION-RULES.md（平台实测 12 条）
+def _validate_case_contract(contract):
+    """校验 Phase 01 契约 YAML 结构（来自 schema_check.py / executable-case.schema.yaml）。
+
+    返回 errors 列表（空=通过）。不涉及 workflow 内容——那是 _validate_workflow_syntax 的职责。
+    """
+    errs = []
+    if not isinstance(contract, dict):
+        return ["契约顶层非映射"]
+
+    # 必填字段
+    for k in ("id", "dimension", "priority", "title", "intent_ref",
+              "setup", "trigger", "assertions", "teardown"):
+        if k not in contract:
+            errs.append(f"缺必填字段 {k}")
+
+    # id 格式
+    cid = contract.get("id")
+    if cid and not _CASE_ID_RE.match(str(cid)):
+        errs.append(f"id 格式不合规（{_CASE_ID_RE.pattern}）: {cid}")
+
+    # dimension 枚举
+    dim = contract.get("dimension")
+    if dim and dim not in _CASE_DIMS:
+        errs.append(f"dimension 非法: {dim}（合法值: {sorted(_CASE_DIMS)}）")
+
+    # priority 枚举
+    prio = contract.get("priority")
+    if prio and prio not in _CASE_PRIOS:
+        errs.append(f"priority 非法: {prio}（合法值: {sorted(_CASE_PRIOS)}）")
+
+    # intent_ref 格式
+    iref = contract.get("intent_ref")
+    if iref and not _CASE_INTENT_RE.match(str(iref)):
+        errs.append(f"intent_ref 格式不合规: {iref}（须匹配 {_CASE_INTENT_RE.pattern}）")
+
+    # setup
+    setup = contract.get("setup")
+    if isinstance(setup, dict) and "repo_fixture" not in setup:
+        errs.append("setup 缺 repo_fixture")
+
+    # trigger
+    trigger = contract.get("trigger")
+    if isinstance(trigger, dict):
+        if isinstance(trigger.get("event"), str) and trigger["event"] not in _CASE_TRIGGER_EVENTS:
+            errs.append(f"trigger.event 非法: {trigger['event']}（合法值: {sorted(_CASE_TRIGGER_EVENTS)}）")
+        if isinstance(trigger.get("as"), str) and trigger["as"] not in _CASE_TRIGGER_AS:
+            errs.append(f"trigger.as 非法: {trigger['as']}（合法值: {sorted(_CASE_TRIGGER_AS)}）")
+
+    # assertions
+    asserts = contract.get("assertions")
+    if not isinstance(asserts, list) or not asserts:
+        errs.append("assertions 必须为非空数组")
+    else:
+        for i, a in enumerate(asserts):
+            if not isinstance(a, dict):
+                errs.append(f"assertions[{i}] 非映射")
+                continue
+            if a.get("type") not in _CASE_ATYPES:
+                errs.append(f"assertions[{i}].type 非法: {a.get('type')}（合法值: {sorted(_CASE_ATYPES)}）")
+            if "target" not in a:
+                errs.append(f"assertions[{i}] 缺 target")
+
+    # 安全用例至少一条 negative 断言
+    if dim == "security" and isinstance(asserts, list):
+        if not any(isinstance(a, dict) and a.get("type") == "negative" for a in asserts):
+            errs.append("security 用例至少需一条 type=negative 断言")
+
+    # teardown
+    td = contract.get("teardown")
+    if isinstance(td, dict):
+        if td.get("reset") not in _CASE_RESETS:
+            errs.append(f"teardown.reset 非法: {td.get('reset')}（合法值: {sorted(_CASE_RESETS)}）")
+
+    # fault_injection 业务校验：破坏性用例 teardown.reset 不得为 none
+    fi = contract.get("fault_injection")
+    if isinstance(fi, dict):
+        if isinstance(td, dict) and td.get("reset") == "none":
+            errs.append("fault_injection 用例 teardown.reset 不得为 none")
+        if fi.get("at") not in _CASE_FI_AT:
+            errs.append(f"fault_injection.at 非法: {fi.get('at')}（合法值: {sorted(_CASE_FI_AT)}）")
+        if fi.get("action") not in _CASE_FI_ACTION:
+            errs.append(f"fault_injection.action 非法: {fi.get('action')}（合法值: {sorted(_CASE_FI_ACTION)}）")
+        if not fi.get("recovery_expectation"):
+            errs.append("fault_injection 缺 recovery_expectation")
+
+    return errs
+
+
+def _validate_workflow_syntax(workflow_yaml):
+    """校验 GitCode workflow YAML 语法合规性（内部辅助，被 preflight_validate 调用）。
+
+    返回 errors 列表（空=通过）。依据 phase01/schema/VALIDATION-RULES.md（平台实测 12 条）
     + PyYAML 语法解析。纯本地、零 API/凭据依赖。
     """
     errors = []
 
-    # 1) YAML 语法（catch 例如 run 命令含 ": " 破坏 plain scalar 的错误）
+    # 1) YAML 语法
     try:
         doc = yaml.safe_load(workflow_yaml)
     except yaml.YAMLError as e:
         mark = getattr(e, "problem_mark", None)
         loc = f"（第 {mark.line + 1} 行）" if mark else ""
-        return False, [f"YAML 语法错误{loc}: {getattr(e, 'problem', e)}"]
+        return [f"workflow YAML 语法错误{loc}: {getattr(e, 'problem', e)}"]
     if not isinstance(doc, dict):
-        return False, ["workflow 顶层不是映射"]
+        return ["workflow 顶层不是映射"]
 
-    # 2) on 触发器：YAML1.1 把 on 解析为 True；必须映射形式，不能列表（平台拒绝 §3.3）
+    # 2) on 触发器：必须映射形式，不能列表（平台拒绝 §3.3）
     trigger = doc.get("on", doc.get(True))
     if trigger is None:
         errors.append("缺 on 触发器")
@@ -181,19 +286,16 @@ def preflight_validate(workflow_yaml):
     # 3) jobs
     jobs = doc.get("jobs")
     if not isinstance(jobs, dict) or not jobs:
-        return False, errors + ["缺 jobs 或 jobs 非映射"]
+        return errors + ["缺 jobs 或 jobs 非映射"]
 
     for jid, job in jobs.items():
         if not isinstance(job, dict):
             errors.append(f"job '{jid}' 非映射"); continue
-        # 3a) job name 必填（§2）
         if not job.get("name"):
             errors.append(f"job '{jid}' 缺 name（平台报 name cannot be empty）")
-        # 3b) runs-on 必须数组形式（§1）
         ro = job.get("runs-on")
         if not isinstance(ro, list):
             errors.append(f"job '{jid}' runs-on 须用数组格式 [ubuntu-latest, x64, small]，实得 {type(ro).__name__}")
-        # 3c) steps ≤ 16（§5）+ 每 step 有 name 且无非法字符（§3）
         steps = job.get("steps") or []
         if len(steps) > 16:
             errors.append(f"job '{jid}' steps={len(steps)} 超过 16，须拆 job（§5）")
@@ -210,9 +312,82 @@ def preflight_validate(workflow_yaml):
                 if len(str(nm)) > 128:
                     errors.append(f"job '{jid}' step name 超 128 字符")
 
-    # 注：早期 VALIDATION-RULES §7 称 vars.* 上下文不支持——**已被实测推翻**
-    # （run 03 的 vars.DUP + handoff 均真跑 PASS）。GitCode 支持 vars.* 引用仓库/组织变量，
-    # 故此处**不再拦截** vars.*（曾误判合法 workflow 为 COMPILE_ERROR）。
+    return errors
+
+
+def _validate_workflow_via_api(workflow_yaml, cfg=None):
+    """调用 GitCode v2 API 校验 workflow YAML 语法（server-side validation）。
+
+    使用 validate_workflow.py 的 validate_workflow() 函数，走 web-api.gitcode.com 的
+    /api/v2/projects/.../actions/valid 端点。需 GITCODE_COOKIE（浏览器会话 token）；
+    无 cookie 则跳过（返回空 errors + 日志提示）。
+
+    返回 (errors: list[str], api_result: dict|None)。
+    """
+    cookie = (cfg.cookie if cfg else "") or os.environ.get("GITCODE_COOKIE", "")
+    if not cookie:
+        log("  (preflight: 跳过 API 校验 — 无 GITCODE_COOKIE)")
+        return [], None
+
+    try:
+        from validate_workflow import validate_workflow as _vwf_call
+    except ImportError:
+        log("  (preflight: 跳过 API 校验 — validate_workflow 模块不可用)")
+        return [], None
+
+    owner = cfg.owner if cfg else os.environ.get("GITCODE_OWNER", "ComputingActionTest")
+    repo = cfg.repo if cfg else os.environ.get("GITCODE_REPO", "bingo")
+    wfid = cfg.workflow_id if cfg else os.environ.get("GITCODE_WORKFLOW_ID", "b03a4b84cd784ddea00c5270eba62c7f")
+
+    try:
+        result = _vwf_call(
+            file_content=workflow_yaml,
+            cookie=cookie,
+            workflow_id=wfid,
+            project_path=f"{owner}/{repo}",
+            file_path=".gitcode/workflows/_preflight_check.yml",
+        )
+    except Exception as e:
+        log(f"  (preflight: API 校验调用失败: {e})")
+        return [], None
+
+    errors = []
+    if result.get("valid") is True:
+        return errors, result
+    if result.get("diagnostics"):
+        for d in result["diagnostics"]:
+            sev = d.get("severity", "?")
+            msg = d.get("message") or "(no detail)"
+            rng = d.get("range", {})
+            s = rng.get("start", {})
+            errors.append(f"[API/{sev}] L{s.get('line','?')}:C{s.get('column','?')} — {msg}")
+    elif result.get("error"):
+        log(f"  (preflight: API 校验异常: {result['error']})")
+    return errors, result
+
+
+def preflight_validate(contract, cfg=None):
+    """push 前校验——先校验用例契约字段，再本地 workflow 语法，最后 GitCode API 语法校验。
+
+    接受 Phase 01 契约 dict + 可选 RunnerConfig（用于 API 校验的 cookie/project 等信息）。
+    返回 (ok: bool, errors: list[str])。ok=False → run_case 应判 COMPILE_ERROR，
+    **不 push**（省一次真跑）。
+
+    三步校验：
+      1. 用例契约字段 schema（id/dimension/priority/assertions…依据 executable-case.schema.yaml）
+      2. 内联 workflow YAML 本地语法校验（依据 VALIDATION-RULES.md 平台实测规则）
+      3. GitCode v2 API 服务器端 workflow 语法校验（调用 validate_workflow.py；需 GITCODE_COOKIE）
+    """
+    errors = []
+
+    errors.extend(_validate_case_contract(contract))
+
+    wf = contract.get("workflow")
+    if wf:
+        errors.extend(_validate_workflow_syntax(wf))
+        # API 校验（需 cookie，无 cookie 时跳过不阻断）
+        api_errs, _ = _validate_workflow_via_api(wf, cfg)
+        errors.extend(api_errs)
 
     return (len(errors) == 0), errors
 

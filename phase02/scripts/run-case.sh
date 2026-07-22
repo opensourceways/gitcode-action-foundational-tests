@@ -119,52 +119,35 @@ git push origin "$GITCODE_BRANCH" 2>&1 | tail -1
 _log "Pushed: .gitcode/workflows/${WF_NAME}"
 
 # ── 3. Poll for run ─────────────────────────────────────
-# Strategy: record baseline run ID before push, then wait for a NEW run to appear.
-# This prevents picking up stale runs from previous pushes.
-BASELINE_RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=1&branch=${GITCODE_BRANCH}")
-BASELINE_RUN_ID=$(echo "$BASELINE_RESP" | python3 -c "import sys,json; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0].get('workflow_run_id','') if runs else '')" 2>/dev/null || echo "")
-_log "Baseline run: ${BASELINE_RUN_ID:-<none>}"
+# Strategy: match by file_path — each run object contains the workflow file path.
+# Filter runs API response for the exact workflow file we just pushed.
+WF_PATH=".gitcode/workflows/${WF_NAME}"
+_log "Polling for run of ${WF_PATH}..."
+sleep 8
 
-_log "Waiting for new run to appear..."
 RUN_ID_GC=""
 ELAPSED=0
-
-# Phase A: wait for a run ID different from baseline
 while [ $ELAPSED -lt $TIMEOUT_SECONDS ]; do
-  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=5&branch=${GITCODE_BRANCH}")
+  RESP=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}&per_page=10&branch=${GITCODE_BRANCH}")
   RUN_ID_GC=$(echo "$RESP" | python3 -c "
 import sys, json
 runs = json.load(sys.stdin).get('workflow_runs', [])
-baseline = '${BASELINE_RUN_ID}'
+target = '${WF_PATH}'
 for r in runs:
-    rid = r.get('workflow_run_id', '')
-    if rid and rid != baseline:
-        print(rid)
+    if r.get('file_path', '') == target:
+        print(r.get('workflow_run_id', ''))
         break
 " 2>/dev/null || echo "")
 
   if [ -n "$RUN_ID_GC" ]; then
-    _log "New run detected: #${RUN_ID_GC}"
-    break
+    DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
+    STATUS=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+    _log "Run #${RUN_ID_GC}: $STATUS ($((ELAPSED))s)"
+
+    case "$STATUS" in
+      COMPLETED|FAILED|CANCELED) break ;;
+    esac
   fi
-
-  sleep $POLL_INTERVAL
-  ELAPSED=$((ELAPSED + POLL_INTERVAL))
-done
-
-if [ -z "$RUN_ID_GC" ]; then
-  _log "ERROR: No new run appeared within ${TIMEOUT_SECONDS}s"
-fi
-
-# Phase B: poll the new run until terminal state
-while [ -n "$RUN_ID_GC" ] && [ $ELAPSED -lt $TIMEOUT_SECONDS ]; do
-  DETAIL=$(curl -sS "${GITCODE_API_BASE_URL}/api/v8/repos/${GITCODE_OWNER}/${GITCODE_REPO}/actions/runs/${RUN_ID_GC}?access_token=${GITCODE_ACCESS_TOKEN}&executor=${GITCODE_EXECUTOR}")
-  STATUS=$(echo "$DETAIL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
-  _log "Run #${RUN_ID_GC}: $STATUS ($((ELAPSED))s)"
-
-  case "$STATUS" in
-    COMPLETED|FAILED|CANCELED) break ;;
-  esac
 
   sleep $POLL_INTERVAL
   ELAPSED=$((ELAPSED + POLL_INTERVAL))
