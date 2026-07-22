@@ -1,0 +1,59 @@
+id: COMPAT-MISSFN-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 缺失表达式函数 join() / fromJSON() / case() 的降级行为
+intent_ref: INTENT-COMPAT-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables:
+    test_list: "a,b,c"
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test-join:
+      name: Test unsupported join function
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) try join function
+          run: |
+            echo "join_result=${{ join(vars.test_list, ',') }}"
+            echo "join_done"
+    test-fromjson:
+      name: Test unsupported fromJSON function
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) try fromJSON function
+          run: |
+            echo "json_result=${{ fromJSON('{\"a\":1}').a }}"
+            echo "json_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "workflow 不应静默成功并输出意外空值；应明确报错或给出不支持提示"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应包含函数名（join/fromJSON）并提示不可用或不支持，而非 generic 语法错误"
+
+teardown:
+  reset: fixture

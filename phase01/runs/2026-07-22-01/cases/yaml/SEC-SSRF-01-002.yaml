@@ -1,0 +1,64 @@
+id: SEC-SSRF-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: Runner 网络出站应阻止对内网保留地址段的未授权访问
+intent_ref: INTENT-SEC-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test internal network SSRF prevention
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) attempt access to RFC1918 address
+          run: |
+            if curl -s --connect-timeout 5 http://10.0.0.1/ ; then
+              echo "rfc1918_accessible"
+              exit 1
+            else
+              echo "rfc1918_blocked"
+            fi
+        - name: (TC) attempt access to loopback
+          run: |
+            if curl -s --connect-timeout 5 http://127.0.0.1:8080/ ; then
+              echo "loopback_accessible"
+              exit 1
+            else
+              echo "loopback_blocked"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "rfc1918_accessible"
+  - type: negative
+    target: run_logs
+    must_not_contain: "loopback_accessible"
+  - type: positive
+    target: run_logs
+    must_contain: "rfc1918_blocked"
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

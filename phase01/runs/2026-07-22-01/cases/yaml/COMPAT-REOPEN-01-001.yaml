@@ -1,0 +1,62 @@
+id: COMPAT-REOPEN-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: fork PR 关闭后重新打开时 pull_request_target 权限保持
+intent_ref: INTENT-COMPAT-032
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+      types: [open, reopen]
+  jobs:
+    verify:
+      name: Verify permission on PR reopen
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout base ref
+          uses: checkout
+        - name: (TC) check secret access on reopen
+          run: |
+            SECRET_VAL="${{ secrets.DEPLOY_TOKEN }}"
+            if [ -z "$SECRET_VAL" ]; then
+              echo "SECRET_EMPTY_ON_REOPEN"
+            else
+              echo "SECRET_LEAKED_ON_REOPEN"
+              exit 1
+            fi
+        - name: (TC) check workflow origin
+          run: |
+            echo "BASE_WORKFLOW_USED_ON_REOPEN"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    action: reopen
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 SECRET_EMPTY_ON_REOPEN"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 BASE_WORKFLOW_USED_ON_REOPEN"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 SECRET_LEAKED_ON_REOPEN"
+
+teardown:
+  reset: fixture

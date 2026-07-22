@@ -1,0 +1,53 @@
+id: SEC-DOUBLEEVAL-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 表达式求值应防止双重模板渲染（嵌套表达式）
+intent_ref: INTENT-SEC-013
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test nested expression double eval
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) attempt nested expression
+          run: |
+            echo "result is ${{ atomgit.event.name }}"
+        - name: (TC) attempt expression via env indirection
+          env:
+            INNER: ${{ secrets.DEPLOY_TOKEN }}
+          run: |
+            echo "$INNER"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    must_not_contain: "placeholder_for_double_eval_result"
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

@@ -1,0 +1,56 @@
+id: SEC-SUMMARY-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: secret 在 step summary 中应被脱敏
+intent_ref: INTENT-SEC-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test step summary secret masking
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) write secret to step summary
+          run: |
+            echo "Token is $DEPLOY_TOKEN" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "summary_written"
+        - name: (TC) verify summary masking
+          if: ${{ always() }}
+          run: |
+            echo "summary_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_summary
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    must_contain: "summary_check_done"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

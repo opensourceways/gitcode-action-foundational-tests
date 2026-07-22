@@ -1,0 +1,61 @@
+id: COMP-MALWF-01-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: 恶意 PR 修改 workflow 文件后 pull_request_target 的行为
+intent_ref: INTENT-COMP-014
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    verify:
+      name: Verify base workflow used on malicious PR
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout base ref
+          uses: checkout
+        - name: (TC) verify base workflow execution
+          run: |
+            echo "BASE_WORKFLOW_EXECUTED"
+            echo "Checking that PR workflow was NOT used"
+        - name: (TC) assert no secret leak
+          run: |
+            SECRET_VAL="${{ secrets.DEPLOY_TOKEN }}"
+            if [ -z "$SECRET_VAL" ]; then
+              echo "SECRET_PROTECTED"
+            else
+              echo "SECRET_EXPOSED"
+              exit 1
+            fi
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 BASE_WORKFLOW_EXECUTED"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 SECRET_PROTECTED"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 SECRET_EXPOSED"
+
+teardown:
+  reset: fixture

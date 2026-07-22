@@ -1,0 +1,45 @@
+id: COMPAT-MIGERR-01-003
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: vars 上下文缺失时的报错质量
+intent_ref: INTENT-COMPAT-031
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    vars-context-test:
+      name: Test vars context error quality
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Use vars context in run
+          run: |
+            VALUE="${{ vars.TEST_VARIABLE }}"
+            echo "vars-value=$VALUE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应明确指出 vars 上下文在 GitCode 中不受支持，并建议使用 atomgit 上下文或环境变量替代"
+
+teardown:
+  reset: fixture

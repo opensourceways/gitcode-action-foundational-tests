@@ -1,0 +1,57 @@
+id: REL-NET-01-013
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: 网络依赖容错——workflow 中访问不可达地址的明确失败与有界超时
+intent_ref: INTENT-REL-062
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Network fault tolerance test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Attempt unreachable host
+          run: |
+            curl --connect-timeout 10 --max-time 30 http://192.0.2.1/unreachable || true
+        - name: Cleanup always
+          if: ${{ always() }}
+          run: |
+            echo "ALWAYS_STEP_RAN"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_status
+    step_name: Attempt unreachable host
+    equals: FAILED
+  - type: positive
+    target: run_logs
+    contains_any:
+      - "Connection timed out"
+      - "No route to host"
+      - "Could not connect"
+  - type: nonfunctional
+    target: step_duration_seconds
+    step_name: Attempt unreachable host
+    less_than_or_equal: 120
+  - type: positive
+    target: run_logs
+    must_contain: ALWAYS_STEP_RAN
+
+teardown:
+  reset: fixture

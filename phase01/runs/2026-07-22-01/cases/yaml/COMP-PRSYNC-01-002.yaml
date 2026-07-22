@@ -1,0 +1,49 @@
+id: COMP-PRSYNC-01-002
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: fork PR force-push 后 pull_request_target 权限保持验证
+intent_ref: INTENT-COMP-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+      types: [update]
+  jobs:
+    forcepush-perms:
+      name: Verify permissions after force push
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Check secret access after sync
+          run: |
+            if [ -n "$DEPLOY_TOKEN" ]; then
+              echo "SECRET_LEAK_AFTER_SYNC"
+            else
+              echo "SECRET_SAFE_AFTER_SYNC"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    force_push: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    must_contain: "SECRET_SAFE_AFTER_SYNC"
+
+teardown:
+  reset: fixture

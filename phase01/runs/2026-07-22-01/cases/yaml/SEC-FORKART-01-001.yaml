@@ -1,0 +1,62 @@
+id: SEC-FORKART-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 上传的 artifact 不可被主仓 workflow 下载或执行
+intent_ref: INTENT-SEC-019
+
+setup:
+  repo_fixture: with-artifacts
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    test:
+      name: Test fork artifact isolation
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) attempt download fork artifact
+          uses: download-artifact
+          with:
+            name: fork-pr-artifact
+        - name: (TC) verify artifact not present
+          if: ${{ always() }}
+          run: |
+            if [ -f "fork-pr-artifact/malicious.sh" ]; then
+              echo "artifact_is_present"
+              exit 1
+            else
+              echo "artifact_is_absent"
+            fi
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "artifact_is_present"
+  - type: negative
+    target: run_logs
+    must_not_contain: "malicious_payload_executed"
+  - type: positive
+    target: run_status
+    in: [failed, completed]
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应表明 artifact 不可访问或权限不足"
+
+teardown:
+  reset: fixture

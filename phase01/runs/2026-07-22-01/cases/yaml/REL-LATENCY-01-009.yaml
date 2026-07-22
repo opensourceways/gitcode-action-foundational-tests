@@ -1,0 +1,47 @@
+id: REL-LATENCY-01-009
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 调度延迟基准——queued 到 running 的 P50/P95 等待时间应满足基准
+intent_ref: INTENT-REL-050
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    latency:
+      name: Latency benchmark job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Quick work
+          run: |
+            echo "DONE"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params:
+    repeat: 20
+    interval_seconds: 5
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: queued_to_running_p50_seconds
+    less_than_or_equal: 15
+  - type: nonfunctional
+    target: queued_to_running_p95_seconds
+    less_than_or_equal: 45
+  - type: negative
+    target: max_queued_to_running_seconds
+    greater_than: 60
+
+teardown:
+  reset: fixture

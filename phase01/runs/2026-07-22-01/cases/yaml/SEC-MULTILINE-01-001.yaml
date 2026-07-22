@@ -1,0 +1,51 @@
+id: SEC-MULTILINE-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 多行 secret 值输出不应绕过日志脱敏
+intent_ref: INTENT-SEC-007
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [MULTILINE_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test multiline secret masking
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) print multiline secret line by line
+          run: |
+            printf '%s\n' "$MULTILINE_SECRET"
+        - name: (TC) print multiline secret with echo
+          run: |
+            echo "$MULTILINE_SECRET"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: MULTILINE_SECRET
+  - type: negative
+    target: run_logs
+    must_not_contain: "placeholder_for_multiline_line1"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

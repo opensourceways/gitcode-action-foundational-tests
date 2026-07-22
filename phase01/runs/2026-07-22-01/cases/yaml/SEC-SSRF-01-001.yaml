@@ -1,0 +1,64 @@
+id: SEC-SSRF-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: Runner 网络出站应受控，防止访问云厂商元数据服务
+intent_ref: INTENT-SEC-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test metadata SSRF prevention
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) attempt to access cloud metadata
+          run: |
+            if curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/ ; then
+              echo "metadata_accessible"
+              exit 1
+            else
+              echo "metadata_blocked"
+            fi
+        - name: (TC) attempt alternative metadata endpoint
+          run: |
+            if curl -s --connect-timeout 5 http://100.100.100.200/latest/meta-data/ ; then
+              echo "alt_metadata_accessible"
+              exit 1
+            else
+              echo "alt_metadata_blocked"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "metadata_accessible"
+  - type: negative
+    target: run_logs
+    must_not_contain: "alt_metadata_accessible"
+  - type: positive
+    target: run_logs
+    must_contain: "metadata_blocked"
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

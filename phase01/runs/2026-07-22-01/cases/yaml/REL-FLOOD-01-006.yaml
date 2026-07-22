@@ -1,0 +1,48 @@
+id: REL-FLOOD-01-006
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 并发洪泛——同一仓库 10 个 push 同时触发 10 个 workflow 运行应无丢失
+intent_ref: INTENT-REL-036
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Concurrent flood 10 push test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Checkout source
+          uses: checkout
+        - name: Echo run id
+          run: |
+            echo "RUN_ID=${{ atomgit.run_id }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    concurrent_pushes: 10
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: api_runs_list
+    count: 10
+  - type: positive
+    target: api_runs_list
+    all_events: Push
+  - type: negative
+    target: api_runs_list
+    any_status_in: [UNKNOWN, null]
+
+teardown:
+  reset: fixture

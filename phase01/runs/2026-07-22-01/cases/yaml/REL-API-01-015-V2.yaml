@@ -1,0 +1,45 @@
+id: REL-API-01-015-V2
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: API 限流与一致性——触发限流后恢复期内查询仍不丢数据
+intent_ref: INTENT-REL-065
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    noop:
+      name: Noop for API rate limit recovery test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Echo done
+          run: |
+            echo "DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: api_rate_limit_triggered
+    status_code: 429
+  - type: positive
+    target: api_recovery_queries
+    all_status_200: true
+  - type: positive
+    target: api_data_consistency
+    before_after_match: true
+
+teardown:
+  reset: none

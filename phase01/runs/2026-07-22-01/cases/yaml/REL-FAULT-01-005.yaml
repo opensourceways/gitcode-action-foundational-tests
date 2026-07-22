@@ -1,0 +1,59 @@
+id: REL-FAULT-01-005
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 故障注入——runner 磁盘接近满时写入操作应失败并报磁盘满
+intent_ref: INTENT-REL-033
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Disk full fault injection test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Pre step
+          run: |
+            echo "PRE_STEP_OK"
+        - name: Write large file
+          run: |
+            dd if=/dev/zero of=large_file bs=1M count=2048
+        - name: Post step
+          run: |
+            echo "POST_STEP_OK"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: pre_job
+  action: disk_full
+  params:
+    free_space_mb: 10
+  recovery_expectation: fail_with_disk_full_error
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: FAILED
+  - type: positive
+    target: run_logs
+    contains_any:
+      - "No space left"
+      - "disk full"
+      - "No space left on device"
+  - type: negative
+    target: runner_process
+    crashed: false
+
+teardown:
+  reset: full_instance

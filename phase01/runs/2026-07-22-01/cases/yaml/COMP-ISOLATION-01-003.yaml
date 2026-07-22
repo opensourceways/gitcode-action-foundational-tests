@@ -1,0 +1,51 @@
+id: COMP-ISOLATION-01-003
+dimensions: [completeness]
+dimension: completeness
+priority: P0
+title: Runner 环境变量在跨 run 时不应残留
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    env-isolation:
+      name: Verify env isolation across runs
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Check for previous run env residue
+          run: |
+            if [ -n "$PREVIOUS_RUN_MARKER" ]; then
+              echo "ENV_RESIDUE_FOUND: $PREVIOUS_RUN_MARKER"
+            else
+              echo "ENV_CLEAN: no previous marker"
+            fi
+        - name: Set marker for potential next run
+          run: |
+            echo "PREVIOUS_RUN_MARKER=marked" >> "$ATOMGIT_ENV"
+            echo "MARKER_SET"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "ENV_CLEAN: no previous marker"
+  - type: negative
+    target: run_logs
+    must_not_contain: "ENV_RESIDUE_FOUND"
+
+teardown:
+  reset: fixture

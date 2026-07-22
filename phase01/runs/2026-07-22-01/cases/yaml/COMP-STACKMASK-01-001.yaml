@@ -1,0 +1,51 @@
+id: COMP-STACKMASK-01-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: secret 在错误堆栈与异常输出中必须保持脱敏
+intent_ref: INTENT-COMP-012
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test secret masking in error stack
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) trigger error with secret reference
+          run: |
+            SECRET_VAL="${{ secrets.DEPLOY_TOKEN }}"
+            echo "About to fail with secret in scope"
+            exit 1
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "错误堆栈和失败输出中不应出现 DEPLOY_TOKEN 明文"
+  - type: positive
+    target: run_status
+    equals: failed
+
+teardown:
+  reset: fixture

@@ -1,0 +1,50 @@
+id: COMPAT-ISOLATION-01-002
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: Runner 复用时的隔离策略与 GitHub ephemeral 语义对齐
+intent_ref: INTENT-COMPAT-028
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    runner-reuse-test:
+      name: Test runner reuse isolation
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Check runner-specific marker
+          run: |
+            RUNNER_ID="${ATOMGIT_RUNNER_NAME:-unknown}"
+            MARKER_FILE="/tmp/reuse-check-$RUNNER_ID"
+            if [ -f "$MARKER_FILE" ]; then
+              echo "SAME_RUNNER_REUSED"
+            else
+              echo "FRESH_RUNNER_OR_FIRST_USE"
+            fi
+            echo "test-data" > "$MARKER_FILE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "FRESH_RUNNER_OR_FIRST_USE"
+  - type: negative
+    target: run_logs
+    must_not_contain: "SAME_RUNNER_REUSED"
+
+teardown:
+  reset: fixture

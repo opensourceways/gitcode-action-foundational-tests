@@ -1,0 +1,54 @@
+id: SEC-OIDC-01-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: OIDC/短时凭据支持缺失时应明确标注为平台限制
+intent_ref: INTENT-SEC-034
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test OIDC short-lived credential boundary
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) request OIDC token
+          run: |
+            if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
+              curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" || echo "oidc_request_failed"
+            else
+              echo "oidc_env_missing"
+            fi
+        - name: (TC) verify explicit error
+          if: ${{ always() }}
+          run: |
+            echo "oidc_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "oidc_check_done"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 OIDC 不支持，错误信息应明确说明平台限制，不应出现模糊的内核错误或静默跳过"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,55 @@
+id: SEC-FORKENV-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: fork PR 中通过环境变量间接访问 secret 应被阻止
+intent_ref: INTENT-SEC-001
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    test:
+      name: Test fork PR env indirection secret isolation
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) attempt env indirection for secret
+          env:
+            INDIRECT_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          run: |
+            echo "env_length=${#INDIRECT_TOKEN}"
+        - name: (TC) verify no secret leakage
+          if: ${{ always() }}
+          run: |
+            echo "fork_env_check_done"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    must_contain: "fork_env_check_done"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 env 被忽略或 secret 为空，日志或错误信息应体现 fork 隔离策略"
+
+teardown:
+  reset: fixture

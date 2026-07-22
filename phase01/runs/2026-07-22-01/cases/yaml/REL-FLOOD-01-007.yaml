@@ -1,0 +1,51 @@
+id: REL-FLOOD-01-007
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 并发洪泛——同一仓库 50 个 push 同时触发应正确排队/限流不崩溃
+intent_ref: INTENT-REL-037
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Concurrent flood 50 push test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Checkout source
+          uses: checkout
+        - name: Echo run id
+          run: |
+            echo "RUN_ID=${{ atomgit.run_id }}"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    concurrent_pushes: 50
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: api_runs_list
+    count: 50
+  - type: positive
+    target: api_runs_list
+    any_had_status: QUEUED
+  - type: negative
+    target: api_runs_list
+    any_stuck_queued_over_seconds: 600
+  - type: negative
+    target: api_response
+    http_5xx: false
+
+teardown:
+  reset: fixture

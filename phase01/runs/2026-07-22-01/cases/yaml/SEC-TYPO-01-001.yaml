@@ -1,0 +1,50 @@
+id: SEC-TYPO-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 第三方 Action 应具备信任边界（typosquatting 限制）
+intent_ref: INTENT-SEC-015
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test typosquatting action boundary
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) attempt to use typosquatting action
+          uses: chekcout
+        - name: (TC) fallback step if blocked
+          if: ${{ always() }}
+          run: |
+            echo "fallback executed"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "typosquatting_payload_executed"
+  - type: positive
+    target: run_status
+    equals: failed
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应明确指出 Action 来源不可信、未审核或拼写错误，并给出可操作的修正建议"
+
+teardown:
+  reset: fixture

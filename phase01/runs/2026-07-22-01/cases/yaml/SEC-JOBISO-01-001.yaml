@@ -1,0 +1,77 @@
+id: SEC-JOBISO-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: Runner 环境变量与共享目录应跨 job 隔离
+intent_ref: INTENT-SEC-021
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    setenv:
+      name: Set custom env and shared dir
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) set env and write shared dir
+          run: |
+            export CUSTOM_SECRET_VAR="job_sensitive_value"
+            echo "$CUSTOM_SECRET_VAR" > /shared/job_data.txt
+            echo "job1_done"
+    verify:
+      name: Verify cross job isolation
+      runs-on: [ubuntu-latest, x64, small]
+      needs: setenv
+      steps:
+        - name: (TC) check env leakage
+          run: |
+            if [ "${CUSTOM_SECRET_VAR}" != "" ]; then
+              echo "env_leaked"
+              exit 1
+            else
+              echo "env_isolated"
+            fi
+        - name: (TC) check shared dir leakage
+          run: |
+            if [ -f "/shared/job_data.txt" ]; then
+              echo "dir_leaked"
+              exit 1
+            else
+              echo "dir_isolated"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "env_leaked"
+  - type: negative
+    target: run_logs
+    must_not_contain: "dir_leaked"
+  - type: positive
+    target: run_logs
+    must_contain: "env_isolated"
+  - type: positive
+    target: run_logs
+    must_contain: "dir_isolated"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

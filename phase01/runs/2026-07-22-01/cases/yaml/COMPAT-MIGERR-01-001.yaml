@@ -1,0 +1,44 @@
+id: COMPAT-MIGERR-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 迁移报错质量：不兼容语法报错应指明 GitCode 差异
+intent_ref: INTENT-COMPAT-031
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test migration error quality
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) reference github context
+          run: |
+            echo "github ref is: ${{ github.ref }}"
+            echo "test_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应指出 github 上下文不可用，并提示使用 atomgit 替代，而非 generic 语法错误"
+
+teardown:
+  reset: fixture

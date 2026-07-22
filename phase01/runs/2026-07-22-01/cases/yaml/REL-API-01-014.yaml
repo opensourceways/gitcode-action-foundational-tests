@@ -1,0 +1,47 @@
+id: REL-API-01-014
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: API 限流与一致性——10 QPS 高频查询 run/job 状态不丢数据
+intent_ref: INTENT-REL-065
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    noop:
+      name: Noop for API query target
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Echo done
+          run: |
+            echo "DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: api_data_consistency
+    before_after_match: true
+  - type: negative
+    target: api_response
+    http_5xx: true
+  - type: positive
+    target: api_rate_limit
+    if_rate_limited:
+      status_code: 429
+      has_header: Retry-After
+
+teardown:
+  reset: none

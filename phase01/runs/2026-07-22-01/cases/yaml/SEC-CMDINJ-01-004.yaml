@@ -1,0 +1,49 @@
+id: SEC-CMDINJ-01-004
+dimensions: [security]
+dimension: security
+priority: P0
+title: issue/PR 评论内容不可直接插进 run 脚本导致命令注入
+intent_ref: INTENT-SEC-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_comment:
+      types: [created]
+  jobs:
+    test:
+      name: Test comment command injection
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) echo comment body from expression
+          run: |
+            echo "Comment is ${{ atomgit.event.comment.body }}"
+
+trigger:
+  event: pull_request_comment
+  as: untrusted_contributor
+  params:
+    comment_body: "test ; cat /etc/passwd #"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "root:"
+  - type: negative
+    target: run_logs
+    must_not_contain: "etc/passwd"
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

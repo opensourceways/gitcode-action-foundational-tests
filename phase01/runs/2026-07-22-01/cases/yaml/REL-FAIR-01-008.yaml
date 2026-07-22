@@ -1,0 +1,64 @@
+id: REL-FAIR-01-008
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 并发资源公平性——2 个 workflow 各 3 个 jobs 应被公平调度
+intent_ref: INTENT-REL-044
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job1:
+      name: Fairness job one
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Work
+          run: |
+            sleep 30
+            echo "JOB1_DONE"
+    job2:
+      name: Fairness job two
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Work
+          run: |
+            sleep 30
+            echo "JOB2_DONE"
+    job3:
+      name: Fairness job three
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Work
+          run: |
+            sleep 30
+            echo "JOB3_DONE"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params:
+    concurrent_workflows: 2
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: job_schedule_timestamps
+    eval: script
+    rubric: "Jobs of workflow A and workflow B should interleave running periods; no workflow should monopolize runners"
+  - type: nonfunctional
+    target: first_job_start_delta_seconds
+    less_than: 30
+  - type: nonfunctional
+    target: last_job_start_delta_seconds
+    less_than: 60
+
+teardown:
+  reset: fixture

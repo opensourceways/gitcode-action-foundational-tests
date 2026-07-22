@@ -1,0 +1,60 @@
+id: SEC-DOUBLEEVAL-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: 表达式求值应防止通过环境变量间接二次求值
+intent_ref: INTENT-SEC-013
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test indirect double evaluation via env
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) set env with expression literal
+          env:
+            EXPRESSION_LITERAL: "${{ secrets.DEPLOY_TOKEN }}"
+          run: |
+            echo "env_value_set"
+        - name: (TC) print env without double eval
+          run: |
+            echo "The env value length is: ${#EXPRESSION_LITERAL}"
+            echo "single_eval_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 env_value_set"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 single_eval_check_done"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 DEPLOY_TOKEN 的明文值"
+
+teardown:
+  reset: fixture

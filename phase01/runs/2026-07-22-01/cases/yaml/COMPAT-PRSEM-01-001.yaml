@@ -1,0 +1,61 @@
+id: COMPAT-PRSEM-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: fork PR 关闭后重新打开时 pull_request_target 语义一致性
+intent_ref: INTENT-COMPAT-032
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+      types: [open, reopen]
+  jobs:
+    reopen-semantics:
+      name: Verify semantics on PR reopen
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Check secret access on reopen
+          run: |
+            if [ -n "$DEPLOY_TOKEN" ]; then
+              echo "SECRET_LEAK_ON_REOPEN"
+            else
+              echo "SECRET_SAFE_ON_REOPEN"
+            fi
+        - name: Verify base branch workflow on reopen
+          run: |
+            BASE_SHA="${{ atomgit.event.pull_request.base.sha }}"
+            CURRENT_SHA="${{ atomgit.sha }}"
+            if [ "$BASE_SHA" = "$CURRENT_SHA" ]; then
+              echo "BASE_BRANCH_ON_REOPEN"
+            else
+              echo "HEAD_BRANCH_ON_REOPEN"
+            fi
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    reopen: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    must_contain: "SECRET_SAFE_ON_REOPEN"
+  - type: positive
+    target: run_logs
+    must_contain: "BASE_BRANCH_ON_REOPEN"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,59 @@
+id: SEC-QUOTA-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: 大 cache 应受配额与边界限制
+intent_ref: INTENT-SEC-033
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test large cache quota limit
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) generate oversized cache directory
+          run: |
+            mkdir -p large_cache_dir
+            dd if=/dev/urandom of=large_cache_dir/oversized_cache.bin bs=1M count=600
+        - name: (TC) attempt save oversized cache
+          uses: cache
+          with:
+            path: large_cache_dir
+            key: oversized-cache-key-${{ atomgit.run_id }}
+        - name: (TC) verify cache blocked
+          if: ${{ always() }}
+          run: |
+            echo "cache_quota_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "cache_saved_unlimited"
+  - type: positive
+    target: run_status
+    in: [failed, completed]
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应包含 cache 大小超限提示、当前大小与配额上限"
+
+teardown:
+  reset: fixture
