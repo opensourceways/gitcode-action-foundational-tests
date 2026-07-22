@@ -1,0 +1,245 @@
+name: full_pr
+
+on:
+  # pull_request_target:
+  pull_request:
+    branches: [ "dev", "master", "master_for_actions" ]
+    paths: []
+    types: [ "open", "reopen", "update", "merge"  ]
+    branches-ignore: []
+    paths-ignore: []
+    code-update: false
+  pull_request_comment:
+    types: [created]
+    branches: [ '*' ]
+    comments: [ '^(?:\/)?compile*' ]
+# concurrency:  #并发策略
+#   max: 12 #并发个数限制
+#   enable: false
+#   preemption:
+#     enable: false
+#     events:
+#     - mr_id
+#   exceed-action: IGNORE #IGNORE:忽略不执行；QUEUE:排队等待
+inputs:
+  SOURCE_BRANCH:
+    type: string
+    description: ""
+    default: "${gitcode_SOURCE_BRANCH}"
+    manual_override: true
+  TARGET_BRANCH:
+    type: string
+    description: ""
+    default: "${gitcode_TARGET_BRANCH}"
+    manual_override: true
+  pipeline_run_id:
+    type: string
+    description: ""
+    default: "${PIPELINE_RUN_ID}"
+    manual_override: true
+  project_id:
+    type: string
+    description: ""
+    default: "${PROJECT_ID}"
+    manual_override: true
+  pipeline_id:
+    type: string
+    description: ""
+    default: "${PIPELINE_ID}"
+    manual_override: true
+  pipeline_number:
+    type: string
+    description: ""
+    default: "${PIPELINE_NUMBER}"
+    manual_override: false
+  REPOSITORY_NAME:
+    type: string
+    description: ""
+    default: "${{atomgit.event.repository.name}}"
+    manual_override: true
+  pr_id:
+    type: string
+    default: "${{atomgit.event.pull_request.number}}"
+    manual_override: true
+  REMOTE_URL:
+    type: string
+    description: ""
+    default: "${{atomgit.repositoryurl}}"
+    manual_override: true
+  TRIGGER_TYPE:
+    type: string
+    default: "${PIPELINE_TRIGGER_TYPE}"
+    manual_override: true
+  subUsername:
+    type: string
+    description: ""
+    default: inference_dev
+    manual_override: false
+  openlibing_project_id:
+    type: string
+    description: ""
+    default: 300036
+    manual_override: false
+  workspace:
+    type: string
+    description: "工作目录"
+    default: ${{ env.ATOMGIT_WORKSPACE }}
+stages:
+  stage1:
+    name: 静态检查
+    select: selected_by_default
+    jobs:
+    #   coecheck:
+    #     name: codecheck  # 任务名
+    #     runs-on: [ 'codearts-hosted', 'ubuntu-latest', 'x64', 'large' ]
+    #     container:
+    #       image: swr.cn-north-4.myhuaweicloud.com/inference/ubuntu:20.04.6.0409.x86
+    #       options: --cpus 1 --user root
+    #     steps:
+    #       - name: Login to CodeArts
+    #         uses: codearts-login  # 引用流水线授权插件
+    #         with:
+    #           region: cn-north-4                        #地域  华南广州 cn-south-1   北京四 cn-north-4
+    #           name: lingqu_CI                   # 账号名
+    #           password: ${{ secrets.IAM_PASSWORD }}    # 账号密码，配置在项目私密参数里
+    #           domain-name: hwstaff_MindX          # 租户名
+    #         id: login
+    #       - name: codecheck
+    #         uses: codecheck_gitcode_v2                  # 代码检查插件名
+    #         with:
+    #           project_id: 6a4fa7d010294da695be52110517c08b # 必填。创建任务时的project_id
+    #           task_name: wangjing127_MindIE-SD        # 必填。创建任务时的任务名
+    #           branch: master  
+
+      sca-pr-scan:
+        name: SCA
+        runs-on: [ 'codearts-hosted', 'ubuntu-latest', 'x64', 'large' ]
+        steps:
+          - name: Checkout repository with pre merge
+            uses: checkout
+            with:
+              repository: ${{atomgit.repositoryurl}}
+              ref: refs/merge-requests/${{ atomgit.event.number }}/merge
+
+          - name: Run SCA PR Scan
+            id: sca-pr-scan
+            uses: sca-pr-scan
+            with:
+              scan-access-key: ${{ secrets.APPID_TASK_SCA }}
+              scan-secret-key: ${{ secrets.SECRETKEY_TASK_SCA }}
+              pr-id: ${{ atomgit.event.pull_request.number }}
+              repository-name: ${{ atomgit.repository }}
+              project-name: "LQ_MindIE"
+
+      Antipoison:
+        name: Antipoison
+        # runs-on: [ self-hosted, arch=x64, os=euler ]
+        runs-on: [ 'codearts-hosted', 'ubuntu-latest', 'x64', 'large' ]
+        container:
+          image: swr.cn-north-4.myhuaweicloud.com/inference/ubuntu:20.04.6.0409.x86
+          options: --cpus 1 --user root
+        steps:
+          - name: Checkout repository with pre merge
+            uses: checkout
+            with:
+              repository: ${{atomgit.repositoryurl}}
+              ref: refs/merge-requests/${{ atomgit.event.number }}/merge
+          - name: Antipoison
+            run: |
+                set -e
+                git config --global http.lowSpeedLimit 0
+                git config --global http.lowSpeedTime 600
+                git config --global http.postBuffer 524288000
+                git config --global http.timeout 600
+                [ -f /home/jenkins/.gitconfig ] && cp /home/jenkins/.gitconfig ~/.gitconfig
+                [ -f /home/jenkins/.git-credentials ] && cp /home/jenkins/.git-credentials ~/.git-credentials
+                cd ..
+                # rm -rf ${REPOSITORY_NAME}
+                ls -l
+
+                rm -rf cie/
+                git clone https://AtlasAccount:${{secrets.ACCESS}}@gitcode.com/Ascend/MindIE-CI.git cie
+                # git clone https://ascend-robot:${{secrets.ACCESS1}}@gitcode.com/Ascend/MindIE-CI.git cie
+                space=$(pwd)
+                # sh -x cie/build/merge.sh "${TARGET_BRANCH}" "${REMOTE_URL}" "${pr_id}" "${space}" "${{secrets.ACCESS}}" "${TRIGGER_TYPE}" "${REPOSITORY_NAME}" 
+                ls -l
+                mv cie ${REPOSITORY_NAME}/
+                cd ${REPOSITORY_NAME}
+                WORKSPACE=$(pwd)
+                org_name=Ascend
+                wget -q https://mindie-pr.obs.cn-north-4.myhuaweicloud.com/tools/ApiGateway-python-sdk-2.0.7.zip --no-check-certificate
+                unzip -q ApiGateway-python-sdk-2.0.7.zip
+                cp -fr ApiGateway-python-sdk-2.0.7/apig_sdk cie/build/access_control/
+                python3 cie/build/access_control/anti_poison_gitcode.py --appId_task ${{secrets.APPID_TASK_ANTI}} --secretKey_task ${{secrets.SECRETKEY_TASK_ANTI}} --appId_status ${{secrets.APPID_STATUS_ANTI}} --secretKey_status ${{secrets.SECRETKEY_STATUS_ANTI}} --repo ${REPOSITORY_NAME} --pr_id ${pr_id} --org_name ${org_name}
+
+      pre-commitID:
+        name: pre-commit
+        if: ${{ default() }} 
+        runs-on:  [ 'dedicate-hosted', 'arm64', 'large' ]
+        container:
+          image: swr.cn-north-4.myhuaweicloud.com/inference/ascend_mindie_ubuntu_aarch64:20260514_ubuntu24_3.1.0_cann9.0.0_torch2.9.0_py311
+          options: --cpus 1 --user root
+        select: selected_by_default             
+        steps:
+          - name: checkout
+            uses: checkout
+            with:
+              ref: refs/merge-requests/${{ env.pr_id }}/merge
+          - name: pre-commit
+            uses: openlibing-pre-commit-action
+
+
+  stage2:
+    name: 编译构建
+    select: selected_by_default
+    jobs:
+      Build_linux_x86_abi1:
+        name: Build_linux_x86_abi1
+        if: ${{ default() }} 
+        uses: ./.gitcode/workflows/build_job.yaml
+        secrets:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+        with:
+          abi_type: "1"
+          arch: "x86_64"
+          CP_DOCKER_IMG: "swr.cn-north-4.myhuaweicloud.com/inference/ascend_mindie_ubuntu_x86:20260514_ubuntu24_3.1.0_cann9.0.0_torch2.9.0_py311"
+          runs_on_arch: "x86"
+          pr_id: "${{ inputs.pr_id }}"
+
+      Build_linux_arm_abi1:
+        name: Build_linux_arm_abi1
+        if: ${{ default() }} 
+        uses: ./.gitcode/workflows/build_job.yaml
+        secrets:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+        with:
+          abi_type: "1"
+          arch: "aarch64"
+          CP_DOCKER_IMG: "swr.cn-north-4.myhuaweicloud.com/inference/ascend_mindie_ubuntu_aarch64:20260514_ubuntu24_3.1.0_cann9.0.0_torch2.9.0_py311"
+          runs_on_arch: "arm64"
+          pr_id: "${{ inputs.pr_id }}"
+
+      Build_linux_arm_abi0:
+        name: Build_linux_arm_abi0
+        if: ${{ default() }} 
+        uses: ./.gitcode/workflows/build_job.yaml
+        secrets:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+        with:
+          abi_type: "0"
+          arch: "aarch64"
+          CP_DOCKER_IMG: "swr.cn-north-4.myhuaweicloud.com/inference/ascend_mindie_ubuntu_aarch64:20260514_ubuntu24_3.1.0_cann9.0.0_torch2.9.0_py311"
+          runs_on_arch: "arm64"
+          pr_id: "${{ inputs.pr_id }}"
+
+      DTArmID:
+        name: DTArmID
+        if: ${{ default() }} 
+        uses: ./.gitcode/workflows/ut_job.yaml
+        with:
+          CP_DOCKER_IMG: "swr.cn-north-4.myhuaweicloud.com/inference/ascend_mindie_ubuntu_x86:20260514_ubuntu24_3.1.0_cann9.0.0_torch2.9.0_py311"
+          runs_on_arch: "x86"
+          pr_id: "${{ inputs.pr_id }}"

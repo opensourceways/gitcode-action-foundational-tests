@@ -1,0 +1,76 @@
+name: Build Job
+
+on:
+  workflow_call:
+    inputs:
+      abi_type:
+        required: true
+        type: string
+      CP_DOCKER_IMG:
+        required: true
+        type: string
+      pr_id:
+        required: true
+        type: string
+      runs_on_arch:
+        required: true
+        type: string
+      arch:
+        required: true
+        type: string
+    secrets:      
+      OBS_AK:
+        required: true
+      OBS_SK:
+        required: true
+
+
+jobs:
+  JOB_Compile:
+    name: JOB_Compile
+    select: selected_by_default 
+    needs: [ ]  
+    runs-on: [ 'dedicate-hosted', '${{ inputs.runs_on_arch }}', 'xlarge' ]
+    container:
+      image: ${{ inputs.CP_DOCKER_IMG }}
+      options: --user root
+                
+    steps: 
+      - name: Checkout repository with pre merge
+        uses: checkout
+        with:
+          repository: ${{atomgit.repositoryurl}}
+          ref: refs/merge-requests/${{ atomgit.event.number }}/merge
+
+      - name: Execute_shell
+        run: |-
+            abi_type=${{ inputs.abi_type }}
+            arch=`uname -m`
+            cd ${WORKSPACE}
+            python_version_major=$(python --version 2>&1 |awk '{print $2}' | cut -d. -f1,2)
+            # check python & abi version 
+            if [ "${python_version_major}" != "3.11" ]; then
+                echo "Error: note that the required python version is 3.11, but the actual python version is ${python_version_major}"
+            else
+                echo "python_version_major: ${python_version_major}"
+            fi
+            echo "abi version: ${abi_type}"
+            if [ "${abi_type}"x == "0"x ]; then
+                export PATH=/opt/rh/devtoolset-7/root/usr/bin:${PATH}
+                gcc --version
+            else
+                gcc --version
+            fi
+            source /usr/local/Ascend/ascend-toolkit/set_env.sh
+            export USER_ABI_VERSION="${abi_type}" && python setup.py bdist_wheel
+            ls -l dist/*
+
+      - name: obs_upload_object
+        uses: obs-upload
+        with:
+          endpoint: "obs.cn-north-4.myhuaweicloud.com"
+          bucket: "mindie-pr"
+          access-key: ${{ secrets.OBS_AK }}
+          secret-key: ${{ secrets.OBS_SK }}
+          artifact-path: "${{ atomgit.workspace }}/dist/*.whl"
+          object-prefix: "monitor/ascend/MindIE-SD/actions/${{ inputs.pr_id }}/abi${{ inputs.abi_type }}/${{ inputs.arch }}/"
