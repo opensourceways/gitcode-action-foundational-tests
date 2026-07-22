@@ -108,24 +108,11 @@ api_list_runner_sets <owner> <repo>
 : ${GITCODE_ACCESS_TOKEN:?请设置 GITCODE_ACCESS_TOKEN 环境变量}
 
 # 统一请求封装
-# ★ 认证：Authorization: Bearer 请求头（不是 ?access_token= 查询参数——后者会报 PARAMETER_ERROR）
-# ★ 列 run 用 per_page=10 较稳；部分节点偶发 PARAMETER_ERROR(codeArtsIds)，需重试穿透（见下 _gitcode_api_retry）
 _gitcode_api() {
   local method="$1" path="$2" qs="$3"
-  local url="${GITCODE_API_BASE_URL}${path}"
-  [ -n "$qs" ] && url="${url}?${qs}"
-  curl -s -X "$method" -H "Authorization: Bearer ${GITCODE_ACCESS_TOKEN}" "$url"
-}
-
-# 带重试的封装：穿透偶发 PARAMETER_ERROR（见 PLATFORM-NOTES.md §3）
-_gitcode_api_retry() {
-  local i
-  for i in $(seq 1 15); do
-    local out; out=$(_gitcode_api "$@")
-    if ! echo "$out" | grep -q 'PARAMETER_ERROR'; then echo "$out"; return 0; fi
-    sleep 3
-  done
-  echo "$out"; return 1
+  local url="${GITCODE_API_BASE_URL}${path}?access_token=${GITCODE_ACCESS_TOKEN}"
+  [ -n "$qs" ] && url="${url}&${qs}"
+  curl -s -X "$method" "$url"
 }
 
 api_get_run() {
@@ -149,10 +136,6 @@ api_download_job_log() {
 ```
 
 ## 错误处理
-- **认证**：`Authorization: Bearer <token>` 请求头；`?access_token=` 查询参数会报 `PARAMETER_ERROR`。
-- **偶发 `PARAMETER_ERROR(codeArtsIds)`**：list runs 时部分后端节点会返回，非参数真错——用 `_gitcode_api_retry` 重试穿透。
-- **run 校验错误 API 看不到**：编译失败的 run，v8 API 的 `message` 是 `null`、job 数为 0、`event=PUSH`、耗时 1s。
-  具体 Validation Error 只在**网页 run 详情页**「N 个错误」处可见（见 PLATFORM-NOTES.md §3）。
 - HTTP 4xx → 记录错误响应，调用方据此判断（401=token 过期，404=资源不存在）
 - HTTP 5xx → 重试最多 2 次（间隔 2s），仍失败则返回错误
 - 网络超时 → curl `--connect-timeout 10 --max-time 30`
