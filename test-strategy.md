@@ -33,11 +33,11 @@
 | 打通phase01 + phase02,生成正确的yaml                  | 7/22 | chenqi      |
 | 用例并发执行                                         | 7/22 | yunlin      |
 | 区分用例自动/手动                                      | 7/23 | chenqi      |
-| 完善phase2的自动化工具,达到大部分用例都能自动化                    | 7/23 | yunlin      |
-| 易用性，性能，安全用例完整输出                                | 7/24 |guoxiaozhen|
-| 用例检查，用例完整                                      | 7/25 |guoxiaozhen|
-| phase01输出yaml完整无误                              | 7/25 |chenqi|
-| phsase02 用例自动化                                 | 7/25 |yunlin|
+| 完善phase2的自动化工具,达到大部分用例都能自动化                    | 7/24 | yunlin      |
+| 易用性，性能，安全用例完整输出                                | 7/24 | guoxiaozhen |
+| 用例检查，用例完整                                      | 7/25 | guoxiaozhen |
+| phase01输出yaml完整无误                              | 7/25 | chenqi      |
+| phsase02 用例自动化                                 | 7/25 | yunlin      |
 | GitCode action正向测试 + 异常场景覆盖                    | 7/25 |             |
 | 安全场景测试                                         | 7/25 |             |
 | 历史功能问题举一反三，详见 [inputs](phase01/inputs/history) | 7/25 |             |
