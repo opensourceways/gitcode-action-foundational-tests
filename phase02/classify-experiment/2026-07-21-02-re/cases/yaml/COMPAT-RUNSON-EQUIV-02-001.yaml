@@ -1,0 +1,52 @@
+id: COMPAT-RUNSON-EQUIV-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P2
+title: "runs-on 多种写法等价性——数组 [..] vs 花括号 {..} vs default vs 键值 arch=arm"
+intent_ref: INTENT-COMPAT-037
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-RUNSON-EQUIV-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    array-form:
+      name: Array Form
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Echo
+        run: echo "ARRAY_FORM_OK"
+    default-form:
+      runs-on: [default]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Echo
+        run: echo "DEFAULT_FORM_OK"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "ARRAY_FORM_OK 出现"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "DEFAULT_FORM_OK 出现"
+
+teardown:
+  reset: fixture

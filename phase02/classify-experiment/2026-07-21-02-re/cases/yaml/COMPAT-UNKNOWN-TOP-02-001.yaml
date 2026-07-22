@@ -1,0 +1,49 @@
+id: COMPAT-UNKNOWN-TOP-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "未知/不支持顶层字段的处理——报错 vs 静默忽略（GitHub 有 run-name 等 GitCode 无）"
+intent_ref: INTENT-COMPAT-041
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-UNKNOWN-TOP-02-001
+  run-name: Test Run by ${{ atomgit.actor }}
+  on:
+    workflow_dispatch:
+  concurrency:
+    group: ${{ atomgit.workflow }}-${{ atomgit.ref }}
+    cancel-in-progress: true
+  jobs:
+    unknown:
+      name: Unknown Field
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Echo
+        run: echo "unknown_field_test"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "不静默成功运行而忽略不支持的字段"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "报错或警告精确到不支持的字段名"
+
+teardown:
+  reset: fixture

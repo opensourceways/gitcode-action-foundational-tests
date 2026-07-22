@@ -1,0 +1,39 @@
+id: USE-DOC-02-002
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "文档声明的 environment 绑定语法与实际校验行为的一致性（复测 TC-010）"
+intent_ref: INTENT-USE-008
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-environment:
+      name: Test Environment
+      runs-on: [dedicate-hosted, x64, large]
+      environment: production
+      steps:
+      - run: echo "deploy to production"
+  name: USE-DOC-02-002
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "按文档示例配置 environment 字段后，平台应接受或文档应明确标注能力状态——不应出现 '文档说可用但平台报 unknown property' 的矛盾"
+
+teardown:
+  reset: fixture

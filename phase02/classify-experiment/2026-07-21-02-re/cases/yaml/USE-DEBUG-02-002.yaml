@@ -1,0 +1,44 @@
+id: USE-DEBUG-02-002
+dimensions:
+  - usability
+dimension: usability
+priority: P2
+title: "运行状态机的完整性与可观察性：queued/cancelled/skipped 状态的展示"
+intent_ref: INTENT-USE-011
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: QUEUE
+  jobs:
+    observable-job:
+      name: Observable Job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: Long step for observation
+        run: sleep 120
+      - run: echo "Job completed"
+  name: USE-DEBUG-02-002
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_status
+    eval: "llm_assisted"
+    rubric: "queued 状态应在 Actions 列表页清晰展示且含排队位置或预计等待时间；cancelled 应含取消原因；skipped job 应有可见的跳过原因"
+
+teardown:
+  reset: fixture

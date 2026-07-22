@@ -1,0 +1,54 @@
+id: USE-RERUN-02-001
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "Re-run failed jobs 后成功 job 的结果和日志保留与展示"
+intent_ref: INTENT-USE-020
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a-success:
+      name: Job A Success
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - run: echo "Job A completed successfully"
+    job-b-fail:
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - run: 'echo "Job B will fail"
+  
+          exit 1
+  
+          '
+  name: USE-RERUN-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "Re-run failed jobs 后 job-a-success 状态显示 'cached' / '已缓存' / 'passed' / '已通过'"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "job-a-success 的原始日志可展开查看"
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "job-a-success 不被重新执行（不消耗额外 Runner 资源）"
+
+teardown:
+  reset: fixture

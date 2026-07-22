@@ -1,0 +1,69 @@
+id: REL-RUNNER-02-003
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "前一个 job 的 workspace 文件残留不污染下一次调度的新 job"
+intent_ref: INTENT-REL-014
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A
+      runs-on: [ubuntu-latest, x64, small]
+      env:
+        JOB_A_ENV: job-a-value
+      steps:
+      - name: Create marker files
+        run: 'echo "job-a-marker" > /tmp/cross-job-marker
+  
+          echo "Created marker file at /tmp/cross-job-marker"
+  
+          echo "JOB_A_ENV=$JOB_A_ENV"
+  
+          '
+    job-b:
+      needs: job-a
+      runs-on: [ubuntu-latest, x64, small]
+      env:
+        JOB_B_ENV: job-b-value
+      steps:
+      - name: Verify no cross-job contamination
+        run: "if [ -f /tmp/cross-job-marker ]; then\n  echo \"FAIL: Found cross-job\
+          \ marker from job-a\"\n  exit 1\nelse\n  echo \"PASS: No cross-job file contamination\"\
+          \nfi\n"
+      - name: Verify env isolation
+        run: "if [ -n \"$JOB_A_ENV\" ]; then\n  echo \"FAIL: JOB_A_ENV leaked to job-b:\
+          \ $JOB_A_ENV\"\n  exit 1\nelse\n  echo \"PASS: Job env isolation confirmed\"\
+          \nfi\n"
+  name: REL-RUNNER-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "job-b 的 workspace 中不存在 job-a 创建的 /tmp/cross-job-marker"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "job-b 的环境变量中不含 job-a 自定义的 JOB_A_ENV"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不应出现跨 job 的 workspace 文件或 env 变量泄露"
+
+teardown:
+  reset: fixture

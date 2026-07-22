@@ -1,0 +1,70 @@
+id: COMP-TRIGGER-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 8 种触发事件类型均能产生运行记录"
+intent_ref: INTENT-COMP-001
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches:
+      - main
+    pull_request:
+      types:
+      - open
+    pull_request_target:
+      types:
+      - open
+    pull_request_comment:
+      types:
+      - new
+    workflow_dispatch:
+      inputs:
+        reason:
+          description: Trigger reason
+          required: false
+  jobs:
+    trigger-test:
+      name: Trigger Test
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Log trigger info
+        run: 'echo "TRIGGER_EVENT=${{ atomgit.event_name }}"
+  
+          echo "TRIGGER_TEST_RUN_OK"
+  
+          '
+  name: COMP-TRIGGER-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "push 触发产生 run 记录，日志含 TRIGGER_TEST_RUN_OK"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "event_name 返回正确的触发事件字符串"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "8 种事件类型（push/pr/pr_target/pr_comment/workflow_dispatch/schedule/issue_comment/workflow_call）均能创建运行记录"
+
+teardown:
+  reset: fixture

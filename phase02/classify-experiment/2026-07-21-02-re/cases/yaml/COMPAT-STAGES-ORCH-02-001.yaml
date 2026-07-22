@@ -1,0 +1,59 @@
+id: COMPAT-STAGES-ORCH-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "stages 编排层——GitHub 扁平 jobs 迁移到 GitCode 是否需引入 stages 及默认行为"
+intent_ref: INTENT-COMPAT-057
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-STAGES-ORCH-02-001
+  on:
+    workflow_dispatch:
+  stages:
+    - name: build
+      jobs:
+        - build-job
+    - name: test
+      jobs:
+        - test-job
+  jobs:
+    build-job:
+      name: Build Job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Build
+        run: echo "BUILD_DONE"
+    test-job:
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Test
+        run: echo "TEST_DONE"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "BUILD_DONE 先于 TEST_DONE 出现"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "两 job 均成功"
+
+teardown:
+  reset: fixture

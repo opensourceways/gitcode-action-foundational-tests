@@ -1,0 +1,48 @@
+id: COMPAT-RECURSIVE-02-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P1
+title: "recursive run 防护一致性——GitCode token 触发的运行是否防递归"
+intent_ref: INTENT-COMPAT-056
+
+setup:
+  repo_fixture: basic-ci
+  secrets: ["TRIGGER_TOKEN"]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-RECURSIVE-02-001
+  on:
+    push:
+      branches:
+        - main
+  jobs:
+    recursive:
+      name: Recursive Guard
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Attempt recursive trigger
+        run: |
+          curl -X POST "${{ atomgit.api_url }}/repos/${{ atomgit.repository }}/actions/workflows/recursive.yml/dispatches"             -H "Authorization: token ${{ secrets.TRIGGER_TOKEN }}"             -d '{"ref":"main"}' || echo "TRIGGER_BLOCKED"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "不产生无限递归 run"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "出现 TRIGGER_BLOCKED 或等效拦截日志"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,64 @@
+id: SEC-PERMS-02-002
+dimensions:
+  - security
+dimension: security
+priority: P0
+title: "未声明 permissions 时 ATOMGIT_TOKEN 使用仓库设置中的默认权限"
+intent_ref: INTENT-SEC-016
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-default-permissions:
+      name: Test Default Permissions
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Test push with default permissions
+        run: "if git push origin HEAD:refs/heads/test-default-perms 2>&1; then
+    echo\
+          \ \"PUSH_ALLOWED_BY_DEFAULT_PERMS\"
+  else
+    echo \"PUSH_REJECTED_BY_DEFAULT_PERMS\"\
+          
+  fi
+  "
+      - name: Report default permission level
+        run: 'echo "Repository default permissions are as configured in repo settings"
+  
+          '
+      name: Test Default Permissions
+  name: SEC-PERMS-02-002
+trigger:
+  event: push
+  as: maintainer
+  params:
+    repo_default_permission: read
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "仓库默认 read 权限时日志含 PUSH_REJECTED_BY_DEFAULT_PERMS"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "仓库默认 read 权限时日志不含 PUSH_ALLOWED_BY_DEFAULT_PERMS"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "权限不被意外放大——默认 read 不应允许 push"
+
+teardown:
+  reset: fixture

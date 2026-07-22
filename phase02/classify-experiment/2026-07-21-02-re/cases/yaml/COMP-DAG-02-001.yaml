@@ -1,0 +1,78 @@
+id: COMP-DAG-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 job DAG needs 依赖拓扑的正确执行与失败传播"
+intent_ref: INTENT-COMP-003
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: exit 1
+    job-b:
+      needs: job-a
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: echo "JOB_B_EXECUTED"
+    job-c:
+      needs: job-b
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: echo "JOB_C_EXECUTED"
+    job-d:
+      needs:
+      - job-a
+      - job-b
+      if: ${{ always }}
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: echo "JOB_D_ALWAYS_EXECUTED"
+    parallel-1:
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: echo "PARALLEL_1_DONE"
+    parallel-2:
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - run: echo "PARALLEL_2_DONE"
+  name: COMP-DAG-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "job-a 失败 → job-b/job-c 状态为 skipped"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "job-d（if: always()）执行，日志含 JOB_D_ALWAYS_EXECUTED"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "无 needs 的 parallel-1/2 并行执行，日志含 PARALLEL_1_DONE 和 PARALLEL_2_DONE"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,63 @@
+id: REL-RERUN-02-003
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "Re-run all jobs 后，ATOMGIT_RUN_ID 和 ATOMGIT_RUN_NUMBER 更新为新值，atomgit.sha 保持原值"
+intent_ref: INTENT-REL-027
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    record-context:
+      name: Record Context
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: Record run identifiers
+        run: 'echo "ATOMGIT_RUN_ID=$ATOMGIT_RUN_ID"
+  
+          echo "ATOMGIT_RUN_NUMBER=$ATOMGIT_RUN_NUMBER"
+  
+          echo "ATOMGIT_SHA=$ATOMGIT_SHA"
+  
+          echo "ATOMGIT_REF=$ATOMGIT_REF"
+  
+          '
+      - name: Export for comparison
+        run: 'echo "Run ID: $ATOMGIT_RUN_ID" > /tmp/run-context.txt
+  
+          echo "Run Number: $ATOMGIT_RUN_NUMBER" >> /tmp/run-context.txt
+  
+          echo "Commit SHA: $ATOMGIT_SHA" >> /tmp/run-context.txt
+  
+          '
+  name: REL-RERUN-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "Re-run 后的 ATOMGIT_RUN_ID 与原始运行不同"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "Re-run 后的 ATOMGIT_RUN_NUMBER > 原始运行的 run_number"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "Re-run 后的 ATOMGIT_SHA 与原始运行的 commit sha 相同"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,38 @@
+id: USE-MIGR-02-006
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "迁移清单文档的完整性与可操作性：从 GitHub 迁移到 GitCode 的官方指南"
+intent_ref: INTENT-USE-019
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    placeholder:
+      name: Placeholder
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - run: echo "This is a document review case — no actual execution needed"
+  name: USE-MIGR-02-006
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "搜索结果应找到从 GitHub Actions 迁移到 GitCode Action 的官方指南，且至少覆盖 7 个阻断性差异点（上下文命名、permissions 命名、runs-on 格式、PR types 命名、表达式语法、inputs 类型、内置 action 引用），每个差异点含 GitHub vs GitCode 对比示例"
+
+teardown:
+  reset: fixture

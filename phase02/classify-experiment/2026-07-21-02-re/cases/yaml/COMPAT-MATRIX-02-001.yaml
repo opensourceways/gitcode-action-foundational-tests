@@ -1,0 +1,81 @@
+id: COMPAT-MATRIX-02-001
+dimensions:
+  - compatibility
+  - completeness
+dimension: compatibility
+priority: P1
+title: "matrix include/exclude 展开语义与动态 runs-on 兼容性——追加变量、排除组合、新组合创建是否与 GitHub 一致"
+intent_ref: INTENT-COMPAT-065
+
+setup:
+  repo_fixture: matrix-compat
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    matrix-compat:
+      name: Matrix Compat
+      runs-on: ${{ matrix.os }},x64,small
+      strategy:
+        matrix:
+          os: [ubuntu-latest, centos-latest]
+          version: [18, 20]
+          include:
+          - os: ubuntu-latest
+            version: 20
+            experimental: true
+          - os: alpine-latest
+            version: edge
+            experimental: edge
+          exclude:
+          - os: centos-latest
+            version: 18
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Echo vars
+        run: |
+          echo "OS=${{ matrix.os }}"
+          echo "VERSION=${{ matrix.version }}"
+          echo "EXPERIMENTAL=${{ matrix.experimental }}"
+          echo "COMPAT_INSTANCE_OK"
+  
+  name: COMPAT-MATRIX-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "共生成 4 个实例（ubuntu-18、ubuntu-20、centos-20 + alpine-edge）"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "ubuntu-20 实例输出 EXPERIMENTAL=true，alpine-edge 实例输出 EXPERIMENTAL=edge"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "各实例调度到与 os 值对应的 Runner"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 centos-18 实例"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应因 alpine-edge 不含基础变量而被静默忽略"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "动态 runs-on 解析失败时不应静默挂起无报错"
+
+teardown:
+  reset: fixture
