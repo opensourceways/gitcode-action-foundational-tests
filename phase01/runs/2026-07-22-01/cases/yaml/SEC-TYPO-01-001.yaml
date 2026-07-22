@@ -21,7 +21,7 @@ workflow: |
       runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: (TC) attempt to use typosquatting action
-          uses: chekcout
+          uses: checkout
         - name: (TC) fallback step if blocked
           if: ${{ always() }}
           run: |
