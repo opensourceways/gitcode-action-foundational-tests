@@ -1,0 +1,60 @@
+id: COMPAT-PERMS-02-001
+dimensions:
+  - compatibility
+  - security
+dimension: compatibility
+priority: P1
+title: "验证 permissions 权限域命名差异 project/pr/repository vs contents/pull-requests 不兼容"
+intent_ref: INTENT-COMPAT-009
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    repository: read
+    pr: write
+  jobs:
+    test-permissions:
+      name: Test Permissions
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Test clone with repository:read
+        run: echo "CLONE_WITH_GC_PERMS_OK"
+      - name: Test push with read-only
+        run: "if git push origin HEAD:refs/heads/test-gc-perms 2>&1; then
+    echo \"\
+          PUSH_SUCCEEDED_UNEXPECTEDLY\"
+  else
+    echo \"PUSH_REJECTED_AS_EXPECTED\"
+  \
+          fi
+  "
+      name: Test Permissions
+  name: COMPAT-PERMS-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "GitCode 域名 repository: read 正确限制权限，日志含 CLONE_WITH_GC_PERMS_OK 和 PUSH_REJECTED_AS_EXPECTED"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "GitHub 域名 contents: read 应报错（非静默忽略权限差异）"
+
+teardown:
+  reset: fixture

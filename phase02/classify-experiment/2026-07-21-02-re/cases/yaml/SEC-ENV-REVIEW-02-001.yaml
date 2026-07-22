@@ -1,0 +1,51 @@
+id: SEC-ENV-REVIEW-02-001
+dimensions: [security, usability]
+dimension: security
+priority: P1
+title: "环境保护规则（reviewers/wait timer）未审批时环境 Secret 不可访问"
+intent_ref: INTENT-SEC-030
+
+setup:
+  repo_fixture: with-secrets
+  secrets: ["ENV_SECRET"]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: SEC-ENV-REVIEW-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    deploy:
+      name: Deploy to Production
+      runs-on: [dedicate-hosted, x64, large]
+      environment: production
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Access env secret
+        run: |
+          VAL="${{ secrets.ENV_SECRET }}"
+          if [ -n "$VAL" ]; then
+            echo "ENV_SECRET_ACCESS_GRANTED"
+          else
+            echo "ENV_SECRET_EMPTY"
+          fi
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "未审批时 run 状态为 waiting 或 paused"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "ENV_SECRET"
+
+teardown:
+  reset: fixture

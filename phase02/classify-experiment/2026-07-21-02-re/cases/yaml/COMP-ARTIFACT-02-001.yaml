@@ -1,0 +1,77 @@
+id: COMP-ARTIFACT-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 artifact 跨 job 上传/下载及保留策略"
+intent_ref: INTENT-COMP-006
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    upload-artifact-job:
+      name: Upload Artifact Job
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Create test files
+        run: 'mkdir -p dist/subdir
+  
+          echo "artifact-content-v1" > dist/output.txt
+  
+          echo "sub-file" > dist/subdir/inner.txt
+  
+          '
+      - uses: upload-artifact
+        with:
+          name: test-artifact
+          path: dist/
+        name: (TC) upload-artifact
+    download-artifact-job:
+      needs: upload-artifact-job
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: download-artifact
+        with:
+          name: test-artifact
+        name: (TC) download-artifact
+      - name: Verify content
+        run: "if [ -f dist/output.txt ] && [ \"$(cat dist/output.txt)\" = \"artifact-content-v1\"\
+          \ ]; then
+    echo \"ARTIFACT_CONTENT_VERIFIED\"
+  else
+    echo \"ARTIFACT_CONTENT_MISMATCH\"\
+          
+    exit 1
+  fi
+  "
+      name: Download Artifact Job
+  name: COMP-ARTIFACT-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志含 ARTIFACT_CONTENT_VERIFIED（上传下载内容一致）"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "日志不含 ARTIFACT_CONTENT_MISMATCH"
+
+teardown:
+  reset: fixture

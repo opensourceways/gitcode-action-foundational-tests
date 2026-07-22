@@ -1,0 +1,63 @@
+id: REL-MATRIX-02-003
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "strategy.fail-fasttrue 时，矩阵中 1 个 job 失败应立即取消其余未完成实例"
+intent_ref: INTENT-REL-007
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    matrix-fail-fast:
+      name: Matrix Fail Fast
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os:
+          - ubuntu
+          - macos
+          - windows
+          node:
+          - 18
+          - 22
+        fail-fast: true
+        max-parallel: 6
+      steps:
+      - name: Run or fail
+        run: "if [ \"${{ matrix.os }}\" = \"macos\" ] && [ \"${{ matrix.node }}\" =\
+          \ \"22\" ]; then\n  echo \"Deliberate failure\"\n  exit 1\nfi\necho \"PASS:\
+          \ ${{ matrix.os }}-${{ matrix.node }}\"\n"
+      - name: Long step for cancel window
+        if: ${{ matrix.os != 'macos' || matrix.node != '22' }}
+        run: sleep 60
+  name: REL-MATRIX-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "fail-fast=true 下首个 job 失败后其余未完成 job 在 30s 内全部转为 cancelled"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "已完成的 job 状态不受 fail-fast 波及"
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "无 job 卡死在 in_progress 超过 60s 未响应取消信号"
+
+teardown:
+  reset: fixture

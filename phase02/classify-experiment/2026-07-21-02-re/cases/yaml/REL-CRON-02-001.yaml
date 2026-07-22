@@ -1,0 +1,66 @@
+id: REL-CRON-02-001
+dimensions:
+  - reliability
+  - completeness
+dimension: reliability
+priority: P1
+title: "cron 表达式运算符边界——标准运算符生效、非标准运算符处理与非法格式拒绝"
+intent_ref: INTENT-REL-034
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+    - cron: '*/5 * * * *'
+  jobs:
+    cron-op-verify:
+      name: Cron Operator Verify
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - name: Record schedule context
+        run: |
+          echo "EVENT_NAME=${{ atomgit.event_name }}"
+          echo "SCHEDULE=${{ atomgit.event.schedule }}"
+trigger:
+  event: schedule
+  as: maintainer
+  params:
+    observation_window_minutes: "30"
+    cron_operators_under_test:
+      - "*/5 * * * *"
+      - "0 2,14 * * *"
+      - "0 9-17 * * 1-5"
+      - "0 0 L * *"
+      - "0 0 * * 1W"
+      - "0 0 * * 1#2"
+      - "? * * * *"
+      - "0 * * * * *"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "标准运算符触发时，日志包含 atomgit.event.schedule 且值为对应 cron 表达式"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "不应出现合法 cron 配置通过但 30min 内无任何 schedule 运行的情况"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "L/W/# 若被静默忽略当作 * 处理，不应出现非预期高频触发"
+  - type: positive
+    target: workflow_validation
+    eval: deterministic
+    rubric: "? 与 6-field 格式在校验阶段被拒绝并给出明确报错"
+
+teardown:
+  reset: none

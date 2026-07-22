@@ -1,0 +1,48 @@
+id: COMPAT-CONCUR-MODEL-02-001
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "concurrency 模型差异——GitHub group+cancel-in-progress vs GitCode enable+max+exceed-action+preemption"
+intent_ref: INTENT-COMPAT-042
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-CONCUR-MODEL-02-001
+  on:
+    workflow_dispatch:
+  concurrency:
+    group: ${{ atomgit.workflow }}-${{ atomgit.ref }}
+    cancel-in-progress: true
+  jobs:
+    model-test:
+      name: Model Test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Echo
+        run: echo "concurrency_model_test"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "不静默成功而忽略并发配置"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "报错包含 GitCode 并发语法示例"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,59 @@
+id: COMP-POST-02-001
+dimensions:
+  - completeness
+dimension: completeness
+priority: P1
+title: "验证 post 后处理阶段 run_always 与时序保证"
+intent_ref: INTENT-COMP-010
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  stages:
+  - name: build
+    fail_fast: true
+    jobs:
+      main-build:
+        runs-on:
+          ubuntu-24: null
+          x64: null
+          small: null
+        steps:
+        - name: (TC) checkout
+          uses: checkout
+        - run: echo "MAIN_BUILD_DONE"
+  post:
+    run_always: true
+    jobs:
+      cleanup:
+        runs-on:
+          ubuntu-24: null
+          x64: null
+          small: null
+        steps:
+        - run: echo "POST_CLEANUP_EXECUTED"
+  name: COMP-POST-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "主流程成功后 post 执行，日志含 POST_CLEANUP_EXECUTED"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "post 在全部 stage 完成后执行"
+
+teardown:
+  reset: fixture

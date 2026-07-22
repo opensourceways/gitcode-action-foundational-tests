@@ -1,0 +1,62 @@
+id: REL-CANCEL-02-005
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "取消后运行终态收敛与 runner 资源释放时限"
+intent_ref: INTENT-REL-038
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    converge-test:
+      name: Converge Test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Long sleep for cancel window
+        run: sleep 180
+      - name: Post cleanup
+        if: always()
+        run: echo "CLEANUP_AFTER_CANCEL"
+  
+  name: REL-CANCEL-02-005
+trigger:
+  event: push
+  as: maintainer
+  params:
+    cancel_after_seconds: 30
+    poll_status_interval: 5
+    poll_status_count: 24
+    probe_runner_interval: 10
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "终态为 cancelled，且连续 5 次轮询一致"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "终态不应为 success 或 failure"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "120s 观察窗口内不应持续 stuck 在 running/queued"
+  - type: nonfunctional
+    target: runner_schedulable
+    eval: deterministic
+    rubric: "取消后 120s 内 runner 可成功调度新探针 job"
+
+teardown:
+  reset: fixture

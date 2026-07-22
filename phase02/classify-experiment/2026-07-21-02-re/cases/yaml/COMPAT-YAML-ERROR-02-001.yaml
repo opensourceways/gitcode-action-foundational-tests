@@ -1,0 +1,45 @@
+id: COMPAT-YAML-ERROR-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "非法 YAML / schema 校验报错质量——错在第几行、可操作提示与 GitHub 对齐"
+intent_ref: INTENT-COMPAT-060
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-YAML-ERROR-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-yaml:
+      name: Bad YAML
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Missing indent
+        run: echo "test"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "YAML 错误报错精确到行号"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "提示包含可操作的修改建议"
+
+teardown:
+  reset: fixture

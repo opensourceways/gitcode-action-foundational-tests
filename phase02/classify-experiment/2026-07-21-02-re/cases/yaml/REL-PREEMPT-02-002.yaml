@@ -1,0 +1,79 @@
+id: REL-PREEMPT-02-002
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "preemption 被抢占 job/run 的终态、日志完整性与 runner 释放时效"
+intent_ref: INTENT-REL-040
+
+setup:
+  repo_fixture: preemption-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    enable: true
+    max: 1
+    preemption:
+      enable: true
+      events:
+      - mr_id
+  jobs:
+    preempt-victim:
+      name: Preempt Victim
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Continuous tick
+        run: |
+          for i in $(seq 1 300); do
+            echo "TICK_$i $(date +%s)"
+            sleep 1
+          done
+      - name: Post cleanup
+        if: always()
+        run: echo "POST_CLEANUP_DONE"
+  
+  name: REL-PREEMPT-02-002
+trigger:
+  event: push
+  as: maintainer
+  params:
+    preempt_after_seconds: 30
+    probe_runner_interval: 10
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "被抢占 job 终态为 cancelled，连续 5 次轮询一致"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志行数 ≥25 行且含被抢占前最后输出（如 TICK_30）"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "终态不应为 success 或 failure"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志不应被截断至 0 行或仅剩前几行"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应无 cancelled/preempted 标记导致无法区分代码失败与被抢占"
+  - type: nonfunctional
+    target: runner_schedulable
+    eval: deterministic
+    rubric: "抢占发生后 runner 在 60s 内可调度新探针 job"
+
+teardown:
+  reset: fixture

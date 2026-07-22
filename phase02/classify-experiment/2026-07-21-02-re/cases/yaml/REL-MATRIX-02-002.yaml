@@ -1,0 +1,68 @@
+id: REL-MATRIX-02-002
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "matrix include/exclude 总数正确：基础组合  include - exclude  最终实例数"
+intent_ref: INTENT-REL-006
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    matrix-test:
+      name: Matrix Test
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os: [ubuntu, windows]
+          node: [18, 20]
+        include:
+          - os: ubuntu
+            node: 22
+            experimental: true
+          - os: windows
+            node: 18
+            experimental: false
+          - os: custom
+            node: 18
+            experimental: true
+        exclude:
+          - os: windows
+            node: 20
+        max-parallel: 6
+      steps:
+        - name: Verify experimental flag
+          run: |
+            echo "os=${{ matrix.os }} node=${{ matrix.node }}"
+            echo "experimental=${{ matrix.experimental }}"
+        - name: Count instances
+          run: 'echo "Instance executed: ${{ matrix.os }}-${{ matrix.node }}"'
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "总 job 实例数 = 6（4 基础 + 3 include - 1 exclude）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "include 追加的 experimental 变量仅在其所属实例中可见为 true"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "被 exclude 的 windows-node-20 组合无对应 job 生成"
+
+teardown:
+  reset: fixture

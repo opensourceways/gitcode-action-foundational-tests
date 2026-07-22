@@ -22,6 +22,22 @@ runs-on: default                        # 不明确的标签
 
 **匹配逻辑**：`runs-on` 中列出的所有标签必须同时存在于 Runner 的标签集合中。
 
+### 1a. 默认 runs-on（非 runs-on 测试时）★
+
+**如果当前用例不测 `runs-on` 行为，应使用专用宿主机（dedicate-hosted），不用虚拟化 runner（ubuntu-latest），以节省执行时间：**
+
+```yaml
+# ✅ 默认 — 不测 runs-on 时首选
+runs-on: [dedicate-hosted, x64, large]
+runs-on: [dedicate-hosted, arm64, large]   # ARM 架构时
+
+# 仅在用例本身测试 runs-on 标签/runner 选择逻辑时才用
+runs-on: [ubuntu-latest, x64, small]
+runs-on: [self-hosted, arch=arm]
+```
+
+> dedicate-hosted 是物理宿主机，启动和构建速度远快于虚拟化 runner。测 runs-on 本身的行为时才需要用其他标签。
+
 ---
 
 ## 2. Job name 必填 ★ [平台实测]
@@ -179,6 +195,23 @@ on:
 
 **注意**：case YAML 中 `workflow:` 字段用 block scalar `|` 写入时，缩进必须正确。`on:` 下的触发事件必须缩进 2 空格，不能是 `- ` 列表项。
 
+### 8a. 默认触发事件（非 trigger 测试时）★
+
+**如果当前用例不测 trigger 语义（事件类型、过滤器、分支匹配等），`on` 应使用 `workflow_dispatch` 而非 `push`：**
+
+```yaml
+# ✅ 默认 — 不测 trigger 时
+on:
+  workflow_dispatch:
+
+# 仅在用例本身测试 push/PR/tag/fork 等触发事件时才用
+on:
+  push:
+    branches: [main]
+```
+
+> `workflow_dispatch` 仅手动/API 触发，不会因常规 push 误触发无关 workflow，避免污染共享仓 run 列表、避免排队竞争。测 trigger 语义的用例才用对应事件。
+
 ---
 
 ## 9. `${{ }}` 在未加引号的字符串中导致 YAML 解析失败 ★ [平台实测]
@@ -318,7 +351,9 @@ workflow: "on:\n- push\n..."
 case-writer 在写入每个 YAML 前执行：
 
 - [ ] `on:` 用 map 格式（`push:`），不是数组（`- push`）
+- [ ] 不测 trigger 时 `on` 用 `workflow_dispatch`
 - [ ] `runs-on` 用数组格式 `[ubuntu-latest, x64, small]`
+- [ ] 不测 runs-on 时用 `[dedicate-hosted, x64, large]` 或 `[dedicate-hosted, arm64, large]`
 - [ ] 每个 job 有 `name:`
 - [ ] 每个 step 有 `name:`，无 `[` `]` `$` `{` `}` 等非法字符
 - [ ] `if:` 表达式用 `${{ }}` 包裹，函数带 `()`

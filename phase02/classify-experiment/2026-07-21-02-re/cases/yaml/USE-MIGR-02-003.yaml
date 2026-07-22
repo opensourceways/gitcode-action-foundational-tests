@@ -1,0 +1,49 @@
+id: USE-MIGR-02-003
+dimensions:
+  - usability
+  - compatibility
+  - security
+dimension: usability
+priority: P0
+title: "permissions 使用 GitHub 命名体系时应报错而不可静默忽略"
+intent_ref: INTENT-USE-016
+
+setup:
+  repo_fixture: with-permissions
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    contents: read
+    pull-requests: write
+  jobs:
+    test:
+      name: Test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - run: echo "Workflow should fail before this step"
+  name: USE-MIGR-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "workflow 应因无法识别的 permissions 项而解析失败"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "错误消息应指出不识别的权限项名称并给出 GitCode 可用权限项列表"
+
+teardown:
+  reset: fixture

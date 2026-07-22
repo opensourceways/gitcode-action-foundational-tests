@@ -1,0 +1,63 @@
+id: COMP-MATRIX-02-006
+dimensions:
+  - completeness
+  - compatibility
+dimension: completeness
+priority: P1
+title: "验证 matrix exclude 排除特定组合后剩余组合的正确性"
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: matrix-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-exclude:
+      name: Test Exclude
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os: [ubuntu, centos]
+          version: [18, 20, 22]
+          exclude:
+          - os: centos
+            version: 18
+          - os: ubuntu
+            version: 22
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Echo matrix vars
+        run: |
+          echo "OS=${{ matrix.os }}"
+          echo "VERSION=${{ matrix.version }}"
+          echo "INSTANCE_OK"
+  
+  name: COMP-MATRIX-02-006
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "共生成 4 个实例（ubuntu-18、ubuntu-20、centos-20、centos-22）"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 centos-18 或 ubuntu-22 实例"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应因部分匹配而误排除所有 ubuntu 或所有 centos 实例"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,38 @@
+id: USE-RERUN-02-002
+dimensions:
+  - usability
+dimension: usability
+priority: P2
+title: "重新运行限制条件（3次/6小时/原始配置）的用户可见性与反馈"
+intent_ref: INTENT-USE-021
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    simple-job:
+      name: Simple Job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - run: echo "Rerun limit test"
+  name: USE-RERUN-02-002
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_status
+    eval: "llm_assisted"
+    rubric: "Re-run 按钮不可用时应有合理反馈——灰掉显示 tooltip 说明原因（如 '已达最大重试次数 3 次' 或 '运行超过 6 小时不支持重新运行'）；重新运行详情页应有提示说明使用原始配置"
+
+teardown:
+  reset: fixture

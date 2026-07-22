@@ -1,0 +1,47 @@
+id: COMPAT-ACTION-INPUTS-02-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "action inputs 环境变量注入差异——INPUT_<NAME> 命名转换与 required 校验"
+intent_ref: INTENT-COMPAT-051
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-ACTION-INPUTS-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    inputs-env:
+      name: Action Inputs Env
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Call custom action
+        uses: custom-action-test
+        with:
+          test-param: hello
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "INPUT_TEST_PARAM 值为 hello"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "required 缺失时报错可理解"
+
+teardown:
+  reset: fixture

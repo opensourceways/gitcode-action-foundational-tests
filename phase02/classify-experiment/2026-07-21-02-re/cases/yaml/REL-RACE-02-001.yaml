@@ -1,0 +1,56 @@
+id: REL-RACE-02-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "job 级 concurrency 跨 workflow 排程无死锁"
+intent_ref: INTENT-REL-021
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: REL-RACE-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A
+      concurrency:
+        max: 1
+        exceed-action: QUEUE
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - name: Job A step
+        run: sleep 30
+    job-b:
+      concurrency:
+        max: 1
+        exceed-action: QUEUE
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - name: Job B step
+        run: sleep 30
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection:
+  at: pre_job
+  action: concurrent_flood
+  params:
+    concurrency: 2
+  recovery_expectation: no_deadlock
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "两个 job 的 concurrency 排程无死锁，所有 run 正常完成"
+
+teardown:
+  reset: fixture

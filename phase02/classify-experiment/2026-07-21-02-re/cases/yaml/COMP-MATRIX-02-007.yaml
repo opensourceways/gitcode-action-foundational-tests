@@ -1,0 +1,69 @@
+id: COMP-MATRIX-02-007
+dimensions:
+  - completeness
+  - compatibility
+dimension: completeness
+priority: P1
+title: "验证 matrix 动态 runs-on——不同组合是否调度到对应 Runner 标签"
+intent_ref: INTENT-COMP-012
+
+setup:
+  repo_fixture: matrix-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    dynamic-runner:
+      name: Dynamic Runner
+      runs-on: ${{ matrix.os }},x64,small
+      strategy:
+        matrix:
+          os: [ubuntu-latest, centos-latest]
+          include:
+          - os: ubuntu-latest
+            extra: included-ubuntu
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Echo runner info
+        run: |
+          echo "OS=${{ matrix.os }}"
+          echo "EXTRA=${{ matrix.extra }}"
+          echo "DYNAMIC_RUNNER_OK"
+    missing-runner:
+      runs-on: nonexistent-os,x64,small
+      steps:
+      - name: Should not run
+        run: echo "SHOULD_NOT_RUN"
+  
+  name: COMP-MATRIX-02-007
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "dynamic-runner job 的 ubuntu-latest 与 centos-latest 实例均成功执行并输出 DYNAMIC_RUNNER_OK"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "include 追加的 ubuntu-latest 实例输出 EXTRA=included-ubuntu"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "missing-runner job 不应无限排队，应在合理时限内报调度失败"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "missing-runner job 不应出现 SHOULD_NOT_RUN"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,65 @@
+id: REL-NEEDS-02-002
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "needs 指向 matrix 父 job 时下游等待所有实例完成后执行"
+intent_ref: INTENT-REL-024
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    matrix-parent:
+      strategy:
+        matrix:
+          os:
+          - ubuntu
+          - windows
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Log matrix instance
+        run: echo "MATRIX_PARENT_OS=${{ matrix.os }}"
+    matrix-child:
+      needs: matrix-parent
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - name: Verify parent completed
+        run: 'echo "ALL_PARENT_INSTANCES_DONE"
+  
+          echo "NEEDS_RESULT=${{ needs.matrix-parent.result }}"
+  
+          '
+  name: REL-NEEDS-02-002
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "child 日志含 ALL_PARENT_INSTANCES_DONE（等待全部 matrix 实例完成）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "needs.<parent>.result 返回汇总状态"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "无'任务初始化错误'"
+
+teardown:
+  reset: fixture

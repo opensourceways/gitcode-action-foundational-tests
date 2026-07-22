@@ -1,0 +1,52 @@
+id: COMPAT-FLAVOR-LABEL-02-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "资源规格标签差异——GitCode flavor（slim~2xlarge）与「large+ 需申请」vs GitHub 标准/大型 runner"
+intent_ref: INTENT-COMPAT-040
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-FLAVOR-LABEL-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    small-job:
+      name: Small Job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Show CPU count
+        run: nproc
+    large-job:
+      runs-on: [ubuntu-latest, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Show CPU count
+        run: nproc
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "small 与 large job 均成功"
+  - type: nonfunctional
+    target: run_logs
+    eval: "llm_assisted"
+    rubric: "CPU 数与 flavor 规格描述一致"
+
+teardown:
+  reset: fixture

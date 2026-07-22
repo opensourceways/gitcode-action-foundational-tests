@@ -1,0 +1,74 @@
+id: COMPAT-EXPRFN-02-003
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "表达式函数 substring/replace/toJson 边界行为——越界、全局/首匹配、JSON 输出格式是否与 GitHub 对齐"
+intent_ref: INTENT-COMPAT-067
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    fn-boundary:
+      name: Fn Boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Substring over-bound
+        run: echo "RESULT=${{ substring('hello', 0, 7) }}"
+      - name: Substring far over-bound
+        run: echo "RESULT=${{ substring('hello', 10, 3) }}"
+      - name: Substring negative start
+        run: echo "RESULT=${{ substring('hello', -1, 2) }}"
+      - name: Replace global or first
+        run: echo "RESULT=${{ replace('aaa', 'a', 'b') }}"
+      - name: Replace slash
+        run: echo "RESULT=${{ replace('a/a', '/', '-') }}"
+      - name: Replace empty old
+        run: echo "RESULT=${{ replace('abc', '', 'x') }}"
+      - name: toJson event
+        run: echo "JSON_EVENT=${{ toJson(atomgit.event) }}"
+      - name: toJson null
+        run: echo "JSON_NULL=${{ toJson(null) }}"
+      - name: toJson true
+        run: echo "JSON_TRUE=${{ toJson(true) }}"
+  
+  name: COMPAT-EXPRFN-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "substring('hello', 0, 7) 输出 RESULT=hello"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "replace('aaa', 'a', 'b') 输出 RESULT=bbb 或 RESULT=baa，行为被记录"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "toJson(null) 输出 JSON_NULL=null；toJson(true) 输出 JSON_TRUE=true"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "substring 越界时不应出现表达式解析错误"
+  - type: nonfunctional
+    target: run_logs
+    eval: deterministic
+    rubric: "toJson(atomgit.event) 输出为合法 pretty-print JSON，可被标准解析器消费"
+
+teardown:
+  reset: fixture
