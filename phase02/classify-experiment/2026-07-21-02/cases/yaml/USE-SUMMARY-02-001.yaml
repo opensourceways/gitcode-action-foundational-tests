@@ -1,0 +1,66 @@
+id: USE-SUMMARY-02-001
+dimensions: [usability]
+dimension: usability
+priority: P2
+title: "Step Summary（ATOMGIT_STEP_SUMMARY）写入后是否在运行详情页可见、超长内容是否截断及提示"
+intent_ref: INTENT-USE-026
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    write-summary:
+      name: Write Summary
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Write normal summary
+        run: |
+          echo "## Test Summary" >> "$ATOMGIT_STEP_SUMMARY"
+          echo "| Result | Count |" >> "$ATOMGIT_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$ATOMGIT_STEP_SUMMARY"
+          echo "| Pass   | 10    |" >> "$ATOMGIT_STEP_SUMMARY"
+          echo "SUMMARY_WRITTEN"
+      - name: Write long summary
+        run: |
+          for i in $(seq 1 5000); do
+            echo "Line $i filler content for truncation test" >> "$ATOMGIT_STEP_SUMMARY"
+          done
+          echo "LONG_SUMMARY_WRITTEN"
+      name: Write Summary
+
+  name: Step Summary 可写性与可见性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_ui
+    eval: deterministic
+    rubric: "运行详情页存在 Summary 区块且内容非空"
+  - type: negative
+    target: run_ui
+    eval: deterministic
+    rubric: "Summary 区块不应完全不可见"
+  - type: nonfunctional
+    target: run_ui
+    eval: deterministic
+    rubric: "超长 summary 若被截断，提示文本应包含截断/超过/省略关键字"
+  - type: nonfunctional
+    target: run_ui
+    eval: llm_assisted
+    rubric: "summary 区块的醒目程度与导航便利性"
+
+teardown:
+  reset: fixture

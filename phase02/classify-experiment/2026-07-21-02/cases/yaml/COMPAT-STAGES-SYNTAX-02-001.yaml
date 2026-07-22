@@ -1,0 +1,61 @@
+id: COMPAT-STAGES-SYNTAX-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P2
+title: "stages 两种写法 + 缩进瑕疵——列表 - name: vs 映射 stage1: 的解析容错"
+intent_ref: INTENT-COMPAT-058
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Stages Syntax Test
+  on:
+  - push
+  stages:
+    build:
+      jobs:
+        - build-job
+    test:
+      jobs:
+        - test-job
+  jobs:
+    build-job:
+      name: Build Job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Build
+        run: echo "BUILD_DONE"
+    test-job:
+      name: Test Job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Test
+        run: echo "TEST_DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "workflow 解析成功且运行"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "若解析失败，报错精确到行号"
+
+teardown:
+  reset: fixture

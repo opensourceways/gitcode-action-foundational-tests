@@ -1,0 +1,66 @@
+id: REL-RERUN-02-001
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "Re-run failed jobs 仅失败 job 重执行，成功 job 状态保留"
+intent_ref: INTENT-REL-025
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    succeed-job:
+      name: Succeed Job
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - run: echo "SUCCEED_JOB_DONE"
+      name: Succeed Job
+    fail-job:
+      name: Fail Job
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - run: 'echo "FAIL_JOB_EXECUTING"
+  
+          exit 1
+  
+          '
+      name: Fail Job
+  name: Re-run failed jobs 仅失败 job 重执行，成功 job 状态保留
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "首次运行 succeed-job success, fail-job failure"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "Re-run failed jobs 后 succeed-job 保持原 success 不被重跑"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "fail-job 重新执行，使用原始 commit 配置"
+
+teardown:
+  reset: fixture

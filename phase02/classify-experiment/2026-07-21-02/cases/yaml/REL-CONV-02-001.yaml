@@ -1,0 +1,71 @@
+id: REL-CONV-02-001
+dimensions:
+  - reliability
+  - completeness
+dimension: reliability
+priority: P1
+title: "schedule 触发收敛与取消语义——Scheduler 修复后调度运行可达终态"
+intent_ref: INTENT-REL-036
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+    - cron: '*/5 * * * *'
+  jobs:
+    converge-test:
+      name: Converge Test
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - name: Create marker file
+        run: touch /tmp/schedule-marker-${ATOMGIT_RUN_ID}
+      - name: Long sleep for cancel window
+        run: sleep 180
+      - name: Post cleanup
+        if: always()
+        run: |
+          rm -f /tmp/schedule-marker-${ATOMGIT_RUN_ID}
+          echo "CLEANUP_DONE"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params:
+    observation_window_minutes: "15"
+    cancel_after_seconds: "30"
+    runner_release_probe: true
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "15min 内至少出现 1 次 schedule 触发，日志含 atomgit.event_name=schedule"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "取消后终态为 cancelled"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "post 清理日志出现 CLEANUP_DONE 且标记文件已被删除"
+  - type: negative
+    target: run_status
+    eval: deterministic
+    rubric: "取消后不应 stuck 在 running 超过 120s，也不应错标为 success/failure"
+  - type: positive
+    target: runner_scheduling
+    eval: deterministic
+    rubric: "取消后 60s 内同 runner 可成功调度新探针 job"
+
+teardown:
+  reset: fixture

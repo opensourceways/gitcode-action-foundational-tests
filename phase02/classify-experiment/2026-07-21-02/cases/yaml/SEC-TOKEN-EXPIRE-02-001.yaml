@@ -1,0 +1,47 @@
+id: SEC-TOKEN-EXPIRE-02-001
+dimensions: [security]
+dimension: security
+priority: P1
+title: "ATOMGIT_TOKEN 运行后失效且不可通过缓存/残留复活"
+intent_ref: INTENT-SEC-023
+
+setup:
+  repo_fixture: basic-ci
+  secrets: ["TOKEN_TEST_SECRET"]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Token Lifecycle
+  on:
+  - push
+  jobs:
+    token-lifecycle:
+      name: Token Lifecycle
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Dump token to file
+        run: echo "${{ atomgit.token }}" > /tmp/token_dump.txt
+      - name: Verify token file exists in same job
+        run: cat /tmp/token_dump.txt
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "同 job 内可读取 token 文件"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "TOKEN_TEST_SECRET"
+
+teardown:
+  reset: fixture

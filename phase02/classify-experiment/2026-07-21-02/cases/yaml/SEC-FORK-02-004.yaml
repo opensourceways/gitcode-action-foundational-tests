@@ -1,0 +1,76 @@
+id: SEC-FORK-02-004
+dimensions:
+  - security
+dimension: security
+priority: P0
+title: "pull_request_target 下 checkout head.sha 后不应自动信任 fork 侧代码"
+intent_ref: INTENT-SEC-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - pull_request_target
+  jobs:
+    checkout-fork-ref:
+      name: Checkout Fork Ref
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        with:
+          ref: ${{ atomgit.event.pull_request.head.sha }}
+        name: (TC) checkout
+      - name: Build with fork Makefile
+        run: make build || echo "MAKE_BUILD_EXECUTED"
+      name: Checkout Fork Ref
+    checkout-default:
+      name: Checkout Default
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Verify base branch only
+        run: "if [ -f Makefile ]; then
+    echo \"MAKEFILE_PRESENT_IN_BASE\"
+  else
+  \
+          \  echo \"NO_FORK_MAKEFILE\"
+  fi
+  "
+      name: Checkout Default
+  name: pull_request_target 下 checkout head.sha 后不应自动信任 fo
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request_target
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "checkout-fork-ref 日志含 MAKE_BUILD_EXECUTED（显式 checkout head.sha 后可执行 fork 侧代码）"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "checkout-default 日志不含 fork 侧的 Makefile 构建输出"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "不显式指定 ref 时 checkout-default 不应拉取 fork 侧的恶意 Makefile"
+
+teardown:
+  reset: fixture

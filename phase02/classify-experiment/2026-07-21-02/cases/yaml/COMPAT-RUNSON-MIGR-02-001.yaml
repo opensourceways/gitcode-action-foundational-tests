@@ -1,0 +1,46 @@
+id: COMPAT-RUNSON-MIGR-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P0
+title: "GitHub 单标签 runs-on 迁移到 GitCode 三段式的降级行为与报错质量"
+intent_ref: INTENT-COMPAT-036
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Runs On Migration
+  on:
+  - push
+  jobs:
+    migrate:
+      name: Migration Job
+      runs-on: ubuntu-latest
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Echo
+        run: echo "migration_test"
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: "deterministic"
+    rubric: "不静默挂起超过 300 秒"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错指明应使用三段式 [os, arch, flavor]"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,63 @@
+id: COMPAT-PR-COMM-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "pull_request_comment 事件：验证 GitCode 独有触发事件类型的语义正确性"
+intent_ref: INTENT-COMPAT-023
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_comment:
+      comments:
+      - /test.*
+      - /deploy.*
+  jobs:
+    comment-trigger:
+      name: Comment Trigger
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: Log comment event details
+        run: 'echo "Event: $ATOMGIT_EVENT_NAME"
+  
+          echo "Comment body: ${{ atomgit.event.comment.body }}"
+  
+          echo "Comment author: ${{ atomgit.event.comment.user.login }}"
+  
+          echo "PR number: ${{ atomgit.event.pull_request.number }}"
+  
+          '
+      - name: Handle test command
+        if: ${{ startsWith(atomgit.event.comment.body, '/test') }}
+        run: echo "Test command detected"
+      name: Comment Trigger
+  name: pull_request_comment 事件：验证 GitCode 独有触发事件类型的语义正确性
+
+trigger:
+  event: pull_request_comment
+  as: untrusted_contributor
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "PR 评论时 pull_request_comment 触发且日志含 comment body"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "comments 正则 /test.* 正确匹配包含 /test 的评论"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "同一评论不应同时触发 pull_request_comment 和 issue_comment"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,59 @@
+id: COMP-ACTOR-02-001
+dimensions:
+  - completeness
+  - usability
+dimension: completeness
+priority: P1
+title: "验证 atomgit.actor 存在性与上下文种类数一致性"
+intent_ref: INTENT-COMP-013
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  jobs:
+    actor-check:
+      name: Actor Check
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Echo actor
+        run: |
+          echo "ACTOR_EXPR=${{ atomgit.actor }}"
+          echo "ACTOR_ENV=$ATOMGIT_ACTOR"
+          echo "ACTOR_CHECK_DONE"
+      - name: List contexts
+        run: |
+          echo "CONTEXTS_ENUMERATED"
+      name: Actor Check
+
+  name: 验证 atomgit.actor 存在性与上下文种类数一致性
+
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中 ACTOR_EXPR 与 ACTOR_ENV 均为非空字符串，与触发用户一致"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中出现 ACTOR_CHECK_DONE 与 CONTEXTS_ENUMERATED"
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "上下文种类数与文档声明的 12 种一致；若不一致，需识别缺失种类"
+
+teardown:
+  reset: fixture

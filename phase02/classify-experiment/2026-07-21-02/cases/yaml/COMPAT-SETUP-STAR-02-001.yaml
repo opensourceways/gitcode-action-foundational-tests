@@ -1,0 +1,57 @@
+id: COMPAT-SETUP-STAR-02-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "setup-* action 差异——setup-node/python/java/go 的 version/cache 参数与版本解析"
+intent_ref: INTENT-COMPAT-050
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: Setup Star Test
+  on:
+  - push
+  jobs:
+    setup-test:
+      name: Setup Star
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Setup Node
+        uses: setup-node
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Verify Node
+        run: node --version
+      - name: Setup Python
+        uses: setup-python
+        with:
+          python-version: '3.11'
+      - name: Verify Python
+        run: python3 --version
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "node --version 包含 v20"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "python3 --version 包含 3.11"
+
+teardown:
+  reset: fixture

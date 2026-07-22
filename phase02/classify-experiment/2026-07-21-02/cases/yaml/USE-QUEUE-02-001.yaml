@@ -1,0 +1,52 @@
+id: USE-QUEUE-02-001
+dimensions:
+  - usability
+dimension: usability
+priority: P2
+title: "concurrency 排队时用户的等待信息可见性"
+intent_ref: INTENT-USE-023
+
+setup:
+  repo_fixture: clean
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+  - push
+  concurrency:
+    enable: true
+    max: 1
+    exceed-action: QUEUE
+  jobs:
+    slow:
+      name: Slow
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
+      steps:
+      - run: sleep 120
+      name: Slow
+  name: concurrency 排队时用户的等待信息可见性
+
+trigger:
+  event: push
+  as: maintainer
+  params:
+    consecutive: 3
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: "queued"
+  - type: nonfunctional
+    target: queue_ui
+    eval: "llm_assisted"
+    rubric: "0=无排队信息, 1=仅显示queued状态, 2=显示排队位置序号和状态"
+
+teardown:
+  reset: fixture
