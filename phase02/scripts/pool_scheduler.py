@@ -171,7 +171,7 @@ def run_pool(run_id, only=None, no_logs=False):
                         _print_verdict(cid, "NOT_CONFIGURED")
                         continue
 
-                    ok, verr = wr.preflight_validate(wf)
+                    ok, verr = wr.preflight_validate(contract_doc, cfg=cfg)
                     if not ok:
                         wr.log(f"  {cid}: 预检不通过（{len(verr)} 项）→ COMPILE_ERROR，不 push")
                         verdict = {"verdict": "COMPILE_ERROR", "verdict_flags": [],
