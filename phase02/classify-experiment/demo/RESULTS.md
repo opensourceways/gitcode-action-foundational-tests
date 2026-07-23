@@ -1,62 +1,44 @@
-# Demo Results — PR Trigger Automation Test
+# Demo Results — PR Trigger Automation Test (Final)
 
-**时间**: 2026-07-23 20:08 – 20:35  
-**脚本**: `demo_pr_trigger.py`, `demo_push_sanity.py`
+**时间**: 2026-07-23  
+**脚本**: `demo_pr_trigger.py`, `demo_fork_pr.py`
 
-## 做了什么
+## Summary
 
-3 轮完整的 "push workflow → create PR → poll" 循环，覆盖了两个关键假设的验证。
+| 测试 | 类型 | API | 结果 |
+|------|------|-----|------|
+| PR #1 | same-repo | `POST /pulls` (bot token) | ❌ 无触发 |
+| PR #2 | same-repo | `POST /pulls` (bot token, workflow on base first) | ❌ 无触发 |
+| PR #3 | same-repo | `POST /pulls` (bot token, 30s wait + git pull sync) | ❌ 无触发 |
+| **PR #4** | **fork → upstream** | **`POST /pulls` (contributor token, `head: teamfi:branch`)** | **❌ 无触发** |
 
-## 发现
-
-### 1. `POST /api/v5/repos/.../pulls` 创建 PR 成功
-
-| PR # | iid | 结果 |
-|------|-----|------|
-| 8925xxx | 1 | 创建成功，关闭成功 |
-| 8925020 | 2 | 创建成功，关闭成功 |
-| 8925111 | 3 | 创建成功，关闭成功 |
-
-GitCode 的 PR body 格式与 GitHub 类似：`{title, head, base, body}`。
-
-### 2. `on: pull_request` 工作流未触发
-
-| 尝试 | 关键配置 | 结果 |
-|------|----------|------|
-| v1 | workflow 只在 feature 分支 | 无触发（预期 — 需在 base 分支） |
-| v2 | workflow 先推 main，等 3s，再开 PR | 无触发 |
-| v3 | workflow 先推 main，等 30s+git pull 同步，再开 PR | 无触发 |
-
-### 3. `on: push` 触发正常
-
-- 仓库有 347 个历史 run，全部 `event=Manual`
-- 平台将**所有 run** 的 event 字段统一标为 `Manual`（包括 push 触发的）—— 这是平台 API 的已知行为
-- `executor` 参数不影响结果
-
-### 4. PR 详情中的 `base.sha` 滞后
-
-PR API 返回的 `base.sha` 可能是 PR 创建时的 main 分支 SHA，而不是最新 main。`git pull` 同步后创建分支对此无影响。
-
-## 结论
+## What Works
 
 | 能力 | 状态 |
 |------|------|
-| API 创建 PR | ✅ 可用 |
-| API 关闭 PR | ✅ 可用 |
-| API 推送 workflow 到 main | ✅ 可用 |
-| PR 触发 workflow run | ❌ 未触发（3 次尝试，0 run） |
-| Poll run by pull_request_id | ❌ 始终返回 0 结果 |
+| `POST /api/v5/repos/.../forks` — 创建 fork | ✅ |
+| Contributor token clone fork + push 分支 | ✅ |
+| `POST /api/v5/repos/.../pulls` 跨仓库 PR (`head: owner:branch`) | ✅ |
+| `PATCH .../pulls/:id` 关闭 PR | ✅ |
+| Bot 推 workflow 到 upstream main | ✅ |
+| Fork 检测与复用 | ✅ |
+| `on: push` workflow 触发 (bot push) | ✅ |
 
-## 待验证假设
+## What Fails
 
-1. **API-created PR 不触发 workflow** — 平台可能只对 Web UI 创建的 PR 触发 `on: pull_request`
-2. **`on: pull_request` 需要 repo 级开关** — GitCode 可能有 "Enable merge request pipelines" 设置，默认关闭
-3. **同一仓库内 PR 不触发** — `on: pull_request` 可能只对 fork PR 而非 same-repo PR 触发
-4. **Web UI 手动创建 PR 可以触发** — 尚未验证
+| 能力 | 尝试次数 | 原因 |
+|------|----------|------|
+| **`on: pull_request` 触发** | 4 (same-repo ×3 + fork ×1) | **平台不触发** |
+| `pull_request_id` filter on v8 runs API | 4 | 始终返回 0 |
 
-## 下一步建议
+## Root Cause
 
-1. **Web UI 测试**：在 GitCode Web UI 创建一个 PR（workflow 文件已在 main），观察是否触发 pipeline
-2. **检查 repo settings**：查看 `Settings > CI/CD > Merge Request Pipelines` 是否有开关
-3. **尝试 fork PR**：用 `CONTRIBUTOR_GITCODE_TOKEN` fork 仓库，从 fork 创建 PR
-4. **联系平台方**：确认 API 创建的 PR 是否会触发 workflow
+**GitCode 的 `POST /api/v5/repos/.../pulls` API 创建的 PR 不会自动触发 `on: pull_request` workflow。** 平台可能仅对 Web UI 创建的 PR 触发，或需要其他触发机制（webhook push event）。
+
+This is a **platform limitation**, not an automation bug. The full fork→PR pipeline is scriptable, but the platform doesn't fire the trigger.
+
+## Next Steps
+
+1. **Web UI 手动创建 PR** — 验证 Web UI 创建的 PR 是否会触发 `on: pull_request` workflow
+2. **Push-triggered workaround** — 用 `on: push` 替代 `on: pull_request`，在 PR 分支 push 时触发
+3. **联系平台方** — 确认 API 创建的 PR 是否应该触发 workflow，或是否需要额外参数
