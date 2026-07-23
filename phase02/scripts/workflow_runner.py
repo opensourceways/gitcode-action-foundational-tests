@@ -581,37 +581,25 @@ def _load_runner_map():
 
 
 def _apply_runner_map(workflow_yaml, runner_map, case_id):
-    """部署前替换 workflow 中的 runs-on label。只替换映射表里明确列出的，其余原样保留。
+    """部署前用字符串替换 workflow 中的 runs-on label（不解析/重序列化 YAML）。
 
+    ★ 只能用字符串替换，禁止 yaml.safe_load + safe_dump——
+      往返会毁掉 on: (变 true)、block scalar run: | 等，违反 VALIDATION-RULES §14a。
     返回 (new_yaml, intended_runs_on, deployed_runs_on)。
     """
     intended = []
     deployed = []
-    try:
-        doc = yaml.safe_load(workflow_yaml)
-    except yaml.YAMLError:
-        return workflow_yaml, [], []
-    if not isinstance(doc, dict):
-        return workflow_yaml, [], []
-    jobs = doc.get("jobs", {}) or {}
-    for jid, job in jobs.items():
-        if not isinstance(job, dict):
-            continue
-        ro = job.get("runs-on")
-        if not isinstance(ro, list):
-            continue
-        label_str = ",".join(str(x).strip() for x in ro)
-        # 按去除空格后的键匹配映射表
-        for map_key, map_val in runner_map.items():
-            if ",".join(k.strip() for k in map_key.split(",")) == label_str:
-                new_ro = [x.strip() for x in map_val.split(",")]
-                intended.append({"job": jid, "runs_on": label_str})
-                deployed.append({"job": jid, "runs_on": ",".join(new_ro)})
-                job["runs-on"] = new_ro
-                log(f"  runs-on {label_str} → {','.join(new_ro)} [{case_id}]")
-                break
-    new_yaml = yaml.safe_dump(doc, default_flow_style=False, allow_unicode=True,
-                              sort_keys=False, width=200)
+    new_yaml = workflow_yaml
+    for map_key, map_val in runner_map.items():
+        # 匹配 runs-on: [a, b, c] 格式，允许逗号后有空格
+        old_parts = [re.escape(p.strip()) for p in map_key.split(",")]
+        old_pattern = r"runs-on:\s*\[" + r",?\s*".join(old_parts) + r"\]"
+        new_ro = f"runs-on: [{map_val}]"
+        if re.search(old_pattern, new_yaml):
+            new_yaml = re.sub(old_pattern, new_ro, new_yaml)
+            intended.append({"runs_on": map_key})
+            deployed.append({"runs_on": map_val})
+            log(f"  runs-on {map_key} → {map_val} [{case_id}]")
     return new_yaml, intended, deployed
 
 
