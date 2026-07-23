@@ -428,7 +428,25 @@ post:
 
 ---
 
-## 21. 未知顶层字段拒绝 ★ [平台实测 · 2026-07-23]
+## 21. `on.schedule` 必须是数组 ★ [平台实测 · 2026-07-23]
+
+GitCode 的 `on.schedule` 必须是数组格式（`schedule: [{cron: ...}]`），不支持单对象格式 `schedule: {cron: ...}`。对象格式报 `Cannot deserialize ArrayList from Object value`。
+
+```yaml
+# ❌ 错误 — 对象格式
+on:
+  schedule:
+    cron: "0 0 * * *"
+
+# ✅ 正确 — 数组格式
+on:
+  schedule:
+    - cron: "0 0 * * *"
+```
+
+---
+
+## 22. 未知顶层字段拒绝 ★ [平台实测 · 2026-07-23]
 
 GitCode 校验器拒绝任何不在 schema 中的顶层字段（如拼写错误的 `on` 变体、GitHub 专有字段等），报 `unknown_field: unknown property`。
 
@@ -484,6 +502,7 @@ case-writer 在写入每个 YAML 前执行：
 - [ ] 无 `run-name`
 - [ ] 无 `services` / `post.steps`
 - [ ] `stages` 用 map 格式（不是数组）
+- [ ] `on.schedule` 用数组格式（不是单对象）
 - [ ] `concurrency.preemption.events` 只用 `[mr_id]`
 - [ ] `dimension=security` → 含 `type: negative`
 - [ ] 所有必填字段非空
