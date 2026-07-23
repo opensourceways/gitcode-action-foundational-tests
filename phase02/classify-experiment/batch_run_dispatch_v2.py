@@ -69,7 +69,7 @@ def ensure_dispatch(wf_text):
 
 
 def deploy_one(case_id, wf_text):
-    """git clone → write → commit → push。返回 file_path。"""
+    """git clone → write → commit → push。返回 (file_path, commit_sha)。"""
     fp = f".gitcode/workflows/{case_id.lower().replace('_', '-')}.yml"
     workdir = tempfile.mkdtemp(prefix="br-")
     repo_url = f"https://oauth2:{TOKEN}@gitcode.com/{OWNER}/{REPO}.git"
@@ -80,7 +80,6 @@ def deploy_one(case_id, wf_text):
         f.write(wf_text)
         f.write(f"\n# deploy: {int(time.time())}\n")
     subprocess.run(["git", "add", fp], cwd=f"{workdir}/repo", capture_output=True, check=True)
-    # commit may fail if nothing changed (files identical) — that's ok
     r = subprocess.run(["git", "commit", "-m", f"test: {case_id}"], cwd=f"{workdir}/repo",
                        capture_output=True, text=True)
     if r.returncode != 0 and "nothing to commit" not in r.stderr:
@@ -88,8 +87,11 @@ def deploy_one(case_id, wf_text):
         raise RuntimeError(f"git commit failed: {r.stderr[:200]}")
     subprocess.run(["git", "push", "origin", BRANCH], cwd=f"{workdir}/repo",
                    capture_output=True, timeout=30, check=True)
+    sha_r = subprocess.run(["git", "rev-parse", "HEAD"], cwd=f"{workdir}/repo",
+                           capture_output=True, text=True, check=True)
+    commit_sha = sha_r.stdout.strip()
     shutil.rmtree(workdir, ignore_errors=True)
-    return fp
+    return fp, commit_sha
 
 
 # ── Dispatch ───────────────────────────────────────────────────────
@@ -104,10 +106,10 @@ def find_workflow_id(fp):
     return None
 
 
-def dispatch_one(wf_id, fp):
+def dispatch_one(wf_id, fp, commit_sha=""):
     project = f"{OWNER}%2F{REPO}"
     url = f"{WEB_API}/api/v2/projects/{project}/actions/workflows/{wf_id}/dispatch"
-    payload = {"ref": BRANCH, "branch": BRANCH, "branch_commit_id": "",
+    payload = {"ref": BRANCH, "branch": BRANCH, "branch_commit_id": commit_sha,
                "repo_https_url": f"https://gitcode.com/{OWNER}/{REPO}.git",
                "file_path": fp, "inputs": {}}
     r = requests.post(url, headers=v2_headers(), json=payload, timeout=10)
@@ -237,8 +239,8 @@ def main():
         try:
             # 1. Ensure dispatchable & Deploy
             wf = ensure_dispatch(wf)
-            fp = deploy_one(cid, wf)
-            log(f"  deployed → {fp}")
+            fp, sha = deploy_one(cid, wf)
+            log(f"  deployed → {fp} ({sha[:8]})")
             time.sleep(6)
 
             # 2. Find + dispatch
@@ -251,7 +253,7 @@ def main():
                 verdict_counts["NOT_FOUND"] += 1
                 continue
 
-            code, resp = dispatch_one(wf_id, fp)
+            code, resp = dispatch_one(wf_id, fp, sha)
             if code != 200:
                 reason = resp.get("error_message", str(resp)) if isinstance(resp, dict) else str(resp)[:300]
                 results.append({"case_id": cid, "verdict": "DISPATCH_FAIL", "reason": reason})

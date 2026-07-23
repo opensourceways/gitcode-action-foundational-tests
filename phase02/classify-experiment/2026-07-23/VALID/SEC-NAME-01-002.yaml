@@ -13,7 +13,7 @@ workflow: |
   jobs:
     printenv-test:
       name: Test printenv masking
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [self-hosted,arch=arm]
       steps:
         - name: Run printenv
           run: |
