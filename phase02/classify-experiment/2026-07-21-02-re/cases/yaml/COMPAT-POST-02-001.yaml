@@ -16,21 +16,25 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: main
-    jobs:
-      main-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - name: Simulate failure
-          run: 'echo "Main job running..."
-  
-            exit 1
-  
-            '
+    main:
+      name: Main
+      jobs:
+        name: Jobs
+        main-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - name: Simulate failure
+            run: 'echo "Main job running..."
+
+              exit 1
+
+              '
   post:
     run_always: true
     jobs:
+      name: Jobs
       cleanup:
+        name: Cleanup
         runs-on: [dedicate-hosted, x64, large]
         steps:
         - name: Post cleanup step
@@ -40,6 +44,7 @@ workflow: |
   
             '
       notify:
+        name: Notify
         runs-on: [dedicate-hosted, x64, large]
         steps:
         - name: Post notification

@@ -15,7 +15,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     dynamic-runner:
       name: Dynamic Runner
@@ -34,13 +34,17 @@ workflow: |
           echo "OS=${{ matrix.os }}"
           echo "EXTRA=${{ matrix.extra }}"
           echo "DYNAMIC_RUNNER_OK"
+      name: Dynamic Runner
     missing-runner:
+      name: Missing Runner
       runs-on: nonexistent-os,x64,small
       steps:
       - name: Should not run
         run: echo "SHOULD_NOT_RUN"
-  
-  name: COMP-MATRIX-02-007
+      name: Missing Runner
+
+  name: 验证 matrix 动态 runs-on——不同组合是否调度到对应 Runner 标签
+
 trigger:
   event: push
   as: maintainer

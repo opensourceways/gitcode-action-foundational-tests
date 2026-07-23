@@ -27,6 +27,7 @@ workflow: |
       - name: Job A step
         run: sleep 30
     job-b:
+      name: Job B
       concurrency:
         max: 1
         exceed-action: QUEUE

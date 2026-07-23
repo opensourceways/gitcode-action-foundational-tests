@@ -16,34 +16,40 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: build
-    fail_fast: true
-    jobs:
-      compile:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Building..."
-        - run: echo "Build complete"
-      lint:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Linting..."
-  - name: test
-    jobs:
-      unit-test:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Running unit tests..."
-      integration-test:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Running integration tests..."
-  - name: deploy
-    jobs:
-      deploy-staging:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Deploying to staging..."
+    build:
+      name: Build
+      fail_fast: true
+      jobs:
+        name: Jobs
+        compile:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Building..."
+          - run: echo "Build complete"
+        lint:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Linting..."
+    test:
+      name: Test
+      jobs:
+        name: Jobs
+        unit-test:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Running unit tests..."
+        integration-test:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Running integration tests..."
+    deploy:
+      name: Deploy
+      jobs:
+        name: Jobs
+        deploy-staging:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Deploying to staging..."
   name: COMPAT-STAGES-02-001
 trigger:
   event: push

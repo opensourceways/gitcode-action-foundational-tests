@@ -16,17 +16,21 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: main
-    jobs:
-      long-running-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - name: Long step to give cancel window
-          run: sleep 600
+    main:
+      name: Main
+      jobs:
+        name: Jobs
+        long-running-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - name: Long step to give cancel window
+            run: sleep 600
   post:
     run_always: true
     jobs:
+      name: Jobs
       cleanup:
+        name: Cleanup
         runs-on: [dedicate-hosted, x64, large]
         steps:
         - name: Post cleanup

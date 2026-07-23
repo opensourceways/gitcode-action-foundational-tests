@@ -7,9 +7,9 @@ workflow_runner.py — Phase 02 原生组件：部署 + 触发 + 采集（确定
 触发、等待、采集证据**——不判 pass/fail（那是 assertion_engine 的职责，rules.md §1）。
 
 设计立场（炼钢：吸收 execute_serial/logassert/masking 的实战经验，弃用一次性脚本）：
-  1. 按 (head_sha AND file_path) **精确匹配 run**。共享仓一次 push 会触发所有
-     `on:push` 的 workflow → 同 SHA 多个 run；只按 head_sha 会抓到别人的 run
-     （run 03 的假红教训）。必须再按"我这次推的文件名"过滤。
+  1. 按 (file_path) **精确匹配 run**。共享仓一次 push 会触发所有
+     `on:push` 的 workflow → 同 SHA 多个 run；只按"我这次推的文件名"过滤。
+     若 API 返回 head_sha 非空则额外校验。
   2. 日志正文走 v8 `download_log`(下划线，跟随 302 → zip)，仅需 OAuth token，
      封装在 log_fetcher.py。（早期误判 `download-log` 连字符"平台缺陷"是端点名错，已更正。）
   3. 只产出"执行层"结果。判定词以 `phase02/rules.md` §11 为准，本组件只输出：
@@ -423,17 +423,23 @@ _TERMINAL = ("COMPLETED", "FAILED", "CANCELED", "IGNORED")
 def poll_run(cfg, sha, wf_filename):
     """轮询到"我这次推的那个 workflow 文件"的 run 抵达终态。
 
-    ★ 必须 (head_sha == sha) AND (file_path 以 wf_filename 结尾) 双条件——
-      否则会抓到同一次 push 触发的别的/历史 workflow 的 run（run 03 教训）。
+    匹配策略（与 run-case.sh 对齐）：
+      优先按 file_path 精确匹配（.gitcode/workflows/<wf_filename>）。
+      若 API 返回 head_sha 非空则同时校验 head_sha 以排除历史 run。
+      ★ 实测：GitCode v8 API 返回的 head_sha 为空，故 file_path 为主匹配器。
     超时返回最后见到的 pending run（若有），否则 None。
     """
     elapsed, pending = 0, None
+    target_path = f".gitcode/workflows/{wf_filename}"
     while elapsed < cfg.timeout:
         d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page=30")
         runs = d.get("workflow_runs", []) if isinstance(d, dict) else []
         for r in runs:
             fp = r.get("file_path") or ""
-            if r.get("head_sha") == sha and fp.endswith(wf_filename):
+            hs = r.get("head_sha") or ""
+            if fp == target_path or fp.endswith(f"/{wf_filename}"):
+                if hs and hs != sha:
+                    continue
                 if r.get("status") in _TERMINAL:
                     return r
                 pending = r

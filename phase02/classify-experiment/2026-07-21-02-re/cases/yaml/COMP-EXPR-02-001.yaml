@@ -22,22 +22,27 @@ workflow: |
   
       steps:
       - run: echo "FIRST_STEP_DONE"
+        name: Run command
       - if: ${{ success }}
         run: echo "SUCCESS_CONTEXT_TRUE"
       - if: ${{ always }}
         run: echo "ALWAYS_CONTEXT_TRUE"
     fail-job:
+      name: Fail Job
       runs-on: [dedicate-hosted, x64, large]
   
       steps:
       - run: exit 1
+        name: Run command
     cleanup-after-fail:
+      name: Cleanup After Fail
       needs: fail-job
-      if: ${{ failed }}
+      if: ${{ failed() }}
       runs-on: [dedicate-hosted, x64, large]
   
       steps:
       - run: echo "FAILED_CONTEXT_TRUE"
+        name: Run command
   name: COMP-EXPR-02-001
 trigger:
   event: push

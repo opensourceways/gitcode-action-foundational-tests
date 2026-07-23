@@ -36,6 +36,7 @@ workflow: |
   
           '
     consumer:
+      name: Consumer
       needs: producer
       runs-on: [dedicate-hosted, x64, large]
       steps:

@@ -22,20 +22,25 @@ workflow: |
   
       steps:
       - run: echo "FIRST_STEP_OK"
+        name: Run command
     conditional-job:
+      name: Conditional Job
       needs: success-job
-      if: ${{ success }}
+      if: ${{ success() }}
       runs-on: [dedicate-hosted, x64, large]
   
       steps:
       - run: echo "SUCCESS_CONDITION_TRUE"
+        name: Run command
     always-job:
+      name: Always Job
       needs: success-job
-      if: ${{ always }}
+      if: ${{ always() }}
       runs-on: [dedicate-hosted, x64, large]
   
       steps:
       - run: echo "ALWAYS_CONDITION_TRUE"
+        name: Run command
   name: COMPAT-EXPRSYN-02-001
 trigger:
   event: push

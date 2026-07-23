@@ -14,7 +14,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     matrix-if-test:
       strategy:
@@ -22,15 +22,19 @@ workflow: |
           os:
           - ubuntu
           - windows
-      runs-on: [dedicate-hosted, x64, large]
-  
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
       if: ${{ matrix.os == 'ubuntu' }}
       steps:
       - uses: checkout
         name: (TC) checkout
       - name: Log filtered matrix instance
         run: echo "MATRIX_OS=${{ matrix.os }}"
-  name: COMP-MATIF-02-001
+      name: Matrix If Test
+  name: 验证 job 级 if 对 matrix 展开的独立求值
+
 trigger:
   event: push
   as: maintainer

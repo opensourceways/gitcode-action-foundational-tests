@@ -1,0 +1,50 @@
+id: REL-ART-CACHE-02-001
+dimensions:
+  - reliability
+dimension: reliability
+priority: P1
+title: "artifact 上传过程中 workflow 被取消，artifact 状态为 incomplete 且不污染后续下载"
+intent_ref: INTENT-REL-029
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    upload-with-cancel-window:
+      name: Upload With Cancel Window
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: Generate large file
+        run: dd if=/dev/urandom of=/tmp/large-file.bin bs=1M count=100
+      - name: Upload artifact
+        uses: upload-artifact
+        with:
+          name: large-file
+          path: /tmp/large-file.bin
+      - name: Sleep to allow cancel window
+        run: sleep 30
+  name: REL-ART-CACHE-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "被取消 Run 的 artifact 不可被后续 Run 下载"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "后续 Run 不会使用损坏/不完整的 artifact（下载报错或返回空）"
+
+teardown:
+  reset: fixture

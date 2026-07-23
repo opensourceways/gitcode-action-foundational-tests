@@ -1,72 +1,42 @@
-# Phase 02 API 缺口分析
+# Phase 02 API 缺口分析 (v2 — 实测后更新)
 
-对照 `phase01/inputs/gitcode-api/api-reference.md`（20 个 Actions API），分析全部阻断项的 API 缺口。
+来源：`actions_ctl.py` 实测 + api-reference.md + docs.gitcode.com
 
-## 总体
+## ✅ 已验证可用（v2 web-api + v8 API）
 
-- 总 case: 197
-- 可直接跑 (full_scriptable): 107
-- 部分可跑 (partial_scriptable): 59
-- 无法跑 (not_scriptable): 31
+| 端点 | 方法 | 用途 | 验证 |
+|------|------|------|------|
+| `/api/v2/projects/{p}/actions/workflows/list` | POST | 列出 workflow | `actions_ctl.py list` |
+| `/api/v2/projects/{p}/actions/workflows/{id}/dispatch` | POST | 触发 workflow_dispatch | `actions_ctl.py dispatch` → poll → COMPLETED |
+| `/api/v2/projects/{p}/actions/workflow-runs/{id}/stop` | POST | 停止/取消运行 | `actions_ctl.py stop` → `{"success": true}` |
+| `/api/v2/projects/{p}/actions/valid` | POST | YAML 语法校验 | `validate_workflow.py` 已集成 |
+| `/api/v8/repos/{o}/{r}/actions/runs` | GET | 列出 runs | v8 api-reference |
+| `/api/v8/repos/{o}/{r}/actions/runs/{id}` | GET | run 详情 | 同上 |
+| `/api/v8/repos/{o}/{r}/actions/runs/{id}/jobs` | GET | job 列表 | 同上 |
+| `/api/v8/repos/{o}/{r}/actions/runs/{id}/jobs/{id}/download_log` | GET | 下载日志 | 同上 |
+| `/api/v8/repos/{o}/{r}/actions/runners` | GET | runner 管理 | 同上 |
+| `/api/v8/repos/{o}/{r}/actions/artifacts` | GET | 制品管理 | 同上 |
 
-## 🔴 完全缺失的 API（api-reference 中无对应端点）
+## ✅ 文档已有，harness 未集成（v5）
 
-| 阻断 | 影响 case | 缺失的 API |
-|------|----------|-----------|
-| fork_pr | 13 | POST /api/v5/repos/:owner/:repo/forks （创建 fork）<br>POST /api/v5/repos/:owner/:repo/pulls （从 fork 分支向目标仓开 PR）<br><small>第二 GitCode 账号的 OAuth token api-reference 未提及 fork API；v5 PR 只提示了 GET 端点</small> |
-| manual | 5 | POST /api/v8/repos/:owner/:repo/actions/workflows/:workflow_id/dispatch<br><small>api-reference 的 run 过滤参数有 event=Manual，说明平台支持 manual 触发，dispatch 端点路径待确认</small> |
-| pr | 5 | POST /api/v5/repos/:owner/:repo/pulls （创建 PR）<br><small>api-reference 相邻 API 提示 v5 pull requests 存在，但未列出 POST 端点</small> |
-| pull_request_comment | 1 | POST /api/v5/repos/:owner/:repo/pulls/:number/comments （PR comment）<br><small>api-reference 提及 v5 Issues 但未提及 PR comments</small> |
-| pull_request_target | 1 | POST /api/v5/repos/:owner/:repo/pulls （创建 PR）<br><small>需额外验证 target 上下文中 fork PR 无法访问 secrets</small> |
-| pull_request | 1 | POST /api/v5/repos/:owner/:repo/pulls （创建 PR）<br><small>同 pr 触发</small> |
+| 端点 | 用途 | 影响 |
+|------|------|------|
+| `POST /api/v5/repos/{o}/{r}/pulls` | 创建 PR | unlock pr/pull_request/pull_request_target (~7 case) |
+| `POST /api/v5/repos/{o}/{r}/pulls/{n}/comments` | PR comment | unlock pull_request_comment (1 case) |
+| `POST /api/v5/repos/{o}/{r}/forks` | 创建 fork | unlock fork_pr (~12 case) |
 
-## 🟡 API 已存在但未集成到 assertion_engine / workflow_runner
+## 🔴 真正缺失
 
-| 阻断 | 影响 case | 已有 API | 缺失的动作 |
-|------|----------|---------|-----------|
-| artifacts | 1 | GET /api/v8/.../actions/artifacts + download — API 已有，只需集成到 assertion_engine |  |
-| run_duration | 2 | GET /api/v8/.../actions/runs/:run_id — 已有 start_time/end_time，只需计算差值 |  |
-| runner_schedulable | 2 | GET /api/v8/.../actions/runners — API 已有，只需检查 runner 在线状态 |  |
-| runner_scheduling | 1 |  | 同 runner_schedulable — API 已有 |
-| step_summary | 1 | GET /api/v8/.../actions/runs/:run_id/jobs/:job_id — Job detail 已有 steps 信息，只需扩展 assertion_engine |  |
-| workflow_validation | 2 | POST /api/v2/projects/:project/actions/valid — validate_workflow.py 已实现 |  |
+| 能力 | 说明 |
+|------|------|
+| schedule 触发 | cron 由平台调度，外部不可控。变通：dispatch + event_name=schedule |
+| untrusted_contributor | 第二 GitCode 账号 + token（账号资源，非 API 缺口） |
+| fault_injection infra | kill_runner 可用 stop API 模拟；network_partition/disk_full 需 infra 层 |
 
-## 🟢 非 API 问题
+## 实测结果（2026-07-22-valid, 149 cases, dispatch 模式）
 
-| 阻断 | 影响 case | 解决方式 |
-|------|----------|---------|
-| llm_assisted | 44 | 非 API 问题 — 需 LLM 辅助判定通道集成到 assertion_engine 44 条中 27 条 target=error_message（可诊断性评估），其余在 run_logs/run_ui 等 |
-| schedule | 5 | 非 API 问题。cron 由平台按时调度，外部无法触发。变通：push trigger + ATOMGIT_EVENT_NAME=schedule |
-| badge | 3 | 非 GitCode API — HTTP GET badge URL 即可，直接用 curl/libcurl |
-| pr_ui | 1 | 同 run_ui — 需 Playwright |
-| run_ui | 3 | 非 API 问题 — 需 Playwright 浏览器自动化检查 Web UI |
-| untrusted | 17 | 第二 GitCode 账号 + OAuth token（非 API 缺口，是账号资源） 即使 trigger=push 也需以 untrusted 身份 push 到 fork → 开 PR |
-
-## 🔴 fault_injection 特例
-
-| 阻断 | 影响 case | 需要的能力 |
-|------|----------|-----------|
-| fault_injection | 5 | POST /api/v8/repos/:owner/:repo/actions/runs/:run_id/cancel （kill_runner 模拟） network_partition 需 infra 层操作（无标准 API） concurrent_flood 可用 workflow_dispatch API 批量触发模拟 |
-
-## ⚠️ 未知 repo_fixture
-
-- **未知 repo_fixture 'branch-protected'，需确认测试仓前置资源**: 1 cases (SEC-REFPROT-02-001)
-- **未知 repo_fixture 'container-ci'，需确认测试仓前置资源**: 1 cases (COMP-CONTAINER-02-001)
-- **未知 repo_fixture 'container-isolation'，需确认测试仓前置资源**: 1 cases (SEC-CONT-ISOLATE-02-001)
-- **未知 repo_fixture 'matrix-ci'，需确认测试仓前置资源**: 3 cases (COMP-MATRIX-02-005, COMP-MATRIX-02-006, COMP-MATRIX-02-007)
-- **未知 repo_fixture 'matrix-compat'，需确认测试仓前置资源**: 1 cases (COMPAT-MATRIX-02-001)
-- **未知 repo_fixture 'preemption-ci'，需确认测试仓前置资源**: 2 cases (REL-PREEMPT-02-001, REL-PREEMPT-02-002)
-- **未知 repo_fixture 'with-permissions'，需确认测试仓前置资源**: 2 cases (SEC-PERMS-02-001, USE-MIGR-02-003)
-- **未知 repo_fixture 'with-pr-trigger'，需确认测试仓前置资源**: 6 cases (SEC-INJECT-02-001, SEC-INJECT-02-002, SEC-INJECT-02-003, SEC-INJECT-02-004, SEC-INJECT-02-005...)
-- **未知 repo_fixture 'with-target-workflow'，需确认测试仓前置资源**: 1 cases (SEC-FORK-02-003)
-
-> 解决方式：在测试组织下预先创建对应 fixture 仓，配置好 secrets/variables/branch_protection。非 API 缺口。
-## 📋 需要向 GitCode 侧确认/申请的端点清单
-
-| 优先级 | API 端点 | 方法 | 用途 | 影响 case 数 |
-|--------|---------|------|------|-------------|
-| P0 | `/api/v5/repos/:owner/:repo/pulls` | POST | 创建 PR（解锁 20 case） | 20 |
-| P0 | `/api/v8/repos/:owner/:repo/actions/workflows/:workflow_id/dispatch` | POST | workflow_dispatch（解锁 5 manual case + 故障注入 flood） | 5+5 |
-| P1 | `/api/v5/repos/:owner/:repo/forks` | POST | 创建 fork（解锁 13 fork_pr case） | 13 |
-| P1 | `/api/v8/repos/:owner/:repo/actions/runs/:run_id/cancel` | POST | 取消运行（调试 + 5 chaos case） | 5 |
-| P2 | `/api/v5/repos/:owner/:repo/pulls/:number/comments` | POST | PR comment 触发（1 case） | 1 |
+| 判定 | 说明 |
+|------|------|
+| PASS / FAIL | dispatch → poll → collect_logs → assert 全链路通过，15+ PASS |
+| DISPATCH_FAIL | workflow YAML 有语法错误，dispatch 时被平台拒绝 |
+| TIMEOUT | 长时间运行的 case（artifact 上传等） |

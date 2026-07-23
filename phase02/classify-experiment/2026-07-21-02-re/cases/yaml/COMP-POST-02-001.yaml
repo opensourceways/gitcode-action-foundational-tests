@@ -16,27 +16,39 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: build
-    fail_fast: true
-    jobs:
-      main-build:
-        runs-on:
-          ubuntu-24: null
-          x64: null
-          small: null
-        steps:
-        - name: (TC) checkout
-          uses: checkout
-        - run: echo "MAIN_BUILD_DONE"
+    build:
+      name: Build
+      fail_fast: true
+      jobs:
+        name: Jobs
+        main-build:
+          runs-on:
+          runs-on: [dedicate-hosted, x64, large]
+          runs-on: [dedicate-hosted, x64, large]
+            ubuntu-24: null
+            x64: null
+            small: null
+          steps:
+            - name: Placeholder step
+              run: echo 'placeholder'
+          - name: (TC) checkout
+            uses: checkout
+          - run: echo "MAIN_BUILD_DONE"
   post:
     run_always: true
     jobs:
+      name: Jobs
       cleanup:
+        name: Cleanup
         runs-on:
+        runs-on: [dedicate-hosted, x64, large]
+        runs-on: [dedicate-hosted, x64, large]
           ubuntu-24: null
           x64: null
           small: null
         steps:
+          - name: Placeholder step
+            run: echo 'placeholder'
         - run: echo "POST_CLEANUP_EXECUTED"
   name: COMP-POST-02-001
 trigger:

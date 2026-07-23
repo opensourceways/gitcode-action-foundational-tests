@@ -19,6 +19,8 @@ workflow: |
   concurrency:
     group: ${{ atomgit.workflow }}-${{ atomgit.ref }}
     cancel-in-progress: true
+    exceed-action: QUEUE
+    max: 1
   jobs:
     unknown:
       name: Unknown Field

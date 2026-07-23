@@ -1,0 +1,55 @@
+id: USE-MIGR-02-001
+dimensions:
+  - usability
+  - compatibility
+dimension: usability
+priority: P1
+title: "直接搬运 .github/workflows/ci.yml 到 .gitcode/workflows/ 后的开箱报错路径"
+intent_ref: INTENT-USE-014
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-gitcode-format:
+      name: Test Gitcode Format
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - uses: setup-node
+        with:
+          node-version: '20'
+        name: (TC) setup-node
+      - name: Verify GitCode format works
+        run: 'echo "REF=${{ atomgit.ref }}"
+  
+          echo "GITCODE_FORMAT_WORKS"
+  
+          '
+  name: USE-MIGR-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "GitCode 格式 workflow 正常执行，日志含 GITCODE_FORMAT_WORKS"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "提交含 github.* / ubuntu-latest / actions/checkout@v4 / failure() / permissions:contents 的 GitHub workflow 时，应一次性报告所有发现的问题，每个报错可定位到对应迁移改造点"
+
+teardown:
+  reset: fixture

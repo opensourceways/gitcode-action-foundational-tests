@@ -14,7 +14,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     matrix-test:
       strategy:
@@ -35,15 +35,19 @@ workflow: |
           node: 22
         fail-fast: false
         max-parallel: 2
-      runs-on: [dedicate-hosted, x64, large]
-  
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
       steps:
       - uses: checkout
         name: (TC) checkout
       - name: Log matrix values
         run: echo "OS=${{ matrix.os }} NODE=${{ matrix.node }} EXP=${{ matrix.experimental
           }}"
-  name: COMP-MATRIX-02-001
+      name: Matrix Test
+  name: 验证矩阵构建 include/exclude/fail-fast/max-parallel 语义
+
 trigger:
   event: push
   as: maintainer

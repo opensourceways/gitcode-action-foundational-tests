@@ -14,7 +14,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     large-matrix-test:
       strategy:
@@ -31,8 +31,10 @@ workflow: |
           - 24
         fail-fast: false
         max-parallel: 8
-      runs-on: [dedicate-hosted, x64, large]
-  
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
       steps:
       - uses: checkout
         name: (TC) checkout
@@ -46,7 +48,9 @@ workflow: |
           echo "MATRIX_INSTANCE_OK"
   
           '
-  name: REL-MATRIX-02-001
+      name: Large Matrix Test
+  name: 二维矩阵生成 16 个 job 实例时全部正确展开并独立执行
+
 trigger:
   event: push
   as: maintainer

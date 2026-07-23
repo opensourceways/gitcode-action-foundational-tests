@@ -1,0 +1,46 @@
+id: USE-ERR-MSG-02-001
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "必填字段缺失时的错误信息可诊断性"
+intent_ref: INTENT-USE-001
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-parse:
+      name: Test Parse
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Verify workflow parsed
+        run: echo "WORKFLOW_PARSED"
+  name: USE-ERR-MSG-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "合法 workflow 正常解析，日志含 WORKFLOW_PARSED"
+  - type: nonfunctional
+    target: error_message
+    eval: "llm_assisted"
+    rubric: "缺少 on 或 jobs 等必填字段时，错误信息包含缺失字段名、文件路径、行号和必填说明，新手 5 分钟内可自行修复"
+
+teardown:
+  reset: fixture

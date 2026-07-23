@@ -39,7 +39,7 @@ workflow: |
   \"
   "
       - name: Should NOT reach
-        if: ${{ success }}
+        if: ${{ success() }}
         run: echo "OOM_NOT_TERMINATED_UNEXPECTEDLY"
   name: REL-RUNNER-02-001
 trigger:

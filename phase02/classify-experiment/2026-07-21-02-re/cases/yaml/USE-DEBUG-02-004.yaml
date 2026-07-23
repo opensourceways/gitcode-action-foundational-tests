@@ -16,16 +16,20 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: main
-    jobs:
-      main-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "Main job succeeded"
+    main:
+      name: Main
+      jobs:
+        name: Jobs
+        main-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "Main job succeeded"
   post:
     run_always: true
     jobs:
+      name: Jobs
       notify:
+        name: Notify
         runs-on: [dedicate-hosted, x64, large]
         steps:
         - name: Deliberate post failure

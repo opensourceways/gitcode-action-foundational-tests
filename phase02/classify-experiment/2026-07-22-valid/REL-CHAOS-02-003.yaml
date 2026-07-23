@@ -1,0 +1,46 @@
+id: REL-CHAOS-02-003
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "runner 在 checkout 步骤前意外崩溃，重新运行后 workflow 可完整完成"
+intent_ref: INTENT-REL-017
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: REL-CHAOS-02-003
+  on:
+    workflow_dispatch:
+  jobs:
+    crash-recovery-job:
+      name: Crash Recovery Job
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - name: (TC) checkout source
+        uses: checkout
+      - name: Post-checkout step
+        run: echo "checkout and execution completed"
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection:
+  at: pre_job
+  action: kill_runner
+  params:
+    delay_seconds: 5
+  recovery_expectation: rerun_and_succeed
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "重新运行后 workflow 完整完成（status=COMPLETED conclusion=success）"
+
+teardown:
+  reset: full_instance

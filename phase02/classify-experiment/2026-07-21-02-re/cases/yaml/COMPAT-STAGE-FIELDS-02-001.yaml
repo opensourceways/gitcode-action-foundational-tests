@@ -16,16 +16,17 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-    - name: build
-      pre:
-        - name: Pre Build
-          runs-on: [dedicate-hosted, x64, large]
-          steps:
-          - name: Pre step
-            run: echo "PRE_BUILD"
-      jobs:
-        - build-job
-      fail-fast: true
+    build:
+      name: Build
+        pre:
+          - name: Pre Build
+            runs-on: [dedicate-hosted, x64, large]
+            steps:
+            - name: Pre step
+              run: echo "PRE_BUILD"
+        jobs:
+          - build-job
+        fail-fast: true
   jobs:
     build-job:
       name: Build Job

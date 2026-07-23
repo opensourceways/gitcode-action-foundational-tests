@@ -1,39 +1,75 @@
 # Case 可脚本化分类报告
 
-**数据源**: `phase01/runs/2026-07-21-02/cases/yaml/`
-**总 case 数**: 197
-**assertion_engine 支持 kind**: config_probe, leak, mask, run_status, status, value
+**数据源**: `phase01/runs/2026-07-21-02/cases/yaml/` (197 cases)
+**Phase 02 执行器**: `workflow_runner.py` + `assertion_engine.py`
 
-## 总体统计
+## 总体统计（含 trigger + setup + fault + 断言）
 
-| 分类 | 数量 | 占比 |
-|------|------|------|
-| full_scriptable | 146 | 74.1% |
-| partial_scriptable | 36 | 18.3% |
-| not_scriptable | 15 | 7.6% |
+| 分类 | 数量 | 占比 | 含义 |
+|------|------|------|------|
+| `full_scriptable` | **107** | 54.3% | trigger=push + 全部断言可映射 + 无 setup/fault 阻断 |
+| `partial_scriptable` | **59** | 29.9% | trigger=push 但存在部分阻断（LLM、新 target、未知 fixture） |
+| `not_scriptable` | **31** | 15.7% | trigger 非 push（fork_pr/manual/schedule/pr/pull_request） |
 
-## 按维度 × 分类交叉统计
+## 按维度 × 分类
 
-| 维度 | full_scriptable | partial_scriptable | not_scriptable | 合计 |
-|------|-----------------|--------------------|----------------|------|
-| completeness | 27 | 2 | 0 | 29 |
-| compatibility | 46 | 14 | 1 | 61 |
-| reliability | 33 | 7 | 0 | 40 |
-| security | 35 | 5 | 0 | 40 |
-| usability | 5 | 8 | 14 | 27 |
+| 维度 | full | partial | not | 合计 | 主要阻断 |
+|------|------|---------|-----|------|---------|
+| completeness | 21 | 6 | 2 | 29 | 未知 fixture、llm_assisted |
+| compatibility | 39 | 16 | 6 | 61 | llm_assisted、pr/manual trigger |
+| reliability | 25 | 10 | 5 | 40 | fault_injection、schedule trigger |
+| security | 17 | 8 | 15 | 40 | fork_pr trigger、untrusted_contributor |
+| usability | 5 | 19 | 3 | 27 | llm_assisted（大量 error_message） |
 
-## 无法映射的断言原因汇总
+---
 
-- **44** 条: `eval=llm_assisted, 需要 LLM 判定`
-- **3** 条: `target=badge_response 不在引擎支持范围内（需新 infra）`
-- **3** 条: `target=run_ui 不在引擎支持范围内（需新 infra）`
-- **2** 条: `target=runner_schedulable 不在引擎支持范围内（需新 infra）`
-- **2** 条: `target=workflow_validation 不在引擎支持范围内（需新 infra）`
-- **2** 条: `target=run_duration 不在引擎支持范围内（需新 infra）`
-- **1** 条: `target=runner_scheduling 不在引擎支持范围内（需新 infra）`
-- **1** 条: `target=step_summary 不在引擎支持范围内（需新 infra）`
-- **1** 条: `target=artifacts 不在引擎支持范围内（需新 infra）`
-- **1** 条: `target=pr_ui 不在引擎支持范围内（需新 infra）`
+## 阻断项详解
+
+### 断言层阻断（assertion_engine 不支持）
+
+| 阻断 | 数量 | 缺什么 |
+|------|------|--------|
+| `eval=llm_assisted` | **44** | assertion_engine 加 LLM 辅助判定通道（27 条 target=error_message） |
+| `target=run_ui / pr_ui` | **4** | Playwright 浏览器自动化 |
+| `target=badge_response` | **3** | HTTP client 获取 badge URL 并解析 SVG |
+| `target=runner_schedulable / runner_scheduling` | **3** | runner API 已有（`GET .../actions/runners`），加 assertion kind |
+| `target=workflow_validation` | **2** | validate_workflow.py 已有（`POST /api/v2/.../valid`），接入 engine |
+| `target=run_duration` | **2** | run API 已有 `start_time`/`end_time`，算差值 + 加 duration kind |
+| `target=step_summary` | **1** | job API 已有 steps JSON，解析结构体而非 grep 日志 |
+| `target=artifacts` | **1** | artifact API 已有（`GET .../actions/artifacts` + download），加扫描 kind |
+
+### Trigger 层阻断
+
+| 阻断 | 数量 | 缺什么 |
+|------|------|--------|
+| `fork_pr` trigger | **13** | fork API（`POST /api/v5/.../forks`）+ 第二 GitCode 账号 |
+| `trigger.as=untrusted_contributor` | **17** | 第二 GitCode 账号 + OAuth token |
+| `manual` trigger | **5** | dispatch API 已验证可用（`actions_ctl.py`），未集成到 runner |
+| `schedule` trigger | **5** | cron 无法按需触发，变通：push + `ATOMGIT_EVENT_NAME=schedule` |
+| `pr` / `pull_request` / `pull_request_target` / `pull_request_comment` | **8** | PR 创建 API（`POST /api/v5/.../pulls`）已有，未集成到 runner |
+
+### 执行环境阻断
+
+| 阻断 | 数量 | 缺什么 |
+|------|------|--------|
+| `fault_injection` 非 null | **5** | runner kill / network_partition / concurrent_flood infra |
+| 未知 `repo_fixture` | **~18** | 预先创建配置好的测试仓 |
+
+---
+
+## API 状态
+
+| API | 状态 | 验证方式 |
+|-----|------|---------|
+| `POST web-api.gitcode.com/api/v2/.../actions/workflows/{id}/dispatch` | ✅ | `actions_ctl.py` dispatch → poll → COMPLETED |
+| `POST web-api.gitcode.com/api/v2/.../actions/workflow-runs/{id}/stop` | ✅ | `actions_ctl.py` stop → `{"success": true}` |
+| `POST web-api.gitcode.com/api/v2/.../actions/valid` | ✅ | `validate_workflow.py` 已集成 |
+| `POST api.gitcode.com/api/v5/repos/{o}/{r}/pulls` | ✅ | GitCode 文档已收录 |
+| `POST api.gitcode.com/api/v5/repos/{o}/{r}/forks` | ✅ | GitCode 文档已收录 |
+| `POST api.gitcode.com/api/v5/repos/{o}/{r}/pulls/{n}/comments` | ✅ | GitCode 文档已收录 |
+| `POST web-api.gitcode.com/api/v2/repos/{id}/variables` | ✅ | 端点存在，需有 repo 管理权限的 cookie |
+
+---
 
 ## 逐 Case 明细
 

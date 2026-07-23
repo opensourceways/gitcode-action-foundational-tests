@@ -21,10 +21,13 @@ workflow: |
       runs-on: [dedicate-hosted, x64, large]
       steps:
       - run: echo "Job A completed successfully"
+        name: Run command
     job-b-fail:
+      name: Job B Fail
       runs-on: [dedicate-hosted, x64, large]
       steps:
       - run: 'echo "Job B will fail"
+        name: Run command
   
           exit 1
   

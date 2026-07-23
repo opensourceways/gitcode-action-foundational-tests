@@ -16,29 +16,33 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-  - name: stage1
-    fail_fast: true
-    jobs:
-      fail-fast-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: 'echo "Deliberately failing fast"
-  
-            exit 1
-  
-            '
-      long-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - name: Long running step for cancel window
-          run: sleep 120
-        - run: echo "Should not reach here"
-  - name: stage2
-    jobs:
-      downstream-job:
-        runs-on: [dedicate-hosted, x64, large]
-        steps:
-        - run: echo "This should be skipped"
+    stage1:
+      name: Stage1
+      fail_fast: true
+      jobs:
+        name: Jobs
+        fail-fast-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: 'echo "Deliberately failing fast"
+
+              exit 1
+
+              '
+        long-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - name: Long running step for cancel window
+            run: sleep 120
+          - run: echo "Should not reach here"
+    stage2:
+      name: Stage2
+      jobs:
+        name: Jobs
+        downstream-job:
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+          - run: echo "This should be skipped"
   name: REL-CANCEL-02-002
 trigger:
   event: push

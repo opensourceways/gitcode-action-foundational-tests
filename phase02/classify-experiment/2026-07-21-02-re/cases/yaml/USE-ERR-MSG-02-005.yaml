@@ -23,11 +23,9 @@ workflow: |
         credentials:
           username: myuser
           password: ${{ secrets.DOCKER_PASSWORD }}
-      services:
-        redis:
-          image: redis:latest
       steps:
       - run: echo "test"
+        name: Run command
   name: USE-ERR-MSG-02-005
 trigger:
   event: push

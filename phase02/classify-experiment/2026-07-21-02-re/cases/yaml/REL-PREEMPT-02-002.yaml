@@ -14,7 +14,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   concurrency:
     enable: true
     max: 1
@@ -25,7 +25,7 @@ workflow: |
   jobs:
     preempt-victim:
       name: Preempt Victim
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - uses: checkout
         name: (TC) checkout
@@ -38,8 +38,10 @@ workflow: |
       - name: Post cleanup
         if: always()
         run: echo "POST_CLEANUP_DONE"
-  
-  name: REL-PREEMPT-02-002
+      name: Preempt Victim
+
+  name: preemption 被抢占 job/run 的终态、日志完整性与 runner 释放时效
+
 trigger:
   event: push
   as: maintainer

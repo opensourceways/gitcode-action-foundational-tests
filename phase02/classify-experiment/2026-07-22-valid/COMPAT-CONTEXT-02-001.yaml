@@ -1,0 +1,86 @@
+id: COMPAT-CONTEXT-02-001
+dimensions:
+  - compatibility
+dimension: compatibility
+priority: P1
+title: "验证 atomgit. 核心属性集对齐 github. 语义完整性"
+intent_ref: INTENT-COMPAT-001
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-atomgit-context:
+      name: Test Atomgit Context
+      runs-on: [dedicate-hosted, x64, large]
+  
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Dump all known atomgit attributes
+        run: 'echo "event_name=${{ atomgit.event_name }}"
+  
+          echo "sha=${{ atomgit.sha }}"
+  
+          echo "ref=${{ atomgit.ref }}"
+  
+          echo "ref_name=${{ atomgit.ref_name }}"
+  
+          echo "event=${{ atomgit.event }}"
+  
+          echo "workspace=${{ atomgit.workspace }}"
+  
+          echo "action=${{ atomgit.action }}"
+  
+          echo "token=***"
+  
+          echo "repository=${{ atomgit.repository }}"
+  
+          echo "repository_owner=${{ atomgit.repository_owner }}"
+  
+          echo "repositoryUrl=${{ atomgit.repositoryUrl }}"
+  
+          echo "run_id=${{ atomgit.run_id }}"
+  
+          echo "run_number=${{ atomgit.run_number }}"
+  
+          echo "run_attempt=${{ atomgit.run_attempt }}"
+  
+          echo "workflow=${{ atomgit.workflow }}"
+  
+          echo "server_url=${{ atomgit.server_url }}"
+  
+          echo "api_url=${{ atomgit.api_url }}"
+  
+          echo "ATOMGIT_CONTEXT_DUMP_COMPLETE"
+  
+          '
+  name: COMPAT-CONTEXT-02-001
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "已文档化的 atomgit.* 属性均返回非空值，日志含 ATOMGIT_CONTEXT_DUMP_COMPLETE"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "event_name 返回正确的触发事件字符串"
+  - type: negative
+    target: run_logs
+    eval: "deterministic"
+    rubric: "无文档声明存在但返回 null 的属性（包括 repository_owner 应可访问）"
+
+teardown:
+  reset: fixture

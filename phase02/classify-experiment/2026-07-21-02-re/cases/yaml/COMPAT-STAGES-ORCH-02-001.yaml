@@ -16,12 +16,14 @@ workflow: |
   on:
     workflow_dispatch:
   stages:
-    - name: build
-      jobs:
-        - build-job
-    - name: test
-      jobs:
-        - test-job
+    build:
+      name: Build
+        jobs:
+          - build-job
+    test:
+      name: Test
+        jobs:
+          - test-job
   jobs:
     build-job:
       name: Build Job

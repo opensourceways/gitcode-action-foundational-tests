@@ -1,0 +1,51 @@
+id: COMPAT-CHECKOUT-EQUIV-02-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "checkout action 差异——GitCode uses: checkout 参数集与 GitHub actions/checkout@v4 等价性"
+intent_ref: INTENT-COMPAT-047
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: COMPAT-CHECKOUT-EQUIV-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    checkout-test:
+      name: Checkout Equivalence
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout with fetch-depth
+        uses: checkout
+        with:
+          fetch-depth: 0
+      - name: Verify full history
+        run: git log --oneline | head -n 5
+      - name: (TC) checkout with ref
+        uses: checkout
+        with:
+          ref: main
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "git log 输出非空"
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "checkout step 成功"
+
+teardown:
+  reset: fixture

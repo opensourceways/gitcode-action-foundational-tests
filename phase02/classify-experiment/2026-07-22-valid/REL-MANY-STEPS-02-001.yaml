@@ -1,0 +1,73 @@
+id: REL-MANY-STEPS-02-001
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: "超多 step 的单 job 稳定性（接近 16 step 上限）"
+intent_ref: INTENT-REL-031
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: REL-MANY-STEPS-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    many-steps:
+      name: Many Steps
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: (TC) checkout
+        uses: checkout
+      - name: Step 01
+        run: echo "step01"
+      - name: Step 02
+        run: echo "step02"
+      - name: Step 03
+        run: echo "step03"
+      - name: Step 04
+        run: echo "step04"
+      - name: Step 05
+        run: echo "step05"
+      - name: Step 06
+        run: echo "step06"
+      - name: Step 07
+        run: echo "step07"
+      - name: Step 08
+        run: echo "step08"
+      - name: Step 09
+        run: echo "step09"
+      - name: Step 10
+        run: echo "step10"
+      - name: Step 11
+        run: echo "step11"
+      - name: Step 12
+        run: echo "step12"
+      - name: Step 13
+        run: echo "step13"
+      - name: Step 14
+        run: echo "step14"
+      - name: Step 15
+        run: echo "step15"
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "run 状态为成功"
+  - type: nonfunctional
+    target: run_duration
+    eval: "deterministic"
+    rubric: "总耗时 < 300 秒"
+
+teardown:
+  reset: fixture

@@ -17,6 +17,7 @@ workflow: |
     workflow_dispatch:
   jobs:
     timeout-job:
+      name: Timeout Job
       timeout-minutes: 1
       runs-on: [dedicate-hosted, x64, large]
   
@@ -26,12 +27,14 @@ workflow: |
       - name: Sleep beyond timeout
         run: sleep 300
     post-timeout-job:
+      name: Post Timeout Job
       needs: timeout-job
-      if: ${{ cancelled }}
+      if: ${{ cancelled() }}
       runs-on: [dedicate-hosted, x64, large]
   
       steps:
       - run: echo "TIMEOUT_CLEANUP"
+        name: Run command
   name: COMP-TIMEOUT-02-001
 trigger:
   event: push

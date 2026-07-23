@@ -14,7 +14,7 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     matrix-parent:
       strategy:
@@ -22,17 +22,22 @@ workflow: |
           os:
           - ubuntu
           - windows
-      runs-on: [dedicate-hosted, x64, large]
-  
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
       steps:
       - uses: checkout
         name: (TC) checkout
       - name: Log matrix instance
         run: echo "MATRIX_PARENT_OS=${{ matrix.os }}"
+      name: Matrix Parent
     matrix-child:
       needs: matrix-parent
-      runs-on: [dedicate-hosted, x64, large]
-  
+      runs-on:
+      - ubuntu-latest
+      - x64
+      - small
       steps:
       - name: Verify parent completed
         run: 'echo "ALL_PARENT_INSTANCES_DONE"
@@ -40,7 +45,9 @@ workflow: |
           echo "NEEDS_RESULT=${{ needs.matrix-parent.result }}"
   
           '
-  name: REL-NEEDS-02-002
+      name: Matrix Child
+  name: needs 指向 matrix 父 job 时下游等待所有实例完成后执行
+
 trigger:
   event: push
   as: maintainer

@@ -14,11 +14,11 @@ setup:
 
 workflow: |
   on:
-    workflow_dispatch:
+  - push
   jobs:
     matrix-predecessor:
       name: Matrix Predecessor
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       strategy:
         matrix:
           os:
@@ -34,9 +34,10 @@ workflow: |
           echo "Matrix job ${{ matrix.os }} completed"
   
           '
+      name: Matrix Predecessor
     downstream:
       needs: matrix-predecessor
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Verify needs context
         run: 'echo "All matrix jobs completed"
@@ -46,7 +47,9 @@ workflow: |
           '
       - name: Confirm after matrix complete
         run: echo "Downstream job executed successfully"
-  name: REL-NEEDS-02-003
+      name: Downstream
+  name: 'needs 指向 matrix 父 job 时，下游 job 正确等待所有矩阵实例完成后执行（复测 '
+
 trigger:
   event: push
   as: maintainer

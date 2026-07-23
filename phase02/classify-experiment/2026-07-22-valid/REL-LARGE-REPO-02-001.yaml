@@ -1,0 +1,47 @@
+id: REL-LARGE-REPO-02-001
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: "超大仓库 checkout 的磁盘/时间边界"
+intent_ref: INTENT-REL-032
+
+setup:
+  repo_fixture: large-repo
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  name: REL-LARGE-REPO-02-001
+  on:
+    workflow_dispatch:
+  jobs:
+    large-checkout:
+      name: Large Checkout
+      runs-on: [ubuntu-latest, x64, large]
+      steps:
+      - name: (TC) checkout large repo
+        uses: checkout
+        with:
+          fetch-depth: 0
+      - name: Check disk usage
+        run: du -sh .
+trigger:
+  event: push
+  as: maintainer
+  params:
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: "deterministic"
+    rubric: "checkout step 成功"
+  - type: nonfunctional
+    target: run_duration
+    eval: "deterministic"
+    rubric: "checkout 耗时 < 600 秒"
+
+teardown:
+  reset: fixture

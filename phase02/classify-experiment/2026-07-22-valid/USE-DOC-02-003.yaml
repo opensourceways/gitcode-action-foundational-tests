@@ -1,0 +1,55 @@
+id: USE-DOC-02-003
+dimensions:
+  - usability
+dimension: usability
+priority: P1
+title: "文档声明的 runner.os / runner.arch 返回值与平台实际返回值的一致性"
+intent_ref: INTENT-USE-009
+
+setup:
+  repo_fixture: basic-ci
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    check-runner-values:
+      name: Check Runner Values
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: Output and compare runner context
+        run: 'echo "runner.os=${{ runner.os }}"
+  
+          echo "runner.arch=${{ runner.arch }}"
+  
+          echo "runner.name=${{ runner.name }}"
+  
+          echo "---"
+  
+          echo "Expected (per docs): runner.os=Linux, runner.arch=X64"
+  
+          echo "Actual:    runner.os=${{ runner.os }}, runner.arch=${{ runner.arch }}"
+  
+          '
+  name: USE-DOC-02-003
+trigger:
+  event: push
+  as: maintainer
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "runner.os 和 runner.arch 返回值与文档声明完全一致（字符串精确匹配，大小写敏感）"
+  - type: negative
+    target: run_logs
+    eval: "determistic"
+    rubric: "若实际值为 linux（全小写）而文档声明为 Linux，则为 FAIL"
+
+teardown:
+  reset: fixture

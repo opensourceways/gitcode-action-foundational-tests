@@ -1,0 +1,50 @@
+id: SEC-TOKEN-02-001
+dimensions:
+  - security
+dimension: security
+priority: P0
+title: "平台内置 ATOMGIT_TOKEN 在 fork PR 下不应为有效完整 token"
+intent_ref: INTENT-SEC-036
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches:
+        - main
+  permissions:
+    repository: read
+  jobs:
+    test-token:
+      name: Test Token
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - uses: checkout
+        name: (TC) checkout
+      - name: Echo atomgit_token (should be masked)
+        run: echo "${{ secrets.atomgit_token }}"
+  name: SEC-TOKEN-02-001
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params:
+    event_type: pull_request
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "atomgit_token"
+  - type: positive
+    target: run_logs
+    eval: "deterministic"
+    rubric: "token 值在日志中应被遮蔽为 ***"
+
+teardown:
+  reset: fixture
