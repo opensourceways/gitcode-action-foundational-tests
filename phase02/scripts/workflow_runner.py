@@ -557,53 +557,7 @@ def preflight_validate(contract, cfg=None):
     return (len(errors) == 0), errors
 
 
-# ── Runner label 映射（部署时环境适配，非语义改写）────────────────────
-_RUNNER_MAP_PATH = os.path.join(os.path.dirname(__file__), "..", "inputs", "runner-map.yaml")
-
-
-def _load_runner_map():
-    """加载 runner label 映射表。优先环境变量 JSON，其次 YAML 文件，最后内置默认。"""
-    import json as _json
-    env = os.environ.get("RUNNER_MAP", "")
-    if env:
-        try:
-            return _json.loads(env)
-        except Exception:
-            pass
-    if os.path.exists(_RUNNER_MAP_PATH):
-        try:
-            m = yaml.safe_load(open(_RUNNER_MAP_PATH, encoding="utf-8"))
-            if isinstance(m, dict):
-                return {str(k): str(v) for k, v in m.items()}
-        except Exception:
-            pass
-    return {"dedicate-hosted,x64,large": "ubuntu-latest,x64,small"}
-
-
-def _apply_runner_map(workflow_yaml, runner_map, case_id):
-    """部署前用字符串替换 workflow 中的 runs-on label（不解析/重序列化 YAML）。
-
-    ★ 只能用字符串替换，禁止 yaml.safe_load + safe_dump——
-      往返会毁掉 on: (变 true)、block scalar run: | 等，违反 VALIDATION-RULES §14a。
-    返回 (new_yaml, intended_runs_on, deployed_runs_on)。
-    """
-    intended = []
-    deployed = []
-    new_yaml = workflow_yaml
-    for map_key, map_val in runner_map.items():
-        # 匹配 runs-on: [a, b, c] 格式，允许逗号后有空格
-        old_parts = [re.escape(p.strip()) for p in map_key.split(",")]
-        old_pattern = r"runs-on:\s*\[" + r",?\s*".join(old_parts) + r"\]"
-        new_ro = f"runs-on: [{map_val}]"
-        if re.search(old_pattern, new_yaml):
-            new_yaml = re.sub(old_pattern, new_ro, new_yaml)
-            intended.append({"runs_on": map_key})
-            deployed.append({"runs_on": map_val})
-            log(f"  runs-on {map_key} → {map_val} [{case_id}]")
-    return new_yaml, intended, deployed
-
-
-# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename)────────
+# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename, runner_mapping)────
 def _push_with_retry(branch, cwd):
     """git push 失败时 pull --rebase 后重试，最多4次，指数退避（1s/2s/4s）。
 
@@ -626,14 +580,11 @@ def deploy(ws, cfg, case_id, workflow_yaml):
     部署前对 runs-on label 做环境适配映射（只替换映射表中明确的，不误伤异常 label）。
     返回 (head_sha, wf_filename, runner_mapping)。push 失败返回 (None, wf_filename, {})。
     """
-    runner_map = getattr(cfg, "runner_map", None) or _load_runner_map()
-    cfg.runner_map = runner_map
-    wf_yaml, intended, deployed = _apply_runner_map(workflow_yaml, runner_map, case_id)
     wf_filename = case_id.lower().replace("_", "-") + ".yml"
     dst = os.path.join(ws.repo_dir, ".gitcode", "workflows", wf_filename)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(dst, "w", encoding="utf-8", newline="\n") as f:
-        f.write(wf_yaml)
+        f.write(workflow_yaml)
     _sh("git add .gitcode/workflows/", cwd=ws.repo_dir)
     # 无变更时用 --allow-empty 强制触发一次
     rc_nodiff, _ = _sh("git diff --cached --quiet", cwd=ws.repo_dir)
@@ -644,7 +595,7 @@ def deploy(ws, cfg, case_id, workflow_yaml):
         log(f"  push 失败（重试后仍失败）: {out[-200:]}")
         return None, wf_filename, {}
     rc, sha = _sh("git rev-parse HEAD", cwd=ws.repo_dir)
-    return sha.strip(), wf_filename, {"intended_runs_on": intended, "deployed_runs_on": deployed}
+    return sha.strip(), wf_filename, {}
 
 
 # ── 2. 轮询（head_sha AND file_path 精确匹配）→ run dict | None ─────
