@@ -683,6 +683,8 @@ TRIGGER_STATUS = {
     "pr":                   {"supported": True},
     "pull_request":         {"supported": True},
     "pull_request_target":  {"supported": True},
+    "issue_comment":        {"supported": False,
+                             "reason": "issue_comment：需先有 issue/PR 再调评论创建端点触发 workflow——api-reference.md 未收录评论端点，待探明实际 API 路径"},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
