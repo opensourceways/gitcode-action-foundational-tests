@@ -54,6 +54,26 @@ except ImportError:  # 允许从别处 import 时按路径补齐
 
 
 # ── 配置 ──────────────────────────────────────────────────────────
+def _load_dotenv_cookie():
+    """从工程根目录 .env 文件读取 GITCODE_COOKIE。遍历4级目录。"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(4):
+        candidate = os.path.join(here, ".env")
+        if os.path.exists(candidate):
+            env_vars = {}
+            with open(candidate, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, _, v = line.partition("=")
+                        env_vars[k.strip()] = v.strip().strip('"').strip("'")
+            return env_vars.get("GITCODE_COOKIE", "")
+        here = os.path.dirname(here)
+    return ""
+
+
 class RunnerConfig:
     """执行器配置。默认对齐当前被测实例（bingo），可由环境变量覆盖。"""
 
@@ -70,8 +90,33 @@ class RunnerConfig:
         self.timeout = int(timeout or os.environ.get("PHASE02_CASE_TIMEOUT", 300))
         self.poll_interval = int(poll_interval or os.environ.get("PHASE02_POLL_INTERVAL", 12))
         self.executor = executor or os.environ.get("GITCODE_EXECUTOR", "")
-        self.cookie = cookie or os.environ.get("GITCODE_COOKIE", "")
+        self.cookie = cookie or self._load_cookie()
         self.workflow_id = workflow_id or os.environ.get("GITCODE_WORKFLOW_ID", "b03a4b84cd784ddea00c5270eba62c7f")
+
+    @staticmethod
+    def _load_token():
+        path = os.path.expanduser(os.environ.get("GITCODE_TOKEN_FILE", "~/.gitcode-token"))
+        if os.path.exists(path):
+            return open(path, encoding="utf-8").read().strip()
+        env = os.environ.get("GITCODE_ACCESS_TOKEN", "")
+        if env:
+            return env
+        raise FileNotFoundError(
+            "未找到 GitCode token：既无 ~/.gitcode-token 也无 GITCODE_ACCESS_TOKEN")
+
+    @staticmethod
+    def _load_cookie():
+        cookie = os.environ.get("GITCODE_COOKIE", "")
+        if cookie:
+            return cookie
+        cookie = _load_dotenv_cookie()
+        if cookie:
+            return cookie
+        path = os.path.expanduser("~/.gitcode-cookie")
+        if os.path.exists(path):
+            return open(path, encoding="utf-8").read().strip()
+        log("  (警告) GITCODE_COOKIE 未配置 — dispatch 触发不可用")
+        return ""
 
     @staticmethod
     def _load_token():
@@ -117,6 +162,74 @@ def api_get(cfg, path, retries=2):
         if attempt < retries:
             time.sleep(2)
     raise last or ApiError(f"unknown error on {path}")
+
+
+# ── Web-API（web-api.gitcode.com，cookie 认证，用于 dispatch/list）─────
+_WEB_HOST = "web-api.gitcode.com"
+
+
+def _enc(project_path):
+    return project_path.replace("/", "%2F")
+
+
+def _build_web_headers(cookie):
+    return {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {cookie}",
+        "Origin": "https://gitcode.com",
+        "Referer": "https://gitcode.com/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        "X-App-Channel": "gitcode-fe",
+        "X-App-Version": "0",
+        "X-Device-ID": "unknown",
+        "X-Device-Type": "Linux",
+        "X-Platform": "web",
+        "Cookie": f"GITCODE_ACCESS_TOKEN={cookie}; GitCodeUserName=ccijunk",
+    }
+
+
+def list_workflows(cookie, project_path):
+    """列出项目的所有 workflow。返回 workflow 列表 [{workflow_id, file_path, name}, ...]。
+    接口: POST web-api.gitcode.com/api/v2/projects/{enc}/actions/workflows/list
+    """
+    headers = _build_web_headers(cookie)
+    url = f"https://{_WEB_HOST}/api/v2/projects/{_enc(project_path)}/actions/workflows/list"
+    data = json.dumps({}).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as r:
+        body = json.loads(r.read().decode("utf-8", errors="replace"))
+    return body.get("content", [])
+
+
+def dispatch_workflow(cookie, project_path, workflow_id, file_path,
+                      ref, branch, repo_https_url, inputs=None):
+    """手动触发一次 workflow 运行。返回 (status_code, workflow_run_id_or_None)。
+    接口: POST web-api.gitcode.com/api/v2/projects/{enc}/actions/workflows/{wf_id}/dispatch
+    """
+    headers = _build_web_headers(cookie)
+    url = f"https://{_WEB_HOST}/api/v2/projects/{_enc(project_path)}/actions/workflows/{workflow_id}/dispatch"
+    payload = {
+        "ref": ref,
+        "branch": branch,
+        "branch_commit_id": "",
+        "repo_https_url": repo_https_url,
+        "file_path": file_path,
+        "inputs": inputs or {},
+    }
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            body = json.loads(r.read().decode("utf-8", errors="replace"))
+        return r.status, body.get("workflow_run_id")
+    except urllib.error.HTTPError as e:
+        try:
+            body = json.loads(e.read().decode("utf-8", errors="replace"))
+        except Exception:
+            body = {}
+        return e.code, body.get("workflow_run_id")
+    except Exception:
+        return -1, None
 
 
 # ── git shell ─────────────────────────────────────────────────────
@@ -516,8 +629,7 @@ TRIGGER_STATUS = {
                              "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配 run（确定性，待验证 GitCode tag 触发语义）"},
     "manual":               {"supported": False,
                              "reason": "manual 触发：需调 GitCode workflow_dispatch API（待确认端点）"},
-    "workflow_dispatch":    {"supported": False,
-                             "reason": "workflow_dispatch：需 dispatch API（待确认端点）"},
+    "workflow_dispatch":    {"supported": True},
     "pr":                   {"supported": False,
                              "reason": "pr 触发：需建分支+开 PR（确定性，待确认 PR 创建端点与 run 关联方式）"},
     "pull_request":         {"supported": False,
@@ -556,6 +668,74 @@ def teardown(ws, cfg, wf_filename):
     return rc == 0
 
 
+# ── Dispatch 触发（workflow_dispatch）───────────────────────────────
+def _poll_run_by_id(cfg, run_id):
+    """按 run_id 轮询到终态。返回 run dict 或 None。"""
+    elapsed = 0
+    while elapsed < cfg.timeout:
+        try:
+            d = api_get(cfg, f"/actions/runs/{run_id}")
+        except ApiError:
+            time.sleep(cfg.poll_interval)
+            elapsed += cfg.poll_interval
+            continue
+        if d.get("status") in _TERMINAL:
+            return d
+        time.sleep(cfg.poll_interval)
+        elapsed += cfg.poll_interval
+    return None
+
+
+def trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """workflow_dispatch 触发链路：deploy → dispatch → poll → collect。
+
+    cookie 不可用时返回 INCONCLUSIVE。
+    """
+    t0 = time.time()
+    if not cfg.cookie:
+        return _exec_result("INCONCLUSIVE", case_id,
+                            reason="GITCODE_COOKIE 未配置，dispatch 触发不可用", t0=t0)
+    try:
+        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        time.sleep(5)
+        project_path = f"{cfg.owner}/{cfg.repo}"
+        wfs = list_workflows(cfg.cookie, project_path)
+        wf_id = None
+        wf_file_path = None
+        for w in wfs:
+            fp = w.get("file_path") or ""
+            if fp.endswith(wf_filename):
+                wf_id = w.get("workflow_id")
+                wf_file_path = fp
+                break
+        if not wf_id:
+            return _exec_result("INCONCLUSIVE", case_id,
+                                reason=f"list_workflows 未找到匹配 {wf_filename} 的 workflow_id", t0=t0)
+        repo_https_url = f"https://gitcode.com/{cfg.owner}/{cfg.repo}.git"
+        code, run_id = dispatch_workflow(cfg.cookie, project_path, wf_id,
+                                         wf_file_path, cfg.branch, cfg.branch,
+                                         repo_https_url)
+        if code != 200 or not run_id:
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"dispatch_workflow 返回 HTTP {code}, run_id={run_id}", t0=t0)
+        log(f"  dispatch: workflow_run_id={run_id}")
+        run = _poll_run_by_id(cfg, run_id)
+        if run is None:
+            return _exec_result("TIMEOUT", case_id, gitcode_run_id=run_id, t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+    except Exception as e:
+        return _exec_result("ENV_ERROR", case_id, reason=f"dispatch 异常: {e}", t0=t0)
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -573,7 +753,9 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     """
     t0 = time.time()
     wf_filename = None
-    # 触发适配：非 push 事件目前未实现 → 如实返回具体原因（不糊弄）
+    # 触发适配：workflow_dispatch 走独立 dispatch 链路
+    if trigger_event == "workflow_dispatch":
+        return trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
