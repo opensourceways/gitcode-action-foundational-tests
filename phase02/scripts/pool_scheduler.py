@@ -246,6 +246,21 @@ def run_pool(run_id, only=None, no_logs=False):
                         rc_t, out_t = wr._sh(f"git tag {tag} && git push origin {tag}", cwd=ws.repo_dir)
                         if rc_t != 0:
                             wr.log(f"  tag push 失败: {out_t[-150:]}")
+                    if ev in ("pr", "pull_request"):
+                        pr_branch = f"pr-{cid.lower().replace('_','-')}"
+                        wr._sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
+                        rc_t, out_t = wr._sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
+                        if rc_t == 0:
+                            wr.log(f"  pr branch pushed: {pr_branch}")
+                            code, presp = wr.api_post(cfg, "/pulls",
+                                                      {"title": f"test: {cid}", "head": pr_branch, "base": cfg.branch})
+                            if code in (200, 201):
+                                pr_id = presp.get("id") or presp.get("number") or presp.get("iid")
+                                wr.log(f"  PR created: id={pr_id}")
+                            else:
+                                wr.log(f"  创建 PR 失败 HTTP {code}")
+                        else:
+                            wr.log(f"  pr branch push 失败: {out_t[-150:]}")
                     in_flight.append({"cid": cid, "repo_cfg": cfg, "ws": ws,
                                       "trigger_event": ev,
                                       "sha": sha, "wf_filename": wf_filename,

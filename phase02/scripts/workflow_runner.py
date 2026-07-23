@@ -178,6 +178,32 @@ def api_get(cfg, path, retries=2):
     raise last or ApiError(f"unknown error on {path}")
 
 
+def api_post(cfg, path, body, retries=1):
+    """POST {api_base}/api/v5/repos/{owner}/{repo}{path}。用 access_token 认证。"""
+    url = f"{cfg.api_base}/api/v5/repos/{cfg.owner}/{cfg.repo}{path}?access_token={cfg.token}"
+    data = json.dumps(body).encode("utf-8")
+    last = None
+    for attempt in range(retries + 1):
+        try:
+            req = urllib.request.Request(url, data=data, method="POST")
+            req.add_header("Content-Type", "application/json")
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.status, json.loads(r.read().decode("utf-8", errors="replace"))
+        except urllib.error.HTTPError as e:
+            try:
+                err_body = json.loads(e.read().decode("utf-8", errors="replace"))
+            except Exception:
+                err_body = {}
+            if 400 <= e.code < 500:
+                raise ApiError(f"HTTP {e.code} on POST {path}: {err_body}")
+            last = ApiError(f"HTTP {e.code} on POST {path}")
+        except Exception as e:
+            last = ApiError(f"{type(e).__name__}: {e} on POST {path}")
+        if attempt < retries:
+            time.sleep(2)
+    raise last or ApiError(f"unknown error on POST {path}")
+
+
 # ── Web-API（web-api.gitcode.com，cookie 认证，用于 dispatch/list）─────
 _WEB_HOST = "web-api.gitcode.com"
 
@@ -654,12 +680,10 @@ TRIGGER_STATUS = {
     "tag":                  {"supported": True},
     "manual":               {"supported": True},
     "workflow_dispatch":    {"supported": True},
-    "pr":                   {"supported": False,
-                             "reason": "pr 触发：需建分支+开 PR（确定性，待确认 PR 创建端点与 run 关联方式）"},
-    "pull_request":         {"supported": False,
-                             "reason": "pull_request 触发：需建分支+开 PR（待确认 PR API 与 run 关联）"},
+    "pr":                   {"supported": True},
+    "pull_request":         {"supported": True},
     "pull_request_target":  {"supported": False,
-                             "reason": "pull_request_target：同 PR，且需注意 base 上下文语义"},
+                              "reason": "pull_request_target：同 PR 触发机制，但需验证 base 上下文语义差异（untrusted fork PR 场景）"},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
@@ -794,6 +818,46 @@ def trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
 
 
+def trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """PR 触发链路：deploy → 建分支+push → 开 PR（v5 API）→ 轮询 match PR run。
+
+    pr 和 pull_request 共用此实现。PR 创建端点使用 v5 API：
+    POST /api/v5/repos/{owner}/{repo}/pulls  body: {title, head, base}
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        pr_branch = f"pr-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
+        rc, out = _sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push pr branch 失败: {out[-200:]}", t0=t0)
+        log(f"  pr branch pushed: {pr_branch}")
+        code, pr_resp = api_post(cfg, "/pulls",
+                                 {"title": f"test: {case_id}", "head": pr_branch, "base": cfg.branch})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"创建 PR 失败 HTTP {code}", t0=t0)
+        pr_id = pr_resp.get("id") or pr_resp.get("number") or pr_resp.get("iid")
+        log(f"  PR created: id={pr_id}, branch={pr_branch}")
+        run = poll_run(cfg, sha, wf_filename)
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -814,9 +878,12 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     # 触发适配：workflow_dispatch / manual 走 dispatch 链路
     if trigger_event in ("workflow_dispatch", "manual"):
         return trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
-    # tag 走独立 tag 链路（deploy + git tag push）
+    # tag 走独立 tag 链路
     if trigger_event == "tag":
         return trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # pr / pull_request 走 PR 链路
+    if trigger_event in ("pr", "pull_request"):
+        return trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
