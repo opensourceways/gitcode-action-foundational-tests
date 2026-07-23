@@ -557,7 +557,7 @@ def preflight_validate(contract, cfg=None):
     return (len(errors) == 0), errors
 
 
-# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename, runner_mapping)────
+# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename, {})────
 def _push_with_retry(branch, cwd):
     """git push 失败时 pull --rebase 后重试，最多4次，指数退避（1s/2s/4s）。
 
@@ -577,8 +577,7 @@ def _push_with_retry(branch, cwd):
 def deploy(ws, cfg, case_id, workflow_yaml):
     """把 workflow 正文写入 .gitcode/workflows/<case-id>.yml 并 push。
 
-    部署前对 runs-on label 做环境适配映射（只替换映射表中明确的，不误伤异常 label）。
-    返回 (head_sha, wf_filename, runner_mapping)。push 失败返回 (None, wf_filename, {})。
+    返回 (head_sha, wf_filename, {})。push 失败返回 (None, wf_filename, {})。
     """
     wf_filename = case_id.lower().replace("_", "-") + ".yml"
     dst = os.path.join(ws.repo_dir, ".gitcode", "workflows", wf_filename)
@@ -947,7 +946,7 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
     try:
-        sha, wf_filename, runner_mapping = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         try:
@@ -959,7 +958,6 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
                                     gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
             rr = collect(cfg, run, fetch_logs=fetch_logs)
             rr["duration_seconds"] = round(time.time() - t0)
-            rr["runner_mapping"] = runner_mapping
             # 平台终态 FAILED 但 0 job：极可能 workflow 被平台拒绝（SYNTAX_ERROR 类）。
             if rr.get("status") == "FAILED" and not rr.get("jobs"):
                 rr["workflow_rejected"] = True
