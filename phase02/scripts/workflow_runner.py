@@ -683,8 +683,8 @@ TRIGGER_STATUS = {
     "pr":                   {"supported": True},
     "pull_request":         {"supported": True},
     "pull_request_target":  {"supported": True},
-    "issue_comment":        {"supported": False,
-                             "reason": "issue_comment：需先有 issue/PR 再调评论创建端点触发 workflow——api-reference.md 未收录评论端点，待探明实际 API 路径"},
+    "issue_comment":        {"supported": True},
+    "pull_request_comment": {"supported": True},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
@@ -859,6 +859,50 @@ def trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
 
 
+def trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """评论触发链路：deploy → 建分支+开PR → 发评论（v5 API）→ 轮询 match run。
+
+    issue_comment / pull_request_comment 共用此实现。
+    评论端点为 POST /api/v5/repos/{owner}/{repo}/pulls/{pr_id}/comments（经实测验证 HTTP 201）。
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        cmt_branch = f"cmt-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git checkout -b {cmt_branch}", cwd=ws.repo_dir)
+        rc, out = _sh(f"git push origin {cmt_branch}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push branch 失败: {out[-200:]}", t0=t0)
+        code, pr_resp = api_post(cfg, "/pulls",
+                                 {"title": f"test: {case_id}", "head": cmt_branch, "base": cfg.branch})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id, reason=f"创建 PR 失败 HTTP {code}", t0=t0)
+        pr_id = pr_resp.get("number") or pr_resp.get("id") or pr_resp.get("iid")
+        log(f"  PR #{pr_id} created, posting comment...")
+        code, cmt_resp = api_post(cfg, f"/pulls/{pr_id}/comments",
+                                  {"body": f"trigger: {case_id}"})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"发评论失败 HTTP {code}", t0=t0)
+        log(f"  comment posted on PR #{pr_id}")
+        run = poll_run(cfg, sha, wf_filename)
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -882,6 +926,9 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     # tag 走独立 tag 链路
     if trigger_event == "tag":
         return trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # issue_comment / pull_request_comment 走评论触发链路
+    if trigger_event in ("issue_comment", "pull_request_comment"):
+        return trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     # pr / pull_request / pull_request_target 走 PR 链路
     if trigger_event in ("pr", "pull_request", "pull_request_target"):
         return trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)

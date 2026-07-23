@@ -246,7 +246,8 @@ def run_pool(run_id, only=None, no_logs=False):
                         rc_t, out_t = wr._sh(f"git tag {tag} && git push origin {tag}", cwd=ws.repo_dir)
                         if rc_t != 0:
                             wr.log(f"  tag push 失败: {out_t[-150:]}")
-                    if ev in ("pr", "pull_request", "pull_request_target"):
+                    if ev in ("pr", "pull_request", "pull_request_target",
+                               "issue_comment", "pull_request_comment"):
                         pr_branch = f"pr-{cid.lower().replace('_','-')}"
                         wr._sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
                         rc_t, out_t = wr._sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
@@ -255,8 +256,12 @@ def run_pool(run_id, only=None, no_logs=False):
                             code, presp = wr.api_post(cfg, "/pulls",
                                                       {"title": f"test: {cid}", "head": pr_branch, "base": cfg.branch})
                             if code in (200, 201):
-                                pr_id = presp.get("id") or presp.get("number") or presp.get("iid")
+                                pr_id = presp.get("number") or presp.get("id") or presp.get("iid")
                                 wr.log(f"  PR created: id={pr_id}")
+                                if ev in ("issue_comment", "pull_request_comment"):
+                                    code2, _ = wr.api_post(cfg, f"/pulls/{pr_id}/comments",
+                                                           {"body": f"trigger: {cid}"})
+                                    wr.log(f"  comment posted: {'HTTP '+str(code2) if code2 not in (200,201) else 'ok'}")
                             else:
                                 wr.log(f"  创建 PR 失败 HTTP {code}")
                         else:
