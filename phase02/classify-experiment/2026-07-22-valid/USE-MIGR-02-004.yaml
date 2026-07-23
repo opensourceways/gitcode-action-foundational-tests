@@ -19,7 +19,7 @@ workflow: |
   jobs:
     test-github-style-uses:
       name: Test Github Style Uses
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - uses: actions/checkout@v4
         name: (TC) actions/checkoutv4

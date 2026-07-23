@@ -20,7 +20,7 @@ workflow: |
   jobs:
     pr-check:
       name: PR Check
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: (TC) checkout
         uses: checkout

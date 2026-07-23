@@ -18,7 +18,7 @@ workflow: |
   jobs:
     placeholder:
       name: Placeholder
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - run: echo "This is a document review case — no actual execution needed"
         name: Run command

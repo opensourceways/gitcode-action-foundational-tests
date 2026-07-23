@@ -18,7 +18,7 @@ workflow: |
   jobs:
     job-a:
       name: Job A
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: exit 1
@@ -26,7 +26,7 @@ workflow: |
     job-b:
       name: Job B
       needs: job-a
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_B_EXECUTED"
@@ -34,7 +34,7 @@ workflow: |
     job-c:
       name: Job C
       needs: job-b
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_C_EXECUTED"
@@ -45,21 +45,21 @@ workflow: |
       - job-a
       - job-b
       if: ${{ always() }}
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_D_ALWAYS_EXECUTED"
         name: Run command
     parallel-1:
       name: Parallel 1
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "PARALLEL_1_DONE"
         name: Run command
     parallel-2:
       name: Parallel 2
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "PARALLEL_2_DONE"

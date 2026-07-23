@@ -18,7 +18,7 @@ workflow: |
   jobs:
     format-boundary:
       name: Format Boundary
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - uses: checkout
         name: (TC) checkout

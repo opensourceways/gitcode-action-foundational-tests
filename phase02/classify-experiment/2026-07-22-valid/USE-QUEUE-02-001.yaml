@@ -22,7 +22,7 @@ workflow: |
   jobs:
     slow:
       name: Slow
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: sleep 120

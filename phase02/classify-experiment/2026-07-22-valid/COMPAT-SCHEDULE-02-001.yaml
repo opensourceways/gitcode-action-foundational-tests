@@ -19,7 +19,7 @@ workflow: |
   jobs:
     scheduled-job:
       name: Scheduled Job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Record execution time
         run: 'echo "Schedule triggered at: $(date -u)"

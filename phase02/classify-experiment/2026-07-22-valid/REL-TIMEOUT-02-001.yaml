@@ -19,7 +19,7 @@ workflow: |
     timeout-job:
       name: Timeout Job
       timeout-minutes: 5
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout

@@ -18,7 +18,7 @@ workflow: |
   jobs:
     upload-artifact-job:
       name: Upload Artifact Job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout
@@ -38,7 +38,7 @@ workflow: |
         name: (TC) upload-artifact
     download-artifact-job:
       needs: upload-artifact-job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: download-artifact

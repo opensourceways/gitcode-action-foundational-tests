@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-atomgit-context:
       name: Test Atomgit Context
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout

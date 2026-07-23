@@ -18,7 +18,7 @@ workflow: |
   jobs:
     job-a-override:
       name: Job A Override
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout
@@ -27,7 +27,7 @@ workflow: |
         run: echo "JOB_A_OVERRIDE_CLONE_OK"
     job-b-override:
       name: Job B Override
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - name: Test no PR access with overridden none

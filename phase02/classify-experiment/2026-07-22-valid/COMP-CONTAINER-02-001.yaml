@@ -19,7 +19,7 @@ workflow: |
   jobs:
     public-image:
       name: Public Image
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       container:
         image: node:18-alpine
       steps:
@@ -29,7 +29,7 @@ workflow: |
           echo "CONTAINER_PUBLIC_OK"
     private-image:
       name: Private Image
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       container:
         image: registry.example.com/private-image:latest
         credentials:
@@ -40,7 +40,7 @@ workflow: |
         run: echo "CONTAINER_PRIVATE_OK"
     bad-creds:
       name: Bad Creds
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       container:
         image: registry.example.com/private-image:latest
         credentials:

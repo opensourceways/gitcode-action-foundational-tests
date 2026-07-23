@@ -19,7 +19,7 @@ workflow: |
   jobs:
     matrix-compat:
       name: Matrix Compat
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       strategy:
         matrix:
           os: [ubuntu-latest, centos-latest]

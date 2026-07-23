@@ -18,7 +18,7 @@ workflow: |
   jobs:
     invalid-timeout:
       name: Invalid Timeout
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       timeout-minutes: 0
       steps:
       - run: echo "This job should not be scheduled"

@@ -20,7 +20,7 @@ workflow: |
   jobs:
     modify-workflow-via-push:
       name: Modify Workflow Via Push
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout
@@ -36,7 +36,7 @@ workflow: |
   "
     modify-workflow-via-api:
       name: Modify Workflow Via Api
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - name: Attempt API workflow modification

@@ -19,7 +19,7 @@ workflow: |
   jobs:
     container-isolation:
       name: Container Isolation
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       container:
         image: ubuntu:latest
         env:

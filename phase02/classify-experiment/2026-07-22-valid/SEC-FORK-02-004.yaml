@@ -20,7 +20,7 @@ workflow: |
   jobs:
     checkout-fork-ref:
       name: Checkout Fork Ref
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout
@@ -30,7 +30,7 @@ workflow: |
       - name: Build with fork Makefile
         run: make build || echo "MAKE_BUILD_EXECUTED"
     checkout-default:
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout

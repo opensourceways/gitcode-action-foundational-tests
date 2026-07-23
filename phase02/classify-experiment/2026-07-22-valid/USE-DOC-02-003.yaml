@@ -18,7 +18,7 @@ workflow: |
   jobs:
     check-runner-values:
       name: Check Runner Values
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Output and compare runner context
         run: 'echo "runner.os=${{ runner.os }}"

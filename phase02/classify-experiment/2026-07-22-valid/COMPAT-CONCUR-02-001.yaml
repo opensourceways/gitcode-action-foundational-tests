@@ -22,7 +22,7 @@ workflow: |
   jobs:
     simulate-work:
       name: Simulate Work
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Simulate long work
         run: sleep 60

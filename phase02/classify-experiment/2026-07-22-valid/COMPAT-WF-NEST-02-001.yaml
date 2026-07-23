@@ -18,7 +18,7 @@ workflow: |
   jobs:
     callee-job:
       name: Callee Job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - run: echo "Nested workflow_call callee executing"
         name: Run command

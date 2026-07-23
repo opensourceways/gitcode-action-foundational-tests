@@ -18,14 +18,14 @@ workflow: |
   jobs:
     job-a-short-timeout:
       name: Job A Short Timeout
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       timeout-minutes: 5
       steps:
       - name: Long step exceeding timeout
         run: sleep 600
     job-b-long-timeout:
       name: Job B Long Timeout
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       timeout-minutes: 360
       steps:
       - name: Quick step

@@ -19,7 +19,7 @@ workflow: |
   jobs:
     deep-callee:
       name: Deep Callee
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - run: echo "Deep nested workflow_call level 3"
         name: Run command

@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-environment:
       name: Test Environment
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - run: echo "deploy to production"
         name: Run command

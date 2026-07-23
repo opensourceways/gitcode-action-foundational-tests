@@ -18,7 +18,7 @@ workflow: |
   jobs:
     isolate-a:
       name: Isolate A
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: (TC) checkout
         uses: checkout
@@ -28,7 +28,7 @@ workflow: |
           echo "PID_A=$$"
     isolate-b:
       name: Isolate B
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: (TC) checkout
         uses: checkout

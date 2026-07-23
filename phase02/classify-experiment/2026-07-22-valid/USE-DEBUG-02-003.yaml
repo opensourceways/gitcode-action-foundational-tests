@@ -18,7 +18,7 @@ workflow: |
   jobs:
     check-system-vars:
       name: Check System Vars
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Dump all ATOMGIT_ system variables
         run: 'echo "ATOMGIT_REPOSITORY=$ATOMGIT_REPOSITORY"

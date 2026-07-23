@@ -18,13 +18,13 @@ workflow: |
   jobs:
     windows-job:
       name: Windows Job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Echo
         run: echo "windows"
     macos-job:
       name: Macos Job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Echo
         run: echo "macos"

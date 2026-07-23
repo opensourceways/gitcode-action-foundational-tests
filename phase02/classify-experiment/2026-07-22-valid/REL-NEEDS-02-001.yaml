@@ -18,7 +18,7 @@ workflow: |
   jobs:
     job-a:
       name: Job A
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: exit 1
@@ -28,7 +28,7 @@ workflow: |
     job-b:
       name: Job B
       needs: job-a
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_B_SHOULD_BE_SKIPPED"
@@ -36,7 +36,7 @@ workflow: |
     job-c:
       name: Job C
       needs: job-b
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_C_SHOULD_BE_SKIPPED"
@@ -48,7 +48,7 @@ workflow: |
       - job-b
       - job-c
       if: ${{ always() }}
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "JOB_D_ALWAYS_EXECUTED"

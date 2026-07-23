@@ -18,7 +18,7 @@ workflow: |
   jobs:
     job-a:
       name: Job A
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       outputs:
         result: ${{ steps.set-output.outputs.result }}
@@ -35,7 +35,7 @@ workflow: |
     job-b:
       name: Job B
       needs: job-a
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - run: echo "NEEDS_OUTPUT=${{ needs.job-a.outputs.result }}"

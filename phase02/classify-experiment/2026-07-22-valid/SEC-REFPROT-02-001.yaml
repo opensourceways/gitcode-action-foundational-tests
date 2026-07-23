@@ -19,7 +19,7 @@ workflow: |
   jobs:
     check-ref-protected:
       name: Check Ref Protected
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - uses: checkout
         name: (TC) checkout
@@ -29,7 +29,7 @@ workflow: |
           echo "ATOMGIT_REF_PROTECTED=$ATOMGIT_REF_PROTECTED"
     deploy-gate:
       name: Deploy Gate
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       if: ${{ atomgit.ref_protected == true }}
       steps:
       - uses: checkout

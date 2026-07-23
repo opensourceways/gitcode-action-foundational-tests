@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-type-coercion:
       name: Test Type Coercion
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
       - name: Test empty string vs zero
         run: "if [ \"${{ '' == 0 }}\" = \"true\" ]; then\n  echo \"PASS: empty-string==0\

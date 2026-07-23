@@ -19,7 +19,7 @@ workflow: |
   jobs:
     min-interval-check:
       name: Min Interval Check
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - name: Record trigger info

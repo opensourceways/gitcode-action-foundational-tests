@@ -22,7 +22,7 @@ workflow: |
   jobs:
     test-permissions:
       name: Test Permissions
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
   
       steps:
       - uses: checkout
