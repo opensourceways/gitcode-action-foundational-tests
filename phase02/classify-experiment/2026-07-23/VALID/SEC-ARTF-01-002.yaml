@@ -1,4 +1,4 @@
-id: SEC-ARTF-01-002
+﻿id: SEC-ARTF-01-002
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     artifact-download:
       name: Download artifact from main repo
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Attempt download fork artifact
           run: |

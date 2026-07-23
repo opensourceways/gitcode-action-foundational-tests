@@ -1,4 +1,4 @@
-id: COMPAT-ENV-01-002
+﻿id: COMPAT-ENV-01-002
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test:
       name: Test GITHUB_SHA env var
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo GITHUB_SHA
           run: |

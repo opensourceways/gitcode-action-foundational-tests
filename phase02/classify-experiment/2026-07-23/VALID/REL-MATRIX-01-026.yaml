@@ -1,4 +1,4 @@
-id: REL-MATRIX-01-026
+﻿id: REL-MATRIX-01-026
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: matrix test job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       strategy:
         matrix:
           version: [1, 2, 3]

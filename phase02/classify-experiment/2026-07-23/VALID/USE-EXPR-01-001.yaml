@@ -1,4 +1,4 @@
-id: USE-EXPR-01-001
+﻿id: USE-EXPR-01-001
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     bad:
       name: undefined context property
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: bad expression
           run: |

@@ -1,4 +1,4 @@
-id: SEC-RUN-01-002
+﻿id: SEC-RUN-01-002
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     job-a-env:
       name: Set env and tmp
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Set env
           run: |
@@ -20,7 +20,7 @@ workflow: |
             echo leaked-data > /tmp/env-test.txt
     job-b-env:
       name: Check env isolation
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Check env clean
           run: |

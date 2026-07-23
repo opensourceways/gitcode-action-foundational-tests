@@ -1,4 +1,4 @@
-id: COMPAT-MASK-01-001
+﻿id: COMPAT-MASK-01-001
 dimensions: [compatibility, security]
 dimension: compatibility
 priority: P0
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     mask-test:
       name: Test secret masking direct echo
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: checkout source
           uses: checkout

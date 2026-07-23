@@ -1,4 +1,4 @@
-id: COMPAT-EXPR-01-002
+﻿id: COMPAT-EXPR-01-002
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     job-a:
       name: Job A that succeeds
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: checkout source
           uses: checkout
@@ -26,7 +26,7 @@ workflow: |
             echo "Job A done"
     job-b:
       name: Job B depends on A
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: job-a
       steps:
         - name: checkout source

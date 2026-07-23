@@ -1,4 +1,4 @@
-id: SEC-SUPPLY-01-001
+﻿id: SEC-SUPPLY-01-001
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     hash-pin:
       name: Test commit hash pinning
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Use pinned action
           uses: docker/build-push-action@1234567890abcdef1234567890abcdef12345678

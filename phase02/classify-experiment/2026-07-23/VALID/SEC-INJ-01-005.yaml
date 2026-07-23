@@ -1,4 +1,4 @@
-id: SEC-INJ-01-005
+﻿id: SEC-INJ-01-005
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     double-template:
       name: Test double template eval
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Pass template syntax
           run: |

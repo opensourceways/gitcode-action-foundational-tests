@@ -1,4 +1,4 @@
-id: SEC-PERM-01-004
+﻿id: SEC-PERM-01-004
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     default-write-denied:
       name: Test default write denied
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Attempt push without permissions
           run: |
