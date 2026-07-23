@@ -79,12 +79,19 @@ def main():
     args = sys.argv[3:]
     dims = None
     prio = None
+    src_dir_override = None
+    if "--src-dir" in args:
+        idx = args.index("--src-dir")
+        src_dir_override = args[idx + 1]
     if "--dims" in args:
         dims = set(args[args.index("--dims") + 1].split(","))
     if "--priority" in args:
         prio = args[args.index("--priority") + 1]
 
-    src_dir = os.path.join(ROOT, "phase01", "runs", p1, "cases", "yaml")
+    if src_dir_override:
+        src_dir = src_dir_override
+    else:
+        src_dir = os.path.join(ROOT, "phase01", "runs", p1, "cases", "yaml")
     if not os.path.isdir(src_dir):
         print(f"找不到 Phase01 用例目录: {src_dir}")
         sys.exit(1)

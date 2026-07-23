@@ -1,4 +1,4 @@
-id: USE-BADGE-01-001
+﻿id: USE-BADGE-01-001
 dimensions: ["usability"]
 dimension: usability
 priority: P1
@@ -18,7 +18,7 @@ workflow: |
   jobs:
     status-test:
       name: status badge test
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: success step
           run: |

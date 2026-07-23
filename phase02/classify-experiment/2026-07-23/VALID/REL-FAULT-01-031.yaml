@@ -1,4 +1,4 @@
-id: REL-FAULT-01-031
+﻿id: REL-FAULT-01-031
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: fault injection SIGKILL
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: step one
           run: |

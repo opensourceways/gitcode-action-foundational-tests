@@ -1,4 +1,4 @@
-id: COMPAT-CACHE-01-001
+﻿id: COMPAT-CACHE-01-001
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     verify-cache-hit:
       name: Verify cache hit behavior
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: (TC) restore cache
           uses: cache

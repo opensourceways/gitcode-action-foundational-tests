@@ -1,4 +1,4 @@
-id: COMP-ARTIFACT-01-002
+﻿id: COMP-ARTIFACT-01-002
 dimensions: [completeness, reliability]
 dimension: completeness
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     build:
       name: Build multiple artifacts
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Create artifacts
           run: |
@@ -36,7 +36,7 @@ workflow: |
             path: reports/
     verify:
       name: Download all artifacts
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: build
       steps:
         - name: Download all

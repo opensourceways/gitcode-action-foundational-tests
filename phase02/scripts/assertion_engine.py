@@ -87,6 +87,13 @@ def _eval_one(a, run_result):
         return {"kind": kind, "type": "positive", "target": "run_status",
                 "pass": actual == expected, "expected": expected, "actual": actual}
 
+    if kind == "run_status_not":
+        not_expected = a["not_equals"]
+        actual = run_result.get("conclusion")
+        return {"kind": kind, "type": "negative", "target": "run_status",
+                "pass": actual != not_expected,
+                "expected": f"conclusion != {not_expected}", "actual": actual}
+
     if kind == "value":
         expect = a["expect"]
         present = expect in logs
@@ -206,5 +213,9 @@ if __name__ == "__main__":
           [{"kind": "mask", "secret_value": "x"}], "INCONCLUSIVE")
     check("not configured", {**green1, "logs": "configured_len=0\n"},
           [{"kind": "config_probe"}], "NOT_CONFIGURED")
+    check("run_status_not pass(F=SUCCESS)", {**green1, "conclusion": "FAILED"},
+          [{"kind": "run_status_not", "not_equals": "SUCCESS"}], "PASS")
+    check("run_status_not fail(S=SUCCESS)", {**green1, "conclusion": "SUCCESS"},
+          [{"kind": "run_status_not", "not_equals": "SUCCESS"}], "FAIL")
     check("timeout passthrough", {"case_id": "T", "status": "TIMEOUT"},
           [{"kind": "status"}], "TIMEOUT")

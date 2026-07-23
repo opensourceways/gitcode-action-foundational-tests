@@ -1,4 +1,4 @@
-id: USE-ENV-01-001
+﻿id: USE-ENV-01-001
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-env:
       name: test ATOMGIT env var
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: echo ATOMGIT_SHA
           run: |

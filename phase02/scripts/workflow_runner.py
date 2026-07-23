@@ -54,6 +54,40 @@ except ImportError:  # 允许从别处 import 时按路径补齐
 
 
 # ── 配置 ──────────────────────────────────────────────────────────
+def _load_dotenv_cookie():
+    """从工程根目录 .env 文件读取 GITCODE_COOKIE。遍历4级目录。"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(4):
+        candidate = os.path.join(here, ".env")
+        if os.path.exists(candidate):
+            env_vars = {}
+            with open(candidate, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, _, v = line.partition("=")
+                        env_vars[k.strip()] = v.strip().strip('"').strip("'")
+            return env_vars.get("GITCODE_COOKIE", "")
+        here = os.path.dirname(here)
+    return ""
+
+
+def _extract_jwt(raw):
+    """从整串 cookie 中提取 GITCODE_ACCESS_TOKEN 的 JWT 值。
+
+    "GITCODE_ACCESS_TOKEN=eyJ...; k=v" → "eyJ..."
+    纯 JWT 串（不含 "=" 前缀）直接返回原值。
+    """
+    if not raw:
+        return raw
+    m = re.search(r"GITCODE_ACCESS_TOKEN=([^;]+)", raw)
+    if m:
+        return m.group(1)
+    return raw
+
+
 class RunnerConfig:
     """执行器配置。默认对齐当前被测实例（bingo），可由环境变量覆盖。"""
 
@@ -70,8 +104,33 @@ class RunnerConfig:
         self.timeout = int(timeout or os.environ.get("PHASE02_CASE_TIMEOUT", 300))
         self.poll_interval = int(poll_interval or os.environ.get("PHASE02_POLL_INTERVAL", 12))
         self.executor = executor or os.environ.get("GITCODE_EXECUTOR", "")
-        self.cookie = cookie or os.environ.get("GITCODE_COOKIE", "")
+        self.cookie = cookie or self._load_cookie()
         self.workflow_id = workflow_id or os.environ.get("GITCODE_WORKFLOW_ID", "b03a4b84cd784ddea00c5270eba62c7f")
+
+    @staticmethod
+    def _load_token():
+        path = os.path.expanduser(os.environ.get("GITCODE_TOKEN_FILE", "~/.gitcode-token"))
+        if os.path.exists(path):
+            return open(path, encoding="utf-8").read().strip()
+        env = os.environ.get("GITCODE_ACCESS_TOKEN", "")
+        if env:
+            return env
+        raise FileNotFoundError(
+            "未找到 GitCode token：既无 ~/.gitcode-token 也无 GITCODE_ACCESS_TOKEN")
+
+    @staticmethod
+    def _load_cookie():
+        cookie = os.environ.get("GITCODE_COOKIE", "")
+        if not cookie:
+            cookie = _load_dotenv_cookie()
+        if not cookie:
+            path = os.path.expanduser("~/.gitcode-cookie")
+            if os.path.exists(path):
+                cookie = open(path, encoding="utf-8").read().strip()
+        if not cookie:
+            log("  (警告) GITCODE_COOKIE 未配置 — dispatch 触发不可用")
+            return ""
+        return _extract_jwt(cookie)
 
     @staticmethod
     def _load_token():
@@ -119,6 +178,100 @@ def api_get(cfg, path, retries=2):
     raise last or ApiError(f"unknown error on {path}")
 
 
+def api_post(cfg, path, body, retries=1):
+    """POST {api_base}/api/v5/repos/{owner}/{repo}{path}。用 access_token 认证。"""
+    url = f"{cfg.api_base}/api/v5/repos/{cfg.owner}/{cfg.repo}{path}?access_token={cfg.token}"
+    data = json.dumps(body).encode("utf-8")
+    last = None
+    for attempt in range(retries + 1):
+        try:
+            req = urllib.request.Request(url, data=data, method="POST")
+            req.add_header("Content-Type", "application/json")
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.status, json.loads(r.read().decode("utf-8", errors="replace"))
+        except urllib.error.HTTPError as e:
+            try:
+                err_body = json.loads(e.read().decode("utf-8", errors="replace"))
+            except Exception:
+                err_body = {}
+            if 400 <= e.code < 500:
+                raise ApiError(f"HTTP {e.code} on POST {path}: {err_body}")
+            last = ApiError(f"HTTP {e.code} on POST {path}")
+        except Exception as e:
+            last = ApiError(f"{type(e).__name__}: {e} on POST {path}")
+        if attempt < retries:
+            time.sleep(2)
+    raise last or ApiError(f"unknown error on POST {path}")
+
+
+# ── Web-API（web-api.gitcode.com，cookie 认证，用于 dispatch/list）─────
+_WEB_HOST = "web-api.gitcode.com"
+
+
+def _enc(project_path):
+    return project_path.replace("/", "%2F")
+
+
+def _build_web_headers(cookie):
+    return {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {cookie}",
+        "Origin": "https://gitcode.com",
+        "Referer": "https://gitcode.com/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        "X-App-Channel": "gitcode-fe",
+        "X-App-Version": "0",
+        "X-Device-ID": "unknown",
+        "X-Device-Type": "Linux",
+        "X-Platform": "web",
+        "Cookie": f"GITCODE_ACCESS_TOKEN={cookie}; GitCodeUserName=ccijunk",
+    }
+
+
+def list_workflows(cookie, project_path):
+    """列出项目的所有 workflow。返回 workflow 列表 [{workflow_id, file_path, name}, ...]。
+    接口: POST web-api.gitcode.com/api/v2/projects/{enc}/actions/workflows/list
+    """
+    headers = _build_web_headers(cookie)
+    url = f"https://{_WEB_HOST}/api/v2/projects/{_enc(project_path)}/actions/workflows/list"
+    data = json.dumps({}).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as r:
+        body = json.loads(r.read().decode("utf-8", errors="replace"))
+    return body.get("content", [])
+
+
+def dispatch_workflow(cookie, project_path, workflow_id, file_path,
+                      ref, branch, repo_https_url, inputs=None):
+    """手动触发一次 workflow 运行。返回 (status_code, workflow_run_id_or_None)。
+    接口: POST web-api.gitcode.com/api/v2/projects/{enc}/actions/workflows/{wf_id}/dispatch
+    """
+    headers = _build_web_headers(cookie)
+    url = f"https://{_WEB_HOST}/api/v2/projects/{_enc(project_path)}/actions/workflows/{workflow_id}/dispatch"
+    payload = {
+        "ref": ref,
+        "branch": branch,
+        "branch_commit_id": "",
+        "repo_https_url": repo_https_url,
+        "file_path": file_path,
+        "inputs": inputs or {},
+    }
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            body = json.loads(r.read().decode("utf-8", errors="replace"))
+        return r.status, body.get("workflow_run_id")
+    except urllib.error.HTTPError as e:
+        try:
+            body = json.loads(e.read().decode("utf-8", errors="replace"))
+        except Exception:
+            body = {}
+        return e.code, body.get("workflow_run_id")
+    except Exception:
+        return -1, None
+
+
 # ── git shell ─────────────────────────────────────────────────────
 def _sh(cmd, cwd=None):
     r = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True,
@@ -126,29 +279,41 @@ def _sh(cmd, cwd=None):
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 
 
-# ── 工作区（一次 clone、多条复用）──────────────────────────────────
+HERE = os.path.dirname(os.path.abspath(__file__))
+PHASE02 = os.path.dirname(HERE)
+
+# ── 工作区（持久化缓存，跨 batch 复用；首次 clone，后续 git pull）──
+_CACHE_ROOT = os.path.join(PHASE02, ".cache", "repos")
+
+
 class Workspace:
-    """clone 一次测试仓到临时目录，退出时清理。"""
+    """clone 一次测试仓到持久缓存目录，退出时保留以备下个 batch 复用。"""
 
     def __init__(self, cfg):
         self.cfg = cfg
-        self.root = None
-        self.repo_dir = None
+        self.repo_dir = os.path.join(_CACHE_ROOT, cfg.owner, cfg.repo)
 
     def __enter__(self):
-        self.root = tempfile.mkdtemp(prefix="p2-wr-")
-        self.repo_dir = os.path.join(self.root, "repo")
         url = (f"https://oauth2:{self.cfg.token}@gitcode.com/"
                f"{self.cfg.owner}/{self.cfg.repo}.git")
-        rc, out = _sh(f'git clone --depth 1 "{url}" "{self.repo_dir}"')
-        if rc != 0:
-            shutil.rmtree(self.root, ignore_errors=True)
-            raise ApiError(f"git clone 失败: {out[-200:]}")
+        if os.path.isdir(os.path.join(self.repo_dir, ".git")):
+            # 缓存存在：拉取最新、强制对齐远程（抹掉上次 batch 的 teardown 残留）
+            rc, out = _sh("git fetch --depth 1 origin", cwd=self.repo_dir)
+            if rc == 0:
+                _sh(f"git checkout -q {self.cfg.branch}", cwd=self.repo_dir)
+                _sh(f"git reset --hard origin/{self.cfg.branch}", cwd=self.repo_dir)
+            else:
+                # fetch 失败则重新 clone
+                shutil.rmtree(self.repo_dir, ignore_errors=True)
+        if not os.path.isdir(os.path.join(self.repo_dir, ".git")):
+            os.makedirs(os.path.dirname(self.repo_dir), exist_ok=True)
+            rc, out = _sh(f'git clone --depth 1 "{url}" "{self.repo_dir}"')
+            if rc != 0:
+                raise ApiError(f"git clone 失败: {out[-200:]}")
         return self
 
     def __exit__(self, *exc):
-        if self.root:
-            shutil.rmtree(self.root, ignore_errors=True)
+        pass  # 持久化缓存，不删除
 
 
 # ── 0. 预检（push 前本地校验，拦编译错误，零 API 依赖）─────────────
@@ -392,7 +557,7 @@ def preflight_validate(contract, cfg=None):
     return (len(errors) == 0), errors
 
 
-# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename)────────
+# ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename, {})────
 def _push_with_retry(branch, cwd):
     """git push 失败时 pull --rebase 后重试，最多4次，指数退避（1s/2s/4s）。
 
@@ -412,7 +577,7 @@ def _push_with_retry(branch, cwd):
 def deploy(ws, cfg, case_id, workflow_yaml):
     """把 workflow 正文写入 .gitcode/workflows/<case-id>.yml 并 push。
 
-    返回 (head_sha, wf_filename)。push 失败返回 (None, wf_filename)。
+    返回 (head_sha, wf_filename, {})。push 失败返回 (None, wf_filename, {})。
     """
     wf_filename = case_id.lower().replace("_", "-") + ".yml"
     dst = os.path.join(ws.repo_dir, ".gitcode", "workflows", wf_filename)
@@ -427,35 +592,38 @@ def deploy(ws, cfg, case_id, workflow_yaml):
     rc, out = _push_with_retry(cfg.branch, ws.repo_dir)
     if rc != 0:
         log(f"  push 失败（重试后仍失败）: {out[-200:]}")
-        return None, wf_filename
+        return None, wf_filename, {}
     rc, sha = _sh("git rev-parse HEAD", cwd=ws.repo_dir)
-    return sha.strip(), wf_filename
+    return sha.strip(), wf_filename, {}
 
 
 # ── 2. 轮询（head_sha AND file_path 精确匹配）→ run dict | None ─────
 _TERMINAL = ("COMPLETED", "FAILED", "CANCELED", "IGNORED")
 
 
-def poll_run(cfg, sha, wf_filename):
-    """轮询到"我这次推的那个 workflow 文件"的 run 抵达终态。
+def poll_run(cfg, sha, wf_filename, match_event=None):
+    """轮询到匹配的 run 抵达终态。
 
-    匹配策略（与 run-case.sh 对齐）：
-      优先按 file_path 精确匹配（.gitcode/workflows/<wf_filename>）。
-      若 API 返回 head_sha 非空则同时校验 head_sha 以排除历史 run。
-      ★ 实测：GitCode v8 API 返回的 head_sha 为空，故 file_path 为主匹配器。
-    超时返回最后见到的 pending run（若有），否则 None。
+    match_event: 非 push 触发时用于辅助匹配的 event 类型（tag→CreateTag, pr→MR）。
+                提供时去掉 branch 过滤 + 跳过 head_sha 检查（PR/tag 的 sha 与 deploy sha 不同）。
     """
     elapsed, pending = 0, None
     target_path = f".gitcode/workflows/{wf_filename}"
+    is_non_push = match_event is not None
     while elapsed < cfg.timeout:
-        d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page=30")
+        if is_non_push:
+            url = f"/actions/runs?per_page=30&event={match_event}"
+        else:
+            url = f"/actions/runs?branch={cfg.branch}&per_page=30"
+        d = api_get(cfg, url)
         runs = d.get("workflow_runs", []) if isinstance(d, dict) else []
         for r in runs:
             fp = r.get("file_path") or ""
-            hs = r.get("head_sha") or ""
             if fp == target_path or fp.endswith(f"/{wf_filename}"):
-                if hs and hs != sha:
-                    continue
+                if not is_non_push:
+                    hs = r.get("head_sha") or ""
+                    if hs and hs != sha:
+                        continue
                 if r.get("status") in _TERMINAL:
                     return r
                 pending = r
@@ -512,18 +680,14 @@ def collect(cfg, run, fetch_logs=False):
 #   扩展点——需先验证 GitCode 对应 API/语义，未实现前如实返回 unsupported 原因（→ INCONCLUSIVE）。
 TRIGGER_STATUS = {
     "push":                 {"supported": True},
-    "tag":                  {"supported": False,
-                             "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配 run（确定性，待验证 GitCode tag 触发语义）"},
-    "manual":               {"supported": False,
-                             "reason": "manual 触发：需调 GitCode workflow_dispatch API（待确认端点）"},
-    "workflow_dispatch":    {"supported": False,
-                             "reason": "workflow_dispatch：需 dispatch API（待确认端点）"},
-    "pr":                   {"supported": False,
-                             "reason": "pr 触发：需建分支+开 PR（确定性，待确认 PR 创建端点与 run 关联方式）"},
-    "pull_request":         {"supported": False,
-                             "reason": "pull_request 触发：需建分支+开 PR（待确认 PR API 与 run 关联）"},
-    "pull_request_target":  {"supported": False,
-                             "reason": "pull_request_target：同 PR，且需注意 base 上下文语义"},
+    "tag":                  {"supported": True},
+    "manual":               {"supported": True},
+    "workflow_dispatch":    {"supported": True},
+    "pr":                   {"supported": True},
+    "pull_request":         {"supported": True},
+    "pull_request_target":  {"supported": True},
+    "issue_comment":        {"supported": True},
+    "pull_request_comment": {"supported": True},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
@@ -556,6 +720,199 @@ def teardown(ws, cfg, wf_filename):
     return rc == 0
 
 
+# ── Dispatch 触发（workflow_dispatch）───────────────────────────────
+def _poll_run_by_id(cfg, run_id):
+    """按 run_id 轮询到终态。返回 run dict 或 None。"""
+    elapsed = 0
+    while elapsed < cfg.timeout:
+        try:
+            d = api_get(cfg, f"/actions/runs/{run_id}")
+        except ApiError:
+            time.sleep(cfg.poll_interval)
+            elapsed += cfg.poll_interval
+            continue
+        if d.get("status") in _TERMINAL:
+            return d
+        time.sleep(cfg.poll_interval)
+        elapsed += cfg.poll_interval
+    return None
+
+
+def trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """workflow_dispatch 触发链路：deploy → dispatch → poll → collect。
+
+    cookie 不可用时返回 INCONCLUSIVE。
+    """
+    t0 = time.time()
+    if not cfg.cookie:
+        return _exec_result("INCONCLUSIVE", case_id,
+                            reason="GITCODE_COOKIE 未配置，dispatch 触发不可用", t0=t0)
+    try:
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        project_path = f"{cfg.owner}/{cfg.repo}"
+        wf_id = None
+        wf_file_path = None
+        for retry in range(6):
+            if retry > 0:
+                time.sleep(5)
+            try:
+                wfs = list_workflows(cfg.cookie, project_path)
+            except Exception:
+                continue
+            for w in wfs:
+                fp = w.get("file_path") or ""
+                if fp.endswith(wf_filename):
+                    wf_id = w.get("workflow_id")
+                    wf_file_path = fp
+                    break
+            if wf_id:
+                break
+        if not wf_id:
+            return _exec_result("INCONCLUSIVE", case_id,
+                                reason=f"list_workflows 未找到匹配 {wf_filename} 的 workflow_id", t0=t0)
+        repo_https_url = f"https://gitcode.com/{cfg.owner}/{cfg.repo}.git"
+        code, run_id = dispatch_workflow(cfg.cookie, project_path, wf_id,
+                                         wf_file_path, cfg.branch, cfg.branch,
+                                         repo_https_url)
+        if code != 200 or not run_id:
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"dispatch_workflow 返回 HTTP {code}, run_id={run_id}", t0=t0)
+        log(f"  dispatch: workflow_run_id={run_id}")
+        run = _poll_run_by_id(cfg, run_id)
+        if run is None:
+            return _exec_result("TIMEOUT", case_id, gitcode_run_id=run_id, t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+    except Exception as e:
+        return _exec_result("ENV_ERROR", case_id, reason=f"dispatch 异常: {e}", t0=t0)
+
+
+def trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """tag 触发链路：deploy → git tag + push → poll_run（确定性，纯 git，零 API）。
+
+    push 一个 tag 触发 workflow，按 sha+file_path 轮询匹配。
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        tag = f"test-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git tag {tag}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git tag 失败: {out[-200:]}", t0=t0)
+        rc, out = _sh(f"git push origin {tag}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push tag 失败: {out[-200:]}", t0=t0)
+        log(f"  tag pushed: {tag}")
+        run = poll_run(cfg, sha, wf_filename, match_event="CreateTag")
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
+def trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """PR 触发链路：deploy → 建分支+push → 开 PR（v5 API）→ 轮询 match PR run。
+
+    pr 和 pull_request 共用此实现。PR 创建端点使用 v5 API：
+    POST /api/v5/repos/{owner}/{repo}/pulls  body: {title, head, base}
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        pr_branch = f"pr-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
+        rc, out = _sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push pr branch 失败: {out[-200:]}", t0=t0)
+        log(f"  pr branch pushed: {pr_branch}")
+        code, pr_resp = api_post(cfg, "/pulls",
+                                 {"title": f"test: {case_id}", "head": pr_branch, "base": cfg.branch})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"创建 PR 失败 HTTP {code}", t0=t0)
+        pr_id = pr_resp.get("id") or pr_resp.get("number") or pr_resp.get("iid")
+        log(f"  PR created: id={pr_id}, branch={pr_branch}")
+        run = poll_run(cfg, sha, wf_filename, match_event="MR")
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
+def trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """评论触发链路：deploy → 建分支+开PR → 发评论（v5 API）→ 轮询 match run。
+
+    issue_comment / pull_request_comment 共用此实现。
+    评论端点为 POST /api/v5/repos/{owner}/{repo}/pulls/{pr_id}/comments（经实测验证 HTTP 201）。
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        cmt_branch = f"cmt-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git checkout -b {cmt_branch}", cwd=ws.repo_dir)
+        rc, out = _sh(f"git push origin {cmt_branch}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push branch 失败: {out[-200:]}", t0=t0)
+        code, pr_resp = api_post(cfg, "/pulls",
+                                 {"title": f"test: {case_id}", "head": cmt_branch, "base": cfg.branch})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id, reason=f"创建 PR 失败 HTTP {code}", t0=t0)
+        pr_id = pr_resp.get("number") or pr_resp.get("id") or pr_resp.get("iid")
+        log(f"  PR #{pr_id} created, posting comment...")
+        code, cmt_resp = api_post(cfg, f"/pulls/{pr_id}/comments",
+                                  {"body": f"trigger: {case_id}"})
+        if code not in (200, 201):
+            return _exec_result("ENV_ERROR", case_id,
+                                reason=f"发评论失败 HTTP {code}", t0=t0)
+        log(f"  comment posted on PR #{pr_id}")
+        run = poll_run(cfg, sha, wf_filename, match_event="MR")
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -573,12 +930,23 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     """
     t0 = time.time()
     wf_filename = None
-    # 触发适配：非 push 事件目前未实现 → 如实返回具体原因（不糊弄）
+    # 触发适配：workflow_dispatch / manual 走 dispatch 链路
+    if trigger_event in ("workflow_dispatch", "manual"):
+        return trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # tag 走独立 tag 链路
+    if trigger_event == "tag":
+        return trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # issue_comment / pull_request_comment 走评论触发链路
+    if trigger_event in ("issue_comment", "pull_request_comment"):
+        return trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # pr / pull_request / pull_request_target 走 PR 链路
+    if trigger_event in ("pr", "pull_request", "pull_request_target"):
+        return trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         try:
@@ -596,8 +964,9 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
                 rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝（预检未覆盖的规则）"
             return rr
         finally:
-            # 无论判定结果如何，清理本次 push 的文件（除非 reset=none）
-            if wf_filename and teardown_reset != "none":
+            # 只对 push 触发执行 teardown（删 workflow 防共享仓污染），
+            # 非 push 触发保留文件（可查 GitCode 界面工作流详情）
+            if wf_filename and teardown_reset != "none" and trigger_event == "push":
                 try:
                     teardown(ws, cfg, wf_filename)
                 except Exception as e:
@@ -623,16 +992,27 @@ def _exec_result(status, case_id, reason="", head_sha="", gitcode_run_id="", t0=
 
 
 # ── 5. 多仓批量轮询函数（拆解 poll_run，供 pool_scheduler 使用）───────────
-def list_runs(cfg, per_page=30):
-    """拉 cfg.repo 最近 per_page 条 run（不阻塞、不匹配）。供调度器批量轮询。"""
-    d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page={per_page}")
+def list_runs(cfg, per_page=30, event_filter=None):
+    """拉 cfg.repo 最近 per_page 条 run（不阻塞、不匹配）。供调度器批量轮询。
+    event_filter: 非 push 时用于过滤事件类型，此时不按 branch 过滤。
+    """
+    if event_filter:
+        url = f"/actions/runs?per_page={per_page}&event={event_filter}"
+    else:
+        url = f"/actions/runs?branch={cfg.branch}&per_page={per_page}"
+    d = api_get(cfg, url)
     return d.get("workflow_runs", []) if isinstance(d, dict) else []
 
 
-def match_run(runs, sha, wf_filename):
-    """在 runs 里找 head_sha==sha AND file_path 结尾匹配 wf_filename 的那条。"""
+def match_run(runs, sha, wf_filename, require_sha=True):
+    """在 runs 里找匹配的 run。require_sha=False 时只按 file_path 匹配（非push用）。"""
     for r in runs:
-        if r.get("head_sha") == sha and (r.get("file_path") or "").endswith(wf_filename):
+        fp = (r.get("file_path") or "")
+        if not fp.endswith(wf_filename):
+            continue
+        if not require_sha:
+            return r
+        if r.get("head_sha") == sha:
             return r
     return None
 

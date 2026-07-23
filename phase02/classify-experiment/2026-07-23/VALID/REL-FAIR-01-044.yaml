@@ -1,4 +1,4 @@
-id: REL-FAIR-01-044
+﻿id: REL-FAIR-01-044
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: reliability test job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: sleep step
           run: |

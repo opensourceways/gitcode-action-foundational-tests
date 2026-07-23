@@ -17,11 +17,15 @@ import os
 import sys
 import json
 import time
-import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PHASE02 = os.path.dirname(HERE)
 ROOT = os.path.dirname(PHASE02)
+
+sys.path.insert(0, HERE)
+import workflow_runner as wr
+import assertion_engine as ae
+import run_case as rc
 
 
 def _load(path, default=None):
@@ -68,28 +72,55 @@ def main():
     _update_run_md(run_dir, run_id, state)
     print(f"=== 批量执行 {run_id} · {len(cases)} 条 ===")
 
-    for i, c in enumerate(cases, 1):
-        cid, contract = c["case_id"], os.path.join(ROOT, c["contract_path"])
-        state["current"] = f"{cid} ({i}/{len(cases)})"
-        _write_state(run_dir, state)
-        _update_run_md(run_dir, run_id, state)
-        print(f"[{i}/{len(cases)}] {cid} ...")
+    cfg = wr.RunnerConfig(branch=None)
+    wr.log(f" clone {cfg.owner}/{cfg.repo}@{cfg.branch}（全 {len(cases)} 条复用）")
+    with wr.Workspace(cfg) as ws:
+        for i, c in enumerate(cases, 1):
+            cid, contract = c["case_id"], os.path.join(ROOT, c["contract_path"])
+            state["current"] = f"{cid} ({i}/{len(cases)})"
+            _write_state(run_dir, state)
+            _update_run_md(run_dir, run_id, state)
+            print(f"[{i}/{len(cases)}] {cid} ...")
 
-        cmd = [sys.executable, os.path.join(HERE, "run_case.py"), contract, run_id]
-        if no_logs:
-            cmd.append("--no-logs")
-        env = dict(os.environ, PYTHONUTF8="1")
-        subprocess.run(cmd, env=env)
+            contract_doc = rc.load_contract(contract)
+            wf, asserts = rc.load_execution_inputs(contract_doc, run_dir, cid)
 
-        # run_case 已把结果并入 summary.json；从中读回本条判定
-        summ = _load(os.path.join(run_dir, "summary.json"), {"records": []})
-        rec = next((r for r in summ["records"] if r["case_id"] == cid), None)
-        v = rec["verdict"] if rec else "NO_RESULT"
-        state["verdicts"][v] = state["verdicts"].get(v, 0) + 1
-        state["done"] = i
-        state["current"] = None
-        _write_state(run_dir, state)
-        _update_run_md(run_dir, run_id, state)
+            if not wf:
+                verdict = {"verdict": "NOT_CONFIGURED", "verdict_flags": [],
+                           "reason": "Phase 01 契约无 workflow 字段", "assertion_results": []}
+                rec = rc.write_result(run_dir, contract_doc, verdict,
+                                      {"status": "NOT_CONFIGURED", "case_id": cid})
+                rc.update_summary(run_dir, rec)
+                v = "NOT_CONFIGURED"
+            else:
+                ev = (contract_doc.get("trigger") or {}).get("event", "push")
+                ok, verr = wr.preflight_validate(wf)
+                if not ok:
+                    wr.log(f"  预检不通过（{len(verr)} 项）→ COMPILE_ERROR，不 push")
+                    verdict = {"verdict": "COMPILE_ERROR", "verdict_flags": [],
+                               "reason": "; ".join(verr), "assertion_results": []}
+                    rec = rc.write_result(run_dir, contract_doc, verdict,
+                                          {"status": "COMPILE_ERROR", "case_id": cid})
+                    rc.update_summary(run_dir, rec)
+                    v = "COMPILE_ERROR"
+                else:
+                    reset = (contract_doc.get("teardown") or {}).get("reset", "fixture")
+                    wr.log(f"  执行 {cid} (teardown={reset})")
+                    rr = wr.run_case(ws, cfg, cid, wf, fetch_logs=not no_logs,
+                                     teardown_reset=reset, trigger_event=ev)
+                    rr["case_id"] = cid
+                    engine_asserts = asserts if asserts else [{"kind": "status"}]
+                    verdict = ae.evaluate(rr, engine_asserts)
+                    rec = rc.write_result(run_dir, contract_doc, verdict, rr)
+                    rc.update_summary(run_dir, rec)
+                    v = rec["verdict"]
+                    wr.log(f"  → {v} run={rec['gitcode_run_id'][:10]} ({rec['duration_seconds']}s)")
+
+            state["verdicts"][v] = state["verdicts"].get(v, 0) + 1
+            state["done"] = i
+            state["current"] = None
+            _write_state(run_dir, state)
+            _update_run_md(run_dir, run_id, state)
 
     state["status"] = "completed"
     _write_state(run_dir, state)
