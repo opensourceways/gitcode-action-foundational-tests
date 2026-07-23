@@ -229,7 +229,7 @@ def run_pool(run_id, only=None, no_logs=False):
 
                     # push（同仓串行——一次只 push 一条）
                     wr.log(f"  [{cfg.repo}] deploy {cid}")
-                    sha, wf_filename = wr.deploy(ws, cfg, cid, wf)
+                    sha, wf_filename, _ = wr.deploy(ws, cfg, cid, wf)
                     if not sha:
                         verdict = {"verdict": "ENV_ERROR", "verdict_flags": [],
                                    "reason": "git push 失败", "assertion_results": []}
