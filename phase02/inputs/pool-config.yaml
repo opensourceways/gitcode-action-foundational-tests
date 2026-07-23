@@ -1,0 +1,12 @@
+repo_pool:
+  owner: ComputingActionTest
+  naming: "gitcode-test-{n}"
+  count: 5
+  branch: main
+queue:
+  per_repo_capacity: 2
+polling:
+  interval_seconds: 8
+  case_timeout_seconds: 300
+execution:
+  teardown: batch_end
