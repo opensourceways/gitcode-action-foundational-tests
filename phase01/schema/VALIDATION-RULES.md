@@ -280,17 +280,23 @@ on:
 
 ---
 
-## 13. `permissions` 不支持 `contents` / `pull-requests` ★ [平台实测]
+## 13. `permissions` 不支持 ★ [平台实测 · 2026-07-23 确认]
 
-GitCode 平台不支持 GitHub 风格的 `permissions` 字段。`contents` 和 `pull-requests` 报 `unknown property`。
+GitCode 平台**完全不支持** `permissions` 字段——无论是 workflow 级还是 job 级。报 `unknown property`（workflow 级）或 `jobs[id].permissions: unknown property`（job 级）。
 
 ```yaml
-# ❌ 错误
+# ❌ 错误 — workflow 级
 permissions:
   contents: read
   pull-requests: write
 
-# ✅ 正确 — 删除 permissions 块
+# ❌ 错误 — job 级
+jobs:
+  test:
+    permissions:
+      contents: read
+
+# ✅ 正确 — 删除所有 permissions 块
 ```
 
 ---
@@ -316,6 +322,117 @@ workflow: "on:\n- push\n..."
 ### 14b. 标题引号
 
 标题含 `:` `{` `}` `[` `]` `$` `#` `&` `*` `!` `|` `>` `%` `@` `` ` `` 时必须双引号包裹。
+
+---
+
+---
+
+## 16. `environment` 不支持 ★ [平台实测 · 2026-07-23]
+
+GitCode 平台不支持 `jobs[id].environment` 字段，报 `jobs[id].environment: unknown property`。
+
+```yaml
+# ❌ 错误
+jobs:
+  deploy:
+    environment: production
+
+# ✅ 正确 — 删除 environment 块
+```
+
+---
+
+## 17. `stages` 必须是 map，不是数组 ★ [平台实测 · 2026-07-23]
+
+GitCode 的 `stages` 字段必须是 map 格式（`stages: {default: {jobs: {...}}}`），不支持数组格式 `stages: [{...}]`。数组格式报 `Cannot deserialize Map from Array value`。
+
+```yaml
+# ❌ 错误 — 数组格式
+stages:
+  - stage1:
+      jobs:
+        test:
+          runs-on: [ubuntu-latest, x64, small]
+          steps: [...]
+
+# ✅ 正确 — map 格式
+stages:
+  default:
+    jobs:
+      test:
+        runs-on: [ubuntu-latest, x64, small]
+        steps: [...]
+```
+
+---
+
+## 18. `run-name` 不支持 ★ [平台实测 · 2026-07-23]
+
+GitCode 平台不支持 `run-name` 字段（GitHub Actions 特性），报 `run-name: unknown property`。
+
+```yaml
+# ❌ 错误
+run-name: Deploy to ${{ inputs.environment }}
+
+# ✅ 正确 — 删除 run-name
+```
+
+---
+
+## 19. `concurrency` 校验规则 ★ [平台实测 · 2026-07-23]
+
+### 19a. `preemption.events` 仅允许 `[mr_id]`
+
+```yaml
+# ❌ 错误 — push 不是允许值
+concurrency:
+  preemption:
+    events: [push]
+
+# ✅ 正确
+concurrency:
+  preemption:
+    events: [mr_id]
+```
+
+### 19b. `max` ≥ 1
+
+`concurrency.max` 不得小于 1，报 `值不能小于1`。
+
+### 19c. `exceed-action` 不能为空
+
+`concurrency.exceed-action` 不能为空值。
+
+---
+
+## 20. `services` / `post.steps` 不支持 ★ [平台实测 · 2026-07-23]
+
+GitCode 平台不支持 GitHub Actions 的 `jobs[id].services` 和 `post.steps`，均报 `unknown property`。
+
+```yaml
+# ❌ 错误
+jobs:
+  test:
+    services:
+      redis:
+        image: redis
+
+# ❌ 错误
+post:
+  steps:
+    - name: cleanup
+      run: echo done
+
+# ✅ 正确 — 不写这两个字段
+```
+
+---
+
+## 21. 未知顶层字段拒绝 ★ [平台实测 · 2026-07-23]
+
+GitCode 校验器拒绝任何不在 schema 中的顶层字段（如拼写错误的 `on` 变体、GitHub 专有字段等），报 `unknown_field: unknown property`。
+
+常见误写：`jobs` → `job`、`steps` → `step`、`runs-on` → `run-on`、`workflow_dispatch` 拼写错误。
 
 ---
 
@@ -363,9 +480,14 @@ case-writer 在写入每个 YAML 前执行：
 - [ ] 无重复键
 - [ ] `on.<event>.types` 使用平台允许的值
 - [ ] 无 `permissions` 块
+- [ ] 无 `environment` 块
+- [ ] 无 `run-name`
+- [ ] 无 `services` / `post.steps`
+- [ ] `stages` 用 map 格式（不是数组）
+- [ ] `concurrency.preemption.events` 只用 `[mr_id]`
 - [ ] `dimension=security` → 含 `type: negative`
 - [ ] 所有必填字段非空
 
 ---
 
-*最后更新: 2026-07-21 · 来源: Run 2026-07-21-02 173 条平台校验 + Run 2026-07-20-02 128 条校验 + demo 仓库 AGENTS.md 12 条平台规则*
+*最后更新: 2026-07-23 · 来源: Run 2026-07-23-01 284 条平台校验 + Run 2026-07-21-02 173 条 + Run 2026-07-20-02 128 条 + demo 仓库 AGENTS.md 12 条平台规则*
