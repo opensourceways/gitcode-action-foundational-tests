@@ -48,19 +48,23 @@ def v2_headers():
 # ── Deploy ────────────────────────────────────────────────────────
 
 def ensure_dispatch(wf_text):
-    """Inject workflow_dispatch into on: if not already present."""
-    if "workflow_dispatch" in wf_text:
-        return wf_text
+    """Inject workflow_dispatch AND push into on: for dual-trigger support."""
     lines = wf_text.split("\n")
     result = []
-    injected = False
+    injected_dispatch = ("workflow_dispatch" in wf_text)
+    injected_push = ("push:" in wf_text)
+    
     for line in lines:
         result.append(line)
         stripped = line.strip()
-        if not injected and stripped.startswith("on:"):
+        if stripped.startswith("on:"):
             indent = " " * (len(line) - len(line.lstrip()) + 2)
-            result.append(f"{indent}workflow_dispatch:")
-            injected = True
+            if not injected_push:
+                result.append(f"{indent}push:")
+                injected_push = True
+            if not injected_dispatch:
+                result.append(f"{indent}workflow_dispatch:")
+                injected_dispatch = True
     return "\n".join(result)
 
 
