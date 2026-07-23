@@ -1,0 +1,33 @@
+id: SEC-TOCTOU-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "审批后推送新 commit 不应被已授权特权运行执行"
+intent_ref: INTENT-SEC-031
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    toctou-test:
+      name: Test TOCTOU protection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check commit SHA
+          run: |
+            echo "Running commit: ${{ atomgit.sha }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "unapproved_commit_executed"
+  - type: positive
+    target: run_logs
+    equals: "approved_sha_matched"
+teardown:
+  reset: fixture

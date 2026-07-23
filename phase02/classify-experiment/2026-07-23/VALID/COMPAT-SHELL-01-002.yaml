@@ -1,0 +1,42 @@
+id: COMPAT-SHELL-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 默认工作目录隐式行为差异 - 未显式声明时是否为仓库根目录
+intent_ref: INTENT-COMPAT-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    check-wd:
+      name: Check default working directory
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: print working directory
+          run: |
+            pwd
+            ls -la
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "README"
+
+teardown:
+  reset: fixture

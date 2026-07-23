@@ -1,0 +1,60 @@
+id: COMPAT-PERM-01-004
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: permissions 命名差异——GitCode repository 权限项正常生效
+intent_ref: INTENT-COMPAT-030
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    repository: read
+  jobs:
+    verify-repository-perm:
+      name: Verify repository permission works
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) checkout with repository read
+          uses: checkout
+        - name: (TC) verify repo access
+          run: |
+            if [ -f "README.md" ]; then
+              echo "REPOSITORY_PERM_OK"
+            else
+              echo "REPOSITORY_PERM_FAILED"
+              exit 1
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 REPOSITORY_PERM_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 REPOSITORY_PERM_FAILED"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "不应因 repository 权限项而解析失败"
+
+teardown:
+  reset: fixture

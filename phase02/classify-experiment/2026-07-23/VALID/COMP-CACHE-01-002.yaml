@@ -1,0 +1,47 @@
+id: COMP-CACHE-01-002
+dimensions: [completeness, security, reliability]
+dimension: completeness
+priority: P0
+title: restore-keys 前缀匹配兜底生效
+intent_ref: INTENT-COMP-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify restore keys fallback
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Cache test file
+          uses: cache
+          with:
+            path: cached.txt
+            key: cache-test-v2-${{ runner.os }}
+            restore-keys: |
+              cache-test-v1-${{ runner.os }}
+              cache-test-
+        - name: Use cache
+          run: |
+            cat cached.txt || echo "cache miss"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: cache_step
+    equals: restore_hit
+
+teardown:
+  reset: none

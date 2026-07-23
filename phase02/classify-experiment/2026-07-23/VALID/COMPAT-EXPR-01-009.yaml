@@ -1,0 +1,64 @@
+id: COMPAT-EXPR-01-009
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: loose equality 跨类型强制求值差异
+intent_ref: INTENT-COMPAT-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-loose-eq:
+      name: Test loose equality cross type coercion
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare string one and number one
+          run: |
+            if ${{ '1' == 1 }}; then
+              echo "STRING_EQ_NUMBER=true"
+            else
+              echo "STRING_EQ_NUMBER=false"
+            fi
+        - name: Compare string true and boolean true
+          run: |
+            if ${{ 'true' == true }}; then
+              echo "STRING_EQ_BOOL=true"
+            else
+              echo "STRING_EQ_BOOL=false"
+            fi
+        - name: Compare number zero and string zero
+          run: |
+            if ${{ 0 == '0' }}; then
+              echo "ZERO_EQ_ZERO=true"
+            else
+              echo "ZERO_EQ_ZERO=false"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "STRING_EQ_NUMBER="
+  - type: positive
+    target: run_logs
+    must_contain: "STRING_EQ_BOOL="
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "loose equality 跨类型比较结果应与 GitHub Actions 一致；字符串 '1' 与数字 1 应视为相等，字符串 'true' 与布尔 true 应视为相等"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,39 @@
+id: COMP-UNKNOWN-01-002
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: 不应静默忽略未知字段导致用户误以为配置生效
+intent_ref: INTENT-COMP-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test silent ignore
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo step
+          run: |
+            echo "should not run"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success_with_unknown_field_silently_ignored
+
+teardown:
+  reset: none

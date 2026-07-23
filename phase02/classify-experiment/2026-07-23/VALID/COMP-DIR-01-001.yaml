@@ -1,0 +1,44 @@
+id: COMP-DIR-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: .gitcode/workflows/ 下的 YAML 被正确识别并触发
+intent_ref: INTENT-COMP-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify directory recognition
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo verify
+          run: |
+            echo "workflow recognized"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_file_path
+    equals: .gitcode/workflows/ci.yml
+
+teardown:
+  reset: none

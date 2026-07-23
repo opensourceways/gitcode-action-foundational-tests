@@ -1,0 +1,31 @@
+id: USE-RES-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "runtime-environment-variables.md 中不应出现未标注的 GitHub 专属变量名"
+intent_ref: INTENT-USE-012
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: documentation
+    eval: deterministic
+    rubric: "独立出现的 GITHUB_ 前缀（非引用、非对照表场景）数量应为 0"
+
+teardown:
+  reset: none
+

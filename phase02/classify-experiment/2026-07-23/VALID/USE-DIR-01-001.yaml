@@ -1,0 +1,41 @@
+id: USE-DIR-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "workflow 放置于 .gitcode/workflows/ 下可正常触发"
+intent_ref: INTENT-USE-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    verify-dir:
+      name: verify directory trigger
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: check directory
+          run: |
+            echo "workflow triggered from .gitcode/workflows/"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+
+teardown:
+  reset: none
+

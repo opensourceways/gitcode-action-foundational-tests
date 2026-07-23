@@ -1,0 +1,47 @@
+id: USE-CONC-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "concurrency.max 配置 -1 时报错应提示有效范围"
+intent_ref: INTENT-USE-027
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  concurrency:
+    max: -1
+    exceed-action: QUEUE
+  on:
+    workflow_dispatch:
+  jobs:
+    bad:
+      name: concurrency max negative
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: step
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含有效范围 1-5 或 1 到 5"
+
+teardown:
+  reset: none
+

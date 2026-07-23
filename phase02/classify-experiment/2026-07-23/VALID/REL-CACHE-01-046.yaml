@@ -1,0 +1,42 @@
+id: REL-CACHE-01-046
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "缓存 LRU 淘汰压力——连续写入 10 个大缓存后最旧缓存应被正确淘汰"
+intent_ref: INTENT-REL-046
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: cache LRU test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: save cache
+          uses: cache
+          with:
+            path: cache_data
+            key: cache-${{ matrix.index }}
+        - name: generate cache data
+          run: |
+            mkdir -p cache_data
+            dd if=/dev/urandom of=cache_data/data.bin bs=1M count=100
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: latest_cache_status
+    equals: "hit"
+  - type: positive
+    target: oldest_cache_status
+    equals: "miss"
+teardown:
+  reset: none

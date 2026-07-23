@@ -1,0 +1,33 @@
+id: REL-MEM-01-020
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 内存边界——small runner 分配 7.5 GB 应成功"
+intent_ref: INTENT-REL-020
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: memory boundary test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: allocate 7.5GB
+          run: |
+            python3 -c "a=bytearray(7680*1024*1024); print(len(a))"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "success"
+teardown:
+  reset: fixture

@@ -1,0 +1,46 @@
+id: COMPAT-IF-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: continue-on-error 标记后失败 step 不阻断后续执行
+intent_ref: INTENT-COMPAT-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-continue:
+      name: Test continue on error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: force failure with continue
+          continue-on-error: true
+          run: |
+            exit 1
+        - name: should still run
+          run: |
+            echo "This should appear"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "This should appear"
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: fixture

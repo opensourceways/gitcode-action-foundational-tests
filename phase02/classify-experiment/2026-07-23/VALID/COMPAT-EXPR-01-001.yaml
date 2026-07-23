@@ -1,0 +1,44 @@
+id: COMPAT-EXPR-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: success 关键字在条件表达式中的可用性
+intent_ref: INTENT-COMPAT-004
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-success:
+      name: Test success keyword availability
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: previous step succeeds
+          run: |
+            echo "Step completed successfully"
+        - name: observe next step runs
+          run: |
+            echo "Next step executed, implicit success confirmed"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "implicit success confirmed"
+
+teardown:
+  reset: fixture

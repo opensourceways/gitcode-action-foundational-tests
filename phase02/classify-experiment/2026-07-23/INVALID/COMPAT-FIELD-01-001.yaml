@@ -1,0 +1,41 @@
+id: COMPAT-FIELD-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 含 run-name 字段的 workflow 应被报错或警告
+intent_ref: INTENT-COMPAT-021
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  run-name: Test Run Name
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test run-name field
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "平台应对 run-name 字段给出明确报错或警告，不应静默忽略"
+
+teardown:
+  reset: fixture

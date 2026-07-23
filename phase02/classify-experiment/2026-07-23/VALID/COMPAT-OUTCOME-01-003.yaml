@@ -1,0 +1,61 @@
+id: COMPAT-OUTCOME-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "outcome 与 conclusion 在 job 条件判断中不应互换语义"
+intent_ref: INTENT-COMPAT-035
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A with continue on error true
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: failing step tolerated
+          continue-on-error: true
+          run: |
+            exit 1
+    job-b:
+      name: Job B depends on A
+      runs-on: [dedicate-hosted, x64, large]
+      needs: [job-a]
+      steps:
+        - name: verify job a conclusion
+          run: |
+            echo "Job A conclusion should be success"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: job_status
+    equals: success
+    eval: llm_assisted
+    rubric: "job A 的 conclusion 为 success，使 job B 基于 needs 成功继续执行"
+  - type: positive
+    target: step_status
+    equals: failure
+    eval: llm_assisted
+    rubric: "job A 内 step 的 outcome 保持为 failure"
+  - type: negative
+    target: semantic_swap
+    eval: llm_assisted
+    rubric: "不应出现 outcome 与 conclusion 被互换使用导致的误判；job B 不应因 job A 的 outcome 为 failure 而被跳过"
+
+teardown:
+  reset: fixture

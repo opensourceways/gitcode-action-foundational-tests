@@ -1,0 +1,47 @@
+id: REL-FAULT-01-035
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "故障注入——artifact 下载服务 503 不可用时 job 应失败并报依赖服务错误"
+intent_ref: INTENT-REL-035
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: fault injection artifact 503
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: download artifact step
+          uses: download-artifact
+          with:
+            name: missing-artifact
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection:
+  at: mid_job
+  action: concurrent_flood
+  params:
+    service: artifact_download
+    response: 503
+    target_step: 1
+  recovery_expectation: explicit_error_and_rerun_success
+assertions:
+  - type: positive
+    target: step_status
+    equals: "failure"
+  - type: positive
+    target: run_logs
+    contains: "503"
+  - type: positive
+    target: job_status
+    equals: "failure"
+teardown:
+  reset: none

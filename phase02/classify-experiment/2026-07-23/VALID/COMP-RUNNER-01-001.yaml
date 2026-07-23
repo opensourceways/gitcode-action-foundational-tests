@@ -1,0 +1,43 @@
+id: COMP-RUNNER-01-001
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: 三段式标签正确调度到对应规格 Runner
+intent_ref: INTENT-COMP-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify 3 segment label
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Echo runner info
+          run: |
+            echo "os=$RUNNER_OS"
+            echo "arch=$RUNNER_ARCH"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: runner_label
+    equals: ubuntu-latest,x64,small
+
+teardown:
+  reset: none

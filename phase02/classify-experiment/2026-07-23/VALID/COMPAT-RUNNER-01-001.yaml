@@ -1,0 +1,44 @@
+id: COMPAT-RUNNER-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: runner.os 在 Linux Runner 上应返回 Linux
+intent_ref: INTENT-COMPAT-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test runner.os value
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo runner os
+          run: |
+            echo "runner_os=${{ runner.os }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 runner_os 应等于 Linux（首字母大写），不应为小写 linux"
+
+teardown:
+  reset: fixture

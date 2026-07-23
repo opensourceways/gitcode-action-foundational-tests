@@ -1,0 +1,36 @@
+id: REL-LOG-01-040
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "超长日志——单 job 输出 100 MB 日志应完整保留且可下载查看"
+intent_ref: INTENT-REL-040
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: log size 100MB test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate 100MB log
+          run: |
+            for i in $(seq 1 2500); do python3 -c "print('A'*40960)"; done
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: log_size_mb
+    equals: "100"
+  - type: positive
+    target: log_download
+    equals: "success"
+teardown:
+  reset: none

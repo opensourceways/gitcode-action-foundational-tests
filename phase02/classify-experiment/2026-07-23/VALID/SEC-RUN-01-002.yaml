@@ -1,0 +1,46 @@
+id: SEC-RUN-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Runner 环境变量与共享目录必须跨 job 隔离"
+intent_ref: INTENT-SEC-021
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a-env:
+      name: Set env and tmp
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Set env
+          run: |
+            echo MY_SECRET_ENV=leaked >> $ATOMGIT_ENV
+            echo leaked-data > /tmp/env-test.txt
+    job-b-env:
+      name: Check env isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check env clean
+          run: |
+            if [ -n "$MY_SECRET_ENV" ] || [ -f /tmp/env-test.txt ]; then
+              echo "isolation broken"
+              exit 1
+            else
+              echo "isolated as expected"
+            fi
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "isolation broken"
+  - type: positive
+    target: run_logs
+    equals: "isolated_as_expected"
+teardown:
+  reset: fixture

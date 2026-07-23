@@ -1,0 +1,38 @@
+id: REL-IMAGE-01-052
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "镜像拉取性能——500MB 自定义 container 环境准备耗时基准"
+intent_ref: INTENT-REL-052
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: image pull 500MB test
+      runs-on: [dedicate-hosted, x64, large]
+      container:
+        image: python:3.11-slim
+      steps:
+        - name: check python version
+          run: |
+            python --version
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: image_pull_time_seconds
+    le: "120"
+  - type: positive
+    target: job_status
+    equals: "success"
+teardown:
+  reset: none

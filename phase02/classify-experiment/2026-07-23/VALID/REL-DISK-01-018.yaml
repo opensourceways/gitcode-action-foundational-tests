@@ -1,0 +1,37 @@
+id: REL-DISK-01-018
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 磁盘边界——small runner 写入 49 GB 应成功"
+intent_ref: INTENT-REL-018
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: disk boundary test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write 49GB file
+          run: |
+            fallocate -l 49G testfile || dd if=/dev/zero of=testfile bs=1M count=50176
+        - name: verify disk space
+          run: |
+            df -h .
+            test -f testfile
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "success"
+teardown:
+  reset: fixture

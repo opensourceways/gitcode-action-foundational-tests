@@ -1,0 +1,35 @@
+id: SEC-BASE-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "pull_request_target 使用 base 分支的 workflow 版本"
+intent_ref: INTENT-SEC-035
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    base-version:
+      name: Verify base workflow version
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo from base
+          run: |
+            echo "Executing base branch workflow"
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    equals: "base_branch_workflow_executed"
+  - type: negative
+    target: run_logs
+    must_not_contain: "fork_injected_step"
+teardown:
+  reset: fixture

@@ -1,0 +1,48 @@
+id: COMPAT-SCHEDULE-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: schedule cron 按 UTC 时间触发
+intent_ref: INTENT-COMPAT-013
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+      cron: "0 12 * * *"
+  jobs:
+    verify:
+      name: Verify schedule UTC trigger
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo schedule time
+          run: |
+            echo "SCHEDULE_TRIGGER_OK"
+            echo "Current UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_event
+    equals: schedule
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "触发时间应按 UTC 解释；若平台未按 UTC 触发，应记录实际时区行为并与 GitHub Actions 对比"
+
+teardown:
+  reset: none

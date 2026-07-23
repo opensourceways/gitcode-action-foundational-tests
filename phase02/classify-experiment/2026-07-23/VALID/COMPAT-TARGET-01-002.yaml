@@ -1,0 +1,48 @@
+id: COMPAT-TARGET-01-002
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: "pull_request_target 在 fork 场景下应保持 secret 隔离"
+intent_ref: INTENT-COMPAT-032
+
+setup:
+  repo_fixture: with-fork-pr
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    secret-access:
+      name: Test secret access in target
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: echo secret masked
+          run: |
+            echo "Token is: ${{ secrets.DEPLOY_TOKEN }}"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+    eval: deterministic
+  - type: positive
+    target: run_status
+    equals: success
+    eval: deterministic
+    rubric: "pull_request_target 场景下 workflow 能成功引用 secrets.DEPLOY_TOKEN 并执行完毕"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,42 @@
+id: REL-RETAIN-01-047
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "artifact 保留期 90 天边界——第 91 天应不可下载"
+intent_ref: INTENT-REL-047
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: artifact retention test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: create artifact
+          run: |
+            echo retention test > retention.txt
+        - name: upload artifact
+          uses: upload-artifact
+          with:
+            name: retention-artifact
+            path: retention.txt
+            retention-days: 90
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: download_day90_status
+    equals: "200"
+  - type: positive
+    target: download_day91_status
+    equals: "404"
+teardown:
+  reset: none

@@ -1,0 +1,46 @@
+id: COMPAT-EXPR-01-008
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: toJson 表达式输出格式差异（pretty-print vs compact）
+intent_ref: INTENT-COMPAT-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-tojson:
+      name: Test toJson output format
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Output object via toJson
+          run: |
+            echo '${{ toJson({'key1': 'value1', 'key2': 'value2'}) }}'
+        - name: Output array via toJson
+          run: |
+            echo '${{ toJson(['a', 'b', 'c']) }}'
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "key1"
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "toJson 输出应为合法 JSON；若包含换行缩进则为 pretty-print，若为单行则为 compact；须与 GitHub Actions 行为一致或文档说明差异"
+
+teardown:
+  reset: fixture

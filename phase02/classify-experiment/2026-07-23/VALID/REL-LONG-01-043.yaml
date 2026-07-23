@@ -1,0 +1,40 @@
+id: REL-LONG-01-043
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "长时运行接近 timeout 边界——350 分钟运行应成功且心跳保活正常"
+intent_ref: INTENT-REL-043
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: long run 350min test
+      runs-on: [dedicate-hosted, x64, large]
+      timeout-minutes: 360
+      steps:
+        - name: heartbeat run
+          run: |
+            for i in $(seq 1 350); do
+              echo heartbeat $i
+              sleep 60
+            done
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "success"
+  - type: nonfunctional
+    target: heartbeat_interval_seconds
+    le: "60"
+teardown:
+  reset: none

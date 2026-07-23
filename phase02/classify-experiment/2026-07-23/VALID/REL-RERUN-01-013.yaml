@@ -1,0 +1,33 @@
+id: REL-RERUN-01-013
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "rerun 6 小时年龄限制——超期运行不可重新运行"
+intent_ref: INTENT-REL-013
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 5
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: rerun_request
+    equals: "rejected"
+teardown:
+  reset: none

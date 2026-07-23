@@ -1,0 +1,64 @@
+id: COMPAT-EXPR-01-010
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: loose equality null 与空字符串及零的等价性差异
+intent_ref: INTENT-COMPAT-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-null-eq:
+      name: Test loose equality with null
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare null and empty string
+          run: |
+            if ${{ null == '' }}; then
+              echo "NULL_EQ_EMPTY=true"
+            else
+              echo "NULL_EQ_EMPTY=false"
+            fi
+        - name: Compare null and number zero
+          run: |
+            if ${{ null == 0 }}; then
+              echo "NULL_EQ_ZERO=true"
+            else
+              echo "NULL_EQ_ZERO=false"
+            fi
+        - name: Compare null and false
+          run: |
+            if ${{ null == false }}; then
+              echo "NULL_EQ_FALSE=true"
+            else
+              echo "NULL_EQ_FALSE=false"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "NULL_EQ_EMPTY="
+  - type: positive
+    target: run_logs
+    must_contain: "NULL_EQ_ZERO="
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "null 的 loose equality 比较结果应与 GitHub Actions 一致；null 不应等于空字符串，null 不应等于 0，null 不应等于 false"
+
+teardown:
+  reset: fixture

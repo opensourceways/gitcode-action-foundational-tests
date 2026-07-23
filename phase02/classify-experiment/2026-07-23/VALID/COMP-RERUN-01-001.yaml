@@ -1,0 +1,44 @@
+id: COMP-RERUN-01-001
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: rerun 后 atomgit.sha 保持原始值 run_number 递增
+intent_ref: INTENT-COMP-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify rerun context
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Dump context
+          run: |
+            echo "sha=$ATOMGIT_SHA"
+            echo "ref=$ATOMGIT_REF"
+            echo "run_number=$ATOMGIT_RUN_NUMBER"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: rerun_context
+    sha_unchanged: True
+  - type: positive
+    target: rerun_context
+    run_number_increased: True
+
+teardown:
+  reset: none

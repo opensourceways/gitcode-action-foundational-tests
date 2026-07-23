@@ -1,0 +1,42 @@
+id: COMPAT-EXPR-01-004
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: contains 表达式大小写敏感边界
+intent_ref: INTENT-COMPAT-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-contains-case:
+      name: Test contains case sensitivity
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: test lowercase match
+          run: "echo \"lowercase match: ${{ contains('Hello World', 'world') }}\""
+        - name: test exact case match
+          run: "echo \"exact case match: ${{ contains('Hello World', 'World') }}\""
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "exact case match: true"
+
+teardown:
+  reset: fixture

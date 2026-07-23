@@ -1,0 +1,46 @@
+id: COMP-PERMS-01-002
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: 声明 repository write 后 TOKEN 可推送代码
+intent_ref: INTENT-COMP-013
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    repository: write
+  jobs:
+    verify:
+      name: Verify write permission
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Push code
+          run: |
+            git config user.email "test@test.com"
+            git config user.name "Test"
+            echo "change" >> README.md
+            git add README.md
+            git commit -m "test"
+            git push https://x-access-token:$ATOMGIT_TOKEN@${{ atomgit.server_url }}/${{ atomgit.repository }}.git HEAD:${{ atomgit.ref }}
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: fixture

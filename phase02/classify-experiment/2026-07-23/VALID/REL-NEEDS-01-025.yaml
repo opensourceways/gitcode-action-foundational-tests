@@ -1,0 +1,44 @@
+id: REL-NEEDS-01-025
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "needs 失败传播——上游 job 失败时下游 job 应被 skip"
+intent_ref: INTENT-REL-025
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job_a:
+      name: upstream failing job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: fail step
+          run: |
+            exit 1
+    job_b:
+      name: downstream dependent job
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job_a
+      steps:
+        - name: should be skipped
+          run: |
+            echo this should not run
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_a_status
+    equals: "failure"
+  - type: positive
+    target: job_b_status
+    equals: "skipped"
+teardown:
+  reset: none

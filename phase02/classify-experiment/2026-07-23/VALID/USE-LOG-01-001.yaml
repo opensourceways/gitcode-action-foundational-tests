@@ -1,0 +1,56 @@
+id: USE-LOG-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "多 step 日志按时间线组织且边界清晰"
+intent_ref: INTENT-USE-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    multi-step:
+      name: multi step log clarity
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: step one prepare
+          run: |
+            echo "prepare done"
+        - name: step two build
+          run: |
+            echo "build done"
+        - name: step three test
+          run: |
+            echo "test done"
+        - name: step four package
+          run: |
+            echo "package done"
+        - name: step five summary
+          run: |
+            echo "summary done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "step one prepare"
+  - type: nonfunctional
+    target: ui_layout
+    eval: llm_assisted
+    rubric: "在 UI 上，用户能在 3 秒内定位到失败的 step（通过视觉层级、颜色或状态图标区分）；日志下载文件为 UTF-8 编码且本地打开无乱码"
+
+teardown:
+  reset: none
+

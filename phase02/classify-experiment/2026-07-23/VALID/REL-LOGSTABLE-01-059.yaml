@@ -1,0 +1,36 @@
+id: REL-LOGSTABLE-01-059
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "日志系统稳定性——6 万行日志无乱序/无丢失/无截断"
+intent_ref: INTENT-REL-059
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: log stability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate 60000 lines log
+          run: |
+            for i in $(seq 1 60000); do echo LOG_LINE_${i} $(date +%s%N); done
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: log_line_count
+    equals: "60000"
+  - type: positive
+    target: log_order
+    equals: "monotonic"
+teardown:
+  reset: none

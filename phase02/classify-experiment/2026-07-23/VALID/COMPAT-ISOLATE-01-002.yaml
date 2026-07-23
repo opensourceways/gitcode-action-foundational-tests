@@ -1,0 +1,62 @@
+id: COMPAT-ISOLATE-01-002
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: Runner 环境隔离——跨 job 环境变量隔离
+intent_ref: INTENT-COMPAT-028
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-set-env:
+      name: Set environment variable
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) set env in job A
+          run: |
+            echo "ISOLATION_TEST_KEY=VALUE_FROM_JOB_A" >> "$ATOMGIT_ENV"
+            echo "ENV_SET_IN_JOB_A"
+    job-verify-env:
+      name: Verify env isolation
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job-set-env
+      steps:
+        - name: (TC) verify env not leaked
+          run: |
+            if [ "${ISOLATION_TEST_KEY:-}" = "VALUE_FROM_JOB_A" ]; then
+              echo "ENV_ISOLATION_BROKEN"
+              exit 1
+            else
+              echo "ENV_ISOLATED_OK"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 ENV_ISOLATED_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ENV_ISOLATION_BROKEN"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 ENV_SET_IN_JOB_A"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,49 @@
+id: COMPAT-DIR-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 工作流目录差异——.github/workflows/ 不应被识别
+intent_ref: INTENT-COMPAT-029
+
+setup:
+  repo_fixture: with-github-dir
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    verify-github-dir-ignored:
+      name: Verify .github workflows dir ignored
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) echo if reached
+          run: |
+            echo "GITHUB_DIR_WORKFLOW_RAN"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: workflow_discovery
+    eval: deterministic
+    rubric: ".github/workflows/ 下的工作流不应被识别触发"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 GITHUB_DIR_WORKFLOW_RAN"
+  - type: positive
+    target: run_status
+    eval: deterministic
+    rubric: "仅 .gitcode/workflows/ 下的工作流应被触发，且无意外运行记录"
+
+teardown:
+  reset: fixture

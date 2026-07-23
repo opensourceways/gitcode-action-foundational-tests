@@ -1,0 +1,48 @@
+id: COMPAT-RUNSON-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: runs-on 标签体系——三段式数组正常匹配
+intent_ref: INTENT-COMPAT-027
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify-runs-on-array:
+      name: Verify three-part runs-on array
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) echo runner info
+          run: |
+            echo "RUNSON_ARRAY_OK"
+            echo "Runner labels: dedicate-hosted x64 large"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 RUNSON_ARRAY_OK"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "不应因数组格式 runs-on 而解析失败"
+
+teardown:
+  reset: fixture

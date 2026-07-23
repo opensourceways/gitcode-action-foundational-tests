@@ -1,0 +1,38 @@
+id: REL-CPU-01-022
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner CPU 饱和——small runner 运行 4 个 CPU 密集型进程应完成但耗时延长"
+intent_ref: INTENT-REL-022
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: CPU saturate test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: burn 4 CPU processes
+          run: |
+            for i in 1 2 3 4; do python3 -c "import time; end=time.time()+60; [x*x for x in range(10000)] while time.time()<end" & done
+            wait
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "success"
+  - type: nonfunctional
+    target: job_duration_seconds
+    ge: "96"
+    le: "144"
+teardown:
+  reset: fixture

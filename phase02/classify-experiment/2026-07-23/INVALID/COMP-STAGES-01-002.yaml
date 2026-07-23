@@ -1,0 +1,61 @@
+id: COMP-STAGES-01-002
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: fail_fast true 时 stage 内任一 job 失败终止同阶段其余 job
+intent_ref: INTENT-COMP-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  stages:
+    - name: test-stage
+      fail_fast: true
+      jobs:
+        fail-job:
+          name: Intentional fail
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Force failure
+              run: |
+                exit 1
+        should-skip:
+          name: Should be skipped
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Echo skipped
+              run: |
+                echo "should not execute"
+    - name: deploy-stage
+      jobs:
+        deploy:
+          name: Deploy
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Echo deploy
+              run: |
+                echo "should not execute"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: job_status
+    equals: skipped_for_should_skip
+  - type: negative
+    target: stage_execution
+    equals: deploy_stage_executed
+
+teardown:
+  reset: none

@@ -1,0 +1,39 @@
+id: REL-OUTPUT-01-016
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "step output 边界值——ATOMGIT_OUTPUT 写入 1 MB 参数应成功传递"
+intent_ref: INTENT-REL-016
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: output boundary test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: write 1MB output
+          id: writer
+          run: |
+            python3 -c "print('A'*1048576)" > out.txt
+            echo "data=$(cat out.txt)" >> $ATOMGIT_OUTPUT
+        - name: read 1MB output
+          run: |
+            echo "${{{{ steps.writer.outputs.data }}}}"
+            test $(echo "${{{{ steps.writer.outputs.data }}}}" | wc -c) -ge 1048576
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: step_output_length
+    equals: "1048576"
+teardown:
+  reset: none

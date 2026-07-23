@@ -1,0 +1,45 @@
+id: USE-STAT-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 success() 带括号时报错应提示 GitCode 括号差异"
+intent_ref: INTENT-USE-004
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-stat:
+      name: test success bracket error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: step with brackets
+          if: ${{ success() }}
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 success 或 状态函数关键词，并明示 GitCode 状态函数不带括号"
+
+teardown:
+  reset: none
+

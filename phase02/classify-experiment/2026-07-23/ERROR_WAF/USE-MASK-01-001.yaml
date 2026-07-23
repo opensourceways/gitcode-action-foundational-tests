@@ -1,0 +1,46 @@
+id: USE-MASK-01-001
+dimensions: ["usability", "security"]
+dimension: usability
+priority: P0
+title: "secret 脱敏文档描述与实际行为一致并给出缓解建议"
+intent_ref: INTENT-USE-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-mask:
+      name: test secret masking via env
+      runs-on: [dedicate-hosted, x64, large]
+      env:
+        SECRET_VAL: ${{ secrets.TEST_SECRET }}
+      steps:
+        - name: echo secret via env
+          run: |
+            echo "secret length=${#SECRET_VAL}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_not_contain_secret: TEST_SECRET
+  - type: nonfunctional
+    target: documentation
+    eval: llm_assisted
+    rubric: "若文档声明存在绕过风险，必须同时给出正确写法与错误写法的代码示例对比；仅有风险声明而无缓解建议的视为可理解性不合格"
+
+teardown:
+  reset: none
+

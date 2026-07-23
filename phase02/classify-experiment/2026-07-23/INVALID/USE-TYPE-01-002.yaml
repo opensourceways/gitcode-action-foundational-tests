@@ -1,0 +1,48 @@
+id: USE-TYPE-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 GitHub types 命名 opened/synchronize 时应给出可理解提示"
+intent_ref: INTENT-USE-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      types:
+        - opened
+        - synchronize
+      branches: [main]
+  jobs:
+    bad-types:
+      name: test github types error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo event
+          run: |
+            echo "hello"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 GitCode 支持的 types 取值 merge/open/reopen/update，并指出 GitHub 的 opened/synchronize/reopened 对应 GitCode 的 open/update/reopen"
+
+teardown:
+  reset: none
+

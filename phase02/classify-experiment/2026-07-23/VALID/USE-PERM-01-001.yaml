@@ -1,0 +1,41 @@
+id: USE-PERM-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 GitCode 权限域命名时正常生效"
+intent_ref: INTENT-USE-005
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  permissions:
+    repository: read
+  on:
+    workflow_dispatch:
+  jobs:
+    test-perm:
+      name: test gitcode permission names
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout
+          uses: checkout
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+
+teardown:
+  reset: none
+

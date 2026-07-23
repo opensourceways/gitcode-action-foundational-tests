@@ -1,0 +1,37 @@
+id: SEC-MASK-01-004
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 日志脱敏不可通过字符串拼接或插值绕过"
+intent_ref: INTENT-SEC-006
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    concat-bypass:
+      name: Test concat bypass
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo secret in parts
+          run: |
+            part1=$(echo "${{ secrets.API_KEY }}" | cut -c1-4)
+            part2=$(echo "${{ secrets.API_KEY }}" | cut -c5-8)
+            echo "part1=$part1 part2=$part2"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "API_KEY"
+  - type: negative
+    target: run_logs
+    eval: "llm_assisted"
+    rubric: "\u65e5\u5fd7\u5168\u6587\u641c\u7d22 secret \u7684\u4efb\u610f\u8fde\u7eed\u5b50\u4e32\uff08\u957f\u5ea6\u8d85\u8fc7\u9608\u503c\uff09\u547d\u4e2d\u6570\u4e3a 0"
+teardown:
+  reset: fixture

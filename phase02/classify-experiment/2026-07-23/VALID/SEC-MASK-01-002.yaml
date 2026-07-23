@@ -1,0 +1,38 @@
+id: SEC-MASK-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 值在 step summary 和错误堆栈中必须被脱敏"
+intent_ref: INTENT-SEC-004
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    summary-mask:
+      name: Test summary masking
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write secret to summary
+          run: |
+            echo "Key: ${{ secrets.API_KEY }}" >> $ATOMGIT_STEP_SUMMARY
+        - name: Intentionally fail
+          run: |
+            echo "Failing with key ${{ secrets.API_KEY }}"
+            exit 1
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: step_summary
+    must_not_contain_secret: "API_KEY"
+  - type: negative
+    target: error_stack
+    must_not_contain_secret: "API_KEY"
+teardown:
+  reset: fixture

@@ -1,0 +1,46 @@
+id: REL-CACHEPERF-01-054
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: "缓存加速比——cache 命中 vs 未命中构建耗时对比"
+intent_ref: INTENT-REL-054
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: cache speedup test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: restore cache
+          uses: cache
+          with:
+            path: node_modules
+            key: cache-deps-${{ matrix.run }}
+        - name: install deps
+          run: |
+            npm ci || true
+        - name: save cache
+          uses: cache
+          with:
+            path: node_modules
+            key: cache-deps-${{ matrix.run }}
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: speedup_ratio
+    ge: "2"
+  - type: nonfunctional
+    target: restore_time_seconds
+    le: "30"
+teardown:
+  reset: fixture

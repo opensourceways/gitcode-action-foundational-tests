@@ -1,0 +1,41 @@
+id: COMP-PUSH-01-002
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 不匹配 branches 的 push 不触发 workflow
+intent_ref: INTENT-COMP-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify branch skip
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo triggered
+          run: |
+            echo "should not run"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_created
+    equals: no_run_for_non_matching_branch
+
+teardown:
+  reset: none

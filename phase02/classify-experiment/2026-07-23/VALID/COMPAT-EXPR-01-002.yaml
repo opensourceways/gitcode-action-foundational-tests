@@ -1,0 +1,54 @@
+id: COMPAT-EXPR-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: success() 函数的处理行为差异
+intent_ref: INTENT-COMPAT-004
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A that succeeds
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: succeed
+          run: |
+            echo "Job A done"
+    job-b:
+      name: Job B depends on A
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job-a
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: observe dependency success
+          run: |
+            echo "Job B ran after Job A success"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "Job B ran after Job A success"
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: fixture

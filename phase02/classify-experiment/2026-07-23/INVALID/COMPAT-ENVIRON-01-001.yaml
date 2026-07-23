@@ -1,0 +1,41 @@
+id: COMPAT-ENVIRON-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 含 environment 字段的 job 应被报错或警告
+intent_ref: INTENT-COMPAT-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test environment field
+      runs-on: [dedicate-hosted, x64, large]
+      environment: production
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "平台应对 environment 字段给出明确报错或警告，不应静默忽略；信息应建议使用其他方式配置部署审批"
+
+teardown:
+  reset: fixture

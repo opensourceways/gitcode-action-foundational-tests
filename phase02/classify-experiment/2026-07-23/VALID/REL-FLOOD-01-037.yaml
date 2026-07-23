@@ -1,0 +1,39 @@
+id: REL-FLOOD-01-037
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "并发洪泛——同一仓库 50 个 push 同时触发应正确排队/限流不崩溃"
+intent_ref: INTENT-REL-037
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 5
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: created_runs_count
+    equals: "50"
+  - type: positive
+    target: api_status
+    equals: "200"
+  - type: negative
+    target: api_status
+    equals: "500"
+teardown:
+  reset: none

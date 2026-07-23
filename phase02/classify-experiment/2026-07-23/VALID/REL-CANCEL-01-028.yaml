@@ -1,0 +1,40 @@
+id: REL-CANCEL-01-028
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "手动取消 workflow——运行中取消时 always() cleanup step 仍应执行"
+intent_ref: INTENT-REL-028
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: cancel semantics test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep main step
+          run: |
+            sleep 60
+        - name: cleanup always step
+          if: ${{ always() }}
+          run: |
+            echo cleanup executed
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: cleanup_step_status
+    equals: "success"
+  - type: positive
+    target: run_status
+    equals: "canceled"
+teardown:
+  reset: none

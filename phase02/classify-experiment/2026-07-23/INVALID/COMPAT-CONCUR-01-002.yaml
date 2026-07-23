@@ -1,0 +1,49 @@
+id: COMPAT-CONCUR-01-002
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "concurrency 配置越界或不支持时应给出清晰报错"
+intent_ref: INTENT-COMPAT-034
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    group: [invalid, array]
+    cancel-in-progress: false
+  jobs:
+    concurrency-invalid:
+      name: Test invalid concurrency config
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: validation_error
+    eval: llm_assisted
+    rubric: "不通过无指引的原始报错（如仅报 generic YAML error）"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息包含 concurrency 关键字，指向具体字段（group 或 cancel-in-progress），并给出可操作建议"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,56 @@
+id: COMP-ISOLATION-01-001
+dimensions: [completeness, reliability, security]
+dimension: completeness
+priority: P0
+title: 同一 workflow 先后 job 的文件系统相互隔离
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job1:
+      name: Write file
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create file
+          run: |
+            echo "secret data" > /tmp/isolation_test.txt
+    job2:
+      name: Read file
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job1
+      steps:
+        - name: Attempt read
+          run: |
+            if [ -f /tmp/isolation_test.txt ]; then
+              echo "file exists"
+              cat /tmp/isolation_test.txt
+              exit 1
+            else
+              echo "file not found as expected"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: negative
+    target: run_logs
+    must_not_contain: secret data
+
+teardown:
+  reset: none

@@ -1,0 +1,44 @@
+id: COMP-PR-01-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: fork PR 触发 pull_request 时不可读取项目 secrets
+intent_ref: INTENT-COMP-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: ['DEPLOY_TOKEN']
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify fork PR secret isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt to read secret
+          run: |
+            echo "secret value is ${{ secrets.DEPLOY_TOKEN }}"
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_status
+    equals: success_or_blocked
+
+teardown:
+  reset: fixture

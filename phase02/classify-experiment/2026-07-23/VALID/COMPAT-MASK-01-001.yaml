@@ -1,0 +1,46 @@
+id: COMPAT-MASK-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: "直接 echo secrets 值应在日志中被脱敏"
+intent_ref: INTENT-COMPAT-033
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [TEST_SECRET]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    mask-test:
+      name: Test secret masking direct echo
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: echo secret directly
+          run: |
+            echo "Secret value: ${{ secrets.TEST_SECRET }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: TEST_SECRET
+    eval: deterministic
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中出现 *** 替代 secret 值，确认脱敏机制生效"
+
+teardown:
+  reset: fixture

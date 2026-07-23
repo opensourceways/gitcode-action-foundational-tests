@@ -1,0 +1,38 @@
+id: REL-PREEMPT-01-006
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "preemption events 越界值——配置 11 个应被拒绝"
+intent_ref: INTENT-REL-006
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    max: 5
+    exceed-action: QUEUE
+    preemption:
+      events: [push, pull_request, workflow_dispatch, schedule, tag, issue_comment, pull_request_comment, merge_requests, fork_pr, manual, pr]
+  jobs:
+    test:
+      name: preempt invalid test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo step
+          run: |
+            echo test
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: yaml_validation
+    equals: "rejected"
+teardown:
+  reset: none

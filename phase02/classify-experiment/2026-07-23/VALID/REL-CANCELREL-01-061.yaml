@@ -1,0 +1,46 @@
+id: REL-CANCELREL-01-061
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "取消操作可靠性——queued/running/post 各阶段取消状态正确过渡"
+intent_ref: INTENT-REL-061
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: cancel semantics test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep main step
+          run: |
+            sleep 60
+        - name: cleanup always step
+          if: ${{ always() }}
+          run: |
+            echo cleanup executed
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: cancel_queued_status
+    equals: "canceled"
+  - type: positive
+    target: cancel_running_status
+    equals: "canceled"
+  - type: positive
+    target: cancel_post_main_status
+    equals: "success"
+  - type: nonfunctional
+    target: cancel_stabilization_seconds
+    le: "60"
+teardown:
+  reset: fixture

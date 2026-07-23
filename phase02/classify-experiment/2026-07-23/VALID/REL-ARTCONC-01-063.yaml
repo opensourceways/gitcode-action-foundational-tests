@@ -1,0 +1,46 @@
+id: REL-ARTCONC-01-063
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "制品并发写一致性——多 job 同时 upload-artifact 同名 artifact"
+intent_ref: INTENT-REL-063
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: artifact concurrent write test
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          instance: [1,2,3]
+      steps:
+        - name: generate content
+          run: |
+            if [ "${{{{ matrix.instance }}}}" = "1" ]; then python3 -c "print('A'*1048576)" > out.txt; fi
+            if [ "${{{{ matrix.instance }}}}" = "2" ]; then python3 -c "print('B'*1048576)" > out.txt; fi
+            if [ "${{{{ matrix.instance }}}}" = "3" ]; then python3 -c "print('C'*1048576)" > out.txt; fi
+        - name: upload artifact step
+          uses: upload-artifact
+          with:
+            name: concurrent-artifact
+            path: out.txt
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: download_content
+    in: ['AAA', 'BBB', 'CCC']
+  - type: negative
+    target: download_content
+    contains_mixed: "false"
+teardown:
+  reset: fixture

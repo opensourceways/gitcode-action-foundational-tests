@@ -1,0 +1,56 @@
+id: USE-MD-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "ATOMGIT_STEP_SUMMARY 写入的 Markdown 正确渲染为 HTML"
+intent_ref: INTENT-USE-020
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    summary-md:
+      name: step summary markdown render
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: write summary
+          run: |
+            echo "## Test Report" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "| Metric | Value |" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "|--------|-------|" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "| passed | 10    |" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "| failed | 0     |" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "" >> "$ATOMGIT_STEP_SUMMARY"
+            echo '```bash' >> "$ATOMGIT_STEP_SUMMARY"
+            echo "npm test" >> "$ATOMGIT_STEP_SUMMARY"
+            echo '```' >> "$ATOMGIT_STEP_SUMMARY"
+            echo "" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "- item one" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "- item two" >> "$ATOMGIT_STEP_SUMMARY"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_summary
+    contains: "Test Report"
+  - type: nonfunctional
+    target: ui_visual
+    eval: llm_assisted
+    rubric: "Markdown 表格必须有表头样式区分（背景色或粗体），代码块必须有语法高亮或至少等宽背景"
+
+teardown:
+  reset: none
+

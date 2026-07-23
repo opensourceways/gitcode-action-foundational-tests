@@ -1,0 +1,39 @@
+id: REL-CONC-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "concurrency.max=5 时同时触发 5 个运行应全部进入执行态"
+intent_ref: INTENT-REL-001
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    max: 5
+    exceed-action: QUEUE
+  jobs:
+    test:
+      name: concurrency test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 10
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+  - type: nonfunctional
+    target: queued_to_running_latency
+    le: "60s"
+teardown:
+  reset: none

@@ -1,0 +1,43 @@
+id: SEC-FORK-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 中 secrets 引用返回空值且 job 不崩溃"
+intent_ref: INTENT-SEC-001
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+  branch_protection: default
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    test-empty:
+      name: Test empty secret
+      runs-on: [dedicate-hosted, x64, large]
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
+      steps:
+        - name: Check env empty
+          run: |
+            if [ -z "$API_KEY" ]; then
+              echo "API_KEY is empty as expected"
+            else
+              echo "API_KEY is not empty"
+              exit 1
+            fi
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "API_KEY"
+  - type: positive
+    target: run_status
+    equals: "success"
+teardown:
+  reset: fixture

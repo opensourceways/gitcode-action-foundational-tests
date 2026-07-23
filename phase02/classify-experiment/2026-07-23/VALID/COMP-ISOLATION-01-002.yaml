@@ -1,0 +1,55 @@
+id: COMP-ISOLATION-01-002
+dimensions: [completeness, reliability, security]
+dimension: completeness
+priority: P0
+title: 环境变量不跨 job 泄漏
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job1:
+      name: Set env
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Export env
+          run: |
+            echo "ISOLATION_VAR=leak" >> "$ATOMGIT_ENV"
+    job2:
+      name: Check env
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job1
+      steps:
+        - name: Verify env absent
+          run: |
+            if [ -z "${ISOLATION_VAR:-}" ]; then
+              echo "env not leaked as expected"
+            else
+              echo "env leaked: $ISOLATION_VAR"
+              exit 1
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: negative
+    target: run_logs
+    must_not_contain: env leaked
+
+teardown:
+  reset: none

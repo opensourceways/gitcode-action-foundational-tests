@@ -1,0 +1,47 @@
+id: USE-YAML-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "YAML 缩进错误时报错应指出具体行号与列号"
+intent_ref: INTENT-USE-022
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad:
+      name: indent error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+      - name: step one
+        run: |
+          echo "hello"
+       - name: step two
+         run: |
+           echo "world"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须同时包含字段名、所在行号、正确写法示例三项中的至少两项"
+
+teardown:
+  reset: none
+

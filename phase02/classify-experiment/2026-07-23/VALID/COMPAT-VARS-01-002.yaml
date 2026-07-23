@@ -1,0 +1,45 @@
+id: COMPAT-VARS-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: vars 上下文若不支持应报错而非静默为空
+intent_ref: INTENT-COMPAT-022
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test vars unsupported behavior
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo vars unknown
+          run: |
+            echo "unknown_var=${{ vars.UNKNOWN_VAR }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 unknown_var 不应仅等于空字符串后静默通过；应出现报错或 vars 未定义的提示"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若不支持 vars，报错信息应说明 vars 上下文不可用"
+
+teardown:
+  reset: fixture

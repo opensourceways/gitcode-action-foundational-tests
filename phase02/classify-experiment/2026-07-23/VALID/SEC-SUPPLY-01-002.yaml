@@ -1,0 +1,32 @@
+id: SEC-SUPPLY-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "commit hash 不匹配时第三方 Action 应被拒绝执行"
+intent_ref: INTENT-SEC-014
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    hash-mismatch:
+      name: Test hash mismatch rejection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use invalid hash action
+          uses: docker/build-push-action@0000000000000000000000000000000000000000
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: "success"
+  - type: positive
+    target: run_logs
+    equals: "action_not_found_or_sha_mismatch"
+teardown:
+  reset: fixture

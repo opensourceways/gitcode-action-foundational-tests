@@ -1,0 +1,41 @@
+id: USE-DEPR-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 ::set-output 时应给出弃用警告与替代示例"
+intent_ref: INTENT-USE-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-depr:
+      name: test deprecated command warning
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: use deprecated set-output
+          run: |
+            echo "::set-output name=mykey::myvalue"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_logs
+    eval: deterministic
+    rubric: "报错/警告信息必须包含已废弃或 deprecated 字样，并给出至少一条完整的替代命令示例"
+
+teardown:
+  reset: none
+

@@ -1,0 +1,31 @@
+id: USE-DOC-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "stages 与 post 概念在迁移文档中具备可发现性"
+intent_ref: INTENT-USE-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: documentation
+    eval: llm_assisted
+    rubric: "文档中关于 stages/post 的说明必须在迁移相关或快速入门类页面中有入口链接，且说明包含 GitCode 特有/GitHub 无此概念等显式差异标注"
+
+teardown:
+  reset: none
+

@@ -1,0 +1,52 @@
+id: COMPAT-PERM-01-003
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: permissions 命名差异——GitHub contents 权限项应报错
+intent_ref: INTENT-COMPAT-030
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    contents: read
+  jobs:
+    verify-contents-perm-error:
+      name: Verify contents permission error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) attempt clone
+          uses: checkout
+        - name: (TC) should not reach
+          run: |
+            echo "CONTENTS_PERM_ACCEPTED"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "使用 contents 权限项时 workflow 解析/校验阶段应报错"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "错误信息应提示 unknown property 或 contents 不被支持"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 CONTENTS_PERM_ACCEPTED（不应成功执行）"
+
+teardown:
+  reset: fixture

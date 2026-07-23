@@ -1,0 +1,39 @@
+id: SEC-TOKEN-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 中 ATOMGIT_TOKEN 写操作被平台拒绝"
+intent_ref: INTENT-SEC-003
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    token-write-denied:
+      name: Test token write denied
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt push
+          run: |
+            git clone https://x-access-token:${{ atomgit.token }}@atomgit.com/${{ atomgit.repository }}.git repo
+            cd repo
+            echo test > test.txt
+            git add test.txt
+            git commit -m "test"
+            git push origin main || echo "push denied"
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    equals: "push_denied_or_403"
+  - type: positive
+    target: run_status
+    equals: "completed"
+teardown:
+  reset: fixture

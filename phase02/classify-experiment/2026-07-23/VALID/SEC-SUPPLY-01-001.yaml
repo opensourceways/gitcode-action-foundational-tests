@@ -1,0 +1,32 @@
+id: SEC-SUPPLY-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "第三方 Action 引用应支持完整 commit hash 固定"
+intent_ref: INTENT-SEC-014
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    hash-pin:
+      name: Test commit hash pinning
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use pinned action
+          uses: docker/build-push-action@1234567890abcdef1234567890abcdef12345678
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "success_or_action_executed"
+  - type: negative
+    target: run_logs
+    must_not_contain: "unauthorized_action_execution"
+teardown:
+  reset: fixture

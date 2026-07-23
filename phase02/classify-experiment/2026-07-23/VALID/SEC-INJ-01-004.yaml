@@ -1,0 +1,34 @@
+id: SEC-INJ-01-004
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "不可信 commit message 不可直接插进 run 脚本导致命令注入"
+intent_ref: INTENT-SEC-012
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    commit-inj:
+      name: Test commit message injection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Inline commit message
+          run: |
+            echo "Message is ${{ atomgit.event.commits[0].message }}"
+trigger:
+  event: push
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "injected_command_executed"
+  - type: positive
+    target: run_status
+    equals: "success"
+teardown:
+  reset: fixture

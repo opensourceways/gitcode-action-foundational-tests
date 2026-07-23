@@ -1,0 +1,39 @@
+id: SEC-SIDE-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 不经 artifact 侧信道绕过脱敏外泄"
+intent_ref: INTENT-SEC-032
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    side-artifact:
+      name: Test secret in artifact
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write secret to file
+          run: |
+            echo "token=${{ secrets.DEPLOY_TOKEN }}" > secret.txt
+        - name: Upload artifact
+          uses: upload-artifact
+          with:
+            name: secret-artifact
+            path: secret.txt
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: artifact_content
+    must_not_contain_secret: "DEPLOY_TOKEN"
+  - type: positive
+    target: run_status
+    equals: "blocked_or_masked"
+teardown:
+  reset: fixture

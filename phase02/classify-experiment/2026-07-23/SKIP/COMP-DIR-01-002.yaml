@@ -1,0 +1,29 @@
+id: COMP-DIR-01-002
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: .github/workflows/ 下的 YAML 不被识别为 workflow
+intent_ref: INTENT-COMP-001
+
+setup:
+  repo_fixture: github-workflows-dir
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_list
+    equals: no_run_from_github_dir
+
+teardown:
+  reset: none

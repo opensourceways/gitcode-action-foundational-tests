@@ -1,0 +1,31 @@
+id: USE-DIR-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: ".github/workflows/ 下 workflow 未被识别时应给出目录差异提示"
+intent_ref: INTENT-USE-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: system_message
+    eval: llm_assisted
+    rubric: "提示信息必须同时包含 .github/workflows 与 .gitcode/workflows 对照字样，并指明 GitCode 使用 .gitcode/workflows 目录存放工作流文件"
+
+teardown:
+  reset: none
+

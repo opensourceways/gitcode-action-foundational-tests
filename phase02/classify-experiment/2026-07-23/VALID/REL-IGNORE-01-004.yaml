@@ -1,0 +1,39 @@
+id: REL-IGNORE-01-004
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "concurrency IGNORE 策略——超上限运行应直接执行"
+intent_ref: INTENT-REL-004
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    max: 2
+    exceed-action: IGNORE
+  jobs:
+    test:
+      name: concurrency test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+  - type: negative
+    target: run_status
+    equals: "queued"
+teardown:
+  reset: none

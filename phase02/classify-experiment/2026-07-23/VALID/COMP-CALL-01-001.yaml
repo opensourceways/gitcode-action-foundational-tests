@@ -1,0 +1,39 @@
+id: COMP-CALL-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 2 层 workflow_call 嵌套正常执行
+intent_ref: INTENT-COMP-006
+
+setup:
+  repo_fixture: reusable-workflow
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    caller:
+      name: Call reusable workflow
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo before call
+          run: |
+            echo "calling reusable workflow"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: none

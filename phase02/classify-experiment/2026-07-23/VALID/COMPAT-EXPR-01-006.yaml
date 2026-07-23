@@ -1,0 +1,40 @@
+id: COMPAT-EXPR-01-006
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: hashFiles 表达式无匹配路径边界
+intent_ref: INTENT-COMPAT-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-hashfiles-none:
+      name: Test hashFiles no match
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: hash no match
+          run: "echo \"hash no match: ${{ hashFiles('**/nonexistent-pattern.xyz') }}\""
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "hash no match:"
+
+teardown:
+  reset: fixture

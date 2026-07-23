@@ -1,0 +1,45 @@
+id: REL-BIGRUNNER-01-066
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "大规格资源调度稳定性——xlarge/2xlarge 反复编译成功率"
+intent_ref: INTENT-REL-066
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    compile_xlarge:
+      name: compile on xlarge
+      runs-on: [ubuntu-latest, x64, xlarge]
+      steps:
+        - name: compile step
+          run: |
+            echo compiling
+            sleep 30
+    compile_2xlarge:
+      name: compile on 2xlarge
+      runs-on: [ubuntu-latest, x64, 2xlarge]
+      steps:
+        - name: compile step
+          run: |
+            echo compiling
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: success_rate
+    ge: "90"
+  - type: positive
+    target: failure_attribution
+    equals: "clear"
+teardown:
+  reset: none

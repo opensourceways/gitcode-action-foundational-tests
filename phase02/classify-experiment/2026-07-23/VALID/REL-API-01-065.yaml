@@ -1,0 +1,39 @@
+id: REL-API-01-065
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: "API 限流与一致性——10 QPS 高频查询 run/job 状态不丢数据"
+intent_ref: INTENT-REL-065
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: http_200_ratio
+    equals: "100%"
+  - type: negative
+    target: http_error_codes
+    contains: "429"
+  - type: nonfunctional
+    target: response_time_p95_seconds
+    le: "2"
+teardown:
+  reset: none

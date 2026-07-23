@@ -1,0 +1,35 @@
+id: SEC-ENV-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "环境级 secret 必须经审批后才能被 workflow 访问"
+intent_ref: INTENT-SEC-027
+setup:
+  repo_fixture: with-env-secrets
+  secrets: ["PROD_TOKEN"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    env-secret-approved:
+      name: Access env secret after approval
+      runs-on: [dedicate-hosted, x64, large]
+      environment: production
+      steps:
+        - name: Use env secret
+          run: |
+            echo "secret length is ${#PROD_TOKEN}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "success_after_approval"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "PROD_TOKEN"
+teardown:
+  reset: fixture

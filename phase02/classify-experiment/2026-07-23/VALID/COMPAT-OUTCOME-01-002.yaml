@@ -1,0 +1,61 @@
+id: COMPAT-OUTCOME-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "continue-on-error true 时 outcome 应为 failure 而 conclusion 应为 success"
+intent_ref: INTENT-COMPAT-035
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    outcome-true:
+      name: Test outcome with continue on error true
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: failing step tolerated
+          continue-on-error: true
+          run: |
+            exit 1
+        - name: next step runs
+          run: |
+            echo "This step should run"
+        - name: check status
+          if: ${{ always() }}
+          run: |
+            echo "Check step outcome and conclusion"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_status
+    equals: failure
+    eval: llm_assisted
+    rubric: "失败 step 的 outcome 为 failure"
+  - type: positive
+    target: step_conclusion
+    equals: success
+    eval: llm_assisted
+    rubric: "失败 step 的 conclusion 为 success"
+  - type: positive
+    target: run_status
+    equals: success
+    eval: deterministic
+    rubric: "后续 step 正常执行，job 最终状态为 success"
+
+teardown:
+  reset: fixture

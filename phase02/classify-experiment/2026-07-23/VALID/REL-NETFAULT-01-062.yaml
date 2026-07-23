@@ -1,0 +1,40 @@
+id: REL-NETFAULT-01-062
+dimensions: [reliability]
+dimension: reliability
+priority: P2
+title: "网络依赖容错——workflow 中访问不可达地址的明确失败与有界超时"
+intent_ref: INTENT-REL-062
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: network fault tolerance test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: curl unreachable addresses
+          run: |
+            curl --connect-timeout 10 --max-time 120 -v http://192.0.2.1/ || true
+            curl --connect-timeout 10 --max-time 120 -v http://nonexistent-domain-test.example/ || true
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: reachable_status
+    equals: "success"
+  - type: positive
+    target: unreachable_timeout_seconds
+    le: "60"
+  - type: positive
+    target: failure_attribution
+    equals: "clear"
+teardown:
+  reset: none

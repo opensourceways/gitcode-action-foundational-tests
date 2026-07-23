@@ -1,0 +1,39 @@
+id: COMPAT-NEST-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: workflow_call 嵌套层数 - 3 层越界应报错
+intent_ref: INTENT-COMPAT-015
+
+setup:
+  repo_fixture: reusable-workflow-3layer
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    call-level2:
+      name: Call level 2 reusable workflow
+      uses: ./.gitcode/workflows/level2.yml
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息应说明 workflow_call 最多支持 2 层嵌套，而非 generic 语法错误"
+
+teardown:
+  reset: fixture

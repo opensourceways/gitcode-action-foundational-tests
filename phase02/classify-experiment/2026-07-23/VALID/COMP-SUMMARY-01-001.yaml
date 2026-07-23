@@ -1,0 +1,45 @@
+id: COMP-SUMMARY-01-001
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: ATOMGIT_STEP_SUMMARY Markdown 表格与标题正确渲染
+intent_ref: INTENT-COMP-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify step summary rendering
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write summary
+          run: |
+            echo "## Test Summary" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "| Metric | Value |" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "|---|---|" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "| Status | Pass |" >> "$ATOMGIT_STEP_SUMMARY"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: step_summary
+    contains: Test Summary
+  - type: positive
+    target: step_summary_html
+    contains: "<table>"
+
+teardown:
+  reset: none

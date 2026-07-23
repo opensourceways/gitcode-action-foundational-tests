@@ -1,0 +1,49 @@
+id: COMPAT-PERM-01-002
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: 未声明 permissions 时 fork PR 写操作隔离
+intent_ref: INTENT-COMPAT-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-write:
+      name: Test fork write isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: attempt write
+          run: |
+            git config user.email "test@example.com"
+            git config user.name "Test"
+            echo "test" > test_file.txt
+            git add test_file.txt
+            git commit -m "test commit"
+            git push origin HEAD
+
+trigger:
+  event: fork_pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: ""
+
+teardown:
+  reset: fixture

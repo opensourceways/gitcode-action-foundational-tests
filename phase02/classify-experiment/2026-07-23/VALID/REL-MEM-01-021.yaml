@@ -1,0 +1,36 @@
+id: REL-MEM-01-021
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 内存越界——small runner 分配 9 GB 应被 OOM kill"
+intent_ref: INTENT-REL-021
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: memory over limit test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: allocate 9GB
+          run: |
+            python3 -c "a=bytearray(9216*1024*1024); print(len(a))"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "failure"
+  - type: positive
+    target: run_logs
+    contains: "Killed"
+teardown:
+  reset: fixture

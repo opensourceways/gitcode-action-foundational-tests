@@ -1,0 +1,40 @@
+id: USE-RUN-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用三段式标签时 job 正常调度"
+intent_ref: INTENT-USE-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-runner:
+      name: test three-part labels
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: check runner
+          run: |
+            echo "runner ok"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+
+teardown:
+  reset: none
+

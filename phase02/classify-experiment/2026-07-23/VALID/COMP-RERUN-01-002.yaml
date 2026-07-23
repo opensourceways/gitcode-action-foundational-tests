@@ -1,0 +1,43 @@
+id: COMP-RERUN-01-002
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: 第 4 次 rerun 应被系统拒绝
+intent_ref: INTENT-COMP-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify rerun limit
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo
+          run: |
+            echo "run"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: rerun_result
+    equals: 4th_rerun_created
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: 报错应说明 rerun 最多 3 次
+
+teardown:
+  reset: none

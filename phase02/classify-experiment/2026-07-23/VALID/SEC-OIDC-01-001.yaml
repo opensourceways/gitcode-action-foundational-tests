@@ -1,0 +1,33 @@
+id: SEC-OIDC-01-001
+dimensions: ["security", "compatibility"]
+dimension: security
+priority: P1
+title: "OIDC / 短时凭据支持若缺失，必须明确标注为平台限制并提供替代安全方案"
+intent_ref: INTENT-SEC-034
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    oidc-check:
+      name: Check OIDC documentation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Document check placeholder
+          run: |
+            echo "Checking OIDC support documentation"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: platform_docs
+    must_not_contain: "long_term_cloud_token_default"
+  - type: positive
+    target: platform_docs
+    equals: "oidc_limitation_documented"
+teardown:
+  reset: none

@@ -1,0 +1,31 @@
+id: USE-PATH-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "paths 300 文件上限在文档与行为中一致且明示"
+intent_ref: INTENT-USE-015
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: documentation
+    eval: llm_assisted
+    rubric: "文档 configure-triggers.md 中 paths/paths-ignore 说明必须在首段或独立的注意块中写明匹配前 300 个变更文件"
+
+teardown:
+  reset: none
+

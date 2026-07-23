@@ -1,0 +1,44 @@
+id: USE-RUN-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用单标签 ubuntu-latest 时报错应给出三段式格式指引"
+intent_ref: INTENT-USE-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-runner:
+      name: test single label error
+      runs-on: [ubuntu-latest]
+      steps:
+        - name: step
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 runs-on 或 runner 标签相关说明，并给出至少一个正确示例"
+
+teardown:
+  reset: none
+

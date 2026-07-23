@@ -1,0 +1,46 @@
+id: COMP-STATUS-01-002
+dimensions: [completeness, usability]
+dimension: completeness
+priority: P1
+title: 失败 step 的日志完整保留且可查看
+intent_ref: INTENT-COMP-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify failed step logs
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Before failure
+          run: |
+            echo "BEFORE_FAILURE_MARKER"
+        - name: Force failure
+          run: |
+            echo "ERROR_MARKER"
+            exit 1
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: BEFORE_FAILURE_MARKER
+  - type: positive
+    target: run_logs
+    contains: ERROR_MARKER
+
+teardown:
+  reset: none

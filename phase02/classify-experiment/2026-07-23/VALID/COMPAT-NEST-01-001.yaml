@@ -1,0 +1,35 @@
+id: COMPAT-NEST-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: workflow_call 嵌套层数 - 2 层正常执行
+intent_ref: INTENT-COMPAT-015
+
+setup:
+  repo_fixture: reusable-workflow
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    call-level2:
+      name: Call level 2 reusable workflow
+      uses: ./.gitcode/workflows/level2.yml
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: fixture

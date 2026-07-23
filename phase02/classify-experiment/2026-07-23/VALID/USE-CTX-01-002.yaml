@@ -1,0 +1,44 @@
+id: USE-CTX-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 github 上下文时报错应提示 atomgit 替代"
+intent_ref: INTENT-USE-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-ctx:
+      name: test github context error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo github ref
+          run: |
+            echo "ref=${{ github.ref }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须同时出现 github 与 atomgit 字样，并给出替换建议"
+
+teardown:
+  reset: none
+

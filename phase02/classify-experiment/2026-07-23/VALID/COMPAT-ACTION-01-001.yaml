@@ -1,0 +1,60 @@
+id: COMPAT-ACTION-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: checkout 短名等价性——ref 参数支持
+intent_ref: INTENT-COMPAT-024
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify-checkout-ref:
+      name: Verify checkout ref parameter
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) checkout with ref main
+          uses: checkout
+          with:
+            ref: main
+        - name: (TC) verify branch is main
+          run: |
+            if [ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]; then
+              echo "CHECKOUT_REF_FAILED"
+              exit 1
+            else
+              echo "CHECKOUT_REF_OK"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 CHECKOUT_REF_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 CHECKOUT_REF_FAILED"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "不应因使用裸插件名 checkout 而解析失败"
+
+teardown:
+  reset: fixture

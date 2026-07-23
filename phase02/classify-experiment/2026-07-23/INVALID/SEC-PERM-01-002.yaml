@@ -1,0 +1,42 @@
+id: SEC-PERM-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "permissions 声明 read 时写操作被平台拒绝"
+intent_ref: INTENT-SEC-016
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    perm-write-denied:
+      name: Test write denied under read
+      runs-on: [dedicate-hosted, x64, large]
+      permissions:
+        repository: read
+      steps:
+        - name: Clone repo
+          run: |
+            git clone https://x-access-token:${{ atomgit.token }}@atomgit.com/${{ atomgit.repository }}.git repo
+        - name: Attempt push
+          run: |
+            cd repo
+            echo test > test.txt
+            git add test.txt
+            git commit -m test
+            git push origin main || echo push denied as expected
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "push_successful"
+  - type: positive
+    target: run_logs
+    equals: "push_denied_or_403"
+teardown:
+  reset: fixture

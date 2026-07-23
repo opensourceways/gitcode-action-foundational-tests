@@ -1,0 +1,34 @@
+id: SEC-WCMD-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Workflow 命令（如 add-mask）的响应本身不可泄露被遮蔽前的 secret 值"
+intent_ref: INTENT-SEC-028
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    add-mask-test:
+      name: Test add-mask response
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Mask secret
+          run: |
+            echo "::add-mask::${{ secrets.API_KEY }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "API_KEY"
+  - type: positive
+    target: run_logs
+    equals: "mask_command_without_payload"
+teardown:
+  reset: fixture

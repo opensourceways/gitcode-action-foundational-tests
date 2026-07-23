@@ -1,0 +1,37 @@
+id: SEC-NAME-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "通过 printenv 或进程枚举获取 ATOMGIT_TOKEN/secrets 时日志中必须保持脱敏"
+intent_ref: INTENT-SEC-025
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    printenv-test:
+      name: Test printenv masking
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Run printenv
+          run: |
+            printenv | grep API_KEY || echo not found
+        - name: Read proc environ
+          run: |
+            cat /proc/self/environ | tr '\0' '\n' | grep API_KEY || echo not found
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "API_KEY"
+  - type: positive
+    target: run_logs
+    equals: "masked_or_not_found"
+teardown:
+  reset: fixture

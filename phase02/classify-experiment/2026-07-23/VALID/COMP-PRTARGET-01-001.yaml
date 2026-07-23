@@ -1,0 +1,44 @@
+id: COMP-PRTARGET-01-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: pull_request_target 默认使用 base 分支 workflow 版本
+intent_ref: INTENT-COMP-014
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify base workflow version
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo base version marker
+          run: |
+            echo "BASE_VERSION_MARKER"
+
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: BASE_VERSION_MARKER
+  - type: negative
+    target: run_logs
+    must_not_contain: FORK_VERSION_MARKER
+
+teardown:
+  reset: fixture
