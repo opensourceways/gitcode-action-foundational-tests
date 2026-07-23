@@ -122,9 +122,9 @@ jobs:
 
 ---
 
-## 4b. `uses:` Action 引用格式 [官方文档]
+## 4b. `uses:` Action 引用格式 [官方文档 + 2026-07-23 更新]
 
-三种合法引用（`writing-pipelines/using-actions.md`）：
+### Step-level `uses:`（steps 内）— 仅支持插件/Action
 
 | 类型 | 语法 | 例 |
 |---|---|---|
@@ -134,8 +134,22 @@ jobs:
 
 - ❌ **禁止 `official_` 前缀**：GitCode 官方插件就是裸名。`official_checkout` 不是合法语法，应写 `checkout`。
 - ❌ **禁止 GitHub 内置全名** `actions/checkout@v4` / `actions/setup-node@v4`——**除非**该用例本身在测 GitHub 格式是否报错（COMPAT 负向用例，须在 rubric 明示预期报错）。
+- ❌ **step 级别不支持 `.yml` 工作流路径**：`uses: ./.gitcode/workflows/xxx.yml` 只能在 **job 级别**使用（`workflow_call` 复用），放在 step 级别会被验证器拒绝（`格式错误：pluginname@version`）。
 - 已知官方内置插件名：`checkout` `setup-node` `setup-go` `setup-java` `setup-python` `cache` `upload-artifact` `download-artifact`。
 - 云集成类插件（OBS/SWR/k8s/docker 登录等）exact 名称以 **GitCode 插件市场**为准；未确认前用 hyphen 命名（如 `obs-upload`）并登记 spec-gap，**勿臆造**。
+
+### Job-level `uses:`（jobs 内）— 支持工作流复用
+
+```yaml
+# ✅ job 级别——复用另一个 workflow 文件
+jobs:
+  caller:
+    uses: ./.gitcode/workflows/reusable.yml
+
+# ❌ step 级别——不支持 .yml 文件
+steps:
+  - uses: ./.gitcode/workflows/reusable.yml   # 平台拒绝
+```
 
 ---
 
@@ -428,7 +442,25 @@ post:
 
 ---
 
-## 21. 未知顶层字段拒绝 ★ [平台实测 · 2026-07-23]
+## 21. `on.schedule` 必须是数组 ★ [平台实测 · 2026-07-23]
+
+GitCode 的 `on.schedule` 必须是数组格式（`schedule: [{cron: ...}]`），不支持单对象格式 `schedule: {cron: ...}`。对象格式报 `Cannot deserialize ArrayList from Object value`。
+
+```yaml
+# ❌ 错误 — 对象格式
+on:
+  schedule:
+    cron: "0 0 * * *"
+
+# ✅ 正确 — 数组格式
+on:
+  schedule:
+    - cron: "0 0 * * *"
+```
+
+---
+
+## 22. 未知顶层字段拒绝 ★ [平台实测 · 2026-07-23]
 
 GitCode 校验器拒绝任何不在 schema 中的顶层字段（如拼写错误的 `on` 变体、GitHub 专有字段等），报 `unknown_field: unknown property`。
 
@@ -484,6 +516,7 @@ case-writer 在写入每个 YAML 前执行：
 - [ ] 无 `run-name`
 - [ ] 无 `services` / `post.steps`
 - [ ] `stages` 用 map 格式（不是数组）
+- [ ] `on.schedule` 用数组格式（不是单对象）
 - [ ] `concurrency.preemption.events` 只用 `[mr_id]`
 - [ ] `dimension=security` → 含 `type: negative`
 - [ ] 所有必填字段非空

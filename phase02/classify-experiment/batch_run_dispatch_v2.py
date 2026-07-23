@@ -48,24 +48,28 @@ def v2_headers():
 # ── Deploy ────────────────────────────────────────────────────────
 
 def ensure_dispatch(wf_text):
-    """Inject workflow_dispatch into on: if not already present."""
-    if "workflow_dispatch" in wf_text:
-        return wf_text
+    """Inject workflow_dispatch AND push into on: for dual-trigger support."""
     lines = wf_text.split("\n")
     result = []
-    injected = False
+    injected_dispatch = ("workflow_dispatch" in wf_text)
+    injected_push = ("push:" in wf_text)
+    
     for line in lines:
         result.append(line)
         stripped = line.strip()
-        if not injected and stripped.startswith("on:"):
+        if stripped.startswith("on:"):
             indent = " " * (len(line) - len(line.lstrip()) + 2)
-            result.append(f"{indent}workflow_dispatch:")
-            injected = True
+            if not injected_push:
+                result.append(f"{indent}push:")
+                injected_push = True
+            if not injected_dispatch:
+                result.append(f"{indent}workflow_dispatch:")
+                injected_dispatch = True
     return "\n".join(result)
 
 
 def deploy_one(case_id, wf_text):
-    """git clone → write → commit → push。返回 file_path。"""
+    """git clone → write → commit → push。返回 (file_path, commit_sha)。"""
     fp = f".gitcode/workflows/{case_id.lower().replace('_', '-')}.yml"
     workdir = tempfile.mkdtemp(prefix="br-")
     repo_url = f"https://oauth2:{TOKEN}@gitcode.com/{OWNER}/{REPO}.git"
@@ -76,7 +80,6 @@ def deploy_one(case_id, wf_text):
         f.write(wf_text)
         f.write(f"\n# deploy: {int(time.time())}\n")
     subprocess.run(["git", "add", fp], cwd=f"{workdir}/repo", capture_output=True, check=True)
-    # commit may fail if nothing changed (files identical) — that's ok
     r = subprocess.run(["git", "commit", "-m", f"test: {case_id}"], cwd=f"{workdir}/repo",
                        capture_output=True, text=True)
     if r.returncode != 0 and "nothing to commit" not in r.stderr:
@@ -84,8 +87,11 @@ def deploy_one(case_id, wf_text):
         raise RuntimeError(f"git commit failed: {r.stderr[:200]}")
     subprocess.run(["git", "push", "origin", BRANCH], cwd=f"{workdir}/repo",
                    capture_output=True, timeout=30, check=True)
+    sha_r = subprocess.run(["git", "rev-parse", "HEAD"], cwd=f"{workdir}/repo",
+                           capture_output=True, text=True, check=True)
+    commit_sha = sha_r.stdout.strip()
     shutil.rmtree(workdir, ignore_errors=True)
-    return fp
+    return fp, commit_sha
 
 
 # ── Dispatch ───────────────────────────────────────────────────────
@@ -100,10 +106,10 @@ def find_workflow_id(fp):
     return None
 
 
-def dispatch_one(wf_id, fp):
+def dispatch_one(wf_id, fp, commit_sha=""):
     project = f"{OWNER}%2F{REPO}"
     url = f"{WEB_API}/api/v2/projects/{project}/actions/workflows/{wf_id}/dispatch"
-    payload = {"ref": BRANCH, "branch": BRANCH, "branch_commit_id": "",
+    payload = {"ref": BRANCH, "branch": BRANCH, "branch_commit_id": commit_sha,
                "repo_https_url": f"https://gitcode.com/{OWNER}/{REPO}.git",
                "file_path": fp, "inputs": {}}
     r = requests.post(url, headers=v2_headers(), json=payload, timeout=10)
@@ -233,8 +239,8 @@ def main():
         try:
             # 1. Ensure dispatchable & Deploy
             wf = ensure_dispatch(wf)
-            fp = deploy_one(cid, wf)
-            log(f"  deployed → {fp}")
+            fp, sha = deploy_one(cid, wf)
+            log(f"  deployed → {fp} ({sha[:8]})")
             time.sleep(6)
 
             # 2. Find + dispatch
@@ -247,7 +253,7 @@ def main():
                 verdict_counts["NOT_FOUND"] += 1
                 continue
 
-            code, resp = dispatch_one(wf_id, fp)
+            code, resp = dispatch_one(wf_id, fp, sha)
             if code != 200:
                 reason = resp.get("error_message", str(resp)) if isinstance(resp, dict) else str(resp)[:300]
                 results.append({"case_id": cid, "verdict": "DISPATCH_FAIL", "reason": reason})

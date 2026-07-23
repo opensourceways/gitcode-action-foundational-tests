@@ -327,12 +327,56 @@ curl -s "https://api.gitcode.com/api/v8/repos/$OWNER/$REPO/actions/runs/$RUN_ID/
 
 ## 相邻 API 分类（非 Actions，但相关）
 
-| 分类 | 版本 | 示例端点 | 可能关联的测试场景 |
+| 分类 | 版本 | 端点 | 可能关联的测试场景 |
 |---|---|---|---|
-| Pull Requests | v5 | `GET /api/v5/repos/:owner/:repo/pulls` | 验证 PR 事件触发 workflow |
-| Webhooks | v5 | `GET /api/v5/repos/:owner/:repo/hooks` | 验证 webhook 与 workflow 触发关联 |
+| Pull Requests | v5 | `GET /api/v5/repos/:owner/:repo/pulls` | 获取 PR 列表、验证 PR 事件触发 workflow |
+| Pull Requests | v5 | `POST /api/v5/repos/:owner/:repo/pulls` | **创建 PR**（maintainer PR 触发 `pull_request` 事件） |
+| Repositories | v5 | `POST /api/v5/repos/:owner/:repo/forks` | **创建 fork**（fork PR 隔离测试的第一步） |
 | Repositories | v5 | `GET /api/v5/repos/:owner/:repo/git/trees/:sha` | 验证 checkout 行为 |
-| Issues | v5 | `POST /api/v5/repos/:owner/issues` | 验证 issue_comment 触发 |
+| Issues | v5 | `POST /api/v5/repos/:owner/issues` | 创建 Issue |
+| Issues | v5 | `POST /api/v5/repos/:owner/:repo/issues/:number/comments` | **创建 Issue 评论**（触发 `issue_comment` 事件） |
+| Webhooks | v5 | `GET /api/v5/repos/:owner/:repo/hooks` | 验证 webhook 与 workflow 触发关联 |
+
+### 关键测试场景：fork PR 隔离
+
+```
+# 1. 创建 fork（以 contributor token 操作）
+POST /api/v5/repos/{owner}/{repo}/forks
+  → response: { id, full_name, ... }     # 返回 fork 后的仓库信息
+  → fork 仓库路径: {contributor}/{repo}
+
+# 2. 在 fork 中修改 workflow 触发文件 + 创建 PR
+POST /api/v5/repos/{contributor}/{repo}/pulls
+  Headers: Authorization: Bearer {contributor_token}
+  Body: {
+    "title": "test: fork PR isolation",
+    "head": "{contributor}:feature-branch",     # 源分支（fork 侧）
+    "base": "main"                                # 目标分支（上游主仓库）
+  }
+  → response: { number, html_url, ... }
+
+# 3. 在上游仓库轮询 workflow run（以 bot token 操作）
+GET /api/v8/repos/{owner}/{repo}/actions/runs?pull_request_id={number}&status=COMPLETED
+  → 找到 run_id
+
+# 4. 检查 job 日志（以 bot token 操作）
+GET /api/v8/repos/{owner}/{repo}/actions/runs/{run_id}/jobs/{job_id}/download-log
+  → 断言: MUST_NOT contain secret value
+```
+
+### 关键测试场景：issue_comment 触发
+
+```
+# 1. 创建 Issue（以 bot token）
+POST /api/v5/repos/{owner}/issues
+  Body: { "title": "test issue", "body": "trigger workflow" }
+  → response: { number: 42, ... }
+
+# 2. 创建评论触发 workflow（以 contributor token）
+POST /api/v5/repos/{owner}/{repo}/issues/42/comments
+  Body: { "body": "/trigger-ci" }
+  → 触发 on: issue_comment 的 workflow
+```
 
 ---
 
