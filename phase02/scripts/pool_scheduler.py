@@ -211,7 +211,7 @@ def run_pool(run_id, only=None, no_logs=False):
                             _print_verdict(cid, "ENV_ERROR")
                             continue
 
-                        repo_deployed[cfg.repo].append(wf_filename)
+                        # 非 push 触发保留文件，不登记待清理
                         run_id, reason = _start_dispatch(cfg, wf_filename, contract_doc)
                         if not run_id:
                             _record_direct(run_dir, state, contract_doc, cid, "ENV_ERROR",
@@ -240,7 +240,9 @@ def run_pool(run_id, only=None, no_logs=False):
                         _print_verdict(cid, "ENV_ERROR")
                         continue
 
-                    repo_deployed[cfg.repo].append(wf_filename)
+                    # 仅 push 触发登记待清理，其余保留（界面可查）
+                    if ev == "push":
+                        repo_deployed[cfg.repo].append(wf_filename)
                     if ev == "tag":
                         tag = f"test-{cid.lower().replace('_','-')}"
                         rc_t, out_t = wr._sh(f"git tag {tag} && git push origin {tag}", cwd=ws.repo_dir)

@@ -954,8 +954,9 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
                 rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝（预检未覆盖的规则）"
             return rr
         finally:
-            # 无论判定结果如何，清理本次 push 的文件（除非 reset=none）
-            if wf_filename and teardown_reset != "none":
+            # 只对 push 触发执行 teardown（删 workflow 防共享仓污染），
+            # 非 push 触发保留文件（可查 GitCode 界面工作流详情）
+            if wf_filename and teardown_reset != "none" and trigger_event == "push":
                 try:
                     teardown(ws, cfg, wf_filename)
                 except Exception as e:
