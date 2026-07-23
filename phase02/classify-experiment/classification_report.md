@@ -25,35 +25,49 @@
 
 ## 阻断项详解
 
-### 断言层阻断（assertion_engine 不支持）
+### 断言层阻断（assertion_engine 不支持）— 全部可代码解决
 
-| 阻断 | 数量 | 缺什么 |
-|------|------|--------|
-| `eval=llm_assisted` | **44** | assertion_engine 加 LLM 辅助判定通道（27 条 target=error_message） |
-| `target=run_ui / pr_ui` | **4** | Playwright 浏览器自动化 |
-| `target=badge_response` | **3** | HTTP client 获取 badge URL 并解析 SVG |
-| `target=runner_schedulable / runner_scheduling` | **3** | runner API 已有（`GET .../actions/runners`），加 assertion kind |
-| `target=workflow_validation` | **2** | validate_workflow.py 已有（`POST /api/v2/.../valid`），接入 engine |
-| `target=run_duration` | **2** | run API 已有 `start_time`/`end_time`，算差值 + 加 duration kind |
-| `target=step_summary` | **1** | job API 已有 steps JSON，解析结构体而非 grep 日志 |
-| `target=artifacts` | **1** | artifact API 已有（`GET .../actions/artifacts` + download），加扫描 kind |
+| 阻断 | 数量 | 解法 | 判性 |
+|------|------|------|------|
+| `eval=llm_assisted` | **44** | 加 `kind="llm"`：发 logs + rubric 到 LLM API，返回结构化评估 | ⬜ 代码 |
+| `target=run_ui / pr_ui` | **4** | 加 Playwright 浏览器自动化 + 新 assertion kind | ⬜ 代码 |
+| `target=badge_response` | **3** | HTTP GET badge URL → 解析 SVG → 新 assertion kind | ⬜ 代码 |
+| `target=runner_schedulable / runner_scheduling` | **3** | API 已有 `GET .../runners`，加 assertion kind | ⬜ 代码 |
+| `target=workflow_validation` | **2** | `validate_workflow.py` 已封装 `POST .../valid`，加 assertion kind | ⬜ 代码 |
+| `target=run_duration` | **2** | API 已有 `start_time`/`end_time`，算差值 + assertion kind | ⬜ 代码 |
+| `target=step_summary` | **1** | API 已有 job steps JSON，加 assertion kind | ⬜ 代码 |
+| `target=artifacts` | **1** | API 已有 `GET .../artifacts` + download，加 assertion kind | ⬜ 代码 |
 
 ### Trigger 层阻断
 
-| 阻断 | 数量 | 缺什么 |
-|------|------|--------|
-| `fork_pr` trigger | **13** | fork API（`POST /api/v5/.../forks`）+ 第二 GitCode 账号 |
-| `trigger.as=untrusted_contributor` | **17** | 第二 GitCode 账号 + OAuth token |
-| `manual` trigger | **5** | dispatch API 已验证可用（`actions_ctl.py`），未集成到 runner |
-| `schedule` trigger | **5** | cron 无法按需触发，变通：push + `ATOMGIT_EVENT_NAME=schedule` |
-| `pr` / `pull_request` / `pull_request_target` / `pull_request_comment` | **8** | PR 创建 API（`POST /api/v5/.../pulls`）已有，未集成到 runner |
+| 阻断 | 数量 | 解法 | 判性 |
+|------|------|------|------|
+| `fork_pr` trigger | **13** | fork API（`POST /api/v5/.../forks`）验证存在，集成到 runner | ⬜ 凭据 |
+| `trigger.as=untrusted_contributor` | **17** | 同 fork_pr | ⬜ 凭据 |
+| `manual` trigger | **5** | dispatch API 已用 `actions_ctl.py` 验证可用，集成到 runner | ⬜ 代码 |
+| `schedule` trigger | **5** | GitCode 无 "trigger schedule now" API，`workflow_dispatch` 事件类型 ≠ `schedule` | ⬛ 平台限制 |
+| `pr` / `pull_request` / `pull_request_target` / `pull_request_comment` | **8** | PR API（`POST /api/v5/.../pulls`）已有 + comment API 已有，集成到 runner | ⬜ 代码 |
 
 ### 执行环境阻断
 
-| 阻断 | 数量 | 缺什么 |
-|------|------|--------|
-| `fault_injection` 非 null | **5** | runner kill / network_partition / concurrent_flood infra |
-| 未知 `repo_fixture` | **~18** | 预先创建配置好的测试仓 |
+| 阻断 | 数量 | 解法 | 判性 |
+|------|------|------|------|
+| `fault_injection`: `kill_runner` | **2** | Stop API 已验证（`POST .../stop → {"success":true}`），模拟杀 runner | ⬜ 代码 |
+| `fault_injection`: `concurrent_flood` | **1** | dispatch API 并发触发多个 run | ⬜ 代码 |
+| `fault_injection`: `network_partition` / `disk_full` / `cpu_saturate` | **2** | 需 runner 宿主机 SSH 权限操作 iptables/dd/stress | ⬛ 手工 |
+| 未知 `repo_fixture` | **~18** | `POST /api/v5/user/repos` 创建测试仓 + 推送 secrets/variables | ⬜ 代码 |
+
+> **⬜ 凭据**（fork_pr + untrusted_contributor 共 30 cases）：代码 trivial，仅缺 **第二 GitCode 账号的 OAuth token**（需在 GitCode 完成实名/邮箱验证）。token 到手后录入 `~/.gitcode-token-contrib` 即可全自动。
+
+### 汇总
+
+```
+断言层    60/60 (100%)  ████████████████████  全部可代码解决
+trigger   31/31  (97%)  ███████████████████░  5 schedule 不可自动化
+执行环境 ~22/22  (86%)  █████████████████░░░  2 故障注入需手工基础设施
+─────────────────────────────────────────────────────
+总计: 106 可代码 + 5 平台限制 + 2 手工  （30 凭据依赖：代码 ready，缺 token）
+```
 
 ---
 
