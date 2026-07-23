@@ -74,6 +74,20 @@ def _load_dotenv_cookie():
     return ""
 
 
+def _extract_jwt(raw):
+    """从整串 cookie 中提取 GITCODE_ACCESS_TOKEN 的 JWT 值。
+
+    "GITCODE_ACCESS_TOKEN=eyJ...; k=v" → "eyJ..."
+    纯 JWT 串（不含 "=" 前缀）直接返回原值。
+    """
+    if not raw:
+        return raw
+    m = re.search(r"GITCODE_ACCESS_TOKEN=([^;]+)", raw)
+    if m:
+        return m.group(1)
+    return raw
+
+
 class RunnerConfig:
     """执行器配置。默认对齐当前被测实例（bingo），可由环境变量覆盖。"""
 
@@ -107,16 +121,16 @@ class RunnerConfig:
     @staticmethod
     def _load_cookie():
         cookie = os.environ.get("GITCODE_COOKIE", "")
-        if cookie:
-            return cookie
-        cookie = _load_dotenv_cookie()
-        if cookie:
-            return cookie
-        path = os.path.expanduser("~/.gitcode-cookie")
-        if os.path.exists(path):
-            return open(path, encoding="utf-8").read().strip()
-        log("  (警告) GITCODE_COOKIE 未配置 — dispatch 触发不可用")
-        return ""
+        if not cookie:
+            cookie = _load_dotenv_cookie()
+        if not cookie:
+            path = os.path.expanduser("~/.gitcode-cookie")
+            if os.path.exists(path):
+                cookie = open(path, encoding="utf-8").read().strip()
+        if not cookie:
+            log("  (警告) GITCODE_COOKIE 未配置 — dispatch 触发不可用")
+            return ""
+        return _extract_jwt(cookie)
 
     @staticmethod
     def _load_token():
