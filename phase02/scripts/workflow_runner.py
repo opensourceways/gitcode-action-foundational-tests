@@ -253,29 +253,41 @@ def _sh(cmd, cwd=None):
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 
 
-# ── 工作区（一次 clone、多条复用）──────────────────────────────────
+HERE = os.path.dirname(os.path.abspath(__file__))
+PHASE02 = os.path.dirname(HERE)
+
+# ── 工作区（持久化缓存，跨 batch 复用；首次 clone，后续 git pull）──
+_CACHE_ROOT = os.path.join(PHASE02, ".cache", "repos")
+
+
 class Workspace:
-    """clone 一次测试仓到临时目录，退出时清理。"""
+    """clone 一次测试仓到持久缓存目录，退出时保留以备下个 batch 复用。"""
 
     def __init__(self, cfg):
         self.cfg = cfg
-        self.root = None
-        self.repo_dir = None
+        self.repo_dir = os.path.join(_CACHE_ROOT, cfg.owner, cfg.repo)
 
     def __enter__(self):
-        self.root = tempfile.mkdtemp(prefix="p2-wr-")
-        self.repo_dir = os.path.join(self.root, "repo")
         url = (f"https://oauth2:{self.cfg.token}@gitcode.com/"
                f"{self.cfg.owner}/{self.cfg.repo}.git")
-        rc, out = _sh(f'git clone --depth 1 "{url}" "{self.repo_dir}"')
-        if rc != 0:
-            shutil.rmtree(self.root, ignore_errors=True)
-            raise ApiError(f"git clone 失败: {out[-200:]}")
+        if os.path.isdir(os.path.join(self.repo_dir, ".git")):
+            # 缓存存在：拉取最新、强制对齐远程（抹掉上次 batch 的 teardown 残留）
+            rc, out = _sh("git fetch --depth 1 origin", cwd=self.repo_dir)
+            if rc == 0:
+                _sh(f"git checkout -q {self.cfg.branch}", cwd=self.repo_dir)
+                _sh(f"git reset --hard origin/{self.cfg.branch}", cwd=self.repo_dir)
+            else:
+                # fetch 失败则重新 clone
+                shutil.rmtree(self.repo_dir, ignore_errors=True)
+        if not os.path.isdir(os.path.join(self.repo_dir, ".git")):
+            os.makedirs(os.path.dirname(self.repo_dir), exist_ok=True)
+            rc, out = _sh(f'git clone --depth 1 "{url}" "{self.repo_dir}"')
+            if rc != 0:
+                raise ApiError(f"git clone 失败: {out[-200:]}")
         return self
 
     def __exit__(self, *exc):
-        if self.root:
-            shutil.rmtree(self.root, ignore_errors=True)
+        pass  # 持久化缓存，不删除
 
 
 # ── 0. 预检（push 前本地校验，拦编译错误，零 API 依赖）─────────────
