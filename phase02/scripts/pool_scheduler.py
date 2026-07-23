@@ -111,7 +111,7 @@ def run_pool(run_id, only=None, no_logs=False):
 
     # 每个仓独立数据结构
     repo_names = pool_cfg["repo_names"]
-    in_flight = []  # [{cid, repo_cfg, ws, sha, wf_filename, contract_doc, asserts, t0}]
+    in_flight = []  # [{cid, repo_cfg, ws, trigger_event, sha/run_id, wf_filename, contract_doc, asserts, t0}]
     repo_deployed = {rn: [] for rn in repo_names}   # 记录本批每仓 push 的文件名 (for batch teardown)
 
     # state 初始化
@@ -195,6 +195,38 @@ def run_pool(run_id, only=None, no_logs=False):
                         _print_verdict(cid, f"INCONCLUSIVE({reason})")
                         continue
 
+                    if ev == "workflow_dispatch":
+                        if not cfg.cookie:
+                            _record_direct(run_dir, state, contract_doc, cid, "INCONCLUSIVE",
+                                           "GITCODE_COOKIE 未配置，dispatch 触发不可用")
+                            _print_verdict(cid, "INCONCLUSIVE(GITCODE_COOKIE 未配置)")
+                            continue
+
+                        wr.log(f"  [{cfg.repo}] deploy+dispatch {cid}")
+                        t0 = time.time()
+                        sha, wf_filename = wr.deploy(ws, cfg, cid, wf)
+                        if not sha:
+                            _record_direct(run_dir, state, contract_doc, cid, "ENV_ERROR",
+                                           "git push 失败", t0=t0)
+                            _print_verdict(cid, "ENV_ERROR")
+                            continue
+
+                        repo_deployed[cfg.repo].append(wf_filename)
+                        run_id, reason = _start_dispatch(cfg, wf_filename, contract_doc)
+                        if not run_id:
+                            _record_direct(run_dir, state, contract_doc, cid, "ENV_ERROR",
+                                           reason, t0=t0)
+                            _print_verdict(cid, f"ENV_ERROR({reason})")
+                            continue
+
+                        in_flight.append({"cid": cid, "repo_cfg": cfg, "ws": ws,
+                                          "trigger_event": ev, "sha": sha,
+                                          "wf_filename": wf_filename, "run_id": run_id,
+                                          "contract_doc": contract_doc, "asserts": asserts,
+                                          "t0": t0})
+                        repo_in_flight = [it for it in in_flight if it["repo_cfg"].repo == cfg.repo]
+                        continue
+
                     # push（同仓串行——一次只 push 一条）
                     wr.log(f"  [{cfg.repo}] deploy {cid}")
                     sha, wf_filename = wr.deploy(ws, cfg, cid, wf)
@@ -210,6 +242,7 @@ def run_pool(run_id, only=None, no_logs=False):
 
                     repo_deployed[cfg.repo].append(wf_filename)
                     in_flight.append({"cid": cid, "repo_cfg": cfg, "ws": ws,
+                                      "trigger_event": ev,
                                       "sha": sha, "wf_filename": wf_filename,
                                       "contract_doc": contract_doc, "asserts": asserts,
                                       "t0": time.time()})
@@ -224,13 +257,17 @@ def run_pool(run_id, only=None, no_logs=False):
                 repo_items = [it for it in in_flight if it["repo_cfg"].repo == cfg.repo]
                 if not repo_items:
                     continue
-                try:
-                    runs = wr.list_runs(cfg, per_page=30)
-                except wr.ApiError:
-                    runs = []
-
+                runs = None
                 for item in list(repo_items):  # 遍历副本，允许 remove
-                    r = wr.match_run(runs, item["sha"], item["wf_filename"])
+                    if item.get("trigger_event") == "workflow_dispatch":
+                        r = _get_dispatch_run(item)
+                    else:
+                        if runs is None:
+                            try:
+                                runs = wr.list_runs(cfg, per_page=30)
+                            except wr.ApiError:
+                                runs = []
+                        r = wr.match_run(runs, item["sha"], item["wf_filename"])
                     if r is None:
                         # 还没出现
                         if time.time() - item["t0"] > case_timeout:
@@ -284,6 +321,66 @@ def _bump_state(state, verdict, run_dir):
 
 def _print_verdict(cid, v):
     print(f"    {cid} → {v}")
+
+
+def _record_direct(run_dir, state, contract_doc, cid, status, reason="", t0=None):
+    verdict = {"verdict": status, "verdict_flags": [],
+               "reason": reason, "assertion_results": []}
+    rec = rc.write_result(run_dir, contract_doc, verdict,
+                          wr._exec_result(status, cid, reason=reason, t0=t0))
+    rc.update_summary(run_dir, rec)
+    _bump_state(state, status, run_dir)
+    return rec
+
+
+def _dispatch_inputs(contract_doc):
+    """Return explicit workflow_dispatch inputs from trigger.params, if present."""
+    params = ((contract_doc.get("trigger") or {}).get("params") or {})
+    if not isinstance(params, dict):
+        return {}
+    nested = params.get("inputs")
+    if isinstance(nested, dict):
+        return nested
+    return params
+
+
+def _start_dispatch(cfg, wf_filename, contract_doc):
+    """Start a workflow_dispatch run and return (run_id, error_reason)."""
+    time.sleep(5)  # Give GitCode time to register the freshly pushed workflow file.
+    project_path = f"{cfg.owner}/{cfg.repo}"
+    try:
+        workflows = wr.list_workflows(cfg.cookie, project_path)
+    except Exception as e:
+        return None, f"list_workflows 失败: {e}"
+
+    wf_id = None
+    wf_file_path = None
+    for workflow in workflows:
+        fp = workflow.get("file_path") or ""
+        if fp.endswith(wf_filename):
+            wf_id = workflow.get("workflow_id")
+            wf_file_path = fp
+            break
+    if not wf_id:
+        return None, f"list_workflows 未找到匹配 {wf_filename} 的 workflow_id"
+
+    repo_https_url = f"https://gitcode.com/{cfg.owner}/{cfg.repo}.git"
+    code, run_id = wr.dispatch_workflow(cfg.cookie, project_path, wf_id, wf_file_path,
+                                        cfg.branch, cfg.branch, repo_https_url,
+                                        inputs=_dispatch_inputs(contract_doc))
+    if code != 200 or not run_id:
+        return None, f"dispatch_workflow 返回 HTTP {code}, run_id={run_id}"
+    wr.log(f"  dispatch: workflow_run_id={run_id}")
+    return run_id, ""
+
+
+def _get_dispatch_run(item):
+    cfg = item["repo_cfg"]
+    try:
+        run = wr.api_get(cfg, f"/actions/runs/{item['run_id']}")
+    except wr.ApiError:
+        return None
+    return run
 
 
 def _resolve_terminal(run_dir, state, item, run, no_logs):
