@@ -682,8 +682,7 @@ TRIGGER_STATUS = {
     "workflow_dispatch":    {"supported": True},
     "pr":                   {"supported": True},
     "pull_request":         {"supported": True},
-    "pull_request_target":  {"supported": False,
-                              "reason": "pull_request_target：同 PR 触发机制，但需验证 base 上下文语义差异（untrusted fork PR 场景）"},
+    "pull_request_target":  {"supported": True},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
@@ -881,8 +880,8 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     # tag 走独立 tag 链路
     if trigger_event == "tag":
         return trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
-    # pr / pull_request 走 PR 链路
-    if trigger_event in ("pr", "pull_request"):
+    # pr / pull_request / pull_request_target 走 PR 链路
+    if trigger_event in ("pr", "pull_request", "pull_request_target"):
         return trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:

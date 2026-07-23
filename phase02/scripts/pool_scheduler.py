@@ -246,7 +246,7 @@ def run_pool(run_id, only=None, no_logs=False):
                         rc_t, out_t = wr._sh(f"git tag {tag} && git push origin {tag}", cwd=ws.repo_dir)
                         if rc_t != 0:
                             wr.log(f"  tag push 失败: {out_t[-150:]}")
-                    if ev in ("pr", "pull_request"):
+                    if ev in ("pr", "pull_request", "pull_request_target"):
                         pr_branch = f"pr-{cid.lower().replace('_','-')}"
                         wr._sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
                         rc_t, out_t = wr._sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
