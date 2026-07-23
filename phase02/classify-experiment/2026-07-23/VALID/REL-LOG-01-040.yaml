@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: log size 100MB test
-      runs-on: [self-hosted,arch=arm]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: generate 100MB log
           run: |
