@@ -241,6 +241,11 @@ def run_pool(run_id, only=None, no_logs=False):
                         continue
 
                     repo_deployed[cfg.repo].append(wf_filename)
+                    if ev == "tag":
+                        tag = f"test-{cid.lower().replace('_','-')}"
+                        rc_t, out_t = wr._sh(f"git tag {tag} && git push origin {tag}", cwd=ws.repo_dir)
+                        if rc_t != 0:
+                            wr.log(f"  tag push 失败: {out_t[-150:]}")
                     in_flight.append({"cid": cid, "repo_cfg": cfg, "ws": ws,
                                       "trigger_event": ev,
                                       "sha": sha, "wf_filename": wf_filename,

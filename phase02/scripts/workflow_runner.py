@@ -651,8 +651,7 @@ def collect(cfg, run, fetch_logs=False):
 #   扩展点——需先验证 GitCode 对应 API/语义，未实现前如实返回 unsupported 原因（→ INCONCLUSIVE）。
 TRIGGER_STATUS = {
     "push":                 {"supported": True},
-    "tag":                  {"supported": False,
-                             "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配 run（确定性，待验证 GitCode tag 触发语义）"},
+    "tag":                  {"supported": True},
     "manual":               {"supported": True},
     "workflow_dispatch":    {"supported": True},
     "pr":                   {"supported": False,
@@ -761,6 +760,40 @@ def trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         return _exec_result("ENV_ERROR", case_id, reason=f"dispatch 异常: {e}", t0=t0)
 
 
+def trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """tag 触发链路：deploy → git tag + push → poll_run（确定性，纯 git，零 API）。
+
+    push 一个 tag 触发 workflow，按 sha+file_path 轮询匹配。
+    """
+    t0 = time.time()
+    try:
+        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        tag = f"test-{case_id.lower().replace('_','-')}"
+        rc, out = _sh(f"git tag {tag}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git tag 失败: {out[-200:]}", t0=t0)
+        rc, out = _sh(f"git push origin {tag}", cwd=ws.repo_dir)
+        if rc != 0:
+            return _exec_result("ENV_ERROR", case_id, reason=f"git push tag 失败: {out[-200:]}", t0=t0)
+        log(f"  tag pushed: {tag}")
+        run = poll_run(cfg, sha, wf_filename)
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -778,9 +811,12 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     """
     t0 = time.time()
     wf_filename = None
-    # 触发适配：workflow_dispatch / manual 走独立 dispatch 链路
+    # 触发适配：workflow_dispatch / manual 走 dispatch 链路
     if trigger_event in ("workflow_dispatch", "manual"):
         return trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # tag 走独立 tag 链路（deploy + git tag push）
+    if trigger_event == "tag":
+        return trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
