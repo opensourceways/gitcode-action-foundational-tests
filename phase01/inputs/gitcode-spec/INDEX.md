@@ -67,6 +67,8 @@
 | 47 | [action-development/plugin-development-guide.md](action-development/plugin-development-guide.md) | 插件开发指南 |
 | 48 | [action-development/plugin-security-specification.md](action-development/plugin-security-specification.md) | 插件安全规范 |
 | 49 | [action-development/plugin-packaging.md](action-development/plugin-packaging.md) | 插件打包 |
+| **Action 市场** | | |
+| 50 | [actions-market.md](actions-market.md) | 官方 Action 市场插件目录（49 个插件，含 README） |
 
 ## 勘误清单（待优化项）
 
