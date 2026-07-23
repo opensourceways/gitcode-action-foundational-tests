@@ -125,6 +125,17 @@ def write_result(run_dir, contract, verdict, rr):
 {rows}
 """
     open(os.path.join(results_dir, f"{cid}.md"), "w", encoding="utf-8").write(md)
+
+    # 日志正文落盘（failure-analyst 归因用）
+    logs = rr.get("logs") or ""
+    v = verdict.get("verdict", "?")
+    if logs.strip():
+        log_text = logs
+    else:
+        log_text = f"<no logs: verdict={v}, case not executed>\n"
+    log_path = os.path.join(results_dir, f"{cid}.log.txt")
+    open(log_path, "w", encoding="utf-8").write(log_text)
+
     return rec
 
 
