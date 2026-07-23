@@ -393,6 +393,22 @@ def preflight_validate(contract, cfg=None):
 
 
 # ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename)────────
+def _push_with_retry(branch, cwd):
+    """git push 失败时 pull --rebase 后重试，最多4次，指数退避（1s/2s/4s）。
+
+    返回 (rc, output)。重试仍失败返回最后一次 push 的 (rc, output)。
+    """
+    for attempt in range(4):
+        rc, out = _sh(f"git push origin {branch}", cwd=cwd)
+        if rc == 0:
+            return rc, out
+        if attempt < 3:
+            log(f"  push 失败（第{attempt+1}次），pull --rebase 后重试...")
+            _sh(f"git pull --rebase origin {branch}", cwd=cwd)
+            time.sleep(2 ** attempt)  # 1s, 2s, 4s
+    return rc, out
+
+
 def deploy(ws, cfg, case_id, workflow_yaml):
     """把 workflow 正文写入 .gitcode/workflows/<case-id>.yml 并 push。
 
@@ -408,9 +424,9 @@ def deploy(ws, cfg, case_id, workflow_yaml):
     rc_nodiff, _ = _sh("git diff --cached --quiet", cwd=ws.repo_dir)
     allow = "--allow-empty " if rc_nodiff == 0 else ""
     _sh(f'git commit {allow}-m "test: {case_id}"', cwd=ws.repo_dir)
-    rc, out = _sh(f"git push origin {cfg.branch}", cwd=ws.repo_dir)
+    rc, out = _push_with_retry(cfg.branch, ws.repo_dir)
     if rc != 0:
-        log(f"  push 失败: {out[-200:]}")
+        log(f"  push 失败（重试后仍失败）: {out[-200:]}")
         return None, wf_filename
     rc, sha = _sh("git rev-parse HEAD", cwd=ws.repo_dir)
     return sha.strip(), wf_filename
@@ -534,9 +550,9 @@ def teardown(ws, cfg, wf_filename):
     if rc != 0:
         return False
     _sh('git commit -q -m "chore: teardown test workflow"', cwd=ws.repo_dir)
-    rc, out = _sh(f"git push origin {cfg.branch}", cwd=ws.repo_dir)
+    rc, out = _push_with_retry(cfg.branch, ws.repo_dir)
     if rc != 0:
-        log(f"  teardown push 失败: {out[-150:]}")
+        log(f"  teardown push 失败（重试后仍失败）: {out[-150:]}")
     return rc == 0
 
 
@@ -630,10 +646,9 @@ def teardown_batch(ws, cfg, wf_filenames):
         path = f".gitcode/workflows/{fn}"
         _sh(f"git rm -q {path}", cwd=ws.repo_dir)
     _sh('git commit -q -m "chore: batch teardown workflows"', cwd=ws.repo_dir)
-    rc, out = _sh(f"git pull --rebase origin {cfg.branch}", cwd=ws.repo_dir)
-    rc, out = _sh(f"git push origin {cfg.branch}", cwd=ws.repo_dir)
+    rc, out = _push_with_retry(cfg.branch, ws.repo_dir)
     if rc != 0:
-        log(f"  teardown_batch push 失败: {out[-150:]}")
+        log(f"  teardown_batch push 失败（重试后仍失败）: {out[-150:]}")
 
 
 def sweep_orphans(ws, cfg, keep=None):
