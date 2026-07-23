@@ -1,0 +1,36 @@
+id: REL-LOGPERF-01-051-V2
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "日志加载性能——200MB 日志下载与查看耗时"
+intent_ref: INTENT-REL-051
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: log perf 200MB test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate 200MB log
+          run: |
+            for i in $(seq 1 200000); do echo LOG_LINE_${{i}} $(date +%s%N); done
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: download_time_seconds
+    le: "120"
+  - type: positive
+    target: log_integrity
+    equals: "100%"
+teardown:
+  reset: none

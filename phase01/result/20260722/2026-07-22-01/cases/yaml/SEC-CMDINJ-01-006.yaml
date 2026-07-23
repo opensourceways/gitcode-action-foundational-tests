@@ -1,0 +1,49 @@
+id: SEC-CMDINJ-01-006
+dimensions: [security]
+dimension: security
+priority: P0
+title: author email 不可直接插进 run 脚本导致命令注入
+intent_ref: INTENT-SEC-012
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test author email command injection
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) echo author email from expression
+          run: |
+            echo "Author is ${{ atomgit.event.head_commit.author.email }}"
+
+trigger:
+  event: push
+  as: untrusted_contributor
+  params:
+    author_email: "test;cat /etc/passwd@example.com"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "root:"
+  - type: negative
+    target: run_logs
+    must_not_contain: "etc/passwd"
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

@@ -1,0 +1,39 @@
+id: SEC-ARTF-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 上传的 artifact 必须不可被主仓 workflow 下载或执行"
+intent_ref: INTENT-SEC-019
+setup:
+  repo_fixture: with-artifacts
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    artifact-upload:
+      name: Upload artifact from fork
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create file
+          run: |
+            echo fork content > fork-artifact.txt
+        - name: Upload artifact
+          uses: upload-artifact
+          with:
+            name: fork-artifact
+            path: fork-artifact.txt
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: artifact_download
+    must_not_equal: "success"
+  - type: positive
+    target: artifact_download
+    equals: "404_or_permission_denied"
+teardown:
+  reset: fixture

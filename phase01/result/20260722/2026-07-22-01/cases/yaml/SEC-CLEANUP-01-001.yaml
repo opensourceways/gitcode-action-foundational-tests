@@ -1,0 +1,73 @@
+id: SEC-CLEANUP-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: Job 结束后 workspace 与临时文件应被彻底清理
+intent_ref: INTENT-SEC-020
+
+setup:
+  repo_fixture: default
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    write:
+      name: Write sensitive temp file
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) write secret to temp file
+          run: |
+            echo "$DEPLOY_TOKEN" > /tmp/secret_temp.txt
+            echo "written" > /workspace/sensitive.tmp
+    check:
+      name: Check workspace cleanup
+      runs-on: [ubuntu-latest, x64, small]
+      needs: write
+      steps:
+        - name: (TC) check previous workspace residue
+          run: |
+            if [ -f "/workspace/sensitive.tmp" ]; then
+              echo "residue_found"
+              exit 1
+            else
+              echo "workspace_clean"
+            fi
+        - name: (TC) check temp file residue
+          run: |
+            if [ -f "/tmp/secret_temp.txt" ]; then
+              echo "temp_residue_found"
+              exit 1
+            else
+              echo "temp_clean"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "residue_found"
+  - type: negative
+    target: run_logs
+    must_not_contain: "temp_residue_found"
+  - type: positive
+    target: run_logs
+    must_contain: "workspace_clean"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

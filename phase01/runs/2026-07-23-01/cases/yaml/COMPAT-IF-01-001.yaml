@@ -1,0 +1,45 @@
+id: COMPAT-IF-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: step 失败后后续 step 默认跳过行为
+intent_ref: INTENT-COMPAT-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-skip:
+      name: Test step failure skip
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: force failure
+          run: |
+            exit 1
+        - name: should be skipped
+          run: |
+            echo "This should not appear"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: negative
+    target: run_logs
+    contains: "This should not appear"
+
+teardown:
+  reset: fixture

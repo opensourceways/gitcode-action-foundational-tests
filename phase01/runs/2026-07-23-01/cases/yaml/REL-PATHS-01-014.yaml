@@ -1,0 +1,35 @@
+id: REL-PATHS-01-014
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "paths 匹配边界值——变更恰好 300 个文件时 paths 过滤应生效"
+intent_ref: INTENT-REL-014
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    push:
+      paths:
+        - 'src/**'
+  jobs:
+    test:
+      name: paths trigger test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo triggered
+          run: |
+            echo triggered by paths
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+teardown:
+  reset: none

@@ -1,0 +1,39 @@
+id: REL-STATE-01-058
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 状态机正确性——空闲/运行/离线转换与时序一致性"
+intent_ref: INTENT-REL-058
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 60
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: state_sequence
+    equals: "idle_running_idle"
+  - type: nonfunctional
+    target: idle_to_running_seconds
+    le: "30"
+  - type: nonfunctional
+    target: running_to_idle_seconds
+    le: "60"
+teardown:
+  reset: none

@@ -1,0 +1,40 @@
+id: SEC-PERM-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "显式声明的 permissions 必须在 job 级实际生效并限制 ATOMGIT_TOKEN"
+intent_ref: INTENT-SEC-016
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    perm-read:
+      name: Test permissions read only
+      runs-on: [dedicate-hosted, x64, large]
+      permissions:
+        repository: read
+        pr: none
+        issue: none
+        note: none
+        project: none
+        hook: none
+      steps:
+        - name: Attempt write
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" -X POST \n            "https://api.gitcode.com/api/v5/repos/${{ atomgit.repository }}/issues" \n            -H "Authorization: token ${{ atomgit.token }}" \n            -d '{"title": "test"}'
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    equals: "read_operations_successful"
+  - type: negative
+    target: run_logs
+    must_not_contain: "write_permission_granted"
+teardown:
+  reset: fixture

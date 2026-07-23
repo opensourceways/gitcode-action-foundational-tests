@@ -1,0 +1,44 @@
+id: COMPAT-EXPR-01-012
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: fromJSON() 函数缺失时的降级行为
+intent_ref: INTENT-COMPAT-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-fromjson:
+      name: Test fromJSON function availability
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Test fromJSON function in run block
+          run: |
+            RESULT="${{ fromJSON('{\"a\": 1}').a }}"
+            echo "fromjson-result=$RESULT"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "fromjson-result=1"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 fromJSON() 函数不可用，错误信息应明确指出函数缺失，而非 generic 语法错误"
+
+teardown:
+  reset: fixture

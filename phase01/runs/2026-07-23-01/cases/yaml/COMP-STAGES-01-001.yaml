@@ -1,0 +1,63 @@
+id: COMP-STAGES-01-001
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: stages 阶段间串行、阶段内 job 并行执行
+intent_ref: INTENT-COMP-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  stages:
+    - name: build-stage
+      jobs:
+        build-a:
+          name: Build A
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Build A step
+              run: |
+                echo "build-a"
+        build-b:
+          name: Build B
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Build B step
+              run: |
+                echo "build-b"
+    - name: test-stage
+      jobs:
+        test:
+          name: Test
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Test step
+              run: |
+                echo "test"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: stage_order
+    equals: serial_across_stages
+  - type: positive
+    target: job_parallelism
+    equals: parallel_within_stage
+
+teardown:
+  reset: none

@@ -1,0 +1,45 @@
+id: COMPAT-EXPR-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: case() 表达式函数缺失时的降级行为
+intent_ref: INTENT-COMPAT-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test-case-fn:
+      name: Test case function availability
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Test case function in run block
+          run: |
+            RESULT="${{ case(true, 'yes', 'no') }}"
+            echo "case-result=$RESULT"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "case-result="
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 case() 函数不可用，错误信息应明确指出函数缺失，而非 generic 语法错误"
+
+teardown:
+  reset: fixture

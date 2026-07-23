@@ -1,0 +1,60 @@
+id: COMPAT-ARTIFACT-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: upload-artifact 保留期行为等价性
+intent_ref: INTENT-COMPAT-026
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify-retention:
+      name: Verify artifact retention
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) create artifact file
+          run: |
+            echo "RETENTION_TEST_MARKER" > retention_marker.txt
+        - name: (TC) upload with retention
+          uses: upload-artifact
+          with:
+            name: retention-test-artifact
+            path: retention_marker.txt
+            retention-days: 1
+        - name: (TC) verify upload success
+          run: |
+            echo "ARTIFACT_UPLOADED_OK"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 ARTIFACT_UPLOADED_OK"
+  - type: nonfunctional
+    target: artifact_state
+    eval: deterministic
+    rubric: "artifact 应在配置保留期内可下载，超期后被清理或不可访问"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 retention-days 被静默忽略的提示"
+
+teardown:
+  reset: fixture

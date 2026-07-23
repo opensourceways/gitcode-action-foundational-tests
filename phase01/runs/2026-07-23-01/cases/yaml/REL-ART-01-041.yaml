@@ -1,0 +1,56 @@
+id: REL-ART-01-041
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "超大 artifact——100 MB artifact 上传后下游 job 应成功下载"
+intent_ref: INTENT-REL-041
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    upload:
+      name: upload artifact job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate 100MB file
+          run: |
+            dd if=/dev/urandom of=artifact.bin bs=1M count=100
+        - name: upload artifact step
+          uses: upload-artifact
+          with:
+            name: perf-artifact
+            path: artifact.bin
+    download:
+      name: download artifact job
+      runs-on: [dedicate-hosted, x64, large]
+      needs: upload
+      steps:
+        - name: download artifact step
+          uses: download-artifact
+          with:
+            name: perf-artifact
+        - name: verify artifact step
+          run: |
+            ls -la perf-artifact
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: upload_status
+    equals: "success"
+  - type: positive
+    target: download_status
+    equals: "success"
+  - type: positive
+    target: md5_match
+    equals: "true"
+teardown:
+  reset: fixture

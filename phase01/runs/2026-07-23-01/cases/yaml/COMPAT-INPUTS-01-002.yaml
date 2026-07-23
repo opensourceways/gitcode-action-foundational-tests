@@ -1,0 +1,53 @@
+id: COMPAT-INPUTS-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: workflow_dispatch inputs 类型限制 - string 正常通过
+intent_ref: INTENT-COMPAT-014
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        environment:
+          description: '部署目标环境'
+          required: true
+          default: 'staging'
+          type: string
+  jobs:
+    verify:
+      name: Verify string input acceptance
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo input value
+          run: |
+            echo "ENV=${{ inputs.environment }}"
+            echo "STRING_INPUT_OK"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params:
+    environment: "production"
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: "STRING_INPUT_OK"
+  - type: positive
+    target: run_logs
+    must_contain: "ENV=production"
+
+teardown:
+  reset: fixture

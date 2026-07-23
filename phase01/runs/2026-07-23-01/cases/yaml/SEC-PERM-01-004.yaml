@@ -1,0 +1,38 @@
+id: SEC-PERM-01-004
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "默认状态下写操作被 403 拒绝"
+intent_ref: INTENT-SEC-017
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    default-write-denied:
+      name: Test default write denied
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt push without permissions
+          run: |
+            git clone https://x-access-token:${{ atomgit.token }}@atomgit.com/${{ atomgit.repository }}.git repo
+            cd repo
+            echo test > test.txt
+            git add test.txt
+            git commit -m test
+            git push origin main || echo push denied as expected
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "push_successful"
+  - type: positive
+    target: run_logs
+    equals: "push_denied_or_403"
+teardown:
+  reset: fixture

@@ -1,0 +1,43 @@
+id: COMP-CALL-01-002
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 3 层 workflow_call 嵌套应被拒绝
+intent_ref: INTENT-COMP-006
+
+setup:
+  repo_fixture: reusable-workflow-3layer
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    caller:
+      name: Call 3 layer reusable workflow
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo before call
+          run: |
+            echo "attempting 3 layer call"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: 报错信息应说明 workflow_call 最多支持 2 层嵌套
+
+teardown:
+  reset: none

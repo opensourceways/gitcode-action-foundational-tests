@@ -1,0 +1,45 @@
+id: USE-PERM-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 GitHub 权限域命名时报错应给出 GitCode 对照表"
+intent_ref: INTENT-USE-005
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  permissions:
+    contents: read
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-perm:
+      name: test github permission error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout
+          uses: checkout
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须同时出现 contents 等 GitHub 命名与 repository/pr 等 GitCode 命名，形成对照"
+
+teardown:
+  reset: none
+

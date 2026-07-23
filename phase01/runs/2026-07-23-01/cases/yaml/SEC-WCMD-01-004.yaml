@@ -1,0 +1,43 @@
+id: SEC-WCMD-01-004
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "ATOMGIT_OUTPUT 不被不可信输入污染提权"
+intent_ref: INTENT-SEC-030
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    output-injection:
+      name: Test ATOMGIT_OUTPUT injection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write malicious output
+          id: bad
+          run: |
+            echo "result=good
+  hijacked=bad" >> $ATOMGIT_OUTPUT
+        - name: Check no hijack
+          run: |
+            if [ "${{ steps.bad.outputs.hijacked }}" = "bad" ]; then
+              echo "hijack succeeded"
+              exit 1
+            else
+              echo "no hijack"
+            fi
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "hijack succeeded"
+  - type: positive
+    target: run_logs
+    equals: "no hijack"
+teardown:
+  reset: fixture

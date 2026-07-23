@@ -1,0 +1,44 @@
+id: COMPAT-CTX-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 使用 atomgit.ref 上下文应正确返回触发引用
+intent_ref: INTENT-COMPAT-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test atomgit context reference
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo atomgit ref
+          run: |
+            echo "atomgit_ref=${{ atomgit.ref }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 atomgit_ref 应包含非空的引用值，如 refs/heads/main 或 refs/tags/xxx"
+
+teardown:
+  reset: fixture

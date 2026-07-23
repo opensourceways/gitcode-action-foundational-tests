@@ -1,0 +1,70 @@
+id: COMP-ARTIFACT-01-002
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: 下载全部制品功能正常
+intent_ref: INTENT-COMP-015
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    build:
+      name: Build multiple artifacts
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create artifacts
+          run: |
+            mkdir -p dist reports
+            echo "app" > dist/app.txt
+            echo "report" > reports/coverage.txt
+        - name: Upload app
+          uses: upload-artifact
+          with:
+            name: app
+            path: dist/
+        - name: Upload reports
+          uses: upload-artifact
+          with:
+            name: reports
+            path: reports/
+    verify:
+      name: Download all artifacts
+      runs-on: [dedicate-hosted, x64, large]
+      needs: build
+      steps:
+        - name: Download all
+          uses: download-artifact
+          with:
+            path: artifacts/
+        - name: Verify all
+          run: |
+            cat artifacts/app/app.txt
+            cat artifacts/reports/coverage.txt
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    contains: app
+  - type: positive
+    target: run_logs
+    contains: report
+
+teardown:
+  reset: none

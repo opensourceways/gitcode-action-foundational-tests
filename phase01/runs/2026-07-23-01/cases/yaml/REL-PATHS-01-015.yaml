@@ -1,0 +1,35 @@
+id: REL-PATHS-01-015
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "paths 匹配越界值——第 301 个变更文件不参与 paths 匹配判断"
+intent_ref: INTENT-REL-015
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    push:
+      paths:
+        - 'src/**'
+  jobs:
+    test:
+      name: paths trigger test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo triggered
+          run: |
+            echo triggered by paths
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "not_triggered"
+teardown:
+  reset: none

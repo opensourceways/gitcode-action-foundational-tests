@@ -1,0 +1,31 @@
+id: USE-VARS-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "vars 上下文在文档与样本中的声明必须一致"
+intent_ref: INTENT-USE-014
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: null
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: documentation
+    eval: deterministic
+    rubric: "文档与样本对同一能力 vars 上下文的声明必须一致；不一致即视为可理解性缺陷"
+
+teardown:
+  reset: none
+

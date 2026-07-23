@@ -1,0 +1,37 @@
+id: REL-OUTPUT-01-017
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "step output 越界值——ATOMGIT_OUTPUT 写入 1 MB+1 byte 应被拒绝或报错"
+intent_ref: INTENT-REL-017
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: output over limit test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: write 1MB+1 output
+          run: |
+            python3 -c "print('A'*1048577)" > out.txt
+            echo "data=$(cat out.txt)" >> $ATOMGIT_OUTPUT
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "1MB"
+  - type: positive
+    target: job_status
+    equals: "failure"
+teardown:
+  reset: none

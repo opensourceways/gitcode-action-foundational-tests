@@ -1,0 +1,49 @@
+id: COMPAT-MIGRATE-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: "GitHub 风格 permissions 块迁移报错应给出可操作指引"
+intent_ref: INTENT-COMPAT-031
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    migrate-permissions:
+      name: Test permissions block error
+      runs-on: [dedicate-hosted, x64, large]
+      permissions:
+        contents: read
+        pull-requests: write
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: validation_error
+    eval: llm_assisted
+    rubric: "报错信息应明确指出 permissions 字段不被支持，并建议删除该块；不应仅给出模糊的 unknown property"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息包含 permissions 关键字及可操作建议，并指向正确行号或字段名"
+
+teardown:
+  reset: fixture

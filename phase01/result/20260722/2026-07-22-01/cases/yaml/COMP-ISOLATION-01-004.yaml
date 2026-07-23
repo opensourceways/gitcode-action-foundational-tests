@@ -1,0 +1,51 @@
+id: COMP-ISOLATION-01-004
+dimensions: [completeness]
+dimension: completeness
+priority: P0
+title: Runner 跨 run 的 tmp 目录隔离验证
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    tmp-isolation:
+      name: Verify tmp isolation across runs
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Check tmp for historical residue
+          run: |
+            if [ -f /tmp/gitcode-isolation-flag ]; then
+              echo "TMP_RESIDUE_FOUND"
+            else
+              echo "TMP_ISOLATED"
+            fi
+        - name: Create isolation flag
+          run: |
+            echo "flag" > /tmp/gitcode-isolation-flag
+            echo "FLAG_CREATED"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "TMP_ISOLATED"
+  - type: negative
+    target: run_logs
+    must_not_contain: "TMP_RESIDUE_FOUND"
+
+teardown:
+  reset: fixture

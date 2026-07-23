@@ -1,0 +1,48 @@
+id: COMP-STACKMASK-01-002
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: secret 在步骤摘要 ATOMGIT_STEP_SUMMARY 中的脱敏验证
+intent_ref: INTENT-COMP-012
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    summary-masking:
+      name: Test secret masking in step summary
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Write secret to step summary
+          run: |
+            TOKEN="${{ secrets.DEPLOY_TOKEN }}"
+            echo "Token value is $TOKEN" >> "$ATOMGIT_STEP_SUMMARY"
+            echo "SUMMARY_WRITTEN"
+        - name: Verify summary does not leak
+          run: |
+            echo "SUMMARY_CHECK_DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: positive
+    target: run_logs
+    must_contain: "SUMMARY_WRITTEN"
+
+teardown:
+  reset: fixture

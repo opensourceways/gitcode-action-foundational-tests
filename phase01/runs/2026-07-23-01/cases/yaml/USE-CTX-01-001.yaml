@@ -1,0 +1,40 @@
+id: USE-CTX-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 atomgit 上下文时表达式正常求值"
+intent_ref: INTENT-USE-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-ctx:
+      name: test atomgit context
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo atomgit ref
+          run: |
+            echo "ref=${{ atomgit.ref }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "ref=refs/heads/"
+
+teardown:
+  reset: none
+

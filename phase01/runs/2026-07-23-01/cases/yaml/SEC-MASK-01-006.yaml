@@ -1,0 +1,38 @@
+id: SEC-MASK-01-006
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 日志脱敏不可通过分片输出绕过"
+intent_ref: INTENT-SEC-008
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    fragment-bypass:
+      name: Test fragment bypass
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo secret character by character
+          run: |
+            secret="${{ secrets.DEPLOY_TOKEN }}"
+            for (( i=0; i<${#secret}; i++ )); do
+              echo "char $i: ${secret:$i:1}"
+            done
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "DEPLOY_TOKEN"
+  - type: negative
+    target: run_logs
+    eval: "llm_assisted"
+    rubric: "\u65e5\u5fd7\u4e2d secret \u7684\u4efb\u610f\u8fde\u7eed\u5b50\u4e32\uff08\u5982 3 \u5b57\u7b26\u4ee5\u4e0a\uff09\u547d\u4e2d\u6570\u5e94\u4e3a 0"
+teardown:
+  reset: fixture

@@ -1,0 +1,39 @@
+id: COMP-RERUN-01-003
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: 超过 6 小时的运行不可 rerun
+intent_ref: INTENT-COMP-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify rerun age limit
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo
+          run: |
+            echo "run"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: rerun_result
+    equals: rerun_of_6h_plus_run
+
+teardown:
+  reset: none

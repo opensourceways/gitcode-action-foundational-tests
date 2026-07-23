@@ -1,0 +1,47 @@
+id: REL-CACHE-01-012
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: Workflow YAML 缓存失效——修改后无旧代码残留
+intent_ref: INTENT-REL-060
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: YAML cache invalidation test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Checkout source
+          uses: checkout
+        - name: Print version marker
+          run: |
+            echo "VERSION_MARKER"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: VERSION_MARKER
+  - type: negative
+    target: run_logs
+    must_not_contain: OLD_VERSION_MARKER
+  - type: positive
+    target: run_head_sha
+    distinct_across_runs: true
+
+teardown:
+  reset: fixture

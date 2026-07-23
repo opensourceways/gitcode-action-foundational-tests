@@ -1,0 +1,39 @@
+id: SEC-PRTGT-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "pull_request_target 无审批不执行 fork PR 代码"
+intent_ref: INTENT-SEC-002
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    unapproved-checkout:
+      name: Unapproved checkout test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Checkout PR head
+          uses: checkout
+          with:
+            ref: ${{ atomgit.event.pull_request.head.sha }}
+        - name: Run build
+          run: |
+            echo "Building PR code"
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: "success_without_approval"
+  - type: positive
+    target: run_status
+    equals: "pending_or_blocked"
+teardown:
+  reset: fixture

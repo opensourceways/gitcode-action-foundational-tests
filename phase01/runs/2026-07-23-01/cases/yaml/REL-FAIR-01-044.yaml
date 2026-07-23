@@ -1,0 +1,33 @@
+id: REL-FAIR-01-044
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "并发资源公平性——2 个 workflow 各 3 个 jobs 应被公平调度"
+intent_ref: INTENT-REL-044
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: startup_time_diff_seconds
+    le: "60"
+teardown:
+  reset: none

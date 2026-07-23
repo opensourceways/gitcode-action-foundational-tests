@@ -1,0 +1,38 @@
+id: SEC-SIDE-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 不经 output 侧信道绕过脱敏外泄"
+intent_ref: INTENT-SEC-032
+setup:
+  repo_fixture: with-secrets
+  secrets: ["API_KEY"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    side-output:
+      name: Test secret in output
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write secret to output
+          id: step1
+          run: |
+            echo "result=${{ secrets.API_KEY }}" >> $ATOMGIT_OUTPUT
+        - name: Check output masked
+          run: |
+            echo "output is ${{ steps.step1.outputs.result }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "API_KEY"
+  - type: negative
+    target: step_output
+    must_not_contain_secret: "API_KEY"
+teardown:
+  reset: fixture

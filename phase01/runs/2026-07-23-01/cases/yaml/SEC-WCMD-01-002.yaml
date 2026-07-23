@@ -1,0 +1,37 @@
+id: SEC-WCMD-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "跨运行 artifact 必须被视为不可信数据"
+intent_ref: INTENT-SEC-029
+setup:
+  repo_fixture: with-artifacts
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    artifact-trust:
+      name: Test artifact trust boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Download untrusted artifact
+          uses: download-artifact
+          with:
+            name: untrusted-artifact
+        - name: Do not auto execute
+          run: |
+            echo "Artifact downloaded but not executed automatically"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "auto_executed"
+  - type: positive
+    target: run_status
+    equals: "completed"
+teardown:
+  reset: fixture

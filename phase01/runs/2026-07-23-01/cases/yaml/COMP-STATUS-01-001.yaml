@@ -1,0 +1,42 @@
+id: COMP-STATUS-01-001
+dimensions: [completeness, usability]
+dimension: completeness
+priority: P1
+title: 运行状态机 queued 到 completed 转换正确
+intent_ref: INTENT-COMP-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify status transitions
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo
+          run: |
+            echo "running"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status_sequence
+    equals: queued_in_progress_completed
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: none

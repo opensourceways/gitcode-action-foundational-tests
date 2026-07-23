@@ -1,0 +1,53 @@
+id: REL-STAGES-01-029
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "stages fail_fast 机制——阶段内任一 job 失败应立即终止同阶段其他 jobs"
+intent_ref: INTENT-REL-029
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  stages:
+    - name: test_stage
+      fail_fast: true
+      jobs:
+        job_a:
+          name: stage job A
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: fail step
+              run: |
+                exit 1
+        job_b:
+          name: stage job B
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: sleep step
+              run: |
+                sleep 30
+        job_c:
+          name: stage job C
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: sleep step
+              run: |
+                sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "failure"
+  - type: positive
+    target: cancelled_jobs_count
+    ge: "2"
+teardown:
+  reset: none

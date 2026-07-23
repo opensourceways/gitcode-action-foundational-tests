@@ -1,0 +1,36 @@
+id: REL-RERUN-01-011
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "rerun 边界值——单条运行连续重新运行 3 次应全部成功"
+intent_ref: INTENT-REL-011
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 5
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: rerun_count
+    equals: "3"
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+teardown:
+  reset: none

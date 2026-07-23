@@ -1,0 +1,44 @@
+id: COMPAT-PERM-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: 未声明 permissions 时默认 TOKEN 读操作权限范围
+intent_ref: INTENT-COMPAT-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-read:
+      name: Test default read permissions
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: read repo file
+          run: |
+            cat README.md
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    contains: "README"
+
+teardown:
+  reset: fixture

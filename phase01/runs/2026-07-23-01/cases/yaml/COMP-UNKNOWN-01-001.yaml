@@ -1,0 +1,44 @@
+id: COMP-UNKNOWN-01-001
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: 包含未知顶层字段的 workflow 触发 YAML 校验失败
+intent_ref: INTENT-COMP-002
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  unknown_field: true
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test unknown field
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo step
+          run: |
+            echo "should not run"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: validation_failed
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: 错误信息应包含不支持的字段名及行号提示
+
+teardown:
+  reset: none

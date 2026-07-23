@@ -1,0 +1,48 @@
+id: USE-SEARCH-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "日志搜索与下载功能可用且交互流畅"
+intent_ref: INTENT-USE-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    log-search:
+      name: log search and download
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate log content
+          run: |
+            echo "INFO: starting build"
+            echo "ERROR: mock failure line 1"
+            echo "WARN: something minor"
+            echo "ERROR: mock failure line 2"
+            echo "INFO: finishing"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "ERROR: mock failure line 1"
+  - type: nonfunctional
+    target: ui_interaction
+    eval: llm_assisted
+    rubric: "搜索框需在日志面板顶部常驻可见，高亮颜色与背景对比度 >= 3:1；下载按钮文案明确为下载日志或 Download logs，不可使用模糊图标无文字说明"
+
+teardown:
+  reset: none
+

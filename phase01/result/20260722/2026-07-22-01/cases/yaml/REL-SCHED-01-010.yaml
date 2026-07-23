@@ -1,0 +1,45 @@
+id: REL-SCHED-01-010
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 资源调度状态一致性——空闲 runner 存在时 job 不应死等
+intent_ref: INTENT-REL-057
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Scheduler consistency test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Verify running
+          run: |
+            echo "RUNNER_ASSIGNED"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: queued_to_running_seconds
+    less_than_or_equal: 30
+  - type: positive
+    target: runner_state
+    transition: idle_to_busy
+  - type: negative
+    target: job_state
+    stuck_in_queued_over_seconds: 60
+
+teardown:
+  reset: fixture

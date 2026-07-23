@@ -1,0 +1,56 @@
+id: REL-FAULT-01-031
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "故障注入——job 执行中 runner 进程被 SIGKILL 后应记录失败并保留已执行日志"
+intent_ref: INTENT-REL-031
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: fault injection SIGKILL
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: step one
+          run: |
+            echo step_one_marker
+        - name: step two
+          run: |
+            echo step_two_marker
+        - name: step three
+          run: |
+            sleep 30
+        - name: step four
+          run: |
+            echo step_four_marker
+        - name: step five
+          run: |
+            echo step_five_marker
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection:
+  at: mid_job
+  action: kill_runner
+  params:
+    target_step: 3
+  recovery_expectation: retry_and_succeed
+assertions:
+  - type: positive
+    target: job_status
+    equals: "failure"
+  - type: positive
+    target: run_logs
+    contains: "step_one_marker"
+  - type: negative
+    target: run_logs
+    contains: "step_four_marker"
+teardown:
+  reset: fixture

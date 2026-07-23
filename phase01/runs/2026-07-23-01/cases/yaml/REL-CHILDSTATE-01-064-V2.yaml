@@ -1,0 +1,43 @@
+id: REL-CHILDSTATE-01-064-V2
+dimensions: [reliability]
+dimension: reliability
+priority: P0
+title: "子任务状态传播——workflow_call 未拉起时父 workflow 不应假阳性完成"
+intent_ref: INTENT-REL-064
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    call_child:
+      name: call missing child workflow
+      uses: ./.gitcode/workflows/child_missing.yml
+    downstream:
+      name: downstream job
+      runs-on: [dedicate-hosted, x64, large]
+      needs: call_child
+      steps:
+        - name: should not run
+          run: |
+            echo downstream
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: parent_status
+    equals: "failure"
+  - type: positive
+    target: downstream_status
+    equals: "skipped"
+  - type: negative
+    target: parent_status
+    equals: "success"
+teardown:
+  reset: fixture

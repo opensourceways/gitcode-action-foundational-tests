@@ -1,0 +1,43 @@
+id: COMPAT-MIGERR-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: GitHub 全名 Action 引用格式的报错质量
+intent_ref: INTENT-COMPAT-031
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    github-action-ref:
+      name: Test GitHub action reference error
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Use GitHub full action name
+          uses: actions/checkout@v4
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应明确指出 GitCode 不支持 actions/checkout@v4 格式，应使用裸插件名 checkout，并指明这是 GitCode 与 GitHub 的差异"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,46 @@
+id: COMPAT-TOKEN-01-002
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: GITHUB_TOKEN 在 GitCode 中应为空且不应被静默映射
+intent_ref: INTENT-COMPAT-020
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test GITHUB_TOKEN unavailable
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use GITHUB_TOKEN for API call
+          run: |
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ atomgit.api_url }}/repos/${{ atomgit.repository }}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}")
+            echo "api_status=$STATUS"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "api_status 应为 401/403 或空，表明 GITHUB_TOKEN 未生效，不应为 200"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若报错，信息应提示使用 ATOMGIT_TOKEN 替代 GITHUB_TOKEN"
+
+teardown:
+  reset: fixture

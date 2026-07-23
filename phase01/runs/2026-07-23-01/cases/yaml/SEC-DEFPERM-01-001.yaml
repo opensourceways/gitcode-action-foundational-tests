@@ -1,0 +1,35 @@
+id: SEC-DEFPERM-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "ATOMGIT_TOKEN 默认权限范围与 job 级覆盖必须正确生效"
+intent_ref: INTENT-SEC-036
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions:
+    repository: read
+  jobs:
+    inherit-test:
+      name: Test permission inheritance
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt write
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" -X POST \n            "https://api.gitcode.com/api/v5/repos/${{ atomgit.repository }}/issues" \n            -H "Authorization: token ${{ atomgit.token }}" \n            -d '{"title": "test"}'
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "write_successful"
+  - type: positive
+    target: run_logs
+    equals: "403_or_permission_denied"
+teardown:
+  reset: fixture

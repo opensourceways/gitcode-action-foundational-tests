@@ -1,0 +1,47 @@
+id: COMP-CACHE-01-001
+dimensions: [completeness, security, reliability]
+dimension: completeness
+priority: P0
+title: cache hit 时恢复缓存内容正确
+intent_ref: INTENT-COMP-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify cache hit
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Cache test file
+          uses: cache
+          with:
+            path: cached.txt
+            key: cache-test-${{ runner.os }}
+        - name: Use cache
+          run: |
+            cat cached.txt || echo "cache miss"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: cache_step
+    equals: hit
+
+teardown:
+  reset: none

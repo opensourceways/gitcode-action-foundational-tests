@@ -1,0 +1,43 @@
+id: USE-NEST-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "workflow_call 嵌套 3 层时报错应明确提示上限为 2 层"
+intent_ref: INTENT-USE-026
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    caller:
+      name: third level nested call
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: call reusable
+          uses: ./.gitcode/workflows/reusable-level1.yml
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 workflow_call、嵌套、2 层、上限等关键词中的至少两项"
+
+teardown:
+  reset: none
+

@@ -1,0 +1,48 @@
+id: COMP-PERMS-01-001
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: permissions 空对象时 ATOMGIT_TOKEN 仅 repository read
+intent_ref: INTENT-COMP-013
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions: {}
+  jobs:
+    verify:
+      name: Verify empty permissions
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt write
+          run: |
+            git config user.email "test@test.com"
+            git config user.name "Test"
+            echo "change" >> README.md
+            git add README.md
+            git commit -m "test"
+            git push https://x-access-token:$ATOMGIT_TOKEN@${{ atomgit.server_url }}/${{ atomgit.repository }}.git HEAD:${{ atomgit.ref }}
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    contains: 403
+
+teardown:
+  reset: none

@@ -1,0 +1,49 @@
+id: COMP-TIMEOUT-01-002
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: 超时的 job 被强制终止并标记为 failure
+intent_ref: INTENT-COMP-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify timeout kill
+      runs-on: [dedicate-hosted, x64, large]
+      timeout-minutes: 1
+      steps:
+        - name: Echo before sleep
+          run: |
+            echo "starting"
+        - name: Sleep beyond timeout
+          run: |
+            sleep 120
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: run_logs
+    contains: starting
+
+teardown:
+  reset: none

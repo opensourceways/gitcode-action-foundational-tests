@@ -1,0 +1,43 @@
+id: COMP-RUNNER-01-003
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: 不存在的标签组合导致 job 排队或失败
+intent_ref: INTENT-COMP-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify invalid label
+      runs-on: [nonexistent-os, x64, small]
+      steps:
+        - name: Echo
+          run: |
+            echo "should not run"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: 错误信息应提示无匹配 Runner 或标签格式指引
+
+teardown:
+  reset: none

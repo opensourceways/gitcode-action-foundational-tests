@@ -1,0 +1,43 @@
+id: USE-UNKN-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "未知字段报错若识别为 GitHub 特有应追加迁移提示"
+intent_ref: INTENT-USE-023
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad:
+      name: github specific field container
+      runs-on: [dedicate-hosted, x64, large]
+      container:
+        image: node:20
+      steps:
+        - name: step
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "对未知字段的提示必须包含字段名和不支持/unknown 字样；若能识别该字段为 GitHub 特有如 container，提示中应追加该字段为 GitHub Actions 特有，GitCode 暂不支持"
+
+teardown:
+  reset: none
+

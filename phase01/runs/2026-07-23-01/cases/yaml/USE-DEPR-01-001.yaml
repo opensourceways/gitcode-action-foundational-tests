@@ -1,0 +1,44 @@
+id: USE-DEPR-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 ATOMGIT_OUTPUT 文件协议时正常生效"
+intent_ref: INTENT-USE-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-output:
+      name: test ATOMGIT_OUTPUT protocol
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: set output
+          id: out
+          run: |
+            echo "mykey=myvalue" >> "$ATOMGIT_OUTPUT"
+        - name: read output
+          run: |
+            echo "val=${{ steps.out.outputs.mykey }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "val=myvalue"
+
+teardown:
+  reset: none
+

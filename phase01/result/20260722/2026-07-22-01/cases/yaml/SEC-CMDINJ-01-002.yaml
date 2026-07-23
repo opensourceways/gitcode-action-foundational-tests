@@ -1,0 +1,49 @@
+id: SEC-CMDINJ-01-002
+dimensions: [security]
+dimension: security
+priority: P0
+title: PR 正文不可直接插进 run 脚本导致命令注入
+intent_ref: INTENT-SEC-009
+
+setup:
+  repo_fixture: with-secrets
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    test:
+      name: Test PR body command injection
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) echo PR body from expression
+          run: |
+            echo "PR body is ${{ atomgit.event.pull_request.body }}"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    pr_body: "test `whoami` $(id)"
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "root"
+  - type: negative
+    target: run_logs
+    must_not_contain: "uid="
+  - type: positive
+    target: run_status
+    in: [completed, failed]
+
+teardown:
+  reset: fixture

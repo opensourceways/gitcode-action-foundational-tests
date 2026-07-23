@@ -1,0 +1,29 @@
+id: REL-NEST-01-023
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "workflow_call 嵌套边界——2 层嵌套调用应成功执行"
+intent_ref: INTENT-REL-023
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    call_level1:
+      name: call level 1 workflow
+      uses: ./.gitcode/workflows/level1.yml
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+teardown:
+  reset: none

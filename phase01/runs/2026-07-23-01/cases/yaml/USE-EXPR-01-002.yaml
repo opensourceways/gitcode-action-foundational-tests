@@ -1,0 +1,45 @@
+id: USE-EXPR-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "调用未知函数时报错应提示函数名错误与修正方向"
+intent_ref: INTENT-USE-024
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad:
+      name: unknown function call
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: bad function
+          if: ${{ unknownFunc() }}
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含出错的原始表达式（或截断后的前 50 字符）和错误类型说明"
+
+teardown:
+  reset: none
+

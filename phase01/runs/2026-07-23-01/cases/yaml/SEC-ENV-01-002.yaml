@@ -1,0 +1,40 @@
+id: SEC-ENV-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "环境级 secret 审批前 workflow 不可读取"
+intent_ref: INTENT-SEC-027
+setup:
+  repo_fixture: with-env-secrets
+  secrets: ["PROD_TOKEN"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    env-secret-denied:
+      name: Access env secret before approval
+      runs-on: [dedicate-hosted, x64, large]
+      environment: production
+      steps:
+        - name: Try use env secret
+          run: |
+            if [ -z "$PROD_TOKEN" ]; then
+              echo "secret not accessible before approval"
+            else
+              echo "secret accessible unexpectedly"
+              exit 1
+            fi
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "secret accessible unexpectedly"
+  - type: positive
+    target: run_status
+    equals: "pending_or_failed"
+teardown:
+  reset: fixture

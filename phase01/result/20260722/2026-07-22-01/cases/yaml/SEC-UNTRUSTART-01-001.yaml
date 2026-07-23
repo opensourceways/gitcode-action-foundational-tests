@@ -1,0 +1,62 @@
+id: SEC-UNTRUSTART-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 跨运行 artifact 应被视为不可信数据
+intent_ref: INTENT-SEC-029
+
+setup:
+  repo_fixture: with-artifacts
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test cross-run artifact untrusted boundary
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) download previous artifact
+          uses: download-artifact
+          with:
+            name: previous-run-artifact
+        - name: (TC) attempt to execute downloaded artifact
+          run: |
+            if [ -f "previous-run-artifact/malicious.sh" ]; then
+              bash previous-run-artifact/malicious.sh
+              echo "script_executed"
+            else
+              echo "artifact_not_present"
+            fi
+        - name: (TC) verify untrusted boundary
+          if: ${{ always() }}
+          run: |
+            echo "boundary_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "untrusted_payload_succeeded"
+  - type: positive
+    target: run_logs
+    must_contain: "boundary_check_done"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 artifact 下载或执行被限制，错误信息应说明跨运行数据不可信或需显式校验"
+
+teardown:
+  reset: fixture

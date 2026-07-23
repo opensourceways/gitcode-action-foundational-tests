@@ -1,0 +1,39 @@
+id: USE-NEST-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "workflow_call 嵌套 2 层时应正常执行"
+intent_ref: INTENT-USE-026
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    caller:
+      name: second level nested call
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: call reusable
+          uses: ./.gitcode/workflows/reusable-level1.yml
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+
+teardown:
+  reset: none
+

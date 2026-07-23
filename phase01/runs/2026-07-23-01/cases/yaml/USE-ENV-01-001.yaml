@@ -1,0 +1,40 @@
+id: USE-ENV-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 ATOMGIT_SHA 环境变量时正常取值"
+intent_ref: INTENT-USE-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-env:
+      name: test ATOMGIT env var
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo ATOMGIT_SHA
+          run: |
+            echo "sha=$ATOMGIT_SHA"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "sha="
+
+teardown:
+  reset: none
+

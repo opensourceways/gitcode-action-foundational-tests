@@ -1,0 +1,40 @@
+id: REL-MATRIX-01-027
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "matrix max-parallel=4——9 个组合应最多同时运行 4 个"
+intent_ref: INTENT-REL-027
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: matrix test job
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          version: [1, 2, 3]
+        max-parallel: 4
+      steps:
+        - name: matrix step
+          run: |
+            echo version=${{ matrix.version }}
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: max_concurrent_jobs
+    le: "4"
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+teardown:
+  reset: none

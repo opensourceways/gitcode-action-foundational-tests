@@ -1,0 +1,47 @@
+id: REL-CONTINUE-01-030
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "continue-on-error=true——job 失败后 workflow 不应终止"
+intent_ref: INTENT-REL-030
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job_a:
+      name: job with continue on error
+      runs-on: [dedicate-hosted, x64, large]
+      continue-on-error: true
+      steps:
+        - name: fail step
+          run: |
+            exit 1
+    job_b:
+      name: downstream after continue
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: success step
+          run: |
+            echo job_b executed
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_a_status
+    equals: "failure"
+  - type: positive
+    target: job_b_status
+    equals: "success"
+  - type: positive
+    target: workflow_status
+    equals: "success"
+teardown:
+  reset: none

@@ -1,0 +1,40 @@
+id: REL-DISK-01-019
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 磁盘越界——small runner 写入 51 GB 应失败并报磁盘满"
+intent_ref: INTENT-REL-019
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: disk over limit test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: write 51GB file
+          run: |
+            fallocate -l 51G testfile || dd if=/dev/zero of=testfile bs=1M count=52224
+          continue-on-error: true
+        - name: check failure
+          run: |
+            echo expecting failure above
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: job_status
+    equals: "failure"
+  - type: positive
+    target: run_logs
+    contains: "No space left on device"
+teardown:
+  reset: fixture

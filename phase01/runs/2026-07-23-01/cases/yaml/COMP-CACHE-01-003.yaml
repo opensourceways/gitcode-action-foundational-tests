@@ -1,0 +1,49 @@
+id: COMP-CACHE-01-003
+dimensions: [completeness, security, reliability]
+dimension: completeness
+priority: P0
+title: fork PR 不应覆盖或污染主分支 cache
+intent_ref: INTENT-COMP-016
+
+setup:
+  repo_fixture: with-cache
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify fork cache isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Cache write
+          uses: cache
+          with:
+            path: cached.txt
+            key: shared-cache-key
+        - name: Write poison
+          run: |
+            echo "poison" > cached.txt
+
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: cache_pollution
+    equals: main_cache_overwritten
+  - type: positive
+    target: main_cache_content
+    equals: original
+
+teardown:
+  reset: fixture

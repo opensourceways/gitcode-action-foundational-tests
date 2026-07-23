@@ -1,0 +1,45 @@
+id: USE-BADGE-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "workflow 运行完成后状态徽标及时回写且语义清晰"
+intent_ref: INTENT-USE-019
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    status-test:
+      name: status badge test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: success step
+          run: |
+            echo "success"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: ui_visual
+    eval: llm_assisted
+    rubric: "状态徽标在 Commits 列表中尺寸 >= 16x16px，颜色含义符合行业惯例（绿=成功、红=失败、黄=运行中、灰=跳过/取消）；鼠标悬停徽标时显示 tooltip，包含 workflow 名称与简要状态"
+
+teardown:
+  reset: none
+

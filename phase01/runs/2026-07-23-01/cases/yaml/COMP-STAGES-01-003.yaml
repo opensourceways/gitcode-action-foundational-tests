@@ -1,0 +1,48 @@
+id: COMP-STAGES-01-003
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: post.run_always true 时 workflow 失败仍执行 post
+intent_ref: INTENT-COMP-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    main:
+      name: Main job fail
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Force failure
+          run: |
+            exit 1
+  post:
+    run_always: true
+    steps:
+      - name: Post cleanup
+        run: |
+          echo "post executed"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: failure
+  - type: positive
+    target: post_logs
+    contains: post executed
+
+teardown:
+  reset: none

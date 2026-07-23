@@ -1,0 +1,48 @@
+id: COMPAT-DIR-01-001
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: 工作流目录差异——.gitcode/workflows/ 正常识别
+intent_ref: INTENT-COMPAT-029
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    verify-gitcode-dir:
+      name: Verify .gitcode workflows dir
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) echo from gitcode dir
+          run: |
+            echo "GITCODE_DIR_RECOGNIZED_OK"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 GITCODE_DIR_RECOGNIZED_OK"
+  - type: positive
+    target: workflow_discovery
+    eval: deterministic
+    rubric: ".gitcode/workflows/ 下的工作流文件被正确识别"
+
+teardown:
+  reset: fixture

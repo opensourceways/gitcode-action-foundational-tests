@@ -1,0 +1,36 @@
+id: REL-YAMLCACHE-01-060
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Workflow YAML 缓存失效——修改后无旧代码残留"
+intent_ref: INTENT-REL-060
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: YAML cache invalidation test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo marker
+          run: |
+            echo marker_v1
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "marker_v2"
+  - type: negative
+    target: run_logs
+    contains: "marker_v1"
+teardown:
+  reset: fixture

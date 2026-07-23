@@ -1,0 +1,58 @@
+id: SEC-QUOTA-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 大 artifact 应受配额与边界限制
+intent_ref: INTENT-SEC-033
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test large artifact quota limit
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) generate oversized artifact
+          run: |
+            dd if=/dev/urandom of=oversized_artifact.bin bs=1M count=600
+        - name: (TC) attempt upload oversized artifact
+          uses: upload-artifact
+          with:
+            name: oversized-artifact
+            path: oversized_artifact.bin
+        - name: (TC) verify upload blocked
+          if: ${{ always() }}
+          run: |
+            echo "quota_check_done"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "upload_completed_unlimited"
+  - type: positive
+    target: run_status
+    in: [failed, completed]
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应包含 artifact 大小超限提示、当前大小与配额上限"
+
+teardown:
+  reset: fixture

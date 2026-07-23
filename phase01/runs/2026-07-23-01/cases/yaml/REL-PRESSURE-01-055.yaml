@@ -1,0 +1,42 @@
+id: REL-PRESSURE-01-055
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "并发压测——concurrency.max=5 时触发 20 个 workflow 的排队与完成率"
+intent_ref: INTENT-REL-055
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    max: 5
+    exceed-action: QUEUE
+  jobs:
+    test:
+      name: concurrency test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: completed_count
+    equals: "20"
+  - type: nonfunctional
+    target: max_running_count
+    le: "5"
+  - type: nonfunctional
+    target: total_duration_seconds
+    le: "900"
+teardown:
+  reset: none

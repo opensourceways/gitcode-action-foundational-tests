@@ -1,0 +1,34 @@
+id: SEC-COMM-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "issue_comment / pull_request_comment 触发关键字过滤必须不可被绕过"
+intent_ref: INTENT-SEC-026
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    issue_comment:
+      types: [created]
+  jobs:
+    comment-filter:
+      name: Test comment keyword filter
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check trigger
+          run: |
+            echo "Triggered by comment"
+trigger:
+  event: issue_comment
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: "triggered_by_masked_keyword"
+  - type: positive
+    target: run_logs
+    equals: "workflow_not_triggered"
+teardown:
+  reset: fixture

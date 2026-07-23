@@ -1,0 +1,45 @@
+id: SEC-RUN-01-003
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "自托管 Runner 跨项目残留必须被隔离"
+intent_ref: INTENT-SEC-022
+setup:
+  repo_fixture: self-hosted-shared
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    project-a:
+      name: Write project A data
+      runs-on: [self-hosted, x64, large]
+      steps:
+        - name: Write temp
+          run: |
+            echo project-a-secret > /tmp/project-a-temp.txt
+    project-b:
+      name: Check project B isolation
+      runs-on: [self-hosted, x64, large]
+      steps:
+        - name: Check no cross project leak
+          run: |
+            if [ -f /tmp/project-a-temp.txt ]; then
+              echo "cross project leak"
+              exit 1
+            else
+              echo "isolated as expected"
+            fi
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "cross project leak"
+  - type: positive
+    target: run_logs
+    equals: "isolated_as_expected"
+teardown:
+  reset: full_instance

@@ -1,0 +1,33 @@
+id: SEC-PERM-01-003
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "未声明 permissions 时 ATOMGIT_TOKEN 默认权限必须最小化（read-only）"
+intent_ref: INTENT-SEC-017
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    default-perm:
+      name: Test default permissions
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt write without permissions
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" -X POST \n            "https://api.gitcode.com/api/v5/repos/${{ atomgit.repository }}/issues" \n            -H "Authorization: token ${{ atomgit.token }}" \n            -d '{"title": "test"}'
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "write_permission_granted"
+  - type: positive
+    target: run_status
+    equals: "completed"
+teardown:
+  reset: fixture

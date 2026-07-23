@@ -1,0 +1,36 @@
+id: REL-LATENCY-01-050
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "调度延迟基准——queued→running P50/P95 等待时间"
+intent_ref: INTENT-REL-050
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 5
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: p95_latency_seconds
+    le: "60"
+  - type: nonfunctional
+    target: p50_latency_seconds
+    le: "30"
+teardown:
+  reset: none

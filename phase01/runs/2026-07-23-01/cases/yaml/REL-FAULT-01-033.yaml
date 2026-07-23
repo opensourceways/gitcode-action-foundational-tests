@@ -1,0 +1,45 @@
+id: REL-FAULT-01-033
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "故障注入——runner 磁盘接近满时写入操作应失败并报磁盘满"
+intent_ref: INTENT-REL-033
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: fault injection disk full
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: prefill disk
+          run: |
+            fallocate -l 49.5G prefill.bin || dd if=/dev/zero of=prefill.bin bs=1M count=50688
+        - name: write additional 2GB
+          run: |
+            dd if=/dev/zero of=extra.bin bs=1M count=2048
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection:
+  at: pre_job
+  action: disk_full
+  params:
+    pre_fill_gb: 49.5
+    append_gb: 2
+  recovery_expectation: explicit_error_and_user_retry
+assertions:
+  - type: positive
+    target: job_status
+    equals: "failure"
+  - type: positive
+    target: run_logs
+    contains: "No space left on device"
+teardown:
+  reset: fixture

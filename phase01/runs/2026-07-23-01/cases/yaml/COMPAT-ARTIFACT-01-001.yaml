@@ -1,0 +1,75 @@
+id: COMPAT-ARTIFACT-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: upload/download-artifact 跨 job 传递等价性
+intent_ref: INTENT-COMPAT-026
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-upload:
+      name: Upload artifact
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) create artifact file
+          run: |
+            mkdir -p artifacts
+            echo "CROSS_JOB_MARKER_$(date +%s)" > artifacts/marker.txt
+        - name: (TC) upload artifact
+          uses: upload-artifact
+          with:
+            name: cross-job-artifact
+            path: artifacts/marker.txt
+    job-download:
+      name: Download and verify artifact
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job-upload
+      steps:
+        - name: (TC) download artifact
+          uses: download-artifact
+          with:
+            name: cross-job-artifact
+            path: downloaded
+        - name: (TC) verify artifact content
+          run: |
+            if grep -q "CROSS_JOB_MARKER" downloaded/marker.txt; then
+              echo "ARTIFACT_TRANSFER_OK"
+            else
+              echo "ARTIFACT_TRANSFER_FAILED"
+              exit 1
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: completed_success
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 ARTIFACT_TRANSFER_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ARTIFACT_TRANSFER_FAILED"
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "不应因使用裸插件名 upload-artifact/download-artifact 而解析失败"
+
+teardown:
+  reset: fixture

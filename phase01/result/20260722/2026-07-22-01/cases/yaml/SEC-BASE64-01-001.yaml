@@ -1,0 +1,51 @@
+id: SEC-BASE64-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: secret 经 base64 编码后输出不应在日志中泄露明文
+intent_ref: INTENT-SEC-005
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test base64 bypass masking
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) encode secret with base64
+          run: |
+            echo "$DEPLOY_TOKEN" | base64
+        - name: (TC) encode secret with base64 wrap
+          run: |
+            printf '%s' "$DEPLOY_TOKEN" | base64 -w0
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    must_not_contain: "placeholder_for_base64_encoded_token"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

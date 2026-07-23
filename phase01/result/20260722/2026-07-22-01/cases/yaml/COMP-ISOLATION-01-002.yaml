@@ -1,0 +1,56 @@
+id: COMP-ISOLATION-01-002
+dimensions: [completeness]
+dimension: completeness
+priority: P0
+title: 跨 job 的 Runner 文件系统隔离应有效
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    job-a:
+      name: Create tmp isolation marker
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Write marker to tmp directory
+          run: |
+            echo "marker-from-job-a" > /tmp/isolation-marker.txt
+            echo "MARKER_CREATED"
+    job-b:
+      name: Check tmp marker isolation
+      runs-on: [ubuntu-latest, x64, small]
+      needs: job-a
+      steps:
+        - name: Verify marker not visible across jobs
+          run: |
+            if [ -f /tmp/isolation-marker.txt ]; then
+              echo "ISOLATION_WEAK: marker from job-a is visible"
+            else
+              echo "ISOLATION_STRONG: marker not visible across jobs"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "ISOLATION_STRONG: marker not visible across jobs"
+  - type: negative
+    target: run_logs
+    must_not_contain: "ISOLATION_WEAK: marker from job-a is visible"
+
+teardown:
+  reset: fixture

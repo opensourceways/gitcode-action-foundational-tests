@@ -1,0 +1,54 @@
+id: REL-RUNNER-01-011
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: Runner 状态机正确性——空闲/运行/离线转换与时序一致性
+intent_ref: INTENT-REL-058
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Runner state machine test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Work step
+          run: |
+            sleep 15
+            echo "WORK_DONE"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: runner_state_sequence
+    sequence:
+      - idle
+      - busy
+      - idle
+      - offline
+      - idle
+  - type: positive
+    target: runner_busy_overlap_job_running
+    overlap: true
+  - type: negative
+    target: runner_state_sequence
+    illegal_transitions:
+      - from: idle
+        to: busy
+        skip: idle
+
+teardown:
+  reset: full_instance

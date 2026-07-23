@@ -1,0 +1,48 @@
+id: COMPAT-TOKEN-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: ATOMGIT_TOKEN 应正确返回有效令牌
+intent_ref: INTENT-COMPAT-020
+
+setup:
+  repo_fixture: default
+  secrets: [ATOMGIT_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test ATOMGIT_TOKEN availability
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use ATOMGIT_TOKEN for API call
+          run: |
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ atomgit.api_url }}/repos/${{ atomgit.repository }}" -H "Authorization: token $ATOMGIT_TOKEN")
+            echo "api_status=$STATUS"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 api_status 应为 200，表明 ATOMGIT_TOKEN 有效"
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: ATOMGIT_TOKEN
+
+teardown:
+  reset: fixture

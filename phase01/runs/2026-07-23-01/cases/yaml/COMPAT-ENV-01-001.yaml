@@ -1,0 +1,44 @@
+id: COMPAT-ENV-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: ATOMGIT_SHA 环境变量应正确返回触发提交 SHA
+intent_ref: INTENT-COMPAT-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test ATOMGIT_SHA env var
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ATOMGIT_SHA
+          run: |
+            echo "atomgit_sha=$ATOMGIT_SHA"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 atomgit_sha 应包含 40 位十六进制 SHA 值"
+
+teardown:
+  reset: fixture

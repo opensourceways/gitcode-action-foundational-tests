@@ -1,0 +1,42 @@
+id: SEC-WCMD-01-003
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "ATOMGIT_ENV 不被不可信输入污染提权"
+intent_ref: INTENT-SEC-030
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    env-injection:
+      name: Test ATOMGIT_ENV injection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write malicious env
+          run: |
+            echo "MY_VAR=good
+  INJECTED_VAR=bad" >> $ATOMGIT_ENV
+        - name: Check no injection
+          run: |
+            if [ -n "$INJECTED_VAR" ]; then
+              echo "injection succeeded"
+              exit 1
+            else
+              echo "no injection"
+            fi
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "injection succeeded"
+  - type: positive
+    target: run_logs
+    equals: "no injection"
+teardown:
+  reset: fixture

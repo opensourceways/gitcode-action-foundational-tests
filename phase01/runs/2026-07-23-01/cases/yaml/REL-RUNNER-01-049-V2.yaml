@@ -1,0 +1,47 @@
+id: REL-RUNNER-01-049-V2
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 规格真实性——xlarge/2xlarge 实际 CPU/内存/磁盘 vs 声明值"
+intent_ref: INTENT-REL-049
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    probe-xlarge:
+      name: probe xlarge runner
+      runs-on: [ubuntu-latest, x64, xlarge]
+      steps:
+        - name: probe xlarge
+          run: |
+            nproc
+            free -m
+            df -BG ${{RUNNER_TEMP}}
+    probe-2xlarge:
+      name: probe 2xlarge runner
+      runs-on: [ubuntu-latest, x64, 2xlarge]
+      steps:
+        - name: probe 2xlarge
+          run: |
+            nproc
+            free -m
+            df -BG ${{RUNNER_TEMP}}
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: resource_ratio
+    ge: "0.9"
+  - type: positive
+    target: failure_attribution
+    equals: "clear"
+teardown:
+  reset: none

@@ -1,0 +1,41 @@
+id: USE-LBL-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "runs-on 标签因容量不足排队时应提示排队状态而非无可用 runner"
+intent_ref: INTENT-USE-025
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    queue-test:
+      name: runner capacity queue test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: step
+          run: |
+            echo "queued then ran"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "若因容量不足排队，应提示当前无空闲 Runner，正在排队而非无可用 runner；若因标签不匹配，应提示未找到匹配标签的 Runner，可用标签包括..."
+
+teardown:
+  reset: none
+

@@ -1,0 +1,35 @@
+id: SEC-CACHE-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "主仓 cache restore 对 fork cache miss"
+intent_ref: INTENT-SEC-018
+setup:
+  repo_fixture: with-cache
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    cache-restore:
+      name: Restore cache from main repo
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Restore cache
+          uses: cache
+          with:
+            path: ./node_modules
+            key: test-cache-key
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: cache_restore
+    must_not_hit: "fork_cache_key"
+  - type: positive
+    target: run_logs
+    equals: "cache_miss"
+teardown:
+  reset: fixture

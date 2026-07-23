@@ -1,0 +1,36 @@
+id: SEC-NET-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Runner 网络出站必须受控，防止 SSRF 与内网跳板"
+intent_ref: INTENT-SEC-023
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    ssrf-test:
+      name: Test SSRF prevention
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Access metadata endpoint
+          run: |
+            curl -s --max-time 5 http://169.254.169.254/ || echo "access denied or timeout"
+        - name: Access internal IP
+          run: |
+            curl -s --max-time 5 http://192.168.1.1/ || echo "access denied or timeout"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "metadata_service_response"
+  - type: positive
+    target: run_logs
+    equals: "access_denied_or_timeout"
+teardown:
+  reset: full_instance

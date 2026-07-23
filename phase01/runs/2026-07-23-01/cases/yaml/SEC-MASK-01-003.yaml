@@ -1,0 +1,36 @@
+id: SEC-MASK-01-003
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 日志脱敏不可通过 base64 编码绕过"
+intent_ref: INTENT-SEC-005
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    b64-bypass:
+      name: Test base64 bypass
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Encode and echo secret
+          run: |
+            encoded=$(echo -n "${{ secrets.DEPLOY_TOKEN }}" | base64)
+            echo "encoded=$encoded"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "DEPLOY_TOKEN"
+  - type: negative
+    target: run_logs
+    eval: "llm_assisted"
+    rubric: "\u65e5\u5fd7\u4e2d base64 \u7f16\u7801\u540e\u7684\u5b57\u7b26\u4e32\u4e0e secret \u539f\u503c\u5b58\u5728\u4e00\u4e00\u5bf9\u5e94\u5173\u7cfb\u65f6\u5e94\u88ab\u906e\u853d"
+teardown:
+  reset: fixture

@@ -1,0 +1,43 @@
+id: COMP-RUNNER-01-002
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: runs-on default 等效 ubuntu-latest x64 small
+intent_ref: INTENT-COMP-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify default label
+      runs-on: default
+      steps:
+        - name: Echo runner info
+          run: |
+            echo "os=$RUNNER_OS"
+            echo "arch=$RUNNER_ARCH"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: runner_spec
+    equals: small
+
+teardown:
+  reset: none

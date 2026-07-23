@@ -1,0 +1,48 @@
+id: COMP-ARTIFACT-01-003
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: artifact 保留期设置生效
+intent_ref: INTENT-COMP-015
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    upload:
+      name: Upload with short retention
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create artifact
+          run: |
+            echo "temp" > temp.txt
+        - name: Upload artifact
+          uses: upload-artifact
+          with:
+            name: temp-artifact
+            path: temp.txt
+            retention-days: 1
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: artifact_available
+    equals: yes_within_retention
+  - type: negative
+    target: artifact_available_after_expiry
+    equals: no_after_1_day
+
+teardown:
+  reset: none

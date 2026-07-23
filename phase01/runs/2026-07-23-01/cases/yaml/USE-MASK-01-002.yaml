@@ -1,0 +1,41 @@
+id: USE-MASK-01-002
+dimensions: ["usability", "security"]
+dimension: usability
+priority: P0
+title: "直接 echo secrets 值时文档描述的绕过风险与实际一致"
+intent_ref: INTENT-USE-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bypass-mask:
+      name: test direct secret echo
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: direct echo secret
+          run: |
+            echo "secret=${{ secrets.TEST_SECRET }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: run_logs
+    eval: llm_assisted
+    rubric: "若文档声明存在绕过风险，必须同时给出正确写法与错误写法的代码示例对比；仅有风险声明而无缓解建议的视为可理解性不合格"
+
+teardown:
+  reset: none
+

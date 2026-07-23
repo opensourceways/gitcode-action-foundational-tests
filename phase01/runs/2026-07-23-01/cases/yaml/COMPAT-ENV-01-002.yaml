@@ -1,0 +1,45 @@
+id: COMPAT-ENV-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: GITHUB_SHA 环境变量在 GitCode 中应为空或未定义
+intent_ref: INTENT-COMPAT-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test GITHUB_SHA env var
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo GITHUB_SHA
+          run: |
+            echo "github_sha=$GITHUB_SHA"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 github_sha 的值应为空，或 shell 显示未定义，不应包含 40 位 SHA"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若因未定义变量导致报错，信息应提示使用 ATOMGIT_* 替代 GITHUB_*"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,48 @@
+id: REL-FAULT-01-034
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "故障注入——cache 服务 503 不可用时 job 应优雅降级为 cache miss"
+intent_ref: INTENT-REL-034
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: fault injection cache 503
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: restore cache step
+          uses: cache
+          with:
+            path: node_modules
+            key: cache-deps
+        - name: subsequent step
+          run: |
+            echo subsequent step executed
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection:
+  at: mid_job
+  action: concurrent_flood
+  params:
+    service: cache
+    response: 503
+    target_step: 1
+  recovery_expectation: graceful_degradation_cache_miss
+assertions:
+  - type: positive
+    target: job_status
+    equals: "success"
+  - type: positive
+    target: run_logs
+    contains: "cache miss"
+teardown:
+  reset: none

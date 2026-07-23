@@ -1,0 +1,50 @@
+id: USE-INPT-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 boolean 类型 input 时报错应提示仅支持 string"
+intent_ref: INTENT-USE-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        dry_run:
+          description: dry run flag
+          type: boolean
+          required: false
+          default: false
+  jobs:
+    bad-input:
+      name: test boolean input error
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo input
+          run: |
+            echo "dry_run=${{ inputs.dry_run }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 GitCode 仅支持 string 类型或等效说明，并给出在步骤中使用表达式转换类型的替代方案"
+
+teardown:
+  reset: none
+

@@ -1,0 +1,56 @@
+id: REL-RUNNER-01-049
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "Runner 规格真实性——small/medium/large 实际 CPU/内存/磁盘 vs 声明值"
+intent_ref: INTENT-REL-049
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    probe-small:
+      name: probe small runner
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: probe small
+          run: |
+            nproc
+            free -m
+            df -BG ${{RUNNER_TEMP}}
+    probe-medium:
+      name: probe medium runner
+      runs-on: [ubuntu-latest, x64, medium]
+      steps:
+        - name: probe medium
+          run: |
+            nproc
+            free -m
+            df -BG ${{RUNNER_TEMP}}
+    probe-large:
+      name: probe large runner
+      runs-on: [ubuntu-latest, x64, large]
+      steps:
+        - name: probe large
+          run: |
+            nproc
+            free -m
+            df -BG ${{RUNNER_TEMP}}
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: resource_ratio
+    ge: "0.9"
+  - type: nonfunctional
+    target: queued_to_running_minutes
+    le: "5"
+teardown:
+  reset: none

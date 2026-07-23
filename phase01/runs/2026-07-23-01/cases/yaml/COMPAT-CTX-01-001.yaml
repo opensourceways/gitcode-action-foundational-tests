@@ -1,0 +1,45 @@
+id: COMPAT-CTX-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: 使用 github.ref 上下文应报错或求值为空
+intent_ref: INTENT-COMPAT-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: Test github context reference
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo github ref
+          run: |
+            echo "github_ref=${{ github.ref }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中 github_ref 的值应为空，或 workflow 因不支持的上下文而失败"
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息应提示 github 上下文不可用，并建议替换为 atomgit.*"
+
+teardown:
+  reset: fixture

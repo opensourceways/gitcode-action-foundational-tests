@@ -1,0 +1,80 @@
+id: COMPAT-ISOLATION-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: Runner 环境隔离与复用策略兼容性确认
+intent_ref: INTENT-COMPAT-028
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    job-a:
+      name: Write sensitive marker in job A
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) write marker files
+          run: |
+            echo "SENSITIVE_MARKER_JOB_A" > /tmp/isolation_test_marker.txt
+            echo "SENSITIVE_MARKER_JOB_A" > workspace_marker.txt
+            echo "marker_written"
+    job-b:
+      name: Verify no residual from job A
+      runs-on: [ubuntu-latest, x64, small]
+      needs: job-a
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) check tmp isolation
+          run: |
+            if [ -f /tmp/isolation_test_marker.txt ]; then
+              echo "RESIDUAL_FOUND_TMP"
+              exit 1
+            else
+              echo "NO_RESIDUAL_TMP"
+            fi
+        - name: (TC) check workspace isolation
+          run: |
+            if [ -f workspace_marker.txt ]; then
+              echo "RESIDUAL_FOUND_WORKSPACE"
+              exit 1
+            else
+              echo "NO_RESIDUAL_WORKSPACE"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 NO_RESIDUAL_TMP"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 NO_RESIDUAL_WORKSPACE"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 RESIDUAL_FOUND_TMP"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 RESIDUAL_FOUND_WORKSPACE"
+
+teardown:
+  reset: fixture

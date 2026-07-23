@@ -1,0 +1,42 @@
+id: USE-ENV-01-002
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "引用 GITHUB_SHA 时日志应给出环境变量映射提示"
+intent_ref: INTENT-USE-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad-env:
+      name: test GITHUB env var hint
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo GITHUB_SHA
+          run: |
+            set -u
+            echo "sha=$GITHUB_SHA"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "日志警告是否足够醒目且包含有效指引：应提示 GITHUB_* 环境变量在 GitCode 中对应为 ATOMGIT_*"
+
+teardown:
+  reset: none
+

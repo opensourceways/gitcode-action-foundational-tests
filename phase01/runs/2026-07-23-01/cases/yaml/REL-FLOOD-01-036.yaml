@@ -1,0 +1,36 @@
+id: REL-FLOOD-01-036
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "并发洪泛——同一仓库 10 个 push 同时触发 10 个 workflow 运行应无丢失"
+intent_ref: INTENT-REL-036
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 5
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: created_runs_count
+    equals: "10"
+  - type: positive
+    target: run_status
+    equals: "completed(success)"
+teardown:
+  reset: none

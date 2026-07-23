@@ -1,0 +1,56 @@
+id: REL-ARTPERF-01-053-V2
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "制品传输性能——1GB artifact 上传下载耗时"
+intent_ref: INTENT-REL-053
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    upload:
+      name: upload artifact job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: generate 1024MB file
+          run: |
+            dd if=/dev/urandom of=artifact.bin bs=1M count=1024
+        - name: upload artifact step
+          uses: upload-artifact
+          with:
+            name: perf-artifact
+            path: artifact.bin
+    download:
+      name: download artifact job
+      runs-on: [dedicate-hosted, x64, large]
+      needs: upload
+      steps:
+        - name: download artifact step
+          uses: download-artifact
+          with:
+            name: perf-artifact
+        - name: verify artifact step
+          run: |
+            ls -la perf-artifact
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: upload_time_seconds
+    le: "300"
+  - type: nonfunctional
+    target: download_time_seconds
+    le: "300"
+  - type: positive
+    target: hash_match
+    equals: "true"
+teardown:
+  reset: fixture

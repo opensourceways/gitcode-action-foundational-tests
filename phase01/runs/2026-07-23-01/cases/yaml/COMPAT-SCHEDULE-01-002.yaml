@@ -1,0 +1,45 @@
+id: COMPAT-SCHEDULE-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: schedule 不支持 timezone 字段差异
+intent_ref: INTENT-COMPAT-013
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+      cron: "0 12 * * *"
+      timezone: "Asia/Shanghai"
+  jobs:
+    verify:
+      name: Verify schedule timezone rejection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo schedule
+          run: |
+            echo "SCHEDULE_TIMEZONE_OK"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应明确指出 timezone 字段不被支持，或 workflow 被平台拒绝；不应出现 generic 解析错误"
+
+teardown:
+  reset: fixture

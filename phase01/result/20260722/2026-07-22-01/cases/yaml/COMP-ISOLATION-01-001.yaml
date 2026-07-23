@@ -1,0 +1,101 @@
+id: COMP-ISOLATION-01-001
+dimensions: [completeness, reliability, security]
+dimension: completeness
+priority: P0
+title: Runner 环境隔离强度验证——跨 job 文件残留不可访问
+intent_ref: INTENT-COMP-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    job-a:
+      name: Write isolation markers
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) write marker in workspace
+          run: |
+            echo "MARKER_JOB_A_WORKSPACE_$(date +%s)" > marker_workspace.txt
+        - name: (TC) write marker in tmp
+          run: |
+            echo "MARKER_JOB_A_TMP_$(date +%s)" > /tmp/marker_tmp.txt
+        - name: (TC) output marker names
+          run: |
+            echo "workspace_marker=marker_workspace.txt" >> "$ATOMGIT_OUTPUT"
+            echo "tmp_marker=/tmp/marker_tmp.txt" >> "$ATOMGIT_OUTPUT"
+    job-b:
+      name: Verify isolation from job A
+      runs-on: [ubuntu-latest, x64, small]
+      needs: job-a
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) verify workspace isolation
+          run: |
+            if ls marker_workspace.txt 2>/dev/null; then
+              echo "ISOLATION_BROKEN_WORKSPACE"
+              exit 1
+            else
+              echo "WORKSPACE_ISOLATED_OK"
+            fi
+        - name: (TC) verify tmp isolation
+          run: |
+            if ls /tmp/marker_tmp.txt 2>/dev/null; then
+              echo "ISOLATION_BROKEN_TMP"
+              exit 1
+            else
+              echo "TMP_ISOLATED_OK"
+            fi
+        - name: (TC) verify no orphan processes
+          run: |
+            if ps aux | grep -v grep | grep -q "MARKER_JOB_A"; then
+              echo "ORPHAN_PROCESS_FOUND"
+              exit 1
+            else
+              echo "NO_ORPHAN_PROCESS_OK"
+            fi
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 WORKSPACE_ISOLATED_OK"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 TMP_ISOLATED_OK"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 NO_ORPHAN_PROCESS_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ISOLATION_BROKEN_WORKSPACE"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ISOLATION_BROKEN_TMP"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ORPHAN_PROCESS_FOUND"
+
+teardown:
+  reset: fixture

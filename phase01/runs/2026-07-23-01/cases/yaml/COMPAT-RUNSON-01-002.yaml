@@ -1,0 +1,48 @@
+id: COMPAT-RUNSON-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: runs-on 标签体系——单标签字符串应报错
+intent_ref: INTENT-COMPAT-027
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify-runs-on-string:
+      name: Verify single label string error
+      runs-on: ubuntu-latest
+      steps:
+        - name: (TC) should not reach here
+          run: |
+            echo "RUNSON_STRING_ACCEPTED"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: workflow_parse
+    eval: deterministic
+    rubric: "单标签字符串 runs-on 应在解析/校验阶段报错"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "错误信息应提示必须使用数组格式或标签匹配失败"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "不应出现 RUNSON_STRING_ACCEPTED（不应成功调度执行）"
+
+teardown:
+  reset: fixture

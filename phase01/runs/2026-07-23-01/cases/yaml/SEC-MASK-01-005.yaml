@@ -1,0 +1,34 @@
+id: SEC-MASK-01-005
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "Secret 日志脱敏不可通过多行值输出绕过"
+intent_ref: INTENT-SEC-007
+setup:
+  repo_fixture: with-secrets
+  secrets: ["MULTI_LINE_SECRET"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    multiline-mask:
+      name: Test multiline masking
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo multiline secret
+          run: |
+            echo "${{ secrets.MULTI_LINE_SECRET }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "MULTI_LINE_SECRET"
+  - type: positive
+    target: run_logs
+    equals: "multiline_masked_with_asterisks"
+teardown:
+  reset: fixture

@@ -1,0 +1,46 @@
+id: COMPAT-PR-01-002
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P0
+title: pull_request types 命名差异 - GitHub 风格 types 应报错
+intent_ref: INTENT-COMPAT-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+      types: [opened, closed, reopened]
+  jobs:
+    verify:
+      name: Verify GitHub style types rejection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo PR event
+          run: |
+            echo "PR_EVENT_TYPE=${{ atomgit.event.action }}"
+            echo "PR_TYPES_OK"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "错误信息应明确指出 opened/closed/reopened 不是合法的 pull_request types，并提示正确的 GitCode 类型名称（如 open/reopen/update）"
+
+teardown:
+  reset: fixture

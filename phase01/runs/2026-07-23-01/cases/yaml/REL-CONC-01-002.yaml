@@ -1,0 +1,39 @@
+id: REL-CONC-01-002
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "concurrency.max=6 配置应被系统拒绝"
+intent_ref: INTENT-REL-002
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    max: 6
+    exceed-action: QUEUE
+  jobs:
+    test:
+      name: concurrency test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 10
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: yaml_validation
+    equals: "rejected"
+  - type: negative
+    target: run_status
+    equals: "should_not_start"
+teardown:
+  reset: none

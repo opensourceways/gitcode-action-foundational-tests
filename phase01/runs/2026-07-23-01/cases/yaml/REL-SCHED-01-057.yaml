@@ -1,0 +1,36 @@
+id: REL-SCHED-01-057
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "资源调度状态一致性——空闲 runner 存在时 job 不应死等"
+intent_ref: INTENT-REL-057
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: reliability test job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: sleep step
+          run: |
+            sleep 30
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: nonfunctional
+    target: max_queued_to_running_seconds
+    le: "60"
+  - type: nonfunctional
+    target: avg_queued_to_running_seconds
+    le: "30"
+teardown:
+  reset: none

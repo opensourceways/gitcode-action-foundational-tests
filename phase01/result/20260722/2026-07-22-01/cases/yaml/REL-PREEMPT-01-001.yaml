@@ -1,0 +1,44 @@
+id: REL-PREEMPT-01-001
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: preemption events 配置越界值（11 个）应被系统拒绝
+intent_ref: INTENT-REL-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Preemption boundary test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Checkout source
+          uses: checkout
+        - name: Echo start
+          run: |
+            echo "start"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: blocked_or_failed
+  - type: positive
+    target: error_message
+    contains: preemption
+
+teardown:
+  reset: fixture

@@ -1,0 +1,33 @@
+id: SEC-INJ-01-005
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "表达式求值必须防止双重模板渲染（二次求值）"
+intent_ref: INTENT-SEC-013
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    double-template:
+      name: Test double template eval
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Pass template syntax
+          run: |
+            echo "Input: ${{ '{{ 1 + 1 }}' }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "2"
+  - type: positive
+    target: run_logs
+    equals: "template_chars_escaped"
+teardown:
+  reset: fixture

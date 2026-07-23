@@ -1,0 +1,45 @@
+id: USE-TYPE-01-001
+dimensions: ["usability", "compatibility"]
+dimension: usability
+priority: P1
+title: "使用 GitCode types 命名时正常触发"
+intent_ref: INTENT-USE-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      types:
+        - open
+        - update
+        - reopen
+      branches: [main]
+  jobs:
+    test-types:
+      name: test gitcode types
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: echo event
+          run: |
+            echo "event=${{ atomgit.event_name }}"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: COMPLETED
+
+teardown:
+  reset: none
+

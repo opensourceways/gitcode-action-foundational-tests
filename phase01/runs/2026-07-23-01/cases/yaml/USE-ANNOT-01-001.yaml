@@ -1,0 +1,45 @@
+id: USE-ANNOT-01-001
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "workflow 命令 ::error:: 与 ::warning:: 在日志中保留原文"
+intent_ref: INTENT-USE-021
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    annot-test:
+      name: annotation command test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: emit error and warning
+          run: |
+            echo "::error file=src/main.js,line=10::Missing semicolon"
+            echo "::warning file=src/util.js,line=5::Deprecated function"
+            echo "::notice::General notice"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains: "::error file=src/main.js,line=10::Missing semicolon"
+  - type: positive
+    target: run_logs
+    contains: "::warning file=src/util.js,line=5::Deprecated function"
+
+teardown:
+  reset: none
+

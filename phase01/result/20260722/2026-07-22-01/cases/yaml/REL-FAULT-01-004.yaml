@@ -1,0 +1,62 @@
+id: REL-FAULT-01-004
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: 故障注入——artifact 上传时网络分区 30 秒后应失败并报网络错误
+intent_ref: INTENT-REL-032
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test:
+      name: Artifact upload network partition test
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: Generate artifact file
+          run: |
+            echo "ARTIFACT_CONTENT" > test-artifact.txt
+        - name: Upload artifact
+          uses: upload-artifact
+          with:
+            name: test-artifact
+            path: test-artifact.txt
+        - name: Post upload step
+          run: |
+            echo "POST_UPLOAD"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection:
+  at: mid_job
+  action: network_partition
+  params:
+    duration_seconds: 30
+    step_index: 1
+  recovery_expectation: fail_with_network_error
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: FAILED
+  - type: positive
+    target: error_message
+    contains_any:
+      - timeout
+      - network
+      - connection
+  - type: negative
+    target: artifacts
+    must_not_contain: test-artifact
+
+teardown:
+  reset: full_instance

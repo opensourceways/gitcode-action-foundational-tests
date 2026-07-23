@@ -1,0 +1,80 @@
+id: COMPAT-ISOLATE-01-001
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: Runner 环境隔离——跨 job 文件隔离
+intent_ref: INTENT-COMPAT-028
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-write:
+      name: Write isolation markers
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) write workspace marker
+          run: |
+            echo "ISOLATION_MARKER_$(date +%s)" > workspace_marker.txt
+        - name: (TC) write tmp marker
+          run: |
+            echo "ISOLATION_MARKER_TMP_$(date +%s)" > /tmp/isolation_marker.txt
+        - name: (TC) output marker names
+          run: |
+            echo "workspace_marker=workspace_marker.txt" >> "$ATOMGIT_OUTPUT"
+            echo "tmp_marker=/tmp/isolation_marker.txt" >> "$ATOMGIT_OUTPUT"
+    job-verify:
+      name: Verify file isolation
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job-write
+      steps:
+        - name: (TC) verify workspace isolation
+          run: |
+            if ls workspace_marker.txt 2>/dev/null; then
+              echo "ISOLATION_BROKEN_WORKSPACE"
+              exit 1
+            else
+              echo "WORKSPACE_ISOLATED_OK"
+            fi
+        - name: (TC) verify tmp isolation
+          run: |
+            if ls /tmp/isolation_marker.txt 2>/dev/null; then
+              echo "ISOLATION_BROKEN_TMP"
+              exit 1
+            else
+              echo "TMP_ISOLATED_OK"
+            fi
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 WORKSPACE_ISOLATED_OK"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现 TMP_ISOLATED_OK"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ISOLATION_BROKEN_WORKSPACE"
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中不应出现 ISOLATION_BROKEN_TMP"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,42 @@
+id: COMP-SUMMARY-01-002
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: summary 中不应暴露系统内部路径
+intent_ref: INTENT-COMP-018
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify summary security
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write safe summary
+          run: |
+            echo "Results: OK" >> "$ATOMGIT_STEP_SUMMARY"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: step_summary
+    must_not_contain: /tmp/runner
+  - type: negative
+    target: step_summary
+    must_not_contain: /opt/actions
+
+teardown:
+  reset: none

@@ -1,0 +1,44 @@
+id: COMP-SCHEDULE-01-003
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: cron 间隔短于 5 分钟时被拒绝或降级
+intent_ref: INTENT-COMP-005
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+      - cron: "*/1 * * * *"
+  jobs:
+    verify:
+      name: Verify short interval rejection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo scheduled
+          run: |
+            echo "should not run"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: success_with_1min_interval
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: 错误信息应说明 cron 最短间隔为 5 分钟
+
+teardown:
+  reset: none

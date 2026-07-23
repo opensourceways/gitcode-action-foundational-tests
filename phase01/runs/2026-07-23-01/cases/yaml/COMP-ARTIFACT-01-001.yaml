@@ -1,0 +1,61 @@
+id: COMP-ARTIFACT-01-001
+dimensions: [completeness, reliability]
+dimension: completeness
+priority: P1
+title: artifact 可在同 workflow 的 job 间正确传递
+intent_ref: INTENT-COMP-015
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    build:
+      name: Build and upload
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create artifact
+          run: |
+            mkdir -p dist
+            echo "hello artifact" > dist/app.txt
+        - name: Upload artifact
+          uses: upload-artifact
+          with:
+            name: app-dist
+            path: dist/
+    verify:
+      name: Download and verify
+      runs-on: [dedicate-hosted, x64, large]
+      needs: build
+      steps:
+        - name: Download artifact
+          uses: download-artifact
+          with:
+            name: app-dist
+            path: dist/
+        - name: Verify content
+          run: |
+            cat dist/app.txt
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    contains: hello artifact
+
+teardown:
+  reset: none

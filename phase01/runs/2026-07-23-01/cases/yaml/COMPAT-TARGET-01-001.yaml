@@ -1,0 +1,53 @@
+id: COMPAT-TARGET-01-001
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: "pull_request_target 默认 checkout 应为 base 分支而非 head 分支"
+intent_ref: INTENT-COMPAT-032
+
+setup:
+  repo_fixture: with-fork-pr
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    check-sha:
+      name: Verify checkout base sha
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout source
+          uses: checkout
+        - name: print sha info
+          run: |
+            echo "Current SHA: ${{ atomgit.sha }}"
+            echo "Base SHA: ${{ atomgit.event.pull_request.base.sha }}"
+            echo "Head SHA: ${{ atomgit.event.pull_request.head.sha }}"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中显示的当前检出 SHA 不应等于 fork PR head SHA"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "日志中显示的当前检出 SHA 等于 base 分支 SHA，确认 checkout 的是目标分支而非 fork head"
+  - type: positive
+    target: run_status
+    equals: success
+    eval: deterministic
+
+teardown:
+  reset: fixture

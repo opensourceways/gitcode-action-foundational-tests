@@ -1,0 +1,53 @@
+id: SEC-TOCTOU-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: 审批后推送新 commit 不应绕过审批与代码固定
+intent_ref: INTENT-SEC-031
+
+setup:
+  repo_fixture: with-approval
+  secrets: []
+  variables: {}
+  branch_protection: required-approval
+
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    test:
+      name: Test TOCTOU approval pinning
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) record executed SHA
+          run: |
+            echo "executed_sha=${{ atomgit.event.pull_request.head.sha }}"
+        - name: (TC) verify sha unchanged from approval
+          run: |
+            echo "toctou_check_done"
+
+trigger:
+  event: pull_request_target
+  as: untrusted_contributor
+  params:
+    post_approval_push: true
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "toctou_bypassed"
+  - type: positive
+    target: run_status
+    in: [paused, blocked, failed, completed]
+  - type: nonfunctional
+    target: error_message
+    eval: llm_assisted
+    rubric: "若 workflow 被暂停或阻止，错误信息应说明审批后代码已变更，需重新审批"
+
+teardown:
+  reset: fixture

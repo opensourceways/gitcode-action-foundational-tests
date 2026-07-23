@@ -45,24 +45,22 @@
 |  | DoD 全绿 | ✅ |
 |  | 状态更新 | `delivered` |
 
-## 交付物位置
-
-全部产物已归位至 `phase01/runs/2026-07-22-01/`：
-
-| 产物 | 路径 |
-|---|---|
-| 新增文本用例（62 条） | `cases/text/*.md` |
-| 新增可执行 YAML（62 条） | `cases/yaml/*.yaml` |
-| 用例全集清单 | `case-manifest.md` |
-| 覆盖度报告 | `coverage.md` |
-| DoD 验收清单 | `dod-checklist.md` |
-| 意图库 | `intent-library.md` |
-| 门禁日志 | `gate-log.md` |
-| 维度原始 intent | `intents/*.md` |
-| 三份基线 | `baseline/*.md` |
-
 ## 状态
 **`delivered`** ✅
 
+## 交付物清单
+
+| 产物 | 路径 |
+|---|---|
+| 新增文本用例（62 条） | `runs/2026-07-22-01/cases/text/*.md` |
+| 新增可执行 YAML（62 条） | `runs/2026-07-22-01/cases/yaml/*.yaml` |
+| 用例全集清单 | `runs/2026-07-22-01/case-manifest.md` |
+| 覆盖度报告 | `runs/2026-07-22-01/coverage.md` |
+| DoD 验收清单 | `runs/2026-07-22-01/dod-checklist.md` |
+| 意图库 | `runs/2026-07-22-01/intent-library.md` |
+| 门禁日志 | `runs/2026-07-22-01/gate-log.md` |
+| 维度原始 intent | `runs/2026-07-22-01/intents/*.md` |
+| 三份基线 | `baseline/*.md` |
+
 ## 下一步
-本批次已可交付 **第二部分（Phase 02）**。如需启动测试执行，请使用 `/phase02-exec`。
+本批次已可交付 **第二部分（Phase 02）**。如需启动 Phase 02 执行，请使用 `/phase02-exec`。

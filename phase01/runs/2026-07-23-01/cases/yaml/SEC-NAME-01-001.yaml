@@ -1,0 +1,34 @@
+id: SEC-NAME-01-001
+dimensions: ["security", "compatibility"]
+dimension: security
+priority: P0
+title: "Secret/变量名含特殊字符时不可导致意外求值或权限绕过"
+intent_ref: INTENT-SEC-024
+setup:
+  repo_fixture: with-secrets
+  secrets: ["MY-VAR"]
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    special-name:
+      name: Test special secret name
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use hyphen secret
+          run: |
+            echo "value is ${{ secrets.MY-VAR }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "MY-VAR"
+  - type: positive
+    target: run_status
+    equals: "success_or_yaml_error"
+teardown:
+  reset: fixture

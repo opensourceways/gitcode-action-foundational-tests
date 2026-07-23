@@ -1,0 +1,43 @@
+id: COMP-PUSH-01-003
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: paths 过滤匹配前 300 个变更文件行为符合预期
+intent_ref: INTENT-COMP-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches:
+        - main
+      paths:
+        - src/**
+  jobs:
+    verify:
+      name: Verify paths filter
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo triggered
+          run: |
+            echo "should not run"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_created
+    equals: no_run_for_non_matching_path
+
+teardown:
+  reset: none

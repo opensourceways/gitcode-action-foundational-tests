@@ -1,0 +1,38 @@
+id: SEC-DOS-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "大 artifact / 大 cache 必须受配额与边界限制"
+intent_ref: INTENT-SEC-033
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    quota-test:
+      name: Test size quota
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Create large file
+          run: |
+            dd if=/dev/zero of=large.bin bs=1M count=1100
+        - name: Upload large artifact
+          uses: upload-artifact
+          with:
+            name: large-artifact
+            path: large.bin
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_status
+    must_not_equal: "success"
+  - type: positive
+    target: run_logs
+    equals: "size_limit_exceeded_error"
+teardown:
+  reset: fixture

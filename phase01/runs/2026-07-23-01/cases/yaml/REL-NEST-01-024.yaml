@@ -1,0 +1,32 @@
+id: REL-NEST-01-024
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "workflow_call 嵌套越界——3 层嵌套调用应被拒绝"
+intent_ref: INTENT-REL-024
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    call_level1:
+      name: call level 1 workflow
+      uses: ./.gitcode/workflows/level1_deep.yml
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: run_status
+    equals: "completed(failure)"
+  - type: positive
+    target: run_logs
+    contains: "嵌套"
+teardown:
+  reset: none

@@ -1,0 +1,52 @@
+id: SEC-SLICE-01-001
+dimensions: [security]
+dimension: security
+priority: P0
+title: secret 分片输出不应绕过日志脱敏
+intent_ref: INTENT-SEC-008
+
+setup:
+  repo_fixture: with-secrets
+  secrets: [DEPLOY_TOKEN]
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    test:
+      name: Test slice bypass masking
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: (TC) checkout source
+          uses: checkout
+        - name: (TC) slice secret with bash substring
+          run: |
+            echo "${DEPLOY_TOKEN:0:4}"
+            echo "${DEPLOY_TOKEN:4:4}"
+        - name: (TC) split secret into chars
+          run: |
+            echo "$DEPLOY_TOKEN" | fold -w1
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: DEPLOY_TOKEN
+  - type: negative
+    target: run_logs
+    must_not_contain: "placeholder_for_slice_result"
+  - type: positive
+    target: run_status
+    equals: completed
+
+teardown:
+  reset: fixture

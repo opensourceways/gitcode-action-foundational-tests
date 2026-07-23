@@ -1,0 +1,33 @@
+id: SEC-ARTF-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "跨仓库 artifact 下载返回 403 或 404"
+intent_ref: INTENT-SEC-019
+setup:
+  repo_fixture: with-artifacts
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    artifact-download:
+      name: Download artifact from main repo
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Attempt download fork artifact
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" \n            "https://api.gitcode.com/api/v8/repos/${{ atomgit.repository }}/actions/artifacts/FORK_ARTIFACT_ID/zip?access_token=${{ atomgit.token }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "200"
+  - type: positive
+    target: run_logs
+    equals: "403_or_404"
+teardown:
+  reset: fixture

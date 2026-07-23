@@ -1,0 +1,44 @@
+id: USE-SECNAME-01-002
+dimensions: ["usability", "security"]
+dimension: usability
+priority: P1
+title: "Secret 名称以数字开头时应给出命名规则错误"
+intent_ref: INTENT-USE-028
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    bad:
+      name: secret name starts with digit
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: use invalid secret name
+          run: |
+            echo "val=${{ secrets.1SECRET }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    equals: COMPLETED
+  - type: nonfunctional
+    target: error_message
+    eval: deterministic
+    rubric: "报错信息必须包含 Secret 名称规则或命名格式相关说明，并列出允许字符（大写字母、数字、下划线）"
+
+teardown:
+  reset: none
+

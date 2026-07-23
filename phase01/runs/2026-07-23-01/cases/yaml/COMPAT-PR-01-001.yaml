@@ -1,0 +1,45 @@
+id: COMPAT-PR-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P0
+title: pull_request types 命名差异 - GitCode 合法 types 应被接受
+intent_ref: INTENT-COMPAT-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+      types: [open, reopen, update]
+  jobs:
+    verify:
+      name: Verify GitCode pull_request types
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo PR event
+          run: |
+            echo "PR_EVENT_TYPE=${{ atomgit.event.action }}"
+            echo "PR_TYPES_OK"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: "PR_TYPES_OK"
+
+teardown:
+  reset: fixture
