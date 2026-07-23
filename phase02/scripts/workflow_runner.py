@@ -663,19 +663,20 @@ def deploy(ws, cfg, case_id, workflow_yaml):
 _TERMINAL = ("COMPLETED", "FAILED", "CANCELED", "IGNORED")
 
 
-def poll_run(cfg, sha, wf_filename):
-    """轮询到"我这次推的那个 workflow 文件"的 run 抵达终态。
+def poll_run(cfg, sha, wf_filename, match_event=None):
+    """轮询到匹配的 run 抵达终态。
 
-    匹配策略（与 run-case.sh 对齐）：
-      优先按 file_path 精确匹配（.gitcode/workflows/<wf_filename>）。
-      若 API 返回 head_sha 非空则同时校验 head_sha 以排除历史 run。
-      ★ 实测：GitCode v8 API 返回的 head_sha 为空，故 file_path 为主匹配器。
-    超时返回最后见到的 pending run（若有），否则 None。
+    match_event: 非 push 触发时用于辅助匹配的 event 类型（tag→CreateTag, pr→MR）。
+                提供时去掉 branch 过滤（PR 在非 main 分支，tag 不在分支上）。
     """
     elapsed, pending = 0, None
     target_path = f".gitcode/workflows/{wf_filename}"
     while elapsed < cfg.timeout:
-        d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page=30")
+        if match_event:
+            url = f"/actions/runs?per_page=30&event={match_event}"
+        else:
+            url = f"/actions/runs?branch={cfg.branch}&per_page=30"
+        d = api_get(cfg, url)
         runs = d.get("workflow_runs", []) if isinstance(d, dict) else []
         for r in runs:
             fp = r.get("file_path") or ""
@@ -810,16 +811,23 @@ def trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
-        time.sleep(5)
         project_path = f"{cfg.owner}/{cfg.repo}"
-        wfs = list_workflows(cfg.cookie, project_path)
         wf_id = None
         wf_file_path = None
-        for w in wfs:
-            fp = w.get("file_path") or ""
-            if fp.endswith(wf_filename):
-                wf_id = w.get("workflow_id")
-                wf_file_path = fp
+        for retry in range(6):
+            if retry > 0:
+                time.sleep(5)
+            try:
+                wfs = list_workflows(cfg.cookie, project_path)
+            except Exception:
+                continue
+            for w in wfs:
+                fp = w.get("file_path") or ""
+                if fp.endswith(wf_filename):
+                    wf_id = w.get("workflow_id")
+                    wf_file_path = fp
+                    break
+            if wf_id:
                 break
         if not wf_id:
             return _exec_result("INCONCLUSIVE", case_id,
@@ -865,7 +873,7 @@ def trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         if rc != 0:
             return _exec_result("ENV_ERROR", case_id, reason=f"git push tag 失败: {out[-200:]}", t0=t0)
         log(f"  tag pushed: {tag}")
-        run = poll_run(cfg, sha, wf_filename)
+        run = poll_run(cfg, sha, wf_filename, match_event="CreateTag")
         if run is None:
             return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
         if run.get("status") not in _TERMINAL:
@@ -905,7 +913,7 @@ def trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
                                 reason=f"创建 PR 失败 HTTP {code}", t0=t0)
         pr_id = pr_resp.get("id") or pr_resp.get("number") or pr_resp.get("iid")
         log(f"  PR created: id={pr_id}, branch={pr_branch}")
-        run = poll_run(cfg, sha, wf_filename)
+        run = poll_run(cfg, sha, wf_filename, match_event="MR")
         if run is None:
             return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
         if run.get("status") not in _TERMINAL:
@@ -949,7 +957,7 @@ def trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
             return _exec_result("ENV_ERROR", case_id,
                                 reason=f"发评论失败 HTTP {code}", t0=t0)
         log(f"  comment posted on PR #{pr_id}")
-        run = poll_run(cfg, sha, wf_filename)
+        run = poll_run(cfg, sha, wf_filename, match_event="MR")
         if run is None:
             return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
         if run.get("status") not in _TERMINAL:
@@ -1045,9 +1053,15 @@ def _exec_result(status, case_id, reason="", head_sha="", gitcode_run_id="", t0=
 
 
 # ── 5. 多仓批量轮询函数（拆解 poll_run，供 pool_scheduler 使用）───────────
-def list_runs(cfg, per_page=30):
-    """拉 cfg.repo 最近 per_page 条 run（不阻塞、不匹配）。供调度器批量轮询。"""
-    d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page={per_page}")
+def list_runs(cfg, per_page=30, event_filter=None):
+    """拉 cfg.repo 最近 per_page 条 run（不阻塞、不匹配）。供调度器批量轮询。
+    event_filter: 非 push 时用于过滤事件类型，此时不按 branch 过滤。
+    """
+    if event_filter:
+        url = f"/actions/runs?per_page={per_page}&event={event_filter}"
+    else:
+        url = f"/actions/runs?branch={cfg.branch}&per_page={per_page}"
+    d = api_get(cfg, url)
     return d.get("workflow_runs", []) if isinstance(d, dict) else []
 
 

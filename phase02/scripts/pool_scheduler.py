@@ -285,16 +285,42 @@ def run_pool(run_id, only=None, no_logs=False):
                 if not repo_items:
                     continue
                 runs = None
+                # 决定 URL 过滤：有非 push 项就去掉 branch，拉全部 run
+                has_non_push = any(it.get("trigger_event", "push") != "push"
+                                   for it in repo_items)
+                if has_non_push:
+                    runs_non_push = None
+                    runs_push = None
+                else:
+                    # 纯 push，维持原 branch 过滤
+                    try:
+                        runs = wr.list_runs(cfg, per_page=30)
+                    except wr.ApiError:
+                        runs = []
                 for item in list(repo_items):  # 遍历副本，允许 remove
-                    if item.get("trigger_event") in ("workflow_dispatch", "manual"):
+                    ev = item.get("trigger_event", "push")
+                    if ev in ("workflow_dispatch", "manual"):
                         r = _get_dispatch_run(item)
                     else:
-                        if runs is None:
-                            try:
-                                runs = wr.list_runs(cfg, per_page=30)
-                            except wr.ApiError:
-                                runs = []
-                        r = wr.match_run(runs, item["sha"], item["wf_filename"])
+                        if has_non_push:
+                            # 非 push：去掉 branch 过滤拉全部 run
+                            if ev == "push":
+                                if runs_push is None:
+                                    try:
+                                        runs_push = wr.list_runs(cfg, per_page=30)
+                                    except wr.ApiError:
+                                        runs_push = []
+                                run_pool = runs_push
+                            else:
+                                if runs_non_push is None:
+                                    try:
+                                        runs_non_push = wr.list_runs(cfg, per_page=30)
+                                    except wr.ApiError:
+                                        runs_non_push = []
+                                run_pool = runs_non_push
+                        else:
+                            run_pool = runs
+                        r = wr.match_run(run_pool, item["sha"], item["wf_filename"])
                     if r is None:
                         # 还没出现
                         if time.time() - item["t0"] > case_timeout:
@@ -373,20 +399,23 @@ def _dispatch_inputs(contract_doc):
 
 def _start_dispatch(cfg, wf_filename, contract_doc):
     """Start a workflow_dispatch run and return (run_id, error_reason)."""
-    time.sleep(5)  # Give GitCode time to register the freshly pushed workflow file.
     project_path = f"{cfg.owner}/{cfg.repo}"
-    try:
-        workflows = wr.list_workflows(cfg.cookie, project_path)
-    except Exception as e:
-        return None, f"list_workflows 失败: {e}"
-
     wf_id = None
     wf_file_path = None
-    for workflow in workflows:
-        fp = workflow.get("file_path") or ""
-        if fp.endswith(wf_filename):
-            wf_id = workflow.get("workflow_id")
-            wf_file_path = fp
+    for retry in range(6):
+        if retry > 0:
+            time.sleep(5)
+        try:
+            workflows = wr.list_workflows(cfg.cookie, project_path)
+        except Exception:
+            continue
+        for workflow in workflows:
+            fp = workflow.get("file_path") or ""
+            if fp.endswith(wf_filename):
+                wf_id = workflow.get("workflow_id")
+                wf_file_path = fp
+                break
+        if wf_id:
             break
     if not wf_id:
         return None, f"list_workflows 未找到匹配 {wf_filename} 的 workflow_id"
