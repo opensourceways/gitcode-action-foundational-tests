@@ -653,8 +653,7 @@ TRIGGER_STATUS = {
     "push":                 {"supported": True},
     "tag":                  {"supported": False,
                              "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配 run（确定性，待验证 GitCode tag 触发语义）"},
-    "manual":               {"supported": False,
-                             "reason": "manual 触发：需调 GitCode workflow_dispatch API（待确认端点）"},
+    "manual":               {"supported": True},
     "workflow_dispatch":    {"supported": True},
     "pr":                   {"supported": False,
                              "reason": "pr 触发：需建分支+开 PR（确定性，待确认 PR 创建端点与 run 关联方式）"},
@@ -779,8 +778,8 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     """
     t0 = time.time()
     wf_filename = None
-    # 触发适配：workflow_dispatch 走独立 dispatch 链路
-    if trigger_event == "workflow_dispatch":
+    # 触发适配：workflow_dispatch / manual 走独立 dispatch 链路
+    if trigger_event in ("workflow_dispatch", "manual"):
         return trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     ok, reason = trigger_supported(trigger_event)
     if not ok:

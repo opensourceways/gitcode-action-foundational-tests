@@ -195,7 +195,7 @@ def run_pool(run_id, only=None, no_logs=False):
                         _print_verdict(cid, f"INCONCLUSIVE({reason})")
                         continue
 
-                    if ev == "workflow_dispatch":
+                    if ev in ("workflow_dispatch", "manual"):
                         if not cfg.cookie:
                             _record_direct(run_dir, state, contract_doc, cid, "INCONCLUSIVE",
                                            "GITCODE_COOKIE 未配置，dispatch 触发不可用")
@@ -259,7 +259,7 @@ def run_pool(run_id, only=None, no_logs=False):
                     continue
                 runs = None
                 for item in list(repo_items):  # 遍历副本，允许 remove
-                    if item.get("trigger_event") == "workflow_dispatch":
+                    if item.get("trigger_event") in ("workflow_dispatch", "manual"):
                         r = _get_dispatch_run(item)
                     else:
                         if runs is None:
