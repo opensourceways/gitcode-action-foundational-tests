@@ -606,6 +606,59 @@ def _exec_result(status, case_id, reason="", head_sha="", gitcode_run_id="", t0=
     }
 
 
+# ── 5. 多仓批量轮询函数（拆解 poll_run，供 pool_scheduler 使用）───────────
+def list_runs(cfg, per_page=30):
+    """拉 cfg.repo 最近 per_page 条 run（不阻塞、不匹配）。供调度器批量轮询。"""
+    d = api_get(cfg, f"/actions/runs?branch={cfg.branch}&per_page={per_page}")
+    return d.get("workflow_runs", []) if isinstance(d, dict) else []
+
+
+def match_run(runs, sha, wf_filename):
+    """在 runs 里找 head_sha==sha AND file_path 结尾匹配 wf_filename 的那条。"""
+    for r in runs:
+        if r.get("head_sha") == sha and (r.get("file_path") or "").endswith(wf_filename):
+            return r
+    return None
+
+
+# ── 6. batch_end teardown + 孤儿清理 ────────────────────────────────────────
+def teardown_batch(ws, cfg, wf_filenames):
+    """整批结束后，一次性删除本仓本批 push 的所有 workflow 文件，单次 commit+push。"""
+    if not wf_filenames:
+        return
+    for fn in wf_filenames:
+        path = f".gitcode/workflows/{fn}"
+        _sh(f"git rm -q {path}", cwd=ws.repo_dir)
+    _sh('git commit -q -m "chore: batch teardown workflows"', cwd=ws.repo_dir)
+    rc, out = _sh(f"git pull --rebase origin {cfg.branch}", cwd=ws.repo_dir)
+    rc, out = _sh(f"git push origin {cfg.branch}", cwd=ws.repo_dir)
+    if rc != 0:
+        log(f"  teardown_batch push 失败: {out[-150:]}")
+
+
+def sweep_orphans(ws, cfg, keep=None):
+    """启动时清理孤儿 workflow 文件（不属于本批基线的 <case-id>.yml）。
+    扫描 .gitcode/workflows/，删掉不属于 keep 列表的文件，一次 commit+push。"""
+    keep = keep or []
+    wf_dir = os.path.join(ws.repo_dir, ".gitcode", "workflows")
+    if not os.path.isdir(wf_dir):
+        return
+    orphaned = []
+    for fn in os.listdir(wf_dir):
+        if fn.endswith(".yml") and fn not in keep:
+            orphaned.append(fn)
+    if not orphaned:
+        return
+    log(f"  sweep_orphans({cfg.repo}): 清理 {len(orphaned)} 个孤儿文件")
+    for fn in orphaned:
+        _sh(f"git rm -q .gitcode/workflows/{fn}", cwd=ws.repo_dir)
+    _sh('git commit -q -m "chore: sweep orphan workflows"', cwd=ws.repo_dir)
+    rc_push, out_push = _sh(f"git pull --rebase origin {cfg.branch}", cwd=ws.repo_dir)
+    rc_push, out_push = _sh(f"git push origin {cfg.branch}", cwd=ws.repo_dir)
+    if rc_push != 0:
+        log(f"  sweep_orphans push 失败: {out_push[-150:]}")
+
+
 if __name__ == "__main__":
     # 自检：仅验证可 import 与配置装载，不触网。
     print("workflow_runner self-check: imports OK")
