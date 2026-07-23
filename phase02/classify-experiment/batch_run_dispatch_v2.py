@@ -47,6 +47,23 @@ def v2_headers():
 
 # ── Deploy ────────────────────────────────────────────────────────
 
+def ensure_dispatch(wf_text):
+    """Inject workflow_dispatch into on: if not already present."""
+    if "workflow_dispatch" in wf_text:
+        return wf_text
+    lines = wf_text.split("\n")
+    result = []
+    injected = False
+    for line in lines:
+        result.append(line)
+        stripped = line.strip()
+        if not injected and stripped.startswith("on:"):
+            indent = " " * (len(line) - len(line.lstrip()) + 2)
+            result.append(f"{indent}workflow_dispatch:")
+            injected = True
+    return "\n".join(result)
+
+
 def deploy_one(case_id, wf_text):
     """git clone → write → commit → push。返回 file_path。"""
     fp = f".gitcode/workflows/{case_id.lower().replace('_', '-')}.yml"
@@ -93,18 +110,29 @@ def dispatch_one(wf_id, fp):
     return r.status_code, r.json() if r.headers.get("Content-Type", "").startswith("application/json") else r.text
 
 
-def poll_run(run_id):
+def poll_run(run_id, timeout=TIMEOUT):
     url = f"{API_V8}/api/v8/repos/{OWNER}/{REPO}/actions/runs/{run_id}?access_token={TOKEN}"
-    for _ in range(TIMEOUT // POLL):
+    last_status = ""
+    no_run_count = 0
+    for i in range(timeout // POLL):
         time.sleep(POLL)
         try:
-            r = requests.get(url, timeout=10)
+            r = requests.get(url, timeout=(5, 10))
             if r.status_code == 200:
                 st = r.json().get("status", "")
+                if st != last_status:
+                    log(f"    {run_id[:8]}... status={st} ({i*POLL}s)")
+                    last_status = st
                 if st in ("COMPLETED", "FAILED", "CANCELED"):
                     return r.json()
-        except Exception:
-            pass
+                no_run_count = 0
+            elif r.status_code == 404:
+                no_run_count += 1
+                if no_run_count >= 6:
+                    log(f"    {run_id[:8]}... run not found after {i*POLL}s, giving up")
+                    return None
+        except Exception as e:
+            log(f"    {run_id[:8]}... poll error: {e}")
     return None
 
 
@@ -156,6 +184,8 @@ def main():
     parser.add_argument("run_id")
     parser.add_argument("--max", type=int, default=0)
     parser.add_argument("--case")
+    parser.add_argument("--cases-dir", default="2026-07-21-02/cases/yaml",
+                        help="Relative path under classify-experiment/")
     args = parser.parse_args()
 
     if not TOKEN or not COOKIE:
@@ -163,7 +193,7 @@ def main():
         sys.exit(1)
 
     script_dir = Path(__file__).resolve().parent
-    cases_dir = script_dir / "2026-07-21-02/cases/yaml"
+    cases_dir = script_dir / args.cases_dir
     results_dir = script_dir / f"../runs/{args.run_id}/results"
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -177,7 +207,18 @@ def main():
     log(f"Cases: {len(yaml_files)}  run: {args.run_id}")
 
     results = []
-    verdict_counts = {"PASS": 0, "FAIL": 0, "DISPATCH_FAIL": 0, "DEPLOY_FAIL": 0, "TIMEOUT": 0, "NOT_FOUND": 0}
+    verdict_counts = {"PASS": 0, "FAIL": 0, "DISPATCH_FAIL": 0, "DEPLOY_FAIL": 0, "TIMEOUT": 0, "NOT_FOUND": 0, "COLLECT_ERROR": 0,
+                      "ERROR": 0}
+
+    # Skip already-run cases
+    skipped = 0
+    for yf in list(yaml_files):
+        cid = yf.stem
+        if (results_dir / f"{cid}.json").exists():
+            yaml_files.remove(yf)
+            skipped += 1
+    if skipped:
+        log(f"  ({skipped} already have results, skipped)")
 
     for i, yf in enumerate(yaml_files):
         cid = yf.stem
@@ -190,7 +231,8 @@ def main():
         log(f"\n[{i+1}/{len(yaml_files)}] {cid}")
 
         try:
-            # 1. Deploy
+            # 1. Ensure dispatchable & Deploy
+            wf = ensure_dispatch(wf)
             fp = deploy_one(cid, wf)
             log(f"  deployed → {fp}")
             time.sleep(6)
@@ -227,8 +269,14 @@ def main():
             log(f"  → {status}")
 
             # 4. Collect logs + assert
-            logs = collect_logs(rid)
-            ar = simple_assert(doc.get("assertions", []), status, logs)
+            try:
+                logs = collect_logs(rid)
+                ar = simple_assert(doc.get("assertions", []), status, logs)
+            except Exception as e:
+                import traceback
+                log(f"  collect/assert error: {e}")
+                traceback.print_exc()
+                ar = {"verdict": "COLLECT_ERROR", "results": [{"pass": False, "reason": str(e)}]}
             verdict = ar["verdict"]
 
             result = {

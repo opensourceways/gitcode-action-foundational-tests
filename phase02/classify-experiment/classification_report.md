@@ -2447,5 +2447,189 @@
      🚫 target=run_ui 不在引擎支持范围内（需新 infra）
   ❌ 断言[2] type=nonfunctional target=run_ui eval=deterministic
      🚫 target=run_ui 不在引擎支持范围内（需新 infra）
-  🤖 断言[3] type=nonfunctional target=run_ui eval=llm_assisted
-     🚫 eval=llm_assisted, 需要 LLM 判定
+   🤖 断言[3] type=nonfunctional target=run_ui eval=llm_assisted
+      🚫 eval=llm_assisted, 需要 LLM 判定
+
+---
+
+# YAML Workflow Validation Results
+
+**数据源**: `phase02/classify-experiment/2026-07-21-02-re/cases/yaml/` (已修复)
+**总 case 数**: 197
+**校验时间**: 2026-07-23
+
+## 总体统计
+
+| 分类 | 数量 | 占比 |
+|------|------|------|
+| VALID (通过校验) | 149 | 75.6% |
+| INVALID/ERROR (未通过) | 48 | 24.4% |
+
+> 原始 197 case 仅有 99 VALID (50.3%)，经过 `fix_workflows_v3.py` 自动修复后提升至 149 (75.6%)。
+
+## 48 Invalid Cases 明细
+
+### A. YAML 解析错误 (14 cases)
+
+这些 case 的 workflow YAML 存在结构性语法错误，无法被 API 正常解析：
+
+| Case ID | 错误原因 |
+|---------|---------|
+| COMP-MATIF-02-001 | on: 反序列化失败（旧生成器 on 格式问题） |
+| COMP-MATRIX-02-001 | on: 反序列化失败 |
+| COMP-MATRIX-02-007 | on: 反序列化失败 |
+| COMP-POST-02-001 | while parsing a block mapping（stages 内部缩进错误） |
+| COMP-STAGES-02-001 | while parsing a block mapping |
+| COMPAT-INJECT-02-001 | on: 反序列化失败 |
+| COMPAT-POST-02-001 | Cannot construct instance（stages 反序列化失败） |
+| COMPAT-STAGE-FIELDS-02-001 | mapping values are not allowed here |
+| COMPAT-STAGES-02-001 | Cannot construct instance（stages 反序列化失败） |
+| COMPAT-STAGES-ORCH-02-001 | mapping values are not allowed here |
+| REL-CANCEL-02-002 | Cannot construct instance（stages 反序列化失败） |
+| REL-CANCEL-02-003 | Cannot construct instance（stages 反序列化失败） |
+| REL-MATRIX-02-001 | on: 反序列化失败 |
+| REL-NEEDS-02-002 | on: 反序列化失败 |
+
+### B. on: 格式问题 (5 cases) — 原有生成器 bug
+
+| Case ID | 错误 |
+|---------|------|
+| COMP-TRIGGER-02-001 | on.pull_request_target branches 超出限制 |
+| COMPAT-PR-TYPES-02-001 | on.merge_requests branches 超出限制 |
+| REL-NEEDS-02-003 | on: 反序列化失败 |
+| REL-PREEMPT-02-001 | on: 反序列化失败 |
+| REL-PREEMPT-02-002 | on: 反序列化失败 |
+
+### C. 兼容性测试 — 平台不支持的特性 (11 cases)
+
+这些是有意测试平台限制的 negative test case，不应修复：
+
+| Case ID | 错误类型 |
+|---------|---------|
+| COMP-EXPR-02-001 | if: success()/always 不支持（平台限制） |
+| COMP-TIMEOUT-02-001 | if: cancelled() 不支持 |
+| COMP-WF-CALL-02-001 | jobs[X].steps: unknown property（workflow_call 特有） |
+| COMPAT-ACTION-INPUTS-02-001 | 插件 custom-action-test 不存在 |
+| COMPAT-CTX-AVAIL-02-001 | if: runner.os 不支持 |
+| COMPAT-EXPRSYN-02-001 | if: success()/always() 不支持 |
+| COMPAT-MIGR-02-001 | if: success()/failure() 不支持 |
+| COMPAT-UNKNOWN-TOP-02-001 | run-name: unknown property |
+| COMPAT-USING-RUNTIME-02-001 | 插件 node20-action-test 不存在 |
+| COMPAT-WF-CALL-02-001 | .secrets: unknown property（step 级 secrets 不支持） |
+| REL-MATRIX-02-003 | if: matrix.os 不支持 |
+
+### D. WAF 418 拦截 (3 cases)
+
+| Case ID | 备注 |
+|---------|------|
+| SEC-ENV-WAIT-02-001 | WAF 418，需重试或白名单 |
+| SEC-FORK-02-002 | WAF 418 |
+| SEC-SECRET-MASK-02-002-V1 | WAF 418 |
+
+### E. Stages 结构错误 (3 cases) — 修复后仍缺内部 name
+
+| Case ID | 错误 |
+|---------|------|
+| COMP-RERUN-02-001 | jobs[fail-job].steps[0].name: 值不能为空 |
+| COMPAT-OUTPUT-02-001 | jobs[producer].steps[0].name: 值不能为空 |
+| REL-RERUN-02-001 | jobs[fail-job].steps[0].name: 值不能为空 |
+| REL-RERUN-02-002 | jobs[always-fail].steps[0].name: 值不能为空 |
+| USE-RERUN-02-001 | jobs[job-b-fail].steps[0].name: 值不能为空 |
+
+### F. 负面测试 — 有意 INVALID (7 cases)
+
+| Case ID | 错误类型 |
+|---------|---------|
+| REL-RACE-02-001 | concurrency.exceed-action/max: unknown property（job 级 concurrency） |
+| REL-RUNNER-02-001 | if: success() 不支持 |
+| SEC-ACTION-PERM-02-001 | uses: 格式错误（第三方 action 引用测试） |
+| SEC-SHA-REF-02-001 | uses: checkout@sha 格式错误 |
+| USE-DEBUG-02-004 | stages 反序列化失败（stages 格式测试） |
+| USE-ERR-MSG-02-002 | on.merge_requests branches 超出限制 |
+| USE-ERR-MSG-02-004 | env: 字段类型错误（string instead of map） |
+| USE-ERR-MSG-02-005 | container.image: 值不能为空 + services unknown |
+| USE-ERR-MSG-02-006 | if: failure() 不支持 |
+
+---
+
+# Cleanup Required Cases
+
+部分 case 在单次 run 后会留下副作用（artifact、cache、fork repo 等），再次运行同名 case 会因资源冲突而失败。需提供 cleanup API 供测试框架调用。
+
+## 需 Cleanup 的 Case 清单
+
+### 🔧 Artifact 清理 (6 cases)
+
+这些 case 会上传 artifact，再次运行可能因同名 artifact 冲突失败：
+
+| Case ID | 说明 |
+|---------|------|
+| COMP-ARTIFACT-02-001 | artifact 上传/下载/内容校验 |
+| COMPAT-ART-CACHE-02-001 | artifact 兼容性测试 |
+| COMPAT-ARTIFACT-EQUIV-02-001 | artifact 等价性测试 |
+| COMPAT-OUTPUT-LIMIT-02-001 | output 大小限制测试（可能产生 artifact） |
+| REL-ART-CACHE-02-001 | artifact cache 可靠性测试 |
+| SEC-SIDECHAN-02-001 | 侧信道泄露测试（通过 artifact 验证） |
+
+**需要 API**: `DELETE /api/v2/projects/{owner}/{repo}/artifacts/{id}` 或批删
+
+### 🔧 Cache 清理 (10 cases)
+
+这些 case 依赖 cache，干净的 cache 状态是测试前提：
+
+| Case ID | 说明 |
+|---------|------|
+| COMP-CACHE-02-001 | cache key 精确/前缀匹配测试 |
+| COMPAT-ART-CACHE-02-001 | artifact + cache 联合测试 |
+| COMPAT-CACHE-EQUIV-02-001 | cache 等价性测试 |
+| COMPAT-RUN-CTX-02-001 | runner 上下文测试（使用 cache） |
+| COMPAT-SETUP-STAR-02-001 | setup-* action 测试（node/setup-node 有 cache） |
+| REL-ART-CACHE-02-001 | artifact cache 可靠性测试 |
+| SEC-CACHE-ISOLATE-02-001 | cache 隔离性安全测试 |
+| USE-MIGR-02-004 | GitHub-style uses 迁移测试（checkout 有 cache） |
+| USE-MIGR-02-005 | 迁移格式测试 |
+| USE-MIGR-02-006 | 迁移格式测试 |
+
+**需要 API**: `DELETE /api/v2/projects/{owner}/{repo}/caches` 或按 key 删除
+
+### 🔧 Fork Repo 清理 (16 cases)
+
+这些 case 涉及 fork 仓库的 PR 测试，需要创建 fork repo 后清理：
+
+| Case ID | 说明 |
+|---------|------|
+| COMP-TRIGGER-02-001 | 多触发器测试（含 pull_request） |
+| COMPAT-ART-CACHE-02-001 | artifact + cache 兼容性 |
+| COMPAT-CACHE-EQUIV-02-001 | cache 等价性 |
+| COMPAT-PR-COMM-02-001 | PR 评论触发 |
+| COMPAT-PR-TARGET-02-001 | PR target 测试 |
+| COMPAT-PR-TYPES-02-001 | PR types 触发 |
+| SEC-FORK-02-001 ~ 005 | fork PR 安全测试（5 个） |
+| SEC-INJECT-02-001 ~ 006 | 注入攻击测试（6 个） |
+| SEC-TOKEN-EXPIRE-02-001 | token 过期测试 |
+
+**需要 API**: `DELETE /api/v2/projects/{owner}/{repo}` 或 fork repo 清理接口
+
+### 🔧 Secret 清理 (0 case)
+
+Secret 在测试仓库中通过 `setup.secrets` 预置，无需 run 间清理。但需确保 secret 值不因测试泄露。
+
+---
+
+## Summary
+
+| 维度 | VALID | INVALID | 需 Cleanup |
+|------|-------|---------|-----------|
+| YAML 校验 | 149 (75.6%) | 48 (24.4%) | — |
+| artifact | — | — | 6 |
+| cache | — | — | 10 |
+| fork repo | — | — | 16 |
+| **cleanup total** | — | — | **27** (重叠) |
+
+### Cleanup API 缺口
+
+| 操作 | 当前状态 | 优先级 |
+|------|---------|--------|
+| 删除 artifact | 未找到对应 API（api-reference.md 无记录） | 高 |
+| 清除 cache | 未找到对应 API | 高 |
+| 删除 fork repo | 可能有 API（与普通 repo 一致），需验证 | 中 |
