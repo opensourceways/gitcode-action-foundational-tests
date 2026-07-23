@@ -57,17 +57,25 @@
 | `fault_injection`: `network_partition` / `disk_full` / `cpu_saturate` | **2** | 需 runner 宿主机 SSH 权限操作 iptables/dd/stress | ⬛ 手工 |
 | 未知 `repo_fixture` | **~18** | `POST /api/v5/user/repos` 创建测试仓 + 推送 secrets/variables | ⬜ 代码 |
 
-> **⬜ 凭据**（fork_pr + untrusted_contributor 共 30 cases）：代码 trivial，仅缺 **第二 GitCode 账号的 OAuth token**（需在 GitCode 完成实名/邮箱验证）。token 到手后录入 `~/.gitcode-token-contrib` 即可全自动。
+> **⬜ 凭据**（fork_pr + untrusted_contributor）：去重后共 **17 cases**（二者高度重叠），代码 trivial，仅缺 **第二 GitCode 账号的 OAuth token**。token 到手后录入 `~/.gitcode-token-contrib` 即可全自动。
 
-### 汇总
+### 汇总（按唯一 case 去重，非按 blocker 出现次数）
 
 ```
-断言层    60/60 (100%)  ████████████████████  全部可代码解决
-trigger   31/31  (97%)  ███████████████████░  5 schedule 不可自动化
-执行环境 ~22/22  (86%)  █████████████████░░░  2 故障注入需手工基础设施
-─────────────────────────────────────────────────────
-总计: 106 可代码 + 5 平台限制 + 2 手工  （30 凭据依赖：代码 ready，缺 token）
+已可用    107 (54%)   ████████████████████  full_scriptable — 现在就通
+代码可变    63 (32%)   ████████████████████  +LLM通道 +新assertion kind +dispatch/PR API +repo fixture = 170
+凭据解锁    17  (9%)   ████████████████████  拿到第二账号 token 后 → 187
+不可自动化  10  (5%)   ████████████████████  5 schedule(平台限制) + 5 fault_injection(infra依赖)
+─────────────────────────────────────────────────────────────────────────────
+总计: 107 + 63 + 17 + 10 = 197 ✓
 ```
+
+| 当前分类 | 数量 | 代码后可变成 | 缺 token 后变成 | 永远不可 |
+|----------|------|-------------|----------------|---------|
+| full_scriptable | 107 | — | — | — |
+| partial_scriptable | 59 | 46 → full | 13 → full | 0 |
+| not_scriptable | 31 | 17 → full | 4 → full | 10 |
+| **合计** | **197** | **170 (+63)** | **187 (+17)** | **10** |
 
 ---
 
