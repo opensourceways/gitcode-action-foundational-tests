@@ -34,12 +34,14 @@ def compile_one(assertion, case_id):
     target = assertion.get("target", "")
     rubric_text = assertion.get("rubric", "")
 
-    # 1) run_status + positive → run_status
+    # 1) run_status
     if target == "run_status":
         if atype == "positive":
             val = assertion.get("equals", "COMPLETED")
             return {"kind": "run_status", "equals": str(val)}
-        return None
+        if atype == "negative":
+            val = assertion.get("not_equals", assertion.get("equals") or "SUCCESS")
+            return {"kind": "run_status_not", "not_equals": str(val)}
 
     # 2) run_logs
     if target == "run_logs":
