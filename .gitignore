@@ -9,3 +9,15 @@ tmp/
 # Phase 02 单次执行的运行结果/报告（本地产物，不入库）
 phase02/runs/
 phase02/reports/
+
+# Phase 01/02 临时运行产物（本地产物，不入库）
+phase01/runs/trigger-selftest/
+phase01/runs/VALID-DISP/
+phase01/runs/VALID-DISP2/
+phase01/runs/handoff-detect/
+phase01/runs/loadtest/
+phase02/.cache/
+.conflict-report/
+
+# 本地工作文档（不入库）
+phase02/HARNESS-PLAN.md

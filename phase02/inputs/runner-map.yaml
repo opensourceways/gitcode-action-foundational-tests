@@ -1,6 +1,0 @@
-# runner-map.yaml — runner label 环境适配映射表
-# 部署时按表替换 runs-on label，其余原样保留（不误伤异常 label 负向用例）。
-# 支持环境变量 RUNNER_MAP 覆盖（JSON 格式）。
-# 格式: 键=用例中的 label, 值=部署环境实际 label
-
-dedicate-hosted,x64,large: ubuntu-latest,x64,small
