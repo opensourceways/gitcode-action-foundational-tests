@@ -24,8 +24,8 @@ from collections import defaultdict
 TRIGGER_SUPPORT = {
     "push":                 {"supported": True,  "reason": ""},
     "tag":                  {"supported": False, "reason": "tag 触发：需 git tag+push 并按 tag ref 匹配"},
-    "manual":               {"supported": False, "reason": "manual 触发：需 workflow_dispatch API（待确认端点）"},
-    "workflow_dispatch":    {"supported": False, "reason": "workflow_dispatch：需 dispatch API（待确认端点）"},
+    "manual":               {"supported": True, "reason": ""},     # dispatch API 已验证可用
+    "workflow_dispatch":    {"supported": True, "reason": ""},   # dispatch API 已验证可用
     "pr":                   {"supported": False, "reason": "pr 触发：需建分支+开 PR（待确认 PR API）"},
     "pull_request":         {"supported": False, "reason": "pull_request：需建分支+开 PR（待确认 PR API）"},
     "pull_request_target":  {"supported": False, "reason": "pull_request_target：同 PR + base 上下文语义"},
@@ -41,7 +41,7 @@ UNTRUSTED_AS_BLOCKER = "trigger.as=untrusted_contributor：需第二 GitCode 账
 FAULT_INJECTION_BLOCKER = "fault_injection 非 null：当前执行器不支持故障注入（需 kill_runner / network_partition / concurrent_flood infra）"
 
 # 未知 setup.repo_fixture 可能影响执行（需确认对应仓已配置好 secrets/variables）
-KNOWN_FIXTURES = {"basic-ci", "clean", "with-secrets", "fork-target", "fork-source",
+KNOWN_FIXTURES = {"basic-ci", "clean", "default", "with-secrets", "fork-target", "fork-source",
                   "environment-protected", "private-registry", "large-repo",
                   "runner-release", "badge-test"}
 FIXTURE_UNKNOWN_BLOCKER = "setup.repo_fixture 未知：需确认测试仓是否已配置好 secrets/variables 等前置资源"
