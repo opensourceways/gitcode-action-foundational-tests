@@ -314,7 +314,8 @@ def run_pool(run_id, only=None, no_logs=False):
                             else:
                                 if runs_non_push is None:
                                     try:
-                                        runs_non_push = wr.list_runs(cfg, per_page=30)
+                                        npev = "CreateTag" if ev == "tag" else "MR"
+                                        runs_non_push = wr.list_runs(cfg, per_page=30, event_filter=npev)
                                     except wr.ApiError:
                                         runs_non_push = []
                                 run_pool = runs_non_push
