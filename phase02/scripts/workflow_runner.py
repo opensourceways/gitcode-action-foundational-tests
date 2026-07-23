@@ -667,12 +667,13 @@ def poll_run(cfg, sha, wf_filename, match_event=None):
     """轮询到匹配的 run 抵达终态。
 
     match_event: 非 push 触发时用于辅助匹配的 event 类型（tag→CreateTag, pr→MR）。
-                提供时去掉 branch 过滤（PR 在非 main 分支，tag 不在分支上）。
+                提供时去掉 branch 过滤 + 跳过 head_sha 检查（PR/tag 的 sha 与 deploy sha 不同）。
     """
     elapsed, pending = 0, None
     target_path = f".gitcode/workflows/{wf_filename}"
+    is_non_push = match_event is not None
     while elapsed < cfg.timeout:
-        if match_event:
+        if is_non_push:
             url = f"/actions/runs?per_page=30&event={match_event}"
         else:
             url = f"/actions/runs?branch={cfg.branch}&per_page=30"
@@ -680,10 +681,11 @@ def poll_run(cfg, sha, wf_filename, match_event=None):
         runs = d.get("workflow_runs", []) if isinstance(d, dict) else []
         for r in runs:
             fp = r.get("file_path") or ""
-            hs = r.get("head_sha") or ""
             if fp == target_path or fp.endswith(f"/{wf_filename}"):
-                if hs and hs != sha:
-                    continue
+                if not is_non_push:
+                    hs = r.get("head_sha") or ""
+                    if hs and hs != sha:
+                        continue
                 if r.get("status") in _TERMINAL:
                     return r
                 pending = r
@@ -1065,10 +1067,15 @@ def list_runs(cfg, per_page=30, event_filter=None):
     return d.get("workflow_runs", []) if isinstance(d, dict) else []
 
 
-def match_run(runs, sha, wf_filename):
-    """在 runs 里找 head_sha==sha AND file_path 结尾匹配 wf_filename 的那条。"""
+def match_run(runs, sha, wf_filename, require_sha=True):
+    """在 runs 里找匹配的 run。require_sha=False 时只按 file_path 匹配（非push用）。"""
     for r in runs:
-        if r.get("head_sha") == sha and (r.get("file_path") or "").endswith(wf_filename):
+        fp = (r.get("file_path") or "")
+        if not fp.endswith(wf_filename):
+            continue
+        if not require_sha:
+            return r
+        if r.get("head_sha") == sha:
             return r
     return None
 

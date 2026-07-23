@@ -321,7 +321,8 @@ def run_pool(run_id, only=None, no_logs=False):
                                 run_pool = runs_non_push
                         else:
                             run_pool = runs
-                        r = wr.match_run(run_pool, item["sha"], item["wf_filename"])
+                        r = wr.match_run(run_pool, item["sha"], item["wf_filename"],
+                                         require_sha=(ev == "push"))
                     if r is None:
                         # 还没出现
                         if time.time() - item["t0"] > case_timeout:
