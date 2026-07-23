@@ -557,6 +557,64 @@ def preflight_validate(contract, cfg=None):
     return (len(errors) == 0), errors
 
 
+# ── Runner label 映射（部署时环境适配，非语义改写）────────────────────
+_RUNNER_MAP_PATH = os.path.join(os.path.dirname(__file__), "..", "inputs", "runner-map.yaml")
+
+
+def _load_runner_map():
+    """加载 runner label 映射表。优先环境变量 JSON，其次 YAML 文件，最后内置默认。"""
+    import json as _json
+    env = os.environ.get("RUNNER_MAP", "")
+    if env:
+        try:
+            return _json.loads(env)
+        except Exception:
+            pass
+    if os.path.exists(_RUNNER_MAP_PATH):
+        try:
+            m = yaml.safe_load(open(_RUNNER_MAP_PATH, encoding="utf-8"))
+            if isinstance(m, dict):
+                return {str(k): str(v) for k, v in m.items()}
+        except Exception:
+            pass
+    return {"dedicate-hosted,x64,large": "ubuntu-latest,x64,small"}
+
+
+def _apply_runner_map(workflow_yaml, runner_map, case_id):
+    """部署前替换 workflow 中的 runs-on label。只替换映射表里明确列出的，其余原样保留。
+
+    返回 (new_yaml, intended_runs_on, deployed_runs_on)。
+    """
+    intended = []
+    deployed = []
+    try:
+        doc = yaml.safe_load(workflow_yaml)
+    except yaml.YAMLError:
+        return workflow_yaml, [], []
+    if not isinstance(doc, dict):
+        return workflow_yaml, [], []
+    jobs = doc.get("jobs", {}) or {}
+    for jid, job in jobs.items():
+        if not isinstance(job, dict):
+            continue
+        ro = job.get("runs-on")
+        if not isinstance(ro, list):
+            continue
+        label_str = ",".join(str(x).strip() for x in ro)
+        # 按去除空格后的键匹配映射表
+        for map_key, map_val in runner_map.items():
+            if ",".join(k.strip() for k in map_key.split(",")) == label_str:
+                new_ro = [x.strip() for x in map_val.split(",")]
+                intended.append({"job": jid, "runs_on": label_str})
+                deployed.append({"job": jid, "runs_on": ",".join(new_ro)})
+                job["runs-on"] = new_ro
+                log(f"  runs-on {label_str} → {','.join(new_ro)} [{case_id}]")
+                break
+    new_yaml = yaml.safe_dump(doc, default_flow_style=False, allow_unicode=True,
+                              sort_keys=False, width=200)
+    return new_yaml, intended, deployed
+
+
 # ── 1. 部署（写 workflow、commit、push）→ (sha, wf_filename)────────
 def _push_with_retry(branch, cwd):
     """git push 失败时 pull --rebase 后重试，最多4次，指数退避（1s/2s/4s）。
@@ -577,13 +635,17 @@ def _push_with_retry(branch, cwd):
 def deploy(ws, cfg, case_id, workflow_yaml):
     """把 workflow 正文写入 .gitcode/workflows/<case-id>.yml 并 push。
 
-    返回 (head_sha, wf_filename)。push 失败返回 (None, wf_filename)。
+    部署前对 runs-on label 做环境适配映射（只替换映射表中明确的，不误伤异常 label）。
+    返回 (head_sha, wf_filename, runner_mapping)。push 失败返回 (None, wf_filename, {})。
     """
+    runner_map = getattr(cfg, "runner_map", None) or _load_runner_map()
+    cfg.runner_map = runner_map
+    wf_yaml, intended, deployed = _apply_runner_map(workflow_yaml, runner_map, case_id)
     wf_filename = case_id.lower().replace("_", "-") + ".yml"
     dst = os.path.join(ws.repo_dir, ".gitcode", "workflows", wf_filename)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(dst, "w", encoding="utf-8", newline="\n") as f:
-        f.write(workflow_yaml)
+        f.write(wf_yaml)
     _sh("git add .gitcode/workflows/", cwd=ws.repo_dir)
     # 无变更时用 --allow-empty 强制触发一次
     rc_nodiff, _ = _sh("git diff --cached --quiet", cwd=ws.repo_dir)
@@ -592,9 +654,9 @@ def deploy(ws, cfg, case_id, workflow_yaml):
     rc, out = _push_with_retry(cfg.branch, ws.repo_dir)
     if rc != 0:
         log(f"  push 失败（重试后仍失败）: {out[-200:]}")
-        return None, wf_filename
+        return None, wf_filename, {}
     rc, sha = _sh("git rev-parse HEAD", cwd=ws.repo_dir)
-    return sha.strip(), wf_filename
+    return sha.strip(), wf_filename, {"intended_runs_on": intended, "deployed_runs_on": deployed}
 
 
 # ── 2. 轮询（head_sha AND file_path 精确匹配）→ run dict | None ─────
@@ -745,7 +807,7 @@ def trigger_dispatch(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         return _exec_result("INCONCLUSIVE", case_id,
                             reason="GITCODE_COOKIE 未配置，dispatch 触发不可用", t0=t0)
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         time.sleep(5)
@@ -792,7 +854,7 @@ def trigger_tag(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
     """
     t0 = time.time()
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         tag = f"test-{case_id.lower().replace('_','-')}"
@@ -827,7 +889,7 @@ def trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
     """
     t0 = time.time()
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         pr_branch = f"pr-{case_id.lower().replace('_','-')}"
@@ -867,7 +929,7 @@ def trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
     """
     t0 = time.time()
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         cmt_branch = f"cmt-{case_id.lower().replace('_','-')}"
@@ -936,7 +998,7 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     if not ok:
         return _exec_result("INCONCLUSIVE", case_id, reason=reason, t0=t0)
     try:
-        sha, wf_filename = deploy(ws, cfg, case_id, workflow_yaml)
+        sha, wf_filename, runner_mapping = deploy(ws, cfg, case_id, workflow_yaml)
         if not sha:
             return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
         try:
@@ -948,6 +1010,7 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
                                     gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
             rr = collect(cfg, run, fetch_logs=fetch_logs)
             rr["duration_seconds"] = round(time.time() - t0)
+            rr["runner_mapping"] = runner_mapping
             # 平台终态 FAILED 但 0 job：极可能 workflow 被平台拒绝（SYNTAX_ERROR 类）。
             if rr.get("status") == "FAILED" and not rr.get("jobs"):
                 rr["workflow_rejected"] = True

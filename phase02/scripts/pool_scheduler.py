@@ -204,7 +204,7 @@ def run_pool(run_id, only=None, no_logs=False):
 
                         wr.log(f"  [{cfg.repo}] deploy+dispatch {cid}")
                         t0 = time.time()
-                        sha, wf_filename = wr.deploy(ws, cfg, cid, wf)
+                        sha, wf_filename, _ = wr.deploy(ws, cfg, cid, wf)
                         if not sha:
                             _record_direct(run_dir, state, contract_doc, cid, "ENV_ERROR",
                                            "git push 失败", t0=t0)
