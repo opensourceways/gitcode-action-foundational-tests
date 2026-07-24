@@ -36,7 +36,7 @@ workflow: |
             name: perf-artifact
         - name: verify artifact step
           run: |
-            ls -la perf-artifact
+            ls -la artifact.bin
 trigger:
   event: workflow_dispatch
   as: maintainer

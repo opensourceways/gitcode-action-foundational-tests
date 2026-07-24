@@ -45,7 +45,7 @@ fault_injection: null
 assertions:
   - type: positive
     target: run_logs
-    contains: "step one prepare"
+    contains: "prepare done"
   - type: nonfunctional
     target: ui_layout
     eval: llm_assisted

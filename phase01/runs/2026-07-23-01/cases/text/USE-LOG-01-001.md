@@ -18,7 +18,7 @@
   step 按定义顺序排列，含时间戳前缀，长输出可折叠
 
 验证点:
-  - [正向] 日志面板中 step 按定义顺序排列，step 名称与 workflow 中 name 一致
+  - [正向] 日志面板中 step 按定义顺序排列，step 内 shell 输出内容（如 "prepare done"）可在 run_logs 中检索到
   - [非功能] 用户能在 3 秒内定位到失败 step
 
 清理:      无

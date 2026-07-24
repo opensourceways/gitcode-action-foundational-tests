@@ -33,14 +33,19 @@ _LOG_KINDS = ("value", "leak", "mask", "config_probe")
 
 # 终态词归一（消除用例 success↔平台 COMPLETED 系统性假 FAIL）
 # 等价类来源：compiled asserts 63 条 + results 192 条真实词形统计（2026-07-23-valid-clean）
+# 2026-07-24 补充：SUCCESS/CANCELED/skipped/IGNORED 等遗漏映射（failure-analysis-96-cases.md 归因）
 _TERMINAL_NORM = {
     "success": "COMPLETED", "completed": "COMPLETED", "completed(success)": "COMPLETED",
-    "completed_success": "COMPLETED", "completed_success": "COMPLETED", "succeeded": "COMPLETED",
+    "completed_success": "COMPLETED", "succeeded": "COMPLETED",
     "successful": "COMPLETED", "ok": "COMPLETED", "passed": "COMPLETED", "pass": "COMPLETED",
     "成功": "COMPLETED", "完成": "COMPLETED",
+    "SUCCESS": "COMPLETED",  # ← 平台偶发返回 SUCCESS 而非 COMPLETED
     "failure": "FAILED", "failed": "FAILED", "completed(failure)": "FAILED",
     "error": "FAILED", "失败": "FAILED", "错误": "FAILED",
     "canceled": "CANCELLED", "cancelled": "CANCELLED", "取消": "CANCELLED",
+    "CANCELED": "CANCELLED",  # ← 美式拼写（单 L）归一到英式 CANCELLED
+    "skipped": "IGNORED", "SKIPPED": "IGNORED",  # ← 用例侧词汇映射到平台实际返回 IGNORED
+    "IGNORED": "IGNORED",  # ← 平台原词保真
 }
 
 

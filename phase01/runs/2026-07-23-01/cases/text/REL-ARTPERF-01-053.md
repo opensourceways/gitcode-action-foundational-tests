@@ -20,6 +20,6 @@
 验证点:
   - [正向] 上传≤30s
   - [正向] 下载≤30s
-  - [正向] hash 100% 匹配
+  - [正向] hash 100% 匹配（下载后文件名为原始文件名 artifact.bin，非 artifact 名称 perf-artifact）
 
 清理:      重置 fixture 仓库
