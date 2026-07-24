@@ -136,7 +136,7 @@ def write_result(run_dir, contract, verdict, rr):
     else:
         log_text = f"<no logs: verdict={v}, case not executed>\n"
     log_path = os.path.join(results_dir, f"{cid}.log.txt")
-    open(log_path, "w", encoding="utf-8").write(log_text)
+    open(log_path, "w", encoding="utf-8", newline="\n").write(log_text)
 
     return rec
 
