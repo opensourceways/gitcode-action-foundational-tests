@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: K8s runner scaling test
-      runs-on: [self-hosted, kubernetes, small]
+      runs-on: [self-hosted, arch=arm, group=006]
       steps:
         - name: sleep step
           run: |
