@@ -24,14 +24,17 @@ runs-on: default                        # 不明确的标签
 
 ### 1a. 默认 runs-on（非 runs-on 测试时）★
 
-**如果当前用例不测 `runs-on` 行为，应使用专用宿主机（dedicate-hosted），不用虚拟化 runner（ubuntu-latest），以节省执行时间：**
+**如果当前用例不测 `runs-on` 行为，应使用ubuntu-latest，不用虚拟化 runner（ubuntu-latest），以节省执行时间：**
 
 ```yaml
 # ✅ 默认 — 不测 runs-on 时首选
-runs-on: [dedicate-hosted, x64, large]
-runs-on: [dedicate-hosted, arm64, large]   # ARM 架构时
+
+runs-on: [ubuntu-latest, x64, small]
+runs-on: [ubuntu-latest, arm64, small]
 
 # 仅在用例本身测试 runs-on 标签/runner 选择逻辑时才用
+runs-on: [dedicate-hosted, x64, large]
+runs-on: [dedicate-hosted, arm64, large]   # ARM 架构时
 runs-on: [ubuntu-latest, x64, small]
 runs-on: [self-hosted, arch=arm]
 ```
