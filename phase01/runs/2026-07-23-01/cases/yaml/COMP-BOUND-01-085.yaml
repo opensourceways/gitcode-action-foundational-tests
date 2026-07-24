@@ -1,0 +1,39 @@
+id: COMP-BOUND-01-085
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: cron 表达式格式与位置边界验证
+intent_ref: KEEP-TC-475~512
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    schedule:
+      - cron: "*/5 * * * *"
+      - cron: "0 2,14 * * *"
+      - cron: "0 9-17 * * 1-5"
+  jobs:
+    verify:
+      name: Verify cron boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "cron_boundary_ok"
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: cron_boundary_ok
+teardown:
+  reset: fixture

@@ -1,0 +1,43 @@
+id: COMP-TRIG-01-072
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: push 事件关键字段与过滤验证
+intent_ref: KEEP-TC-223~233
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    push:
+      branches: [main]
+  jobs:
+    verify:
+      name: Verify push event fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print push fields
+          run: |
+            echo "REF=${{ atomgit.event.ref }}"
+            echo "BEFORE=${{ atomgit.event.before }}"
+            echo "AFTER=${{ atomgit.event.after }}"
+            echo "push_ok"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: REF=refs/
+  - type: positive
+    target: run_logs
+    must_contain: BEFORE=
+  - type: positive
+    target: run_logs
+    must_contain: push_ok
+teardown:
+  reset: fixture

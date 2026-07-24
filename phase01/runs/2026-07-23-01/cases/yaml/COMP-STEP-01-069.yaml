@@ -1,0 +1,38 @@
+id: COMP-STEP-01-069
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: step 必填与核心字段 name run uses 验证
+intent_ref: KEEP-TC-279~288
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify step core fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Run step
+          run: |
+            echo "run_ok"
+        - name: Uses step
+          uses: checkout
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: run_ok
+  - type: positive
+    target: run_status
+    equals: success
+teardown:
+  reset: fixture

@@ -1,0 +1,39 @@
+id: COMP-TRIG-01-077
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: pull_request_comment 事件关键字段与过滤验证
+intent_ref: KEEP-TC-469~470
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    pull_request_comment:
+      types: [created, edited, deleted]
+  jobs:
+    verify:
+      name: Verify pull_request_comment fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print PR comment fields
+          run: |
+            echo "PR_NUM=${{ atomgit.event.pull_request.number }}"
+            echo "COMMENT_BODY=${{ atomgit.event.comment.body }}"
+            echo "pr_comment_ok"
+trigger:
+  event: pull_request_comment
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: PR_NUM=
+  - type: positive
+    target: run_logs
+    must_contain: pr_comment_ok
+teardown:
+  reset: fixture

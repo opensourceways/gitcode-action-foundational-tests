@@ -1,0 +1,42 @@
+id: COMP-SYSENV-01-060
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: ATOMGIT 系统环境变量值正确性
+intent_ref: KEEP-TC-197~222
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify ATOMGIT env values
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare values
+          run: |
+            echo "SHA_MATCH=$([ "$ATOMGIT_SHA" = "${{ atomgit.sha }}" ] && echo yes || echo no)"
+            echo "REF_MATCH=$([ "$ATOMGIT_REF" = "${{ atomgit.ref }}" ] && echo yes || echo no)"
+            echo "EVENT_MATCH=$([ "$ATOMGIT_EVENT_NAME" = "${{ atomgit.event_name }}" ] && echo yes || echo no)"
+            echo "REPO_MATCH=$([ "$ATOMGIT_REPOSITORY" = "${{ atomgit.repository }}" ] && echo yes || echo no)"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: SHA_MATCH=yes
+  - type: positive
+    target: run_logs
+    must_contain: REF_MATCH=yes
+  - type: positive
+    target: run_logs
+    must_contain: EVENT_MATCH=yes
+teardown:
+  reset: fixture

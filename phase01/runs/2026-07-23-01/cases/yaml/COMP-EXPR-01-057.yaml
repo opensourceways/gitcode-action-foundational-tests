@@ -1,0 +1,45 @@
+id: COMP-EXPR-01-057
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: format substring replace 函数边界行为
+intent_ref: KEEP-TC-183~185
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify format substring replace
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Format string
+          run: |
+            echo "FMT=${{ format('Hello {0}', 'World') }}"
+        - name: Substring sha
+          run: |
+            echo "SUB=${{ substring(atomgit.sha, 0, 7) }}"
+        - name: Replace prefix
+          run: |
+            echo "REP=${{ replace(atomgit.ref, 'refs/heads/', '') }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: FMT=Hello World
+  - type: positive
+    target: run_logs
+    must_contain: SUB=
+  - type: positive
+    target: run_logs
+    must_contain: REP=
+teardown:
+  reset: fixture

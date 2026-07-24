@@ -1,0 +1,41 @@
+id: COMP-TRIG-01-078
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 多事件组合与分支路径过滤验证
+intent_ref: KEEP-TC-423
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    push:
+      branches: [main]
+      paths:
+        - "src/**"
+        - "package.json"
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify multi event and filters
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "multi_event_ok"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: multi_event_ok
+teardown:
+  reset: fixture

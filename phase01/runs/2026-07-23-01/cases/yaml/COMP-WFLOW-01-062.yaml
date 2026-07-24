@@ -1,0 +1,46 @@
+id: COMP-WFLOW-01-062
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: workflow env 与 defaults 字段验证
+intent_ref: KEEP-TC-366~401
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  env:
+    GLOBAL_VAR: global_value
+  defaults:
+    run:
+      shell: bash
+      working-directory: .
+  jobs:
+    verify:
+      name: Verify env and defaults
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check global env
+          run: |
+            echo "GLOBAL=$GLOBAL_VAR"
+        - name: Override shell
+          shell: sh
+          run: |
+            echo "shell_override"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: GLOBAL=global_value
+  - type: positive
+    target: run_logs
+    must_contain: shell_override
+teardown:
+  reset: fixture

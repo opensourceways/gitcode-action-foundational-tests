@@ -1,0 +1,45 @@
+id: COMP-ENVCTX-01-050
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: env 优先级链 step 大于 job 大于 workflow
+intent_ref: KEEP-TC-001~004
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  env:
+    MY_VAR: workflow_value
+  jobs:
+    verify:
+      name: Verify env priority chain
+      runs-on: [dedicate-hosted, x64, large]
+      env:
+        MY_VAR: job_value
+      steps:
+        - name: Step override
+          env:
+            MY_VAR: step_value
+          run: |
+            echo "MY_VAR=$MY_VAR"
+        - name: Job inherit
+          run: |
+            echo "JOB_VAR=$MY_VAR"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: MY_VAR=step_value
+  - type: positive
+    target: run_logs
+    must_contain: JOB_VAR=job_value
+teardown:
+  reset: fixture

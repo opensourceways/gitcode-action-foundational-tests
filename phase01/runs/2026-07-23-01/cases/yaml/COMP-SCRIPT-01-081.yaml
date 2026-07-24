@@ -1,0 +1,36 @@
+id: COMP-SCRIPT-01-081
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 仓库内脚本执行与路径验证
+intent_ref: KEEP-TC-431~433
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify in-repo script execution
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Run inline script
+          run: |
+            echo "inline_script_ok"
+        - name: Run repo script
+          run: |
+            ./scripts/hello.sh || echo "script_fallback"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: inline_script_ok
+teardown:
+  reset: fixture

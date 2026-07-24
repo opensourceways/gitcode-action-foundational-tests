@@ -1,0 +1,39 @@
+id: COMP-TRIG-01-076
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: issue_comment 事件关键字段与 types 验证
+intent_ref: KEEP-TC-075~083
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    issue_comment:
+      types: [created, edited, deleted]
+  jobs:
+    verify:
+      name: Verify issue_comment fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print comment fields
+          run: |
+            echo "COMMENT_ID=${{ atomgit.event.comment.id }}"
+            echo "ISSUE_NUM=${{ atomgit.event.issue.number }}"
+            echo "issue_comment_ok"
+trigger:
+  event: issue_comment
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: COMMENT_ID=
+  - type: positive
+    target: run_logs
+    must_contain: issue_comment_ok
+teardown:
+  reset: fixture

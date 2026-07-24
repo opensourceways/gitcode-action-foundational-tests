@@ -1,0 +1,52 @@
+id: COMP-JOB-01-067
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: job 可选字段 env if timeout-minutes needs 验证
+intent_ref: KEEP-TC-264~288
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    prepare:
+      name: Prepare job
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Prepare
+          run: |
+            echo "prepare_done"
+    verify:
+      name: Verify optional fields
+      runs-on: [dedicate-hosted, x64, large]
+      needs: prepare
+      if: ${{ true }}
+      timeout-minutes: 30
+      env:
+        JOB_VAR: job_value
+      steps:
+        - name: Check fields
+          run: |
+            echo "JOB_VAR=$JOB_VAR"
+            echo "optional_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: prepare_done
+  - type: positive
+    target: run_logs
+    must_contain: JOB_VAR=job_value
+  - type: positive
+    target: run_logs
+    must_contain: optional_ok
+teardown:
+  reset: fixture

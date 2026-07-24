@@ -1,0 +1,46 @@
+id: COMP-STEP-01-070
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: step 可选字段 id env if with 验证
+intent_ref: KEEP-TC-279~288
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify step optional fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Step with id
+          id: mystep
+          run: |
+            echo "result=hello" >> "$ATOMGIT_OUTPUT"
+        - name: Use output
+          run: |
+            echo "OUT=${{ steps.mystep.outputs.result }}"
+        - name: Conditional step
+          if: ${{ true }}
+          env:
+            STEP_VAR: step_value
+          run: |
+            echo "STEP_VAR=$STEP_VAR"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: OUT=hello
+  - type: positive
+    target: run_logs
+    must_contain: STEP_VAR=step_value
+teardown:
+  reset: fixture

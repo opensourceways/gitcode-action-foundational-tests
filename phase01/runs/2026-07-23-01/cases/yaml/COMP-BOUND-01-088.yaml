@@ -1,0 +1,42 @@
+id: COMP-BOUND-01-088
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 工作流命令 set-env add-path 与文件写入边界验证
+intent_ref: KEEP-TC-240~246
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify workflow commands boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write env and path
+          run: |
+            echo "MY_ENV=from_env_file" >> "$ATOMGIT_ENV"
+            echo "/tmp/extra_bin" >> "$ATOMGIT_PATH"
+        - name: Read env
+          run: |
+            echo "MY_ENV=$MY_ENV"
+            echo "PATH_HAS_EXTRA=$([[ "$PATH" == *"/tmp/extra_bin"* ]] && echo yes || echo no)"
+            echo "commands_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: MY_ENV=from_env_file
+  - type: positive
+    target: run_logs
+    must_contain: commands_ok
+teardown:
+  reset: fixture

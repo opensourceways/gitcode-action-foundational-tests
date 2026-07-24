@@ -1,0 +1,36 @@
+id: COMP-JOB-01-066
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: job 必填字段 name runs-on steps 验证
+intent_ref: KEEP-TC-264~288
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify required job fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "job_fields_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: job_fields_ok
+teardown:
+  reset: fixture

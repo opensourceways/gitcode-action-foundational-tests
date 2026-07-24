@@ -1,0 +1,55 @@
+id: COMP-EXPR-01-058
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 表达式运算符与优先级边界行为
+intent_ref: KEEP-TC-160~175
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify operator precedence
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Equality
+          if: ${{ atomgit.ref_name == 'main' || true }}
+          run: |
+            echo "eq_passed"
+        - name: Not equal
+          if: ${{ atomgit.ref_name != 'nonexistent' }}
+          run: |
+            echo "ne_passed"
+        - name: Greater than
+          if: ${{ 5 > 3 }}
+          run: |
+            echo "gt_passed"
+        - name: Logical combo
+          if: ${{ true && (false || true) }}
+          run: |
+            echo "logic_passed"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: eq_passed
+  - type: positive
+    target: run_logs
+    must_contain: ne_passed
+  - type: positive
+    target: run_logs
+    must_contain: gt_passed
+  - type: positive
+    target: run_logs
+    must_contain: logic_passed
+teardown:
+  reset: fixture

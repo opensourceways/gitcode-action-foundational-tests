@@ -1,0 +1,52 @@
+id: COMP-TRIG-01-074
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: workflow_dispatch 事件关键字段与 inputs 验证
+intent_ref: KEEP-TC-084~085
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+      inputs:
+        environment:
+          description: Target env
+          type: string
+          required: true
+          default: staging
+        version:
+          description: Version
+          type: string
+          required: false
+          default: 1.0.0
+  jobs:
+    verify:
+      name: Verify workflow_dispatch fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print inputs
+          run: |
+            echo "ENV=${{ inputs.environment }}"
+            echo "VER=${{ inputs.version }}"
+            echo "dispatch_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: ENV=
+  - type: positive
+    target: run_logs
+    must_contain: VER=
+  - type: positive
+    target: run_logs
+    must_contain: dispatch_ok
+teardown:
+  reset: fixture

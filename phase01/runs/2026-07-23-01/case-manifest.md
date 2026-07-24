@@ -1,10 +1,11 @@
 # Case Manifest · Run 2026-07-23-01
 
 > 生成时间: 2026-07-23
-> 运行目的: 生产统一、自包含的基准全量用例集（全维度、全准入 intent）
+> 运行目的: 生产统一、自包含的基准全量用例集（全维度、全准入 intent + 补全字段级 KEEP 用例）
 > 准入 intent 总数: 186 条
-> 生成用例总数: 284 条
-> 复用已有 TC: 0 条（本轮为全量基准生成，不复用旧格式 TC）
+> 生成用例总数: 326 条
+> 字段级 KEEP 补全: 42 条（合并自 ~260 条 KEEP 历史用例）
+> 复用已有 TC: 0 条
 > 待生成: 0
 
 ---
@@ -13,34 +14,54 @@
 
 | 维度 | 准入 Intent | 生成用例 | P0 | P1 | P2 |
 |---|---|---|---|---|---|
-| completeness | 16 | 46 | 16 | 30 | 0 |
+| completeness | 16 | 88 | 16 | 72 | 0 |
 | compatibility | 35 | 66 | 13 | 53 | 0 |
 | security | 36 | 51 | 50 | 1 | 0 |
 | reliability | 66 | 72 | 2 | 67 | 3 |
 | usability | 29 | 49 | 2 | 47 | 0 |
-| **合计** | **182** | **284** | **83** | **198** | **3** |
+| **合计** | **182** | **326** | **83** | **240** | **3** |
 
 ---
 
 ## 全量用例清单
 
 
-### completeness（46 条）
+### completeness（88 条）
 
 | 用例 ID | 优先级 | 溯源意图 | 标题 |
 |---|---|---|---|
 | COMP-ARTIFACT-01-001 | P1 | INTENT-COMP-015 | artifact 可在同 workflow 的 job 间正确传递 |
 | COMP-ARTIFACT-01-002 | P1 | INTENT-COMP-015 | 下载全部制品功能正常 |
 | COMP-ARTIFACT-01-003 | P1 | INTENT-COMP-015 | artifact 保留期设置生效 |
+| COMP-ATOMGIT-01-047 | P1 | KEEP-TC-017~057 | atomgit 核心上下文属性可访问性 |
+| COMP-ATOMGIT-01-048 | P1 | KEEP-TC-048~060 | atomgit 事件相关属性可访问性 |
+| COMP-ATOMGIT-01-049 | P1 | KEEP-TC-566~570 | atomgit 边界格式校验 |
+| COMP-BOUND-01-084 | P1 | KEEP-TC-514~559 | 路径与分支过滤组合及否定模式边界验证 |
+| COMP-BOUND-01-085 | P1 | KEEP-TC-475~512 | cron 表达式格式与位置边界验证 |
+| COMP-BOUND-01-086 | P1 | KEEP-TC-276~328 | 矩阵构建 include exclude 与单值边界验证 |
+| COMP-BOUND-01-087 | P1 | KEEP-TC-331~333 | 步骤输出与跨 job 传递边界验证 |
+| COMP-BOUND-01-088 | P1 | KEEP-TC-240~246 | 工作流命令 set-env add-path 与文件写入边界验证 |
 | COMP-CACHE-01-001 | P0 | INTENT-COMP-016 | cache hit 时恢复缓存内容正确 |
 | COMP-CACHE-01-002 | P0 | INTENT-COMP-016 | restore-keys 前缀匹配兜底生效 |
 | COMP-CACHE-01-003 | P0 | INTENT-COMP-016 | fork PR 不应覆盖或污染主分支 cache |
 | COMP-CALL-01-001 | P1 | INTENT-COMP-006 | 2 层 workflow_call 嵌套正常执行 |
 | COMP-CALL-01-002 | P1 | INTENT-COMP-006 | 3 层 workflow_call 嵌套应被拒绝 |
+| COMP-CTX-01-051 | P1 | KEEP-TC-086~124 | 上下文在 workflow job step 各级注入验证 |
+| COMP-CTX-01-052 | P1 | KEEP-TC-086~124 | 上下文在条件表达式 if 中注入验证 |
+| COMP-CTX-01-053 | P1 | KEEP-TC-086~124 | 上下文在 Action 插件参数中注入验证 |
 | COMP-DIR-01-001 | P1 | INTENT-COMP-001 | .gitcode/workflows/ 下的 YAML 被正确识别并触发 |
 | COMP-DIR-01-002 | P1 | INTENT-COMP-001 | .github/workflows/ 下的 YAML 不被识别为 workflow |
+| COMP-ENVCTX-01-050 | P1 | KEEP-TC-001~004 | env 优先级链 step 大于 job 大于 workflow |
+| COMP-EXPR-01-054 | P1 | KEEP-TC-180~182 | 字符串函数 contains startsWith endsWith 边界行为 |
+| COMP-EXPR-01-055 | P1 | KEEP-TC-186 | hashFiles 函数边界行为 |
+| COMP-EXPR-01-056 | P1 | KEEP-TC-187 | toJson 函数边界行为 |
+| COMP-EXPR-01-057 | P1 | KEEP-TC-183~185 | format substring replace 函数边界行为 |
+| COMP-EXPR-01-058 | P1 | KEEP-TC-160~175 | 表达式运算符与优先级边界行为 |
 | COMP-ISOLATION-01-001 | P0 | INTENT-COMP-011 | 同一 workflow 先后 job 的文件系统相互隔离 |
 | COMP-ISOLATION-01-002 | P0 | INTENT-COMP-011 | 环境变量不跨 job 泄漏 |
+| COMP-JOB-01-066 | P1 | KEEP-TC-264~288 | job 必填字段 name runs-on steps 验证 |
+| COMP-JOB-01-067 | P1 | KEEP-TC-264~288 | job 可选字段 env if timeout-minutes needs 验证 |
+| COMP-JOB-01-068 | P1 | KEEP-TC-276~278 | job strategy 矩阵与 continue-on-error 验证 |
 | COMP-PERMS-01-001 | P0 | INTENT-COMP-013 | permissions 空对象时 ATOMGIT_TOKEN 仅 repository read |
 | COMP-PERMS-01-002 | P0 | INTENT-COMP-013 | 声明 repository write 后 TOKEN 可推送代码 |
 | COMP-PERMS-01-003 | P0 | INTENT-COMP-013 | fork PR 的 pull_request 下声明 write 仍仅 read |
@@ -58,9 +79,12 @@
 | COMP-RUNNER-01-001 | P1 | INTENT-COMP-010 | 三段式标签正确调度到对应规格 Runner |
 | COMP-RUNNER-01-002 | P1 | INTENT-COMP-010 | runs-on default 等效 ubuntu-latest x64 small |
 | COMP-RUNNER-01-003 | P1 | INTENT-COMP-010 | 不存在的标签组合导致 job 排队或失败 |
+| COMP-RUNNER-01-080 | P1 | KEEP-TC-096~098 | runner 上下文属性可访问性验证 |
 | COMP-SCHEDULE-01-001 | P1 | INTENT-COMP-005 | 合法 cron 在默认分支按时触发 |
 | COMP-SCHEDULE-01-002 | P1 | INTENT-COMP-005 | 非默认分支的 schedule workflow 不应触发 |
 | COMP-SCHEDULE-01-003 | P1 | INTENT-COMP-005 | cron 间隔短于 5 分钟时被拒绝或降级 |
+| COMP-SCRIPT-01-081 | P1 | KEEP-TC-431~433 | 仓库内脚本执行与路径验证 |
+| COMP-SCRIPT-01-082 | P1 | KEEP-TC-431~433 | 脚本权限设置与直接执行验证 |
 | COMP-SECRET-01-001 | P0 | INTENT-COMP-012 | echo secret 在日志中被脱敏为 *** |
 | COMP-SECRET-01-002 | P0 | INTENT-COMP-012 | secret 原始值不应以明文出现在标准日志中 |
 | COMP-SECRET-01-003 | P0 | INTENT-COMP-012 | base64 编码后的 secret 是否仍被脱敏 |
@@ -69,12 +93,31 @@
 | COMP-STAGES-01-003 | P1 | INTENT-COMP-007 | post.run_always true 时 workflow 失败仍执行 post |
 | COMP-STATUS-01-001 | P1 | INTENT-COMP-017 | 运行状态机 queued 到 completed 转换正确 |
 | COMP-STATUS-01-002 | P1 | INTENT-COMP-017 | 失败 step 的日志完整保留且可查看 |
+| COMP-STEP-01-069 | P1 | KEEP-TC-279~288 | step 必填与核心字段 name run uses 验证 |
+| COMP-STEP-01-070 | P1 | KEEP-TC-279~288 | step 可选字段 id env if with 验证 |
+| COMP-STEP-01-071 | P1 | KEEP-TC-279~288 | step 执行控制 shell working-directory continue-on-error timeout-minutes 验证 |
 | COMP-SUMMARY-01-001 | P1 | INTENT-COMP-018 | ATOMGIT_STEP_SUMMARY Markdown 表格与标题正确渲染 |
 | COMP-SUMMARY-01-002 | P1 | INTENT-COMP-018 | summary 中不应暴露系统内部路径 |
+| COMP-SYSENV-01-059 | P1 | KEEP-TC-197~222 | ATOMGIT 系统环境变量关键变量存在性 |
+| COMP-SYSENV-01-060 | P1 | KEEP-TC-197~222 | ATOMGIT 系统环境变量值正确性 |
 | COMP-TIMEOUT-01-001 | P1 | INTENT-COMP-008 | 未声明 timeout-minutes 的 job 在 360 分钟内正常完成 |
 | COMP-TIMEOUT-01-002 | P1 | INTENT-COMP-008 | 超时的 job 被强制终止并标记为 failure |
+| COMP-TRIG-01-072 | P1 | KEEP-TC-223~233 | push 事件关键字段与过滤验证 |
+| COMP-TRIG-01-073 | P1 | KEEP-TC-061~083 | pull_request 事件关键字段与 types 验证 |
+| COMP-TRIG-01-074 | P1 | KEEP-TC-084~085 | workflow_dispatch 事件关键字段与 inputs 验证 |
+| COMP-TRIG-01-075 | P1 | KEEP-TC-237~430 | schedule 事件关键字段与 cron 格式验证 |
+| COMP-TRIG-01-076 | P1 | KEEP-TC-075~083 | issue_comment 事件关键字段与 types 验证 |
+| COMP-TRIG-01-077 | P1 | KEEP-TC-469~470 | pull_request_comment 事件关键字段与过滤验证 |
+| COMP-TRIG-01-078 | P1 | KEEP-TC-423 | 多事件组合与分支路径过滤验证 |
+| COMP-TRIG-01-079 | P1 | KEEP-TC-234~560 | 触发事件 types 取值与过滤边界验证 |
 | COMP-UNKNOWN-01-001 | P1 | INTENT-COMP-002 | 包含未知顶层字段的 workflow 触发 YAML 校验失败 |
 | COMP-UNKNOWN-01-002 | P1 | INTENT-COMP-002 | 不应静默忽略未知字段导致用户误以为配置生效 |
+| COMP-VARREF-01-083 | P1 | KEEP-TC-438~440 | YAML 表达式与 Shell 环境变量引用方式验证 |
+| COMP-WFLOW-01-061 | P1 | KEEP-TC-366~401 | workflow name 与 on 字段必填与类型验证 |
+| COMP-WFLOW-01-062 | P1 | KEEP-TC-366~401 | workflow env 与 defaults 字段验证 |
+| COMP-WFLOW-01-063 | P1 | KEEP-TC-289~293 | workflow concurrency 并发控制字段验证 |
+| COMP-WFLOW-01-064 | P1 | KEEP-TC-366~401 | workflow stages 阶段结构字段验证 |
+| COMP-WFLOW-01-065 | P1 | KEEP-TC-366~401 | workflow post 后处理阶段字段验证 |
 
 ### compatibility（66 条）
 
@@ -340,7 +383,7 @@
 
 - [x] 每条文本用例含 `维度标签` 字段，非空
 - [x] 每条用例 ID 含 run 序列 `01`，跨 run 不碰撞
-- [x] 每条文本用例可溯源到 `intent_ref`
+- [x] 每条文本用例可溯源到 `intent_ref` 或 `KEEP-TC` 范围
 - [x] 每条文本用例有对应、过 schema 校验的 YAML
 - [x] 安全用例文本层含「不应发生」验证点，YAML 层落 `negative` 断言
 - [x] 破坏性用例声明了正确的 `teardown.reset`
@@ -350,11 +393,11 @@
 - [x] `workflow:` 字段全部使用 `|` block scalar
 - [x] `runs-on:` 全部使用数组格式
 - [x] `uses:` 全部使用裸插件名
-- [x] `if:` 仅使用 `${{ always() }}`（带括号）
+- [x] `if:` 仅使用 `${ always() }`（带括号）
 - [x] 所有 `run:` 全部使用 `run: |` block scalar
 - [x] 每个 job 有 `name:`，每个 step 有 `name:`
 - [x] Step name 无非法字符
-- [x] 284 条 YAML 全部通过 schema 解析验证
+- [x] 326 条 YAML 全部通过 schema 解析验证
 
 ---
 
