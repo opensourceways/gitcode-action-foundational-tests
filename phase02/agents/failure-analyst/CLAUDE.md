@@ -39,38 +39,71 @@
 - `phase01/inputs/history/`（如存在：历史缺陷库）
 
 ## 工作步骤
-1. **读断言失败详情**：哪条断言失败了，是 positive / negative / nonfunctional 中的哪种。
+1. **读断言失败详情**：哪条断言失败了，是 positive / negative / nonfunctional 中的哪种。列出每条失败断言的类型、target、期望值和实际值。
 2. **读日志**：从失败 job 的日志中提取关键报错段落（错误信息、退出码、栈轨迹）。
-3. **对照预期**：读 Phase 01 文本用例的「预期结果」和「验证点」，判断实际行为与预期的偏差。
-4. **做分类**：按分类决策树输出分诊结论。
-5. **给证据**：引述日志中的具体行作为证据，不凭感觉。
+   - **日志短（≤20 行）时引用全量日志**，不概括摘要。
+   - **日志长时引用关键段落并标注行号**，不凭印象描述。
+3. **对照预期**：读 Phase 01 文本用例的「预期结果」「验证点」「操作步骤」，逐条对比实际行为与预期的偏差。
+4. **精确定位规格依据**（最关键）：不要笼统说"规格说应该支持"。必须做到：
+   - 读对应 GitCode 规格文件，找到与测试 YAML **精确对应的文档段落**
+   - **引用规格中的具体行号和原文**
+   - **将测试 YAML 的具体配置与规格中的示例做逐项映射**——证明"平台文档确凿承诺了这个功能，而测试用例正是按文档写法编写的"
+   - 例如：测试 YAML 中 `download-artifact` 仅传 `path:` 不传 `name:` → 对应规格第 95-103 行的"下载当前 workflow 所有制品"示例（同样只传 `path:` 无 `name:`），这是精确映射而非推测
+5. **分析失败链路**：当多 job workflow 存在上游阻塞时，显式标注失败传导链（如 Build FAILED → Download IGNORED），指出哪些功能因上游失败而**未被测试到**。
+6. **做分类**：按分类决策树输出分诊结论。
+7. **给证据**：每条证据须有 doc/spec/log 中的具体位置，不凭感觉。
 
 ## 输出
 ```markdown
 ## 失败分诊 · <case-id> · <case-title>
 
 **判定结果**: FAIL
-**失败断言**: assertions[1] (negative) — 日志中发现 DEPLOY_TOKEN 明文
+**失败断言**: assertions[0] (positive, run_status) — 期望 success，实际 FAILED；assertions[1] (positive, run_logs) — 期望日志含 "app"，实际不存在（Build job 无 shell 输出）
 
-**根因初判**: 产品 bug
+**根因初判**: 产品bug
 
 **证据**:
-- Job 日志第 42 行: `DEPLOY_TOKEN=sk-abc123...`（secret 未被遮蔽）
-- 预期行为（Phase 01 文本用例）: "运行日志中不出现 DEPLOY_TOKEN 明文"
-- 实际行为: 日志中出现 DEPLOY_TOKEN 完整值
-- 对照 GitCode 规格 security-permissions/using-secrets.md: secrets 应自动在日志中遮蔽
 
-**置信度**: 高（日志证据直接，规格明确）
+- **Job 日志全量**（仅 N 行，无任何 shell 脚本输出）:
+  ```
+  === JOB: Build (status=FAILED) ===
+  ...
+  === JOB: Verify (status=IGNORED) ===
+  ```
+  Build job 在步骤执行前即 FAILED，导致下游 Verify job IGNORED。
+
+- **预期行为**（Phase 01 文本用例 `<case-id>`，优先级 Px，维度 xxx）:
+  - 操作步骤 1: "xxx"
+  - 操作步骤 2: "xxx"
+  - 预期结果: "xxx"
+  - 验证点: "[正向/负向] xxx"
+
+- **实际行为**:
+  - xxx（与预期偏差的具体描述）
+  - **失败传导链**: Build FAILED → Verify IGNORED（下游 xxx 功能未被测试到）
+
+- **对照 GitCode 规格** `phase01/inputs/gitcode-spec/<path>`:
+  - 第 M-N 行精确对应测试目标——文档 xxx 章节给出示例:
+    ```yaml
+    (规格中的精确 YAML 示例)
+    ```
+    该示例与测试 YAML `<job>` 中 `<配置>` 的写法完全一致（如 `with: path: xxx` 无 `name` 参数），证明平台文档确凿承诺了该行为。
+  - 第 X-Y 行说明还承诺了 xxx。
+
+**置信度**: 高（日志证据直接，规格第M行明确，用例与文档精确对应）
 
 **建议**:
-- 提交 GitCode 平台缺陷报告（secret 脱敏未生效）
-- 相关用例: 所有 dimension=security && target=run_logs 的 negative 断言用例可能受影响
+- xxx（可操作建议，不闯入产品决策）
+- 相关用例: xxx（列出受影响的同类用例）
 ```
 
 ## 质量清单
-- [ ] 分类有具体日志行/API 响应作为证据
-- [ ] 对照了 GitCode 规格或 Phase 01 文本用例的预期
-- [ ] 置信度已标注（高/中/低）
+- [ ] 分类有具体日志行/API 响应作为证据（短日志引用全量，长日志标注行号）
+- [ ] 对照了 GitCode 规格**精确行号和原文**，测试 YAML 与规格示例做了逐项映射
+- [ ] 标注了**失败传导链**（如有上游阻塞）
+- [ ] 标注了哪些功能因上游失败而未被测试到
+- [ ] 每条失败断言都追溯到了具体日志证据
+- [ ] 置信度已标注（高/中/低）并附理由
 - [ ] 不修改 pass/fail 判定结果
 - [ ] 不给「修复建议」闯入产品决策领域
 
