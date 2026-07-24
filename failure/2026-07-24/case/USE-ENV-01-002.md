@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (nonfunctional, error_message, eval=llm_assisted) — 期望日志中出现 ATOMGIT_* 前缀环境变量的映射指引，实际日志仅含 bash 级 `GITHUB_SHA: unbound variable` 错误，无平台级环境变量映射提示；断言退化至 run_status 检查时 Job 为 FAILED
 
 **根因初判**: 产品bug（错误提示缺失）+ 用例问题（断言 eval=llm_assisted 导致编译退化）
+**责任人**: 平台方（兼 Phase 01）
 
 **证据**:
 

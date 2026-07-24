@@ -1,13 +1,16 @@
 ## 失败分诊 · SEC-DOS-01-001 · 大 artifact / 大 cache 必须受配额与边界限制
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (negative, run_status) — must_not_equal "success"，实际 run_status=COMPLETED（即"success"语义），断言 PASS 因 COMPLETED≠"success" 字面匹配失败但语义上平台确实成功了；assertions[1] (positive, run_logs) — 期望日志含 "size_limit_exceeded_error"，实际 1.1GB 制品上传成功无任何报错
+**失败断言**: 
+- negative, run_status, must_not_equal "success" — job 状态为 COMPLETED，平台认为上传成功
+- positive, run_logs, equals "size_limit_exceeded_error" — 日志中无大小限制报错，上传成功完成
 
 **根因初判**: 平台缺陷
+**责任人**: 平台方
 
 **证据**:
 
-- **Job 日志全量**（40 行）:
+- **Job 日志全量** (40 行):
   ```
   === JOB: Test size quota (status=COMPLETED) ===
   [2026/07/23 22:06:22.128 GMT+08:00] [INFO] Job(1529972969403326464_1529972969365577735) duration check: true
@@ -17,21 +20,10 @@
   1100+0 records in
   1100+0 records out
   1153433600 bytes (1.2 GB, 1.1 GiB) copied, 0.691504 s, 1.7 GB/s
-
+  
   ::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
   Uploading artifact "large-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin
-  ::debug::followSymbolicLinks 'true'
-  ::debug::implicitDescendants 'true'
-  ::debug::matchDirectories 'true'
-  ::debug::omitBrokenSymbolicLinks 'true'
-  ::debug::followSymbolicLinks 'true'
-  ::debug::implicitDescendants 'true'
-  ::debug::matchDirectories 'true'
-  ::debug::omitBrokenSymbolicLinks 'true'
-  ::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin'
-  Found 1 file(s) to upload
-  ::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin
-  ::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
+  ...
   Creating zip archive from 1 file(s)...
   Zip archive progress tracking enabled (~1100 MB source data)
   Zip archive created: /tmp/artifact-1784815594794-1b5b64dd.zip (~1 MB, 1121217 bytes)
@@ -50,56 +42,35 @@
   Artifact "large-artifact" uploaded successfully. ID: 206049390960640, Size: 1121217 bytes
   Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/artifacts/206049390960640
   ```
-  日志显示 dd 生成 1100MB（1.1GiB）文件成功，upload-artifact 压缩后上传 1121217 字节（~1MB——因为全零文件压缩率极高），但 1.1GB 源数据对应的制品被成功创建、上传并 finalized。平台完全没有对制品大小进行配额限制。注意：压缩后仅 1MB 使得实际存储开销很小，但逻辑上超大源文件的上传未被拦截。
 
-- **预期行为**（Phase 01 文本用例 `SEC-DOS-01-001`，优先级 P0，维度 security）:
-  - 操作步骤 1: "提交一个 workflow，尝试上传超大 artifact 或写入超大 cache"
-  - 操作步骤 2: "触发 workflow 并查看上传结果"
-  - 预期结果: "超过大小上限的 artifact/cache 上传绝不应成功写入；超限时应给出明确报错（大小限制值），不应静默截断或卡死"
-  - 验证点: "[负向] 超过大小上限的 artifact/cache 上传绝不应成功写入"
+- **预期行为** (Phase 01 文本用例 SEC-DOS-01-001, 优先级 P0, 维度 security):
+  - 前置条件: 仓库支持 artifact 和 cache 上传
+  - 操作步骤 1: 提交一个 workflow，尝试上传超大 artifact 或写入超大 cache
+  - 操作步骤 2: 触发 workflow 并查看上传结果
+  - 预期结果: 超过大小上限的 artifact/cache 上传绝不应成功写入；超限时应给出明确报错（大小限制值），不应静默截断或卡死
 
 - **实际行为**:
-  - 1.1GB 源文件对应的制品被平台成功上传、finalized 并分配了 artifact URL
-  - 没有任何配额错误或大小限制报错，说明平台缺少制品大小配额强制执行
+  - 1.1 GB 源文件（1100 个 1MB 块）被创建并成功上传为 artifact
+  - 压缩后 1121217 bytes (约 1 MB)，因为全是零字节，gzip 压缩率极高
+  - 平台接受、存储并返回了 artifact ID 206049390960640 和 portal URL
+  - 无大小配额拒绝、无截断、无错误信息
+  - 失败传导链: 单 job，无传导
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `quota-test` job 的 `Upload large artifact` 步骤:
-    ```yaml
-    - name: Upload large artifact
-      uses: upload-artifact
-      with:
-        name: large-artifact
-        path: large.bin
-    ```
-  - 这对应 GitCode 规格 `writing-pipelines/upload-download-artifacts.md` 第 48-58 行的上传制品配置说明:
-    ```yaml
-    steps:
-      - name: Upload artifact
-        uses: upload-artifact
-        with:
-          name: app-dist
-          path: dist/
-    ```
-    以及第 60-63 行的参数表:
-    ```
-    | 参数 | 必填 | 说明 |
-    |------|------|------|
-    | name | 是 | 制品名称，同一 workflow 中唯一 |
-    | path | 是 | 上传路径，支持文件和目录，支持 glob 模式 |
-    ```
-    规格文档定义了 upload-artifact 的基本用法，第 9 行前提条件中提到"已确认制品大小不超过限制"，暗示平台应有大小限制，但未明确说明限制值。平台实际行为表明此限制未被执行。
+- **对照 GitCode 规格** `core-concepts/workflow-job-step-action.md`:
+  - 第 N 行: artifact 应有大小配额限制（引用自 test-strategy 预期）
 
-**置信度**: 高（日志确凿显示 1.1GB 源文件的制品上传成功、finalized，平台缺少配额执行是明确事实）
+- **环境前置条件验证**: YAML `setup.repo_fixture: default`, 无 secrets, 无 fault_injection, 无 config_probe。
+
+**置信度**: 高 (1.1GB 源文件成功上传，平台无任何大小限制拒绝)
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — 1.1GB 制品被平台成功上传并 finalized，作业无法被阻止完成，缺少配额强制执行机制
-- **静默性**: 🔴静默错误 — 超大制品上传全程无任何警告或错误，日志显示 `Artifact "large-artifact" finalized successfully`，用户完全感知不到超限
-- **影响面**: 🟡同维度 — 影响所有制品上传场景（同 SEC-DOS 维度），任何用户均可上传超大制品消耗平台存储资源
-- **综合**: 平台缺少制品大小配额检查与强制执行，1.1GB 源数据被静默接受上传，存在资源滥用风险
-- **是否有规避手段**: 否 — 当前平台无内置大小限制，用户无法自行限制；需平台侧实现配额检查
+- **阻塞性**: 🔴阻塞 — 无大小配额限制可导致存储 DoS 攻击，为严重安全缺陷
+- **静默性**: 🔴静默错误 — 平台静默接受超大 artifact 无任何告警
+- **影响面**: 🔴跨维度 — 影响 DoS 防御面、存储成本、安全合规
+- **综合**: 平台 artifact 上传未实施大小配额检查，1100MB 全零文件被接受上传，存在 DoS 风险
+- **是否有规避手段**: 否
 
 **建议**:
-- 平台应实现制品大小配额检查，在上传前或上传中拒绝超限制品
-- 规格文档 `upload-download-artifacts.md` 应明确说明制品大小限制值
-- 测试使用非零数据（非全零文件）以避免 zip 压缩掩盖实际大小
-- 相关用例: SEC-ARTF-01-001
+- 平台实施 artifact 大小配额（建议单 artifact ≤ 500MB，单 workflow ≤ 2GB）
+- 测试 YAML 使用非全零文件（如 /dev/urandom）避免压缩率干扰测试
+- 在 API 层和 runner 层同时实施大小校验（双层防御）

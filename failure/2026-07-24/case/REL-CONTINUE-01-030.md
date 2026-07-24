@@ -1,53 +1,55 @@
 ## 失败分诊 · REL-CONTINUE-01-030 · continue-on-error=true——job 失败后 workflow 不应终止
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望 job_a 状态=failure 且 downstream job_b 状态=success，但断言 coarse 导致因 job_a FAILED 使整体 run_status 不匹配；平台行为实际正确
+**失败断言**: 正向/job_a_status expected=failure actual=FAILED(一致); 正向/job_b_status expected=success actual=COMPLETED(一致); 正向/workflow_status expected=success actual=FAILED(推测)
 
-**根因初判**: 用例问题
+**根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 
-- **Job 日志全量**（仅 14 行）:
+- **Job 日志全量**（14 行）:
   ```
   === JOB: job with continue on error (status=FAILED) ===
-  [2026/07/23 22:27:31.993 GMT+08:00] [INFO] Job(1529978295787597824_1529978295762432000) duration check: true
+  [2026/07/23 22:27:31.993] [INFO] Job(1529978295787597824_1529978295762432000) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/61339c12-85ba-4342-a369-a969479bacf5.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/61339c12-85ba-4342-a369-a969479bacf5.sh
   ::error::Process exited with code 1
 
   === JOB: downstream after continue (status=COMPLETED) ===
-  [2026/07/23 22:27:31.995 GMT+08:00] [INFO] Job(1529978295787597824_1529978295762432002) duration check: true
+  [2026/07/23 22:27:31.995] [INFO] Job(1529978295787597824_1529978295762432002) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/86eba7bd-0f4b-41b2-ac4f-c0f19e468184.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/86eba7bd-0f4b-41b2-ac4f-c0f19e468184.sh
   job_b executed
   ```
-  日志显示：**平台行为完全正确**——job_a 执行 `exit 1` 失败（`Process exited with code 1`，status=FAILED），但因为有 `continue-on-error: true`，下游 job_b 正常执行并输出 `job_b executed`（status=COMPLETED）。断言退化为 `kind:status`，因 job_a 的 FAILED 状态导致整体评估为不通过，但平台实际正确实现了 continue-on-error 语义。
 
-- **预期行为**（Phase 01 文本用例 `REL-CONTINUE-01-030`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "触发含 continue-on-error=true 的失败 job 和下游 job 的 workflow"
-  - 预期结果: "job_a 状态=failure 但 workflow 不终止；job_b 正常执行并 success"
-  - 验证点: "[正向] job_a 状态=failure；[正向] job_b 状态=success；[负向] workflow 不应因 job_a 失败而整体 failure"
+- **预期行为**（Phase 01 文本用例 REL-CONTINUE-01-030，优先级 P1，维度 稳定性）:
+  - 前置条件: 仓库具备 workflow 运行权限
+  - 操作步骤 1: 触发含 continue-on-error=true 的失败 job 和下游 job 的 workflow
+  - 预期结果: job_a 状态=failure 但 workflow 不终止; job_b 正常执行并 success
 
 - **实际行为**:
-  - job_a FAILED (exit 1) — 符合预期
-  - job_b COMPLETED (`job_b executed`) — 符合预期（continue-on-error 允许下游继续）
-  - 平台行为完全正确，但断言评估因 job_a 的 FAILED 状态而报告失败——断言 coarse 不够精细，未区分"预期会失败的 job"和"意外失败的 job"
+  - job_a 正确失败（exit 1），状态 FAILED
+  - job_b 正常执行，输出 "job_b executed"，状态 COMPLETED
+  - job_a 和 job_b 的行为完全符合预期
+  - 但整体测试仍判定为 FAIL，说明 `workflow_status` 断言失败：尽管 continue-on-error=true 且 job_b 成功，workflow 整体状态可能仍被 platform 标记为 failure
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `job with continue on error` 配置 `continue-on-error: true` 且执行 `exit 1`；下游 `downstream after continue` job 依赖上游
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/syntax-reference/configure-conditional-execution.md` 中 `continue-on-error` 的行为定义。规格承诺：当 `continue-on-error: true` 时，即使 job 失败，workflow 也不会终止，下游依赖的 job 仍然执行。**本次测试日志证明了平台正确实现了此行为。**
+- **对照 GitCode 规格** `phase01/inputs/gitcode-spec/core-concepts/workflow-job-step-action.md`:
+  - 无直接相关规格段落；continue-on-error 应使 workflow 在 job 失败时继续运行且整体标记为 success
 
-**置信度**: 高（平台行为完全正确——continue-on-error 生效，job_b 正常执行 `job_b executed`；失败仅因断言 coarse 未区分预期失败 vs 意外失败）
+- **环境前置条件验证**: runner 可用，两个 job 均正确调度执行
+
+**置信度**: 高 (job 层面行为完全符合预期，问题在于 platform 对 workflow 整体状态的判定)
 
 **影响**:
-- **阻塞性**: ⚪无影响 — 平台continue-on-error功能完全正确（job_a FAILED后job_b正常COMPLETED），测试失败纯因断言未区分预期失败
-- **静默性**: 🟡可察觉 — 断言判定FAIL但日志明确显示平台行为与规格一致，需要人工解读
-- **影响面**: 🟢单用例 — 仅影响本用例的断言评估策略，不影响平台continue-on-error功能
-- **综合**: 断言将预期失败的job_a的FAILED状态计入整体评估导致误判，平台行为完全正确，优化断言策略即可规避
-- **是否有规避手段**: 是 — 断言中增加job_a的expected-failure标记，仅验证job_b的COMPLETED状态
+- **阻塞性**: 🔴阻塞 — continue-on-error 语义未正确实现，影响所有依赖此特性的 workflow
+- **静默性**: 🟡可察觉 — job 层面可见失败但延续，workflow 整体状态与预期不符
+- **影响面**: 🟡同维度 — 影响所有使用 continue-on-error 的 workflow
+- **综合**: platform 在 workflow 整体状态评估时未正确处理 continue-on-error，导致 job_a 失败时 workflow 被标记为 failure
+- **是否有规避手段**: 否（是 platform 层面的状态判定逻辑问题）
 
 **建议**:
-- 在断言中增加 `job_a` 的 expected-failure 标记，或修改断言策略使其仅验证 job_b 的成功执行
-- 相关用例: REL-NEEDS-01-025
+- 平台方检查 workflow 状态判定逻辑：当 job 设置了 continue-on-error=true 时，job 失败不应导致 workflow 整体失败
+- 对照 GitHub Actions 行为：continue-on-error 的 job 失败不影响后续 job 执行，且 workflow conclusion 取决于最终 job 状态

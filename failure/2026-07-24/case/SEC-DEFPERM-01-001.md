@@ -1,13 +1,16 @@
 ## 失败分诊 · SEC-DEFPERM-01-001 · ATOMGIT_TOKEN 默认权限范围与 job 级覆盖必须正确生效
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (negative, run_logs) — must_not_contain "write_successful"，实际该关键词未出现（PASS）；assertions[1] (positive, run_logs) — 期望日志含 "403_or_permission_denied"，实际返回 401 UNAUTHORIZED，"token not found"
+**失败断言**: 
+- negative, run_logs, must_not_contain "write_successful" — 无法验证，403/401 未按预期生效
+- positive, run_logs, equals "403_or_permission_denied" — 实际返回 401 UNAUTHORIZED，不匹配
 
 **根因初判**: 环境问题
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 6 行）:
+- **Job 日志全量** (6 行):
   ```
   === JOB: Test permission inheritance (status=FAILED) ===
   [2026/07/23 22:06:10.148 GMT+08:00] [INFO] Job(1529972919336046592_1529972919310880775) duration check: true
@@ -16,49 +19,35 @@
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6524ea65-d3b3-42b6-82f2-1c4a1c56c494.sh
   000{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found","trace_id":"fc37cf8321aebc57a99740e7bfd2ddd9"}401000000::error::Process exited with code 6
   ```
-  日志显示 API 返回 401 UNAUTHORIZED，"token not found"。错误是 ATOMGIT_TOKEN 本身不可用（token not found），而非权限校验返回 403。这是一个环境/token 注入问题，不是权限控制逻辑问题。Job status 为 FAILED（exit code 6），而断言期望的是权限错误关键词 "403_or_permission_denied"。
 
-- **预期行为**（Phase 01 文本用例 `SEC-DEFPERM-01-001`，优先级 P0，维度 security）:
-  - 操作步骤 1: "提交一个 workflow，顶层声明 repository: read，job 级覆盖为 repository: write"
-  - 操作步骤 2: "触发 workflow 并验证实际权限"
-  - 预期结果: "顶层声明被各 job 继承；job 级声明覆盖顶层"
-  - 验证点: "[正向] 顶层声明被各 job 继承；job 级声明覆盖顶层"
+- **预期行为** (Phase 01 文本用例 SEC-DEFPERM-01-001, 优先级 P0, 维度 security):
+  - 前置条件: 仓库未声明或声明了部分 permissions
+  - 操作步骤 1: 提交一个 workflow，顶层声明 `repository: read`，job 级覆盖为 `repository: write`
+  - 操作步骤 2: 触发 workflow 并验证实际权限
+  - 预期结果: 顶层声明被各 job 继承；job 级声明覆盖顶层
 
 - **实际行为**:
-  - ATOMGIT_TOKEN 不可用（"token not found"），导致 curl 请求返回 401 而非权限拒绝 403
-  - 无法判断 permissions 继承/覆盖逻辑是否工作——token 本身没有被正确注入
+  - API 返回 401 UNAUTHORIZED + `"token not found"`
+  - `${{ atomgit.token }}` 展开为空字符串，Authorization header 为 `token ` (空值)
+  - 权限继承与覆盖逻辑因此无法被验证
+  - job 状态为 FAILED（exit code 6）
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `inherit-test` job 的 `Attempt write` 步骤:
-    ```yaml
-    - name: Attempt write
-      run: |
-        curl -s -o /dev/null -w "%{http_code}" -X POST \
-          "https://api.gitcode.com/api/v5/repos/${{ atomgit.repository }}/issues" \
-          -H "Authorization: token ${{ atomgit.token }}" \
-          -d '{"title": "test"}'
-    ```
-  - 这对应 GitCode 规格 `security-permissions/token-permissions.md` 第 49-65 行的最小权限原则实践，以及第 97-103 行的 permissions 与 ATOMGIT_TOKEN 关系表:
-    ```
-    | permissions 配置 | ATOMGIT_TOKEN 实际权限 |
-    |------------------|----------------------|
-    | 未声明 permissions | 使用仓库设置中定义的权限 |
-    | 顶层声明 permissions | 所有 job 继承顶层权限，除非 job 级覆盖 |
-    | permissions: {}（空） | ATOMGIT_TOKEN 仅拥有最小默认权限（repository:read） |
-    ```
-    规格第 101 行明确承诺"顶层声明 permissions：所有 job 继承顶层权限，除非 job 级覆盖"。测试 YAML 在顶层声明了 `permissions: {repository: read}`，验证 API 调用被拒绝（因无 issue:write 权限）是符合规格期望的——但当前日志中 ATOMGIT_TOKEN 根本不可用，跳过了权限验证逻辑。
-  - 同时也对应规格第 26-36 行的 permissions 字段详解示例，文档确凿承诺了 permissions 字段的权限控制能力。
+- **对照 GitCode 规格** `security-permissions/token-permissions.md`:
+  - 第 13 行: "每次流水线运行时，AtomGit Action 自动生成 ATOMGIT_TOKEN"
+  - 第 99-103 行: "未声明 permissions | 使用仓库设置中定义的权限" / "顶层声明 permissions | 所有 job 继承顶层权限，除非 job 级覆盖"
+  - 第 103 行: "permissions: {}（空）| ATOMGIT_TOKEN 仅拥有最小默认权限（repository:read）"
 
-**置信度**: 中（token not found 是环境问题已被日志确凿证实，但此环境下 permissions 继承逻辑是否正确无法判断）
+- **环境前置条件验证**: YAML `setup.repo_fixture: default`，无 `secrets` 字段，无 config_probe。`atomgit.token` 是平台自动注入变量，其值为空表明测试环境未正确初始化 runner token 上下文。
+
+**置信度**: 高 (401 + "token not found" 明确指示 token 注入缺失)
 
 **影响**:
-- **阻塞性**: 🟡非阻塞 — workflow 能完成（job FAILED 但有明确退出码 6），但 permissions 继承逻辑未被验证到
-- **静默性**: 🟡可察觉 — 日志明确显示 `{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found"}`，token 不可用的原因可观测但非自解释
-- **影响面**: 🟢单用例 — 同时影响 SEC-DEFPERM-01-001 和 SEC-PERM-01-003（同 token 注入问题），不涉及其他 security 维度
-- **综合**: ATOMGIT_TOKEN 在 workflow_dispatch 事件下注入失败，permissions 继承逻辑未被测试到，属环境问题而非权限控制缺陷
-- **是否有规避手段**: 是 — 修复 token 注入或在 push 事件下触发测试即可验证 permissions 逻辑
+- **阻塞性**: 🔴阻塞 — 权限验证用例完全无法执行
+- **静默性**: 🟢明确报错 — 平台返回明确的 401 和 "token not found"
+- **影响面**: 🟡同维度 — SEC-PERM-01-003 也因相同原因失败
+- **综合**: 测试环境未注入有效的 ATOMGIT_TOKEN，导致所有权限验证类用例无法验证
+- **是否有规避手段**: 否
 
 **建议**:
-- 修复 ATOMGIT_TOKEN 在 workflow_dispatch 事件下的注入问题
-- 修复后重跑此用例以验证 permissions 继承逻辑
-- 相关用例: SEC-PERM-01-003, SEC-PERM-01-004
+- 在测试 YAML 中添加 config_probe 步骤验证 `ATOMGIT_TOKEN` 是否被正确注入
+- 检查 workflow_dispatch 触发方式下 ATOMGIT_TOKEN 的注入策略是否与 push/PR 事件一致

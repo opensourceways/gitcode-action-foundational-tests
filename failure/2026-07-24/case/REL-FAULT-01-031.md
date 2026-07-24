@@ -1,16 +1,17 @@
 ## 失败分诊 · REL-FAULT-01-031 · 故障注入——job 执行中 runner 进程被 SIGKILL 后应记录失败并保留已执行日志
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望 job 状态=failure（被 SIGKILL 强制终止），实际 job status=COMPLETED，所有 step 正常执行完成
+**失败断言**: 正向/job_status expected=failure actual=COMPLETED; 正向/run_logs expected=contains step_one_marker actual=contains(满足); 负向/run_logs expected=NOT contains step_four_marker actual=contains(违反)
 
-**根因初判**: 平台缺陷
+**根因初判**: 环境/Harness
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 25 行）:
+- **Job 日志全量**（25 行）:
   ```
   === JOB: fault injection SIGKILL (status=COMPLETED) ===
-  [2026/07/23 22:28:25.487 GMT+08:00] [INFO] Job(1529978520157822976_1529978520124268551) duration check: true
+  [2026/07/23 22:28:25.487] [INFO] Job(1529978520157822976_1529978520124268551) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/19155db2-7af6-4510-b96f-d97cab632ffa.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/19155db2-7af6-4510-b96f-d97cab632ffa.sh
@@ -35,31 +36,32 @@
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1d286a0d-7419-4fbc-b3fc-233882a2c14e.sh
   step_five_marker
   ```
-  日志显示：job 状态 **COMPLETED**，step_1 到 step_5 全部正常输出 marker（`step_one_marker`、`step_two_marker`、`step_four_marker`、`step_five_marker`）。预期在第 3 个 step 时注入 SIGKILL——但 step 3 的脚本无输出（可能是 sleep 或无操作步骤），随后 step 4 和 5 继续正常执行。**SIGKILL 从未施加**，故障注入机制未生效。
 
-- **预期行为**（Phase 01 文本用例 `REL-FAULT-01-031`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "触发 workflow，在 job 执行到第 3 个 step 时对 runner 进程注入 SIGKILL"
-  - 预期结果: "job 状态=failure；step 1-2 的日志完整可查看；step 3 日志不完整或标记为中断"
-  - 验证点: "[正向] job 状态=failure；[正向] step 1-2 日志完整；[负向] 不应状态=in_progress 挂起超过 5 分钟"
+- **预期行为**（Phase 01 文本用例 REL-FAULT-01-031，优先级 P1，维度 稳定性）:
+  - 前置条件: 具备故障注入能力; fixture 仓库可接受破坏性测试
+  - 操作步骤 1: 触发 workflow，在 job 执行到第 3 个 step 时对 runner 进程注入 SIGKILL
+  - 预期结果: job 状态=failure; step 1-2 的日志完整可查看; step 3 日志不完整或标记为中断
 
 - **实际行为**:
-  - 全部 5 个 step 完整执行完毕，step 1/2/4/5 均有日志输出
-  - job 状态 COMPLETED（而非预期的 FAILED）
-  - **故障注入未生效**——SIGKILL 从未被发送到 runner 进程
+  - job 以 COMPLETED 状态完整执行了所有 5 个 step
+  - step_one_marker, step_two_marker, step_four_marker, step_five_marker 全部出现
+  - step 3 (sleep 30) 也正常执行完毕
+  - 故障注入（SIGKILL）完全没有生效，runner 进程未被杀死
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `fault injection SIGKILL` job 设计了 5 个 step，预期在第 3 个 step 执行时由外部注入 SIGKILL
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/core-concepts/runner-and-environment.md` 中 runner 进程管理和故障恢复的行为。规格描述 runner 进程被异常终止时 job 应标记为失败。但本次测试中故障注入未施加——所有 step 正常完成，说明故障注入机制（harness 层或平台 API 层）未触发。
+- **对照 GitCode 规格**:
+  - 无直接相关规格段落；此用例依赖 harness 的故障注入能力
 
-**置信度**: 高（日志确凿——step 1/2/4/5 全部输出 marker 且 job COMPLETED，SIGKILL 故障注入未生效）
+- **环境前置条件验证**: harness 声称具备故障注入能力（at: mid_job, action: kill_runner, target_step: 3），但实际未生效
+
+**置信度**: 高 (所有 step 均正常执行，SIGKILL 明显未注入)
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — 平台无法在job运行时施加SIGKILL故障，故障恢复路径完全无法被验证，存在运行时可靠性盲区
-- **静默性**: 🔴静默错误 — 所有step正常完成（COMPLETED），无任何错误、无任何日志表明故障注入未生效，静默跳过了关键安全验证
-- **影响面**: 🟡同维度 — 影响全部故障注入类用例（REL-FAULT-01-031/032/033），故障注入机制整体失效
-- **综合**: SIGKILL故障注入机制整体未生效，所有step在无故障条件下正常完成，job容错和故障恢复能力完全未被测试，需平台修复故障注入基础设施
-- **是否有规避手段**: 否 — 故障注入是平台级能力，单用例层面无法注入SIGKILL到runner进程
+- **阻塞性**: 🔴阻塞 — 故障注入能力完全缺失，无法验证 SIGKILL 场景
+- **静默性**: 🔴静默错误 — 无任何故障注入失败的警告或错误日志
+- **影响面**: 🔴跨维度 — 影响所有故障注入测试（REL-FAULT-01-032, REL-FAULT-01-033）
+- **综合**: harness 声明的故障注入能力未实际部署或未正确触发
+- **是否有规避手段**: 否（harness 需要实现实际的故障注入机制）
 
 **建议**:
-- 检查故障注入 harness 的实现——确认 SIGKILL 发送时机（是否在正确的时间点发送到正确的 PID）和发送权限
-- 相关用例: REL-FAULT-01-032, REL-FAULT-01-033
+- Phase 02 排查故障注入模块是否已部署，确认 kill_runner action 的实现逻辑
+- 增加故障注入执行确认日志，确保每次注入都有明确的成功/失败记录

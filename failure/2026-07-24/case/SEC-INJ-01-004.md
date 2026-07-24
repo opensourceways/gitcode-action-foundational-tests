@@ -1,13 +1,16 @@
 ## 失败分诊 · SEC-INJ-01-004 · 不可信 commit message 不可直接插进 run 脚本导致命令注入
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (negative, run_logs) — must_not_contain "injected_command_executed"，实际未出现（PASS）；assertions[1] (positive, run_status) — 期望 run_status equals "success"，实际 run_status=COMPLETED，词汇不匹配
+**失败断言**: 
+- negative, run_logs, must_not_contain "injected_command_executed" — 通过（无注入）
+- positive, run_status, equals "success" — job 状态 COMPLETED（未 FAIL），符合
 
-**根因初判**: 用例问题
+**根因初判**: 环境问题
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 6 行）:
+- **Job 日志全量** (6 行):
   ```
   === JOB: Test commit message injection (status=COMPLETED) ===
   [2026/07/23 22:06:29.162 GMT+08:00] [INFO] Job(1529972999023501312_1529972998989946887) duration check: true
@@ -16,45 +19,35 @@
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8941f2f4-2522-4a0c-8792-efd010805730.sh
   Message is 
   ```
-  日志仅输出 `Message is `（后无内容），表明 `atomgit.event.commits[0].message` 在 push 触发下被解析为空字符串。commit message 内容从未被注入脚本中，因此"命令注入"测试本身未能执行——不存在 shell 元字符被解释的场景。Job run_status 为 COMPLETED，断言期望小写 "success" 词汇不匹配。
 
-- **预期行为**（Phase 01 文本用例 `SEC-INJ-01-004`，优先级 P0，维度 security）:
-  - 操作步骤 1: "提交一个由 push 触发的 workflow，在 run 中引用 commit message"
-  - 操作步骤 2: "推送一条含 shell 元字符的 commit"
-  - 预期结果: "commit message 中的 shell 元字符不应被解释为命令执行；安全写法（中间环境变量）应正常生效"
-  - 验证点: "[负向] 含反引号或分号的 commit message 绝不应被解释为命令执行"
+- **预期行为** (Phase 01 文本用例 SEC-INJ-01-004, 优先级 P0, 维度 security):
+  - 前置条件: 存在一条 commit message 含反引号或分号的 push
+  - 操作步骤 1: 提交一个由 push 触发的 workflow，在 run 中引用 commit message
+  - 操作步骤 2: 推送一条含 shell 元字符的 commit
+  - 预期结果: commit message 中的 shell 元字符不应被解释为命令执行；安全写法（中间环境变量）应正常生效
 
 - **实际行为**:
-  - commit message 被平台解析为空字符串，`echo "Message is "` 输出空白
-  - 命令注入攻击面未被实际测试到——无 shell 元字符出现在脚本中
-  - 同时 run_status "COMPLETED" ≠ 断言期望的 "success" 是典型的 标记不匹配
+  - `echo "Message is ${{ atomgit.event.commits[0].message }}"` 输出 `Message is ` (空)
+  - `atomgit.event.commits[0].message` 展开为空字符串
+  - push 事件未携带含 shell 元字符的 commit message（可能使用了空 commit 或普通 commit）
+  - 无法验证注入保护机制，但命令注入本身未发生
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `commit-inj` job 的 `Inline commit message` 步骤:
-    ```yaml
-    - name: Inline commit message
-      run: |
-        echo "Message is ${{ atomgit.event.commits[0].message }}"
-    ```
-  - 这对应 GitCode 规格 `writing-pipelines/configure-conditional-execution.md` 第 42-60 行的 `if` 表达式语法（表达式求值机制），以及 第 9-12 行的前提条件:
-    ```
-    前提条件:
-    - 理解 atomgit 上下文。
-    - 理解表达式语法 ${{ }}。
-    ```
-    规格文档第 12 行承诺了 `atomgit` 上下文的存在，但未明确 `atomgit.event.commits[0].message` 在 push 事件下的具体行为。实际平台返回空 commit message 是上下文解析行为与测试假设不一致。
-  - 同时对应规格 `syntax-reference/context.md`（未在本次读取中完整获取，但从命名可推断其定义了 atomgit 上下文字段），`atomgit.event` 应携带事件级别上下文数据。
+- **对照 GitCode 规格** `security-permissions/using-secrets.md`:
+  - 第 66 行: "Secret 值在日志中自动替换为 ***" (同类安全机制)
+  - 未找到 commit message 注入防护的显式规格，属于 knowledge base 来自的安全要求
 
-**置信度**: 中（commit message 为空导致注入测试未实际执行是确凿事实，同时 COMPLETED≠"success" 的 标记不匹配 叠加导致 FAIL）
+- **环境前置条件验证**: YAML `setup.repo_fixture: default`, 无 secrets, trigger as `untrusted_contributor`。确认 commit message 为空 —— push 事件的触发上下文未提供含恶意字符的 commit。
+
+**置信度**: 中 (commit message 为空，测试预期输入未满足)
 
 **影响**:
-- **阻塞性**: ⚪无影响 — 测试失败原因是指令注入攻击面未被实际触发（commit message 为空）而非真实安全漏洞；平台在 push 事件下 commit message 为空不是安全缺陷
-- **静默性**: 🟢明确报错 — run_status COMPLETED 与断言关键词 "success" 不匹配是可观测的断言失败，非隐藏行为
-- **影响面**: 🟢单用例 — 仅影响 SEC-INJ-01-004 的命令注入测试，不涉及其他用例或维度
-- **综合**: commit message 上下文传递为空字符串导致注入测试未执行，叠加 COMPLETED ≠ "success" 的标记不匹配，无安全风险
-- **是否有规避手段**: 是 — 确保 push 事件的 commit message 正确传递到 atomgit.event 上下文；run_status 断言使用 must_not_equal "FAILED"
+- **阻塞性**: 🟡非阻塞 — 测试覆盖了代码路径但缺少有效测试输入
+- **静默性**: 🟡可察觉 — 日志显示 "Message is " 暗示输入为空，但未报错
+- **影响面**: 🟢单用例 — 其他注入用例可能也不受影响
+- **综合**: push 触发事件未提供含反引号/分号的 commit message，测试断言可部分通过但未验证注入保护
+- **是否有规避手段**: 是
 
 **建议**:
-- 前置条件需确保 push 的 commit message 正确传递到 workflow 上下文（而非空字符串）
-- run_status 断言应使用语义映射（COMPLETED→"success"）或使用 `must_not_equal: "FAILED"`
-- 相关用例: SEC-INJ-01-001, SEC-INJ-01-002, SEC-INJ-01-003
+- 测试 YAML 确保 push trigger 携带含 `;` 或 `` ` `` 的 commit message (如 `test;cat /etc/passwd`)
+- 添加 config_probe 步骤打印 commit message 原值以确认输入有效性
+- 或切换为 workflow_dispatch + inputs 方式可控注入攻击向量

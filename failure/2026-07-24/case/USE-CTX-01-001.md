@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (positive, run_logs) — 期望日志含 `"ref=refs/heads/"`，实际日志仅含 `ref=main`（短格式，不含 `refs/heads/` 前缀）
 
 **根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 

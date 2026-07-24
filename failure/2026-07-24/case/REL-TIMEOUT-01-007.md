@@ -1,45 +1,47 @@
 ## 失败分诊 · REL-TIMEOUT-01-007 · job timeout 边界值——359 分钟运行应在 360 分钟边界前完成
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望 job 在 359 分钟前 success，实际 job status=CANCELED（369s 后被 harness 强制取消，远低于 359min）；assertions[1] (positive, run_logs) — 期望日志含 sleep 21540 完成标记，实际不存在
+**失败断言**: 正向/job_status expected=success actual=CANCELED; 非功能/job_duration_minutes ≤359 actual=harness取消
 
 **根因初判**: 环境/Harness
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 5 行）:
+- **Job 日志全量**（5 行）:
   ```
   === JOB: timeout test job (status=CANCELED) ===
-  [2026/07/23 22:38:47.849 GMT+08:00] [INFO] Job(1529981130642173952_1529981130621202439) duration check: true
+  [2026/07/23 22:38:47.849] [INFO] Job(1529981130642173952_1529981130621202439) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/76228aa7-941d-4842-8876-04918777d9d6.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/76228aa7-941d-4842-8876-04918777d9d6.sh
   ```
-  日志显示：job 状态 **CANCELED**，**无任何 shell 业务输出**（无 `sleep` 开始/结束标记，无退出错误）。脚本被执行但无输出——job 被外部取消。期望 `timeout-minutes=360` 的 job 执行 `sleep 21540`（约 359 分钟），但实际在仅约 369s 后就被取消——这是**测试 harness 的 300s 全局超时**，而非平台的 `timeout-minutes` 机制。Harness 超时先于 `sleep 21540` 完成前触发，强制取消了 job。
 
-- **预期行为**（Phase 01 文本用例 `REL-TIMEOUT-01-007`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "触发 timeout-minutes=360 的 workflow，job 执行 sleep 21540"
-  - 预期结果: "job 在 359 分钟前成功完成；状态为 success"
-  - 验证点: "[正向] job 状态=success；[负向] 不应在 358 分钟前被强制终止"
+- **预期行为**（Phase 01 文本用例 REL-TIMEOUT-01-007，优先级 P1，维度 稳定性）:
+  - 前置条件: 仓库具备 workflow 运行权限
+  - 操作步骤 1: 触发 timeout-minutes=360 的 workflow，job 执行 sleep 21540
+  - 预期结果: job 在 359 分钟前成功完成; 状态为 success
 
 - **实际行为**:
-  - Job 在约 369s（而非 359min）后被测试 harness 的超时机制取消
-  - 平台 timeout-minutes=360 的边界行为未被测试到——harness 层超时（~300s）远低于平台超时
-  - sleep 21540 从未被执行这么久，job 状态 CANCELED 而非预期的 COMPLETED
+  - job 被标记为 CANCELED，无任何 step 执行日志
+  - timeout-minutes=360, sleep 21540（359 分钟）是需要运行数小时的超长任务
+  - harness 在 job 开始执行后将其取消（而非等待数小时让 sleep 自然完成）
+  - 此行为属于 harness 的超时保护机制：对于动辄数小时的 timeout 测试，harness 主动取消了 job
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `timeout test job` 配置 `timeout-minutes: 360`，执行 `sleep 21540`
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/syntax-reference/workflow-file-location-structure.md` 中 `jobs.<job_id>.timeout-minutes` 参数的定义。规格描述：`timeout-minutes` 默认 360 分钟，在边界值（如 359 分钟）时 job 应正常完成。但测试 harness 的 300s 超时机制先于平台 timeout 触发——**harness 层不应覆盖平台超时设置**。
+- **对照 GitCode 规格** `phase01/inputs/gitcode-spec/core-concepts/workflow-job-step-action.md`:
+  - 无直接相关规格段落；timeout-minutes 为 job 级别超时，21540 秒 sleep 理论上需运行约 6 小时
 
-**置信度**: 高（harness 300s 超时在 ~369s 时触发取消——`sleep 21540` 对应的 359min 远未到达；日志 0 字节有效输出证明 job 被外部取消而非平台 timeout 机制触发）
+- **环境前置条件验证**: job 被调度但被 harness 提前取消
+
+**置信度**: 高 (job 状态为 CANCELED 且无执行内容，是 harness 主动取消的结果)
 
 **影响**:
-- **阻塞性**: 🟡非阻塞 — 平台timeout-minutes=360功能未被测试（sleep 21540从未执行完成），但平台job启动和harness取消机制均正常
-- **静默性**: 🟡可察觉 — job状态CANCELED可察觉被取消，但0字节有效日志无法判断是平台timeout还是harness取消
-- **影响面**: 🟢单用例 — 仅影响超长sleep的timeout边界测试用例（REL-TIMEOUT-01-007/008/010），不影响短时用例
-- **综合**: harness 300s全局超时先于平台360min timeout触发导致platform timeout边界行为未被测试，调整harness超时配置即可规避
-- **是否有规避手段**: 是 — 将超长sleep用例的harness超时上限设置为大于平台timeout-minutes的值（如370min）
+- **阻塞性**: 🟡非阻塞 — harness 超时保护合理，但阻塞了真实 timeout 场景测试
+- **静默性**: 🟡可察觉 — CANCELED 状态明确
+- **影响面**: 🟡同维度 — 影响所有长时间 timeout 测试（REL-TIMEOUT-01-008/009/010）
+- **综合**: harness 有整体运行超时保护，对单 job 需运行 6 小时的测试自动取消，无法验证 timeout-minutes 机制
+- **是否有规避手段**: 是（缩短测试的 sleep 时间，或用加速时钟模拟长时间运行）
 
 **建议**:
-- 针对超长 sleep 用例（如 sleep 21540=359min），测试 harness 的超时上限应设置为大于平台 timeout-minutes 的值（如 370min），或 disable harness 超时
-- 相关用例: REL-TIMEOUT-01-008, REL-TIMEOUT-01-009, REL-TIMEOUT-01-010
+- 对 timeout 测试使用加速时间或 mock：将 sleep 时间缩短但调整 timeout-minutes 保持相对比例
+- 或为 timeout 测试用例配置独立的不受全局超时保护的 harness 通道

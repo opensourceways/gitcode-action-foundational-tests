@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (negative, run_status) — 期望 run_status 不为 COMPLETED（即 YAML 校验应拒绝 `type: boolean`），实际 COMPLETED；assertions[1] (nonfunctional, error_message) — 期望报错含"仅支持 string"及类型转换指引，实际无任何报错
 
 **根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 

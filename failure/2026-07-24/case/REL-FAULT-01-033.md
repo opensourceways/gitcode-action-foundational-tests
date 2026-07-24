@@ -1,16 +1,17 @@
 ## 失败分诊 · REL-FAULT-01-033 · 故障注入——runner 磁盘接近满时写入操作应失败并报磁盘满
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望 job 状态=failure（磁盘满拒绝写入），实际 job status=COMPLETED，2GB 写入成功
+**失败断言**: 正向/job_status expected=failure actual=COMPLETED; 正向/run_logs expected=contains "No space left on device" actual=日志无磁盘满错误
 
-**根因初判**: 平台缺陷
+**根因初判**: 环境/Harness
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 12 行）:
+- **Job 日志全量**（12 行）:
   ```
   === JOB: fault injection disk full (status=COMPLETED) ===
-  [2026/07/23 22:28:50.082 GMT+08:00] [INFO] Job(1529978623182512128_1529978623153152001) duration check: true
+  [2026/07/23 22:28:50.082] [INFO] Job(1529978623182512128_1529978623153152001) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8152ff3d-2caf-440c-bc72-b2d3acaf10f8.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8152ff3d-2caf-440c-bc72-b2d3acaf10f8.sh
@@ -22,32 +23,32 @@
   2048+0 records out
   2147483648 bytes (2.1 GB, 2.0 GiB) copied, 0.858863 s, 2.5 GB/s
   ```
-  日志显示：job 状态 **COMPLETED**，2GB 数据写入成功——`2147483648 bytes (2.1 GB, 2.0 GiB) copied, 2.5 GB/s`。**磁盘满故障注入从未施加**——在"预填充 49.5 GB"的前提下，2GB 写入应触发 `No space left on device`，但实际写入在 0.86s 内以 2.5 GB/s 的速度完成，磁盘空间充足。
 
-- **预期行为**（Phase 01 文本用例 `REL-FAULT-01-033`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "在 small runner 上预填充 49.5 GB 数据，job 再尝试写入 2 GB artifact"
-  - 预期结果: "写入失败，日志含 No space left on device 或平台等价错误；job 状态=failure"
-  - 验证点: "[正向] job 状态=failure；[正向] 日志含磁盘满错误"
+- **预期行为**（Phase 01 文本用例 REL-FAULT-01-033，优先级 P1，维度 稳定性）:
+  - 前置条件: 具备故障注入能力; fixture 仓库可接受破坏性测试
+  - 操作步骤 1: 在 small runner 上预填充 49.5 GB 数据，job 再尝试写入 2 GB artifact
+  - 预期结果: 写入失败，日志含 No space left on device 或平台等价错误; job 状态=failure
 
 - **实际行为**:
-  - 2GB 文件在 0.86s 内以 2.5 GB/s 速度正常写入
-  - 无任何磁盘满错误——`No space left on device` 未出现
-  - **故障注入未生效**——磁盘预填充未被执行，或 runner 磁盘空间远大于 50GB
+  - job 以 COMPLETED 状态完成
+  - prefill step 静默执行（无输出），write 2GB step 成功写入 2.1 GB（2.5 GB/s 写入速度）
+  - 磁盘空间充足，未触发任何磁盘满错误
+  - fault_injection 配置（at: pre_job, action: disk_full, pre_fill_gb: 49.5）未生效
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `fault injection disk full` job 设计为 step_1 预填充磁盘，step_2 尝试写入 2GB 数据
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/core-concepts/runner-and-environment.md` 中 runner 资源限制和错误处理的行为。规格描述当磁盘空间不足时 job 应报告 `No space left on device` 错误。但本次测试中预填充步骤被静默跳过或 runner 磁盘容量远超预期——2GB 写入在 0.86s 内成功，磁盘满故障注入机制未生效。
+- **对照 GitCode 规格**:
+  - 无直接相关规格段落；依赖 harness 的 disk_full 注入能力
 
-**置信度**: 高（日志确凿——2GB 写入成功 `2.1 GB copied, 2.5 GB/s`，磁盘满故障注入完全未生效）
+- **环境前置条件验证**: 磁盘空间充足（2 GB 写入成功），故障注入未触发
+
+**置信度**: 高 (2 GB 数据成功写入，磁盘满故障注入明显未生效)
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — 平台无法在runner上施加磁盘满故障，磁盘空间耗尽时的job错误处理能力完全未验证
-- **静默性**: 🔴静默错误 — 2GB写入在0.86s内以2.5GB/s速度成功完成，无任何磁盘满错误，无日志表明预填充未执行
-- **影响面**: 🟡同维度 — 影响全部故障注入类用例（REL-FAULT-01-031/032/033），磁盘满故障注入机制整体失效
-- **综合**: 磁盘预填充步骤静默跳过，2GB写入在充足空间中成功完成，job磁盘满错误处理能力完全未被测试，需平台修复故障注入基础设施
-- **是否有规避手段**: 否 — 磁盘满模拟需要平台/harness层在runner节点上预填充磁盘空间
+- **阻塞性**: 🔴阻塞 — disk_full 故障注入能力缺失
+- **静默性**: 🔴静默错误 — 无故障注入日志，无磁盘使用警告
+- **影响面**: 🔴跨维度 — 同 REL-FAULT-01-031，故障注入能力整体缺失
+- **综合**: harness disk_full 故障注入（pre-fill 49.5 GB）未执行，runner 磁盘充足，写入正常完成
+- **是否有规避手段**: 否（harness 需实现 pre-fill 磁盘空间的故障注入）
 
 **建议**:
-- 检查 step_1 预填充 49.5GB 的脚本是否实际执行（日志显示 step_1 无输出——可能为空步骤或失败后静默继续）
-- 确认 runner 磁盘容量和故障注入 harness 的预填充逻辑
-- 相关用例: REL-FAULT-01-031, REL-FAULT-01-032
+- Phase 02 确认磁盘满故障注入是否在 runner 上实施（如 fallocate/tmpfs 限制）
+- 三类故障注入（SIGKILL, network_partition, disk_full）均失败，可能是统一注入框架未部署

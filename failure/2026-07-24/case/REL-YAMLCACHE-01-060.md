@@ -1,49 +1,49 @@
 ## 失败分诊 · REL-YAMLCACHE-01-060 · Workflow YAML 缓存失效——修改后无旧代码残留
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_logs) — 期望日志含 `marker_v2`（修改后的输出），实际日志显示 `marker_v1`（旧版代码输出），说明平台使用了缓存的旧 YAML
+**失败断言**: 正向/run_logs expected=contains "marker_v2" actual=contains "marker_v1"; 负向/run_logs expected=NOT contains "marker_v1" actual=contains "marker_v1"
 
-**根因初判**: 平台缺陷
+**根因初判**: 环境/Harness
+**责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量**（仅 6 行）:
+- **Job 日志全量**（6 行）:
   ```
   === JOB: YAML cache invalidation test (status=COMPLETED) ===
-  [2026/07/23 22:39:31.470 GMT+08:00] [INFO] Job(1529981313643851776_1529981313627074567) duration check: true
+  [2026/07/23 22:39:31.470] [INFO] Job(1529981313643851776_1529981313627074567) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3b5dcf9a-66a1-4b08-b131-8a31993711ae.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3b5dcf9a-66a1-4b08-b131-8a31993711ae.sh
   marker_v1
   ```
-  日志显示：job 状态 **COMPLETED**，输出 **`marker_v1`**——这是修改前的旧版 workflow 代码的输出。测试流程为：第一轮执行记录 `marker_v1` → 修改 workflow 源码输出改为 `marker_v2` 并 push → 第二轮执行应输出 `marker_v2`。但实际第二轮执行输出仍为 `marker_v1`（旧版代码），证明**平台缓存了第一次的 workflow YAML 并未在修改后失效**——平台执行的是缓存的旧版 workflow。
 
-- **预期行为**（Phase 01 文本用例 `REL-YAMLCACHE-01-060`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "第一轮执行记录输出 marker_v1"
-  - 操作步骤 2: "修改 workflow 输出为 marker_v2 并 push"
-  - 操作步骤 3: "立即触发 workflow"
-  - 预期结果: "新触发运行日志中出现 marker_v2；不应出现 marker_v1 缓存残留"
-  - 验证点: "[正向] 日志打印 marker_v2；[负向] 不应打印 marker_v1"
+- **预期行为**（Phase 01 文本用例 REL-YAMLCACHE-01-060，优先级 P1，维度 稳定性）:
+  - 前置条件: 仓库具备 workflow 修改与触发权限
+  - 操作步骤 1: 第一轮执行记录输出 marker_v1
+  - 操作步骤 2: 修改 workflow 输出为 marker_v2 并 push
+  - 操作步骤 3: 立即触发 workflow
+  - 预期结果: 新触发运行日志中出现 marker_v2; 不应出现 marker_v1 缓存残留
 
 - **实际行为**:
-  - 第二轮执行输出 `marker_v1`（旧版代码）而非 `marker_v2`（新版代码）
-  - 平台未检测到 workflow YAML 文件的修改，继续使用缓存的旧版本执行
-  - YAML 缓存失效机制失效——修改后的 workflow 未被重新加载
+  - 日志输出 `marker_v1`，而非预期的 `marker_v2`
+  - 这说明第二轮（修改 workflow 为 marker_v2 → push → 触发）未执行，仅执行了第一轮（marker_v1）
+  - 也可能第二轮执行了但平台 YAML 缓存未失效，仍返回了旧版 v1 workflow
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 的 `YAML cache invalidation test` job 初始版本输出 `marker_v1`，修改后应输出 `marker_v2`
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/core-concepts/using-dependency-cache.md` 中缓存失效的一般原则。规格描述缓存应在内容变更时失效并重新加载。平台当前行为——继续使用旧版 YAML——说明缓存失效机制存在缺陷。**这是安全隐患**：如果 workflow YAML 被篡改后旧版仍被执行，可能导致安全策略失效。
+- **对照 GitCode 规格**:
+  - 无直接相关规格段落；此为测试 harness 编排问题，也可能是平台 YAML 缓存机制问题
 
-**置信度**: 高（日志确凿——第二轮执行输出 `marker_v1` 而非 `marker_v2`，平台缓存未失效；存在安全隐患）
+- **环境前置条件验证**: runner 可用，但二阶段编排（修改 → push → 触发）未执行
+
+**置信度**: 低 (可能是 harness 未执行第二轮，也可能是 platform YAML 缓存确实有问题——需进一步区分)
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — 修改后的workflow YAML未被平台重新加载，旧版代码继续执行，存在安全策略失效风险
-- **静默性**: 🔴静默错误 — 第二轮执行静默输出旧版 `marker_v1`，无任何错误或警告表明平台使用了缓存旧版本
-- **影响面**: 🟡同维度 — 影响所有涉及workflow YAML修改后重新触发的场景，任何YAML缓存失效缺陷都会导致同样的旧版本执行问题
-- **综合**: 平台缓存未在workflow YAML修改后失效，旧版代码被静默执行，存在安全策略绕过隐患，需平台修复缓存失效机制
-- **是否有规避手段**: 否 — YAML缓存失效是平台级缺陷，单用例层面无法强制平台刷新缓存
+- **阻塞性**: 🟡非阻塞 — 即使缓存机制有缺陷，不影响基本功能
+- **静默性**: 🔴静默错误 — 如果真的是缓存失效问题，用户修改 workflow 后可能运行旧版本
+- **影响面**: 🟡同维度 — 影响 workflow 更新流程
+- **综合**: 无法判定是 harness 未执行第二轮（环境问题）还是 platform YAML 缓存未失效（平台缺陷），需进一步排查
+- **是否有规避手段**: 是（harness 增加二阶段编排，或检查 platform 缓存刷新机制）
 
 **建议**:
-- 平台需确保在 workflow YAML 文件被修改后（通过 push），立即失效对应缓存并重新加载最新版本
-- 建议在 workflow dispatch 时校验 YAML 文件的 SHA/ETag，确保执行的是最新内容
-- 相关用例: REL-CACHE-01-046
+- 首先确认 harness 是否执行了第二步（修改 workflow YAML → commit → push → 触发新 run）
+- 如果是 platform 缓存问题，需排查 workflow YAML 缓存失效策略

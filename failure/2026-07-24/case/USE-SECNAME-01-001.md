@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (negative, run_status) — 期望 run_status 不为 COMPLETED（即平台应拒绝 `ATOMGIT_TOKEN` 作为 secret 名称），实际 COMPLETED；assertions[1] (nonfunctional, error_message) — 期望报错含 Secret 命名规则及允许字符说明，实际无任何报错
 
 **根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 

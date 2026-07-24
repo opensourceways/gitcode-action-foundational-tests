@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (negative, run_status) — 期望 run_status 不为 COMPLETED（即 YAML 校验或表达式求值应报错），实际 COMPLETED；assertions[1] (nonfunctional, error_message) — 期望报错信息同时出现 github 与 atomgit 字样，实际无任何报错
 
 **根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 

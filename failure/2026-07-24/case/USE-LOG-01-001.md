@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (positive, run_logs) — 期望日志含 `"step one prepare"`（YAML 中 step 的 name 字段），实际日志含 `"prepare done"`（step 内 shell echo 的输出内容），两者的字符串内容不匹配
 
 **根因初判**: 用例问题
+**责任人**: Phase 01
 
 **证据**:
 

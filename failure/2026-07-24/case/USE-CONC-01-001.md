@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (negative, run_status) — 期望 run_status 不为 COMPLETED，实际 COMPLETED；assertions[1] (nonfunctional, error_message) — 期望平台返回含"1-5"的校验错误，实际无任何校验错误
 
 **根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 

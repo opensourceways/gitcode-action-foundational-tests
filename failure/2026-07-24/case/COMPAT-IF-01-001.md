@@ -1,66 +1,77 @@
 ## 失败分诊 · COMPAT-IF-01-001 · step 失败后后续 step 默认跳过行为
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望 `failure`，实际 `FAILED`（平台 API 大小写与表达式函数语义不一致：platform=`FAILED` vs `${{ failure }}`=`failed`）
+**失败断言**:
+assertions[0] (positive, run_status) — 期望 `success`，实际 job status=FAILED
 
-**根因初判**: Engine Bug
+**根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 
 - **Job 日志全量**（共 6 行）:
 ```
-=== JOB: Test step failure skip (status=FAILED) ===
-[2026/07/23 22:21:08.975 GMT+08:00] [INFO] Job(1529976689461440512_1529976689440468999) duration check: true
-No shell specified, using platform default: default-bash
-::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
-::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
-::error::Process exited with code 1
+  === JOB: Test step failure skip (status=FAILED) ===
+  [2026/07/23 22:21:08.975 GMT+08:00] [INFO] Job(1529976689461440512_1529976689440468999) duration check: true
+  No shell specified, using platform default: default-bash
+  ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
+  ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
+  ::error::Process exited with code 1
 ```
 
-  **日志分析**: 故意失败 job → "failure"≠"FAILED", leak=PASS
-
-- **预期行为**（Phase 01 文本用例 `COMPAT-IF-01-001`，优先级 P1，维度 compatibility）:
-  - 操作步骤 1: "提交一个包含两个 step 的 workflow"
-  - 操作步骤 2: "第一个 step 显式返回非零退出码以模拟失败"
-  - 操作步骤 3: "第二个 step 输出一条消息"
-  - 操作步骤 4: "手动触发该 workflow"
-
-  预期结果:
-  - 第一个 step 失败后，第二个 step 被系统默认跳过
-  - 整个 job 标记为失败状态
-
-  验证点:
-  - [正向] 第二个 step 未执行，日志中无其输出
-  - [正向] job 整体状态为失败
-  - [负向] 第二个 step 不应在第一个 step 失败后仍运行
+- **预期行为**（Phase 01 文本用例 `COMPAT-IF-01-001`，优先级 P1，维度 兼容性）:
+  - 前置条件: - 仓库已启用 GitCode Action
+  - 操作步骤: 1. 提交一个包含两个 step 的 workflow
+    2. 第一个 step 显式返回非零退出码以模拟失败
+    3. 第二个 step 输出一条消息
+    4. 手动触发该 workflow
+  - 预期结果: - 第一个 step 失败后，第二个 step 被系统默认跳过
+    - 整个 job 标记为失败状态
+  - 验证点: - [正向] 第二个 step 未执行，日志中无其输出
+    - [正向] job 整体状态为失败
+    - [负向] 第二个 step 不应在第一个 step 失败后仍运行
 
 - **实际行为**:
-  - 故意失败 job → "failure"≠"FAILED", leak=PASS
+  - Job "Test step failure skip" status=FAILED
 
-
-- **测试 YAML 与规格精确对照**:
-  - 规格文件: `expressions.md` (路径: `phase01/inputs/gitcode-spec/syntax-reference/expressions.md`)
-  - 规格节选:
-```yaml
-# expressions.md 第36-39行: success/failed 状态函数
-# context.md 第202-207行: steps 上下文 outcome 与 conclusion
-steps:<step_id>.conclusion 的值: success / failure / cancelled
+- **对照 GitCode 规格** `phase01/inputs/gitcode-spec/core-concepts/workflow-job-step-action.md`:
+  - 规格摘要:
+    ```
+# 工作流、任务、步骤和 Action
+AtomGit Action 的执行模型遵循清晰的层级链：
 ```
-    该规格明确声明: expressions.md 36-39行 + context.md 202-207行
+Event → Workflow → Stages → Jobs → Runner → Steps → Scripts / Actions
+```
+当特定 **Event（事件）** 触发后，系统加载对应的 **Workflow（工作流）** 定义文件，按 **Stages（阶段）** 顺序串行推进，每个 Stage 内的 **Jobs（任务）** 默认并行执行，每个 Job 被分配到一台 **Runner（运行器）** 上，Job 内的 **Steps（步骤）** 串行依次运行。
+## Workflow（工作流）
+Workflow 是自动化流程的顶层定义，存储在仓库的 `.gitcode/workflows/` 目录下，以 YAML 格式描述。
+```yaml
+name: Build and Deploy
+on:
+push:
+branches: [main]
+stages:
+- build
+    ```
+  - 测试 YAML 工作流模式与此规格承诺一致
 
-  测试 YAML 的写法与规格示例一致，证明平台文档确凿承诺了该行为。
+- **环境前置条件验证**:
+  - setup.secrets: `[]`
+  - setup.repo_fixture: `default`
+  - setup.branch_protection: `default`
+  - 触发方式: workflow_dispatch (manual)
+  - Phase 01 前置条件: - 仓库已启用 GitCode Action
 
-**置信度**: 高（故意失败 job → "failure"≠"FAILED", leak=PASS）
+**置信度**: 高（job status=FAILED，平台执行层明确故障）
 
 **影响**:
-- **阻塞性**: ⚪无影响 — Engine Bug（大小写比较），平台 step 失败后默认跳过正常，仅断言 "failure"≠"FAILED"
-- **静默性**: 🟢明确报错 — 平台输出 "::error::Process exited with code 1"，错误清晰可诊断
-- **影响面**: 🟢单用例 — 表达式引擎大小写不一致，仅影响断言比较
-- **综合**: 平台 step 失败跳过行为正确，仅表达式返回值大小写与断言不匹配
-- **是否有规避手段**: 是 — 统一断言为 FAILED 或平台修复大小写语义
+- **阻塞性**: 🔴阻塞 — job FAILED 导致功能不可用
+- **静默性**: 🟡可察觉 — status=FAILED，但 shell 诊断输出有限
+- **影响面**: 🔴跨维度 — 平台核心功能故障
+- **综合**: 基于上述证据，COMPAT-IF-01-001 的失败根因初步判定为 **产品bug**（责任人: **平台方**），需在对应阶段修复后重新验证。
+- **是否有规避手段**: 否 — 平台功能缺陷
 
 **建议**:
-- 平台表达式引擎同时返回大写(`FAILED`/`CANCELED`)和文档中的小写(`success`/`failure`/`cancelled`)值
-- 建议统一为文档约定的小写语义值
-- 将 COMPAT-IF-01-001 标记为「平台修复后重新验跑」
+- 提交缺陷给平台工程团队，附日志 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMPAT-IF-01-001.log`
+- 修复后重新验跑 COMPAT-IF-01-001
 - 相关用例: COMPAT-IF-01-002

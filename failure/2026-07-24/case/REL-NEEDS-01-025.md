@@ -1,16 +1,17 @@
 ## 失败分诊 · REL-NEEDS-01-025 · needs 失败传播——上游 job 失败时下游 job 应被 skip
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (positive, run_status) — 期望下游 job_b 状态=skipped，实际 job_b status=IGNORED；assertions[1] (positive, run_logs) — 期望日志含 "skipped"，实际不存在
+**失败断言**: 正向/job_a_status expected=failure actual=FAILED(满足); 正向/job_b_status expected=skipped actual=IGNORED
 
-**根因初判**: 用例问题
+**根因初判**: 产品bug
+**责任人**: 平台方
 
 **证据**:
 
-- **Job 日志全量**（仅 9 行）:
+- **Job 日志全量**（9 行）:
   ```
   === JOB: upstream failing job (status=FAILED) ===
-  [2026/07/23 22:33:52.461 GMT+08:00] [INFO] Job(1529979891682521088_1529979891657355271) duration check: true
+  [2026/07/23 22:33:52.461] [INFO] Job(1529979891682521088_1529979891657355271) duration check: true
   No shell specified, using platform default: default-bash
   ::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c1c13e84-9d75-4ff3-b3ad-c9e88d6a8a55.sh
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c1c13e84-9d75-4ff3-b3ad-c9e88d6a8a55.sh
@@ -18,31 +19,32 @@
 
   === JOB: downstream dependent job (status=IGNORED) ===
   ```
-  日志显示：**平台行为完全正确**——upstream job 执行 `exit 1` 失败（`Process exited with code 1`），下游 job 因 `needs` 依赖被忽略（**status=IGNORED**）。但断言期望的状态值是 **`skipped`**，而非平台实际使用的 **`IGNORED`**。这是**词汇差异**——平台使用 `IGNORED` 标记因上游失败而被跳过不执行的下游 job，而断言期望 `skipped`。
 
-- **预期行为**（Phase 01 文本用例 `REL-NEEDS-01-025`，优先级 P1，维度 稳定性）:
-  - 操作步骤 1: "触发含 job_a(失败) 和 job_b(needs: job_a) 的 workflow"
-  - 预期结果: "job_a 状态=failure；job_b 状态=skipped；job_b 不应执行"
-  - 验证点: "[正向] job_a 状态=failure；[正向] job_b 状态=skipped；[负向] job_b 不应在 job_a 失败后仍执行"
+- **预期行为**（Phase 01 文本用例 REL-NEEDS-01-025，优先级 P1，维度 稳定性）:
+  - 前置条件: 仓库具备 workflow 运行权限
+  - 操作步骤 1: 触发含 job_a(失败) 和 job_b(needs: job_a) 的 workflow
+  - 预期结果: job_a 状态=failure; job_b 状态=skipped; job_b 不应执行
 
 - **实际行为**:
-  - job_a FAILED（exit 1）——符合预期
-  - job_b IGNORED（未执行）——符合预期（平台正确拒绝执行）
-  - 平台行为完全正确，但断言期望 `skipped` 而平台使用 `IGNORED`
+  - job_a 正确失败（exit 1），状态 FAILED，满足预期
+  - job_b 因 needs job_a 失败而未执行，状态为 IGNORED
+  - 但断言期望 job_b 状态为 "skipped"，实际平台返回的是 "IGNORED"
+  - 行为语义正确（needs 失败传播生效），但状态标签名不匹配
 
-- **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `downstream dependent job` 配置 `needs: upstream failing job`，上游 job 执行 `exit 1`
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/syntax-reference/configure-conditional-execution.md` 中 `needs` 的失败传播行为定义。规格描述：当 `needs` 依赖的上游 job 失败时，下游 job 会被跳过不执行。平台使用 `IGNORED` 状态标记此种情况——这与规范 `skipped` 的语义等价，但词汇不同。**平台功能正确，断言词汇不匹配**。
+- **对照 GitCode 规格** `phase01/inputs/gitcode-spec/core-concepts/workflow-job-step-action.md`:
+  - 无直接相关规格段落；GitHub Actions 中 needs 失败的下游 job 状态为 "skipped"，GitCode 平台使用 "IGNORED"
 
-**置信度**: 高（平台行为完全正确——上游 FAILED → 下游 IGNORED，符合 needs 失败传播语义；失败纯因状态词汇差异：`IGNORED` vs 预期的 `skipped`）
+- **环境前置条件验证**: runner 可用，needs 依赖传播机制正常
+
+**置信度**: 中 (行为正确但状态标签不匹配；可能是 GitCode 平台特有术语 "IGNORED" 替代了 GitHub Actions 的 "skipped")
 
 **影响**:
-- **阻塞性**: ⚪无影响 — 平台needs失败传播功能完全正确（上游FAILED后下游被IGNORED），测试失败纯因断言词汇不匹配
-- **静默性**: 🟡可察觉 — 断言期望 `skipped` 而实际为 `IGNORED`，差异可察觉但语义等价，需人工解读
-- **影响面**: 🟢单用例 — 仅影响使用 `skipped` 标记的断言，不影响平台needs失败传播功能
-- **综合**: 断言期望 `skipped` 而平台使用 `IGNORED` 标记被跳过job，平台needs语义完全正确，修正断言字符串即可完全规避
-- **是否有规避手段**: 是 — 将断言中的 `skipped` 改为 `IGNORED`
+- **阻塞性**: 🟡非阻塞 — needs 传播机制本身工作正常，只是状态标签不同
+- **静默性**: 🟡可察觉 — 断言因标签名不匹配而失败
+- **影响面**: 🟡同维度 — 影响所有检查 needs 传播状态的测试
+- **综合**: 平台使用 "IGNORED" 而不是 "skipped" 表示 needs 未满足的 job，Phase 01 文本用例使用了 GitHub Actions 术语
+- **是否有规避手段**: 是（断言中将 "skipped" 改为 "IGNORED" 以匹配平台术语）
 
 **建议**:
-- 修正断言中的状态标记——将 `skipped` 改为 `IGNORED`（匹配平台实际状态值体系）
-- 相关用例: REL-CONTINUE-01-030
+- Phase 01 更新文本用例预期的 job_b 状态为 "IGNORED"（若为平台规范术语）
+- 或平台方统一术语，将 "IGNORED" 改为 "skipped" 以兼容 GitHub Actions 生态

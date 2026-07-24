@@ -4,6 +4,7 @@
 **失败断言**: assertions[0] (positive, run_logs) — 期望日志含 `"env=staging"`，实际 Job FAILED 且无任何步骤输出（0 字节有效日志），run_logs 中不包含该字符串
 
 **根因初判**: 需人工判断
+**责任人**: 多方联合
 
 **证据**:
 
