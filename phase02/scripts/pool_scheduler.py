@@ -250,13 +250,18 @@ def run_pool(run_id, only=None, no_logs=False):
                             wr.log(f"  tag push 失败: {out_t[-150:]}")
                     if ev in ("pr", "pull_request", "pull_request_target",
                                "issue_comment", "pull_request_comment"):
-                        pr_branch = f"pr-{cid.lower().replace('_','-')}"
+                        pr_branch = f"pr-{cid.lower()[:20].replace('_','-')}-{int(time.time())%100000}"
                         wr._sh(f"git checkout -b {pr_branch}", cwd=ws.repo_dir)
                         rc_t, out_t = wr._sh(f"git push origin {pr_branch}", cwd=ws.repo_dir)
                         if rc_t == 0:
                             wr.log(f"  pr branch pushed: {pr_branch}")
-                            code, presp = wr.api_post(cfg, "/pulls",
-                                                      {"title": f"test: {cid}", "head": pr_branch, "base": cfg.branch})
+                            try:
+                                code, presp = wr.api_post(cfg, "/pulls",
+                                                          {"title": f"test: {cid}", "head": pr_branch, "base": cfg.branch})
+                            except wr.ApiError as e:
+                                wr.log(f"  PR create failed: {e}")
+                                code = getattr(e, 'code', 500)
+                                presp = {}
                             if code in (200, 201):
                                 pr_id = presp.get("number") or presp.get("id") or presp.get("iid")
                                 wr.log(f"  PR created: id={pr_id}")
@@ -268,6 +273,10 @@ def run_pool(run_id, only=None, no_logs=False):
                                 wr.log(f"  创建 PR 失败 HTTP {code}")
                         else:
                             wr.log(f"  pr branch push 失败: {out_t[-150:]}")
+                    # PR 分支操作后，无论成功失败，切回主分支，避免下条用例 deploy 在 PR 分支上
+                    if ev in ("pr", "pull_request", "pull_request_target",
+                               "issue_comment", "pull_request_comment"):
+                        wr._sh(f"git checkout {cfg.branch}", cwd=ws.repo_dir)
                     in_flight.append({"cid": cid, "repo_cfg": cfg, "ws": ws,
                                       "trigger_event": ev,
                                       "sha": sha, "wf_filename": wf_filename,
