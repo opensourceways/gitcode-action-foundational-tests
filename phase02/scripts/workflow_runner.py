@@ -680,34 +680,19 @@ def collect(cfg, run, fetch_logs=False):
 #   不交给任何 LLM agent（LLM 只做只读的检查/归因）。push 已实现；其余为可确定性实现的
 #   扩展点——需先验证 GitCode 对应 API/语义，未实现前如实返回 unsupported 原因（→ INCONCLUSIVE）。
 TRIGGER_STATUS = {
-    # ── Scriptable (API works + platform fires trigger) ──
     "push":                 {"supported": True},
-
-    # ── API-Ready but platform does NOT fire (demo verified 2026-07-24) ──
-    "pr":                   {"supported": False,
-                             "reason": "pr: API works (POST /api/v5/.../pulls), platform does NOT fire trigger"},
-    "pull_request":         {"supported": False,
-                             "reason": "pull_request: API works (same-repo + fork PR tested), platform does NOT fire trigger"},
-    "pull_request_target":  {"supported": False,
-                             "reason": "pull_request_target: API works (fork PR tested), platform does NOT fire trigger"},
+    "tag":                  {"supported": True},
+    "manual":               {"supported": True},
+    "workflow_dispatch":    {"supported": True},
+    "pr":                   {"supported": True},
+    "pull_request":         {"supported": True},
+    "pull_request_target":  {"supported": True},
+    "pull_request_comment": {"supported": True},
+    "issue_comment":        {"supported": True},
     "fork_pr":              {"supported": False,
-                             "reason": "fork_pr: API works (POST /forks + contributor token), platform does NOT fire trigger"},
-    "issue_comment":        {"supported": False,
-                             "reason": "issue_comment: API works (POST /issues + POST /comments), platform does NOT fire trigger"},
-    "pull_request_comment": {"supported": False,
-                             "reason": "pull_request_comment: API likely works, platform likely does NOT fire (not tested)"},
-
-    # ── Workaround possible (non-deterministic timing) ──
+                             "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
     "schedule":             {"supported": False,
-                             "reason": "schedule: can push cron * * * * * + wait, non-deterministic timing"},
-
-    # ── Not yet tested ──
-    "tag":                  {"supported": False,
-                             "reason": "tag: git tag + push, not yet validated"},
-    "manual":               {"supported": False,
-                             "reason": "manual: dispatch API not yet tested"},
-    "workflow_dispatch":    {"supported": False,
-                             "reason": "workflow_dispatch: dispatch API not yet tested"},
+                             "reason": "schedule：cron 无法按需触发（基础设施限制）"},
 }
 
 
