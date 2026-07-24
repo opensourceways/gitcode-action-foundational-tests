@@ -670,6 +670,7 @@ def collect(cfg, run, fetch_logs=False):
         "logs": "\n".join(logs_parts),
         "logs_available": bool(fetch_logs),
         "artifacts": [],  # v8 artifacts 采集按需补
+        "run_url": f"https://gitcode.com/{cfg.owner}/{cfg.repo}/actions/runs/{rid}" if rid else "",
     }
 
 

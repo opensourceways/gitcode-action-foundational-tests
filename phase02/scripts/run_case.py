@@ -85,6 +85,7 @@ def write_result(run_dir, contract, verdict, rr):
         "job_count": len(rr.get("jobs", [])),
         "duration_seconds": rr.get("duration_seconds", 0),
         "log_fingerprint": _log_fingerprint(rr),
+        "run_url": rr.get("run_url", ""),
         "assertion_results": verdict.get("assertion_results", []),
     }
     results_dir = os.path.join(run_dir, "results")
@@ -112,6 +113,7 @@ def write_result(run_dir, contract, verdict, rr):
 | head_sha | {rec['head_sha']} |
 | Run 状态 / Job 数 | {rec['run_status']} / {rec['job_count']} |
 | 日志指纹 | {rec['log_fingerprint']} |
+| **Run 页面** | {rec.get('run_url', '') or '（无 run_id）'} |
 | 耗时 | {rec['duration_seconds']}s |
 
 ## 判定: {icon}{flags}
