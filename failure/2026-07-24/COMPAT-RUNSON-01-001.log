@@ -1,0 +1,7 @@
+=== JOB: Verify three-part runs-on array (status=COMPLETED) ===
+[2026/07/23 22:23:59.912 GMT+08:00] [INFO] Job(1529977405961936896_1529977405928382471) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0e2eff48-33b4-4714-afd2-7d43714c9b48.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0e2eff48-33b4-4714-afd2-7d43714c9b48.sh
+RUNSON_ARRAY_OK
+Runner labels: dedicate-hosted x64 large

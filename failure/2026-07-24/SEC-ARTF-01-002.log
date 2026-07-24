@@ -1,0 +1,6 @@
+=== JOB: Download artifact from main repo (status=COMPLETED) ===
+[2026/07/23 22:04:59.770 GMT+08:00] [INFO] Job(1529972624010526720_1529972623976972295) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9475c6a7-2cba-4764-be97-0bcff98150fa.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9475c6a7-2cba-4764-be97-0bcff98150fa.sh
+000{"error_code":400,"error_code_name":"BAD_REQUEST","error_message":"参数类型错误","trace_id":"12c6003d91a08a7982149aa870c0010c"}400

@@ -1,0 +1,13 @@
+=== JOB: Write sensitive file (status=COMPLETED) ===
+[2026/07/23 22:09:32.440 GMT+08:00] [INFO] Job(1529973767860523008_1529973767831162887) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2be5f0a1-d517-487d-b657-77309a59054d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2be5f0a1-d517-487d-b657-77309a59054d.sh
+
+
+=== JOB: Check cleanup (status=COMPLETED) ===
+[2026/07/23 22:09:32.455 GMT+08:00] [INFO] Job(1529973767860523008_1529973767835357185) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0a3ef073-dbb1-4a4c-834c-628811a1ed80.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0a3ef073-dbb1-4a4c-834c-628811a1ed80.sh
+cleaned as expected

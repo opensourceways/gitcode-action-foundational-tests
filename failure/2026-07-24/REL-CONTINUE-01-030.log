@@ -1,0 +1,14 @@
+=== JOB: job with continue on error (status=FAILED) ===
+[2026/07/23 22:27:31.993 GMT+08:00] [INFO] Job(1529978295787597824_1529978295762432000) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/61339c12-85ba-4342-a369-a969479bacf5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/61339c12-85ba-4342-a369-a969479bacf5.sh
+::error::Process exited with code 1
+
+
+=== JOB: downstream after continue (status=COMPLETED) ===
+[2026/07/23 22:27:31.995 GMT+08:00] [INFO] Job(1529978295787597824_1529978295762432002) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/86eba7bd-0f4b-41b2-ac4f-c0f19e468184.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/86eba7bd-0f4b-41b2-ac4f-c0f19e468184.sh
+job_b executed

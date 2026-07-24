@@ -1,0 +1,7 @@
+=== JOB: Test ATOMGIT_SHA env var (status=COMPLETED) ===
+[2026/07/23 22:17:55.420 GMT+08:00] [INFO] Job(1529975877301706752_1529975877263958023) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/fa86e9e0-7aba-4669-8c7a-9d3ea2710a12.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/fa86e9e0-7aba-4669-8c7a-9d3ea2710a12.sh
+atomgit_sha=
+done

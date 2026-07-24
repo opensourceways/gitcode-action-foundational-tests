@@ -1,0 +1,25 @@
+=== JOB: fault injection SIGKILL (status=COMPLETED) ===
+[2026/07/23 22:28:25.487 GMT+08:00] [INFO] Job(1529978520157822976_1529978520124268551) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/19155db2-7af6-4510-b96f-d97cab632ffa.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/19155db2-7af6-4510-b96f-d97cab632ffa.sh
+step_one_marker
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/5facc260-54cf-47de-aec2-472fe5d04f45.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/5facc260-54cf-47de-aec2-472fe5d04f45.sh
+step_two_marker
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/e0b6526d-f857-4b0c-81ce-e4d239df2596.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/e0b6526d-f857-4b0c-81ce-e4d239df2596.sh
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/814d2183-2200-4e74-ba82-cf63d7ab8243.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/814d2183-2200-4e74-ba82-cf63d7ab8243.sh
+step_four_marker
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1d286a0d-7419-4fbc-b3fc-233882a2c14e.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1d286a0d-7419-4fbc-b3fc-233882a2c14e.sh
+step_five_marker

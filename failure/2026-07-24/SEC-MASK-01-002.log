@@ -1,0 +1,11 @@
+=== JOB: Test summary masking (status=FAILED) ===
+[2026/07/23 22:06:57.709 GMT+08:00] [INFO] Job(1529973118867476480_1529973118842310663) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/11ffd625-7ee1-4a2b-8f49-3b4fddc20001.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/11ffd625-7ee1-4a2b-8f49-3b4fddc20001.sh
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9cb3636a-c161-490a-95cb-ab53c2167329.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9cb3636a-c161-490a-95cb-ab53c2167329.sh
+Failing with key 
+::error::Process exited with code 1

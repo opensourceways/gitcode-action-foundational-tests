@@ -1,0 +1,31 @@
+=== JOB: artifact concurrent write test (status=FAILED) ===
+[2026/07/23 22:25:05.416 GMT+08:00] [INFO] Job(1529977680772608000_1529977680780996611) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/19c43dcd-32a8-46d6-bcea-573108e4b7c0.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/19c43dcd-32a8-46d6-bcea-573108e4b7c0.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/19c43dcd-32a8-46d6-bcea-573108e4b7c0.sh: line 1: ${{{{ matrix.instance }}}}: bad substitution
+::error::Process exited with code 1
+
+ 
+
+=== JOB: artifact concurrent write test (status=FAILED) ===
+[2026/07/23 22:25:05.320 GMT+08:00] [INFO] Job(1529977680772608000_1529977680780996610) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/e4b01d41-956b-4c3e-9a2e-8ee4218079c1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/e4b01d41-956b-4c3e-9a2e-8ee4218079c1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/e4b01d41-956b-4c3e-9a2e-8ee4218079c1.sh: line 1: ${{{{ matrix.instance }}}}: bad substitution
+::error::Process exited with code 1
+
+ 
+
+=== JOB: artifact concurrent write test (status=FAILED) ===
+[2026/07/23 22:25:05.502 GMT+08:00] [INFO] Job(1529977680772608000_1529977680780996609) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c52b5f3c-c240-4e8c-8218-6b63fe2c82c6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c52b5f3c-c240-4e8c-8218-6b63fe2c82c6.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c52b5f3c-c240-4e8c-8218-6b63fe2c82c6.sh: line 1: ${{{{ matrix.instance }}}}: bad substitution
+::error::Process exited with code 1
+
+ 
+
+=== JOB: artifact concurrent write test (status=FAILED) ===

@@ -1,0 +1,12 @@
+=== JOB: Verify cache hit behavior (status=COMPLETED) ===
+[2026/07/23 22:17:14.476 GMT+08:00] [INFO] Job(1529975705632784384_1529975705595035655) duration check: true
+::warning::Event Validation Error: The event type Manual (normalized: manual) is not supported because it's not tied to a branch or tag ref.
+::warning::[cache eventValidation] normalized=manual allowlistMatch=false allowlist=[push|pull_request|merge_request] ATOMGIT_EVENT_NAME=Manual GITHUB_EVENT_NAME=Manual ATOMGIT_REF=main GITHUB_REF=main | hint: EVENT_NAME normalized "Manual" -> "manual" for allowlist check; event not in allowlist [push|pull_request|merge_request]
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/39d53118-33e1-4736-9483-446a1fe38d6d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/39d53118-33e1-4736-9483-446a1fe38d6d.sh
+CACHE_MISS
+
+::warning::Event Validation Error: The event type Manual (normalized: manual) is not supported because it's not tied to a branch or tag ref.
+::warning::[cache eventValidation] normalized=manual allowlistMatch=false allowlist=[push|pull_request|merge_request] ATOMGIT_EVENT_NAME=Manual GITHUB_EVENT_NAME=Manual ATOMGIT_REF=main GITHUB_REF=main | hint: EVENT_NAME normalized "Manual" -> "manual" for allowlist check; event not in allowlist [push|pull_request|merge_request]

@@ -1,0 +1,6 @@
+=== JOB: Test add-mask response (status=COMPLETED) ===
+[2026/07/23 22:10:58.623 GMT+08:00] [INFO] Job(1529974129308864512_1529974129283698695) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d93eaaec-61d4-49e4-8d50-dad75070df4d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d93eaaec-61d4-49e4-8d50-dad75070df4d.sh
+::add-mask::

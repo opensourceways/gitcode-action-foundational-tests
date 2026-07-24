@@ -1,0 +1,5 @@
+=== JOB: timeout test job (status=CANCELED) ===
+[2026/07/23 22:39:09.913 GMT+08:00] [INFO] Job(1529981223072178176_1529981223042818055) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9361f7ab-b9b2-4862-8026-2d606b12540c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9361f7ab-b9b2-4862-8026-2d606b12540c.sh

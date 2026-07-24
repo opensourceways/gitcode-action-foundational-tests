@@ -1,0 +1,451 @@
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.743 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856486) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bc0a3896-6449-4bde-abd5-4b3ad88d8a81.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bc0a3896-6449-4bde-abd5-4b3ad88d8a81.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/bc0a3896-6449-4bde-abd5-4b3ad88d8a81.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.550 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856485) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d150846e-6721-41d0-b27e-44c75953301b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d150846e-6721-41d0-b27e-44c75953301b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d150846e-6721-41d0-b27e-44c75953301b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:01.754 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856484) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/eeb40d65-c008-4331-9a75-d9970d407a81.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/eeb40d65-c008-4331-9a75-d9970d407a81.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/eeb40d65-c008-4331-9a75-d9970d407a81.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:02.972 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856483) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/77ab19b1-b816-4d0c-a615-1a58aa6e6fa6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/77ab19b1-b816-4d0c-a615-1a58aa6e6fa6.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/77ab19b1-b816-4d0c-a615-1a58aa6e6fa6.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:20.050 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856482) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a8850735-9171-4872-abcd-b27c676cacc8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a8850735-9171-4872-abcd-b27c676cacc8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a8850735-9171-4872-abcd-b27c676cacc8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.541 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856498) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/fab359b3-b721-4447-8c0a-c1a50669f5e4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/fab359b3-b721-4447-8c0a-c1a50669f5e4.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/fab359b3-b721-4447-8c0a-c1a50669f5e4.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.278 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856496) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/6f48ba98-9901-43ed-aa70-f35f485b57ee.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6f48ba98-9901-43ed-aa70-f35f485b57ee.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/6f48ba98-9901-43ed-aa70-f35f485b57ee.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:20.084 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856494) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/43a80354-f7a4-4d1c-bf57-994c58cdbba0.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/43a80354-f7a4-4d1c-bf57-994c58cdbba0.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/43a80354-f7a4-4d1c-bf57-994c58cdbba0.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.847 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856492) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f0686ce2-437a-4d95-b8f1-9a12e8531718.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f0686ce2-437a-4d95-b8f1-9a12e8531718.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f0686ce2-437a-4d95-b8f1-9a12e8531718.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:54.161 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856490) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f0d3a377-a610-451b-8bd0-34f2447d4df4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f0d3a377-a610-451b-8bd0-34f2447d4df4.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f0d3a377-a610-451b-8bd0-34f2447d4df4.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.352 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856478) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/02d25cab-b5b2-4be9-8082-72d92b4c8cb8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/02d25cab-b5b2-4be9-8082-72d92b4c8cb8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/02d25cab-b5b2-4be9-8082-72d92b4c8cb8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:10.108 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856477) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/135c0238-61a6-4707-a20f-a6fec8d27282.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/135c0238-61a6-4707-a20f-a6fec8d27282.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/135c0238-61a6-4707-a20f-a6fec8d27282.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.977 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856476) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/81461759-92b3-4347-9ca2-091551414bdf.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/81461759-92b3-4347-9ca2-091551414bdf.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/81461759-92b3-4347-9ca2-091551414bdf.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.460 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856475) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bdbff7cf-c3de-4ede-a7e0-bf591f3b4417.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bdbff7cf-c3de-4ede-a7e0-bf591f3b4417.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/bdbff7cf-c3de-4ede-a7e0-bf591f3b4417.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.439 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856474) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f742fde7-f142-4557-9b7b-f1c07e6a74c1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f742fde7-f142-4557-9b7b-f1c07e6a74c1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f742fde7-f142-4557-9b7b-f1c07e6a74c1.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.019 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856473) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f2daeea5-c573-42eb-86b3-ca9651d2ecf8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f2daeea5-c573-42eb-86b3-ca9651d2ecf8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f2daeea5-c573-42eb-86b3-ca9651d2ecf8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.866 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856472) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/68ea7869-b238-4c42-8691-4e0656cd5f0d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/68ea7869-b238-4c42-8691-4e0656cd5f0d.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/68ea7869-b238-4c42-8691-4e0656cd5f0d.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.163 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856471) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/01f7dcfb-e1c3-4555-90ad-c734e6c9f736.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/01f7dcfb-e1c3-4555-90ad-c734e6c9f736.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/01f7dcfb-e1c3-4555-90ad-c734e6c9f736.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.648 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856470) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4a422869-b5a1-4bd0-8e95-bbcf14db04e5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4a422869-b5a1-4bd0-8e95-bbcf14db04e5.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4a422869-b5a1-4bd0-8e95-bbcf14db04e5.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:51.251 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856469) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d09a6282-941f-49f2-ba42-77c64a820aeb.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d09a6282-941f-49f2-ba42-77c64a820aeb.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d09a6282-941f-49f2-ba42-77c64a820aeb.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.876 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856468) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/52ed8f2c-0224-4602-b349-a38f099dd7d0.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/52ed8f2c-0224-4602-b349-a38f099dd7d0.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/52ed8f2c-0224-4602-b349-a38f099dd7d0.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.746 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856467) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1dbd38ee-8262-4071-88e9-6c975d5bd635.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1dbd38ee-8262-4071-88e9-6c975d5bd635.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1dbd38ee-8262-4071-88e9-6c975d5bd635.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.967 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856466) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2c56a5b2-2617-4bf5-be49-0712d1562218.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2c56a5b2-2617-4bf5-be49-0712d1562218.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/2c56a5b2-2617-4bf5-be49-0712d1562218.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.968 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856465) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9255b7d0-204e-4919-af69-01907d57cc70.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9255b7d0-204e-4919-af69-01907d57cc70.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9255b7d0-204e-4919-af69-01907d57cc70.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:10.156 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856464) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0c5c88b5-c214-4ae2-bfc5-8f8e1c139dc1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0c5c88b5-c214-4ae2-bfc5-8f8e1c139dc1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/0c5c88b5-c214-4ae2-bfc5-8f8e1c139dc1.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:51.063 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856463) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/11658862-c254-4b80-90bf-fea566f873f5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/11658862-c254-4b80-90bf-fea566f873f5.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/11658862-c254-4b80-90bf-fea566f873f5.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.728 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856462) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c7c0f0a0-1f15-4fc9-bc98-c86e1a57da90.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c7c0f0a0-1f15-4fc9-bc98-c86e1a57da90.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c7c0f0a0-1f15-4fc9-bc98-c86e1a57da90.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.842 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856461) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4f31e62f-7d24-4141-9826-07d82046850b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4f31e62f-7d24-4141-9826-07d82046850b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4f31e62f-7d24-4141-9826-07d82046850b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:59.276 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856460) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/79908550-3afa-4758-9d45-61037fba78d6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/79908550-3afa-4758-9d45-61037fba78d6.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/79908550-3afa-4758-9d45-61037fba78d6.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.682 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856459) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0d5904be-7cfb-488c-ac43-d3f4b7e73661.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0d5904be-7cfb-488c-ac43-d3f4b7e73661.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/0d5904be-7cfb-488c-ac43-d3f4b7e73661.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.357 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856458) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4eb18d7f-9277-4def-82b6-f38f4026662f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4eb18d7f-9277-4def-82b6-f38f4026662f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4eb18d7f-9277-4def-82b6-f38f4026662f.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:12.173 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856457) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2b0b22de-c10a-4a72-aa41-33aa430d0b35.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2b0b22de-c10a-4a72-aa41-33aa430d0b35.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/2b0b22de-c10a-4a72-aa41-33aa430d0b35.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.242 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856456) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3b7b159b-960d-44ba-84d4-ccfc1d4b63ba.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3b7b159b-960d-44ba-84d4-ccfc1d4b63ba.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/3b7b159b-960d-44ba-84d4-ccfc1d4b63ba.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.538 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856455) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/706eb7af-12ed-470a-a282-1583aed88301.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/706eb7af-12ed-470a-a282-1583aed88301.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/706eb7af-12ed-470a-a282-1583aed88301.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:50.241 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856454) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0b7c9628-003a-4688-896e-09e39eaa50b8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0b7c9628-003a-4688-896e-09e39eaa50b8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/0b7c9628-003a-4688-896e-09e39eaa50b8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:51.155 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856453) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a1d82aa5-64f2-4e26-95ea-b02fc25a0e9b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a1d82aa5-64f2-4e26-95ea-b02fc25a0e9b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a1d82aa5-64f2-4e26-95ea-b02fc25a0e9b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.460 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856452) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1184246d-fd21-4fe0-84df-9571f2d57885.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1184246d-fd21-4fe0-84df-9571f2d57885.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1184246d-fd21-4fe0-84df-9571f2d57885.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:52.754 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856451) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a81ebbef-d67b-40ab-8bcc-81b94594a984.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a81ebbef-d67b-40ab-8bcc-81b94594a984.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a81ebbef-d67b-40ab-8bcc-81b94594a984.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.762 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856450) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d21efd98-23b6-4dc4-85c1-aa10aabe9f9b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d21efd98-23b6-4dc4-85c1-aa10aabe9f9b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d21efd98-23b6-4dc4-85c1-aa10aabe9f9b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:01.635 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856449) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c4e07524-78f9-4f67-8c5b-83e150930956.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c4e07524-78f9-4f67-8c5b-83e150930956.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c4e07524-78f9-4f67-8c5b-83e150930956.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.062 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856497) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/29b2e15c-23df-42d5-9b3d-c86a9526cc2d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/29b2e15c-23df-42d5-9b3d-c86a9526cc2d.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/29b2e15c-23df-42d5-9b3d-c86a9526cc2d.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.443 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856495) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/407e88be-31c3-46bd-ac4e-07edd396fb1f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/407e88be-31c3-46bd-ac4e-07edd396fb1f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/407e88be-31c3-46bd-ac4e-07edd396fb1f.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.534 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856493) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d49f715f-6ab0-4d51-8157-8a5365ffd10a.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d49f715f-6ab0-4d51-8157-8a5365ffd10a.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d49f715f-6ab0-4d51-8157-8a5365ffd10a.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:54.049 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856491) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/5b5ebc15-e147-4cf6-8665-9a15aa09f9f4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/5b5ebc15-e147-4cf6-8665-9a15aa09f9f4.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/5b5ebc15-e147-4cf6-8665-9a15aa09f9f4.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.672 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856489) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b2a2eec3-8aaf-42f5-8520-7863501ad0c1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b2a2eec3-8aaf-42f5-8520-7863501ad0c1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/b2a2eec3-8aaf-42f5-8520-7863501ad0c1.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.936 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856488) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9221e09d-903a-4fec-a4b6-37534e17ceb9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9221e09d-903a-4fec-a4b6-37534e17ceb9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9221e09d-903a-4fec-a4b6-37534e17ceb9.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:53.149 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856487) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3c845897-b01e-4373-a7a3-394fd9d4dc66.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3c845897-b01e-4373-a7a3-394fd9d4dc66.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/3c845897-b01e-4373-a7a3-394fd9d4dc66.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:49.395 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856481) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9815b51b-d09a-44d9-8c9f-77b2fb5cba48.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9815b51b-d09a-44d9-8c9f-77b2fb5cba48.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9815b51b-d09a-44d9-8c9f-77b2fb5cba48.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:33:19.940 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856480) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b65bf055-3546-4bc1-9c2a-c78a0db37869.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b65bf055-3546-4bc1-9c2a-c78a0db37869.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/b65bf055-3546-4bc1-9c2a-c78a0db37869.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===
+[2026/07/23 22:32:51.336 GMT+08:00] [INFO] Job(1529979624610467840_1529979624618856479) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d87a4439-522b-443f-902c-074dda0d94a5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d87a4439-522b-443f-902c-074dda0d94a5.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d87a4439-522b-443f-902c-074dda0d94a5.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+
+=== JOB: matrix 50 combos test (status=FAILED) ===

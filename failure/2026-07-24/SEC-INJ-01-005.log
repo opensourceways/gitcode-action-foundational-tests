@@ -1,0 +1,7 @@
+=== JOB: Test double template eval (status=FAILED) ===
+[2026/07/23 22:06:36.637 GMT+08:00] [INFO] Job(1529973030472265728_1529973030451294209) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4d458ef9-a34b-4abb-8fd7-74d2103e89bf.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4d458ef9-a34b-4abb-8fd7-74d2103e89bf.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4d458ef9-a34b-4abb-8fd7-74d2103e89bf.sh: line 1: Input: ${{ '{{ 1 + 1 }}' }}: bad substitution
+::error::Process exited with code 1

@@ -1,0 +1,6 @@
+=== JOB: test runner.os value (status=COMPLETED) ===
+[2026/07/23 22:44:21.055 GMT+08:00] [INFO] Job(1529982528146771968_1529982528121606151) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d1f6d39c-422f-4369-9656-1e6baa3f91ed.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d1f6d39c-422f-4369-9656-1e6baa3f91ed.sh
+os=linux

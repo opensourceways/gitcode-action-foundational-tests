@@ -1,0 +1,6 @@
+=== JOB: Test default permissions (status=FAILED) ===
+[2026/07/23 22:08:23.568 GMT+08:00] [INFO] Job(1529973478763544576_1529973478729990151) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c525be66-2200-49bc-a600-269befedd1ba.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c525be66-2200-49bc-a600-269befedd1ba.sh
+000{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found","trace_id":"e52c578851200f198792d2fc6f5c93aa"}401000000::error::Process exited with code 6

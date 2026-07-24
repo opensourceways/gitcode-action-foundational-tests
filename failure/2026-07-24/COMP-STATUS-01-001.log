@@ -1,0 +1,6 @@
+=== JOB: Verify status transitions (status=COMPLETED) ===
+[2026/07/23 22:14:18.376 GMT+08:00] [INFO] Job(1529974967082958848_1529974967053598727) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/12939bab-f456-413b-8825-3a3e589aec8b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/12939bab-f456-413b-8825-3a3e589aec8b.sh
+running

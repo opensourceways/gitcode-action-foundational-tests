@@ -1,0 +1,6 @@
+=== JOB: Verify default timeout (status=COMPLETED) ===
+[2026/07/23 22:14:59.297 GMT+08:00] [INFO] Job(1529975138676383744_1529975138642829319) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0850d2a0-1db9-47e0-a3df-bc88b583695b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0850d2a0-1db9-47e0-a3df-bc88b583695b.sh
+done

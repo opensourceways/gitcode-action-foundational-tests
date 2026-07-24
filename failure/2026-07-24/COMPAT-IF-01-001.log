@@ -1,0 +1,8 @@
+=== JOB: Test step failure skip (status=FAILED) ===
+[2026/07/23 22:21:08.975 GMT+08:00] [INFO] Job(1529976689461440512_1529976689440468999) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f8929145-2912-4162-b2f8-5b8787004f1b.sh
+::error::Process exited with code 1
+
+ 

@@ -1,0 +1,5 @@
+=== JOB: concurrency test job (status=COMPLETED) ===
+[2026/07/23 22:29:52.595 GMT+08:00] [INFO] Job(1529978885519450112_1529978885485895687) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1969b61c-ad5d-4fe1-9b68-d4a69501aa45.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1969b61c-ad5d-4fe1-9b68-d4a69501aa45.sh

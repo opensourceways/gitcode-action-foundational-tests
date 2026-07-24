@@ -1,0 +1,7 @@
+=== JOB: Verify string input acceptance (status=COMPLETED) ===
+[2026/07/23 22:21:44.341 GMT+08:00] [INFO] Job(1529976837469913088_1529976837436358663) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/20a4cb42-6949-4714-bb01-d9812980ffa0.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/20a4cb42-6949-4714-bb01-d9812980ffa0.sh
+ENV=production
+STRING_INPUT_OK

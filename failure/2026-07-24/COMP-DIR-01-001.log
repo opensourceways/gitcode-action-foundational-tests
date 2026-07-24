@@ -1,0 +1,6 @@
+=== JOB: Verify directory recognition (status=COMPLETED) ===
+[2026/07/23 22:13:10.568 GMT+08:00] [INFO] Job(1529974682319458304_1529974682290098183) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/195d75a3-e78a-4d88-889d-797372ff1ad1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/195d75a3-e78a-4d88-889d-797372ff1ad1.sh
+workflow recognized

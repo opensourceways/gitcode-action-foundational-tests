@@ -1,0 +1,13 @@
+=== JOB: Set env and tmp (status=COMPLETED) ===
+[2026/07/23 22:09:43.134 GMT+08:00] [INFO] Job(1529973812697632768_1529973812668272647) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ae32645c-6c03-4c98-8e96-718cf793d193.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ae32645c-6c03-4c98-8e96-718cf793d193.sh
+
+
+=== JOB: Check env isolation (status=COMPLETED) ===
+[2026/07/23 22:09:43.135 GMT+08:00] [INFO] Job(1529973812697632768_1529973812668272649) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f649cccc-4a31-4695-af37-c62095ab268d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f649cccc-4a31-4695-af37-c62095ab268d.sh
+isolated as expected

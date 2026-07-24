@@ -1,0 +1,6 @@
+=== JOB: Verify branch trigger (status=COMPLETED) ===
+[2026/07/23 22:13:15.010 GMT+08:00] [INFO] Job(1529974701441290240_1529974701416124423) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/04c682c0-7a35-4080-9caa-44265ee2138f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/04c682c0-7a35-4080-9caa-44265ee2138f.sh
+triggered on main

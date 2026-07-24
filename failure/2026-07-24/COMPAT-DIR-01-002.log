@@ -1,0 +1,6 @@
+=== JOB: Verify .github workflows dir ignored (status=COMPLETED) ===
+[2026/07/23 22:17:47.119 GMT+08:00] [INFO] Job(1529975842702766080_1529975842677600263) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/59368d05-2ae4-4cc8-a813-3504c1bbe144.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/59368d05-2ae4-4cc8-a813-3504c1bbe144.sh
+GITHUB_DIR_WORKFLOW_RAN

@@ -1,0 +1,6 @@
+=== JOB: test github context error (status=COMPLETED) ===
+[2026/07/23 22:41:23.977 GMT+08:00] [INFO] Job(1529981785318375424_1529981785289015303) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/92957af6-0842-4ae9-9faf-134b01a6b96d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/92957af6-0842-4ae9-9faf-134b01a6b96d.sh
+ref=placeholder_ref

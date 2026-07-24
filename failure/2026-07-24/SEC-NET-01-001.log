@@ -1,0 +1,19 @@
+=== JOB: Test SSRF prevention (status=COMPLETED) ===
+[2026/07/23 22:08:12.857 GMT+08:00] [INFO] Job(1529973433859325952_1529973433825771527) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/af58a105-ee47-48e4-a0b8-02de61588a7b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/af58a105-ee47-48e4-a0b8-02de61588a7b.sh
+1.0
+2007-01-19
+2007-03-01
+2007-08-29
+2007-10-10
+2007-12-15
+2008-02-01
+2008-09-01
+2009-04-04
+latest
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/dcf77cc6-cff9-4b9a-b63f-cd5d0e28fba4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/dcf77cc6-cff9-4b9a-b63f-cd5d0e28fba4.sh
+access denied or timeout

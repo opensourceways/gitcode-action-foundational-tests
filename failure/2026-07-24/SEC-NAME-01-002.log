@@ -1,0 +1,13 @@
+=== JOB: Test printenv masking (status=COMPLETED) ===
+[2026/07/23 22:08:01.828 GMT+08:00] [INFO] Job(1529973387885940736_1529973387860774919) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ae3abea2-e99c-454c-b1d0-f8f15055d985.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ae3abea2-e99c-454c-b1d0-f8f15055d985.sh
+INPUT_SCHEDULER_ACTION_PARAMS={"pluginInfo":"{\"uses\":\"official_shell@1.0.0\",\"pluginName\":\"official_shell\",\"pluginVersion\":\"1.0.0\"}","script":"printenv | grep API_KEY || echo not found\n","shell":"","working-directory":""}
+INPUT_SCRIPT=printenv | grep API_KEY || echo not found
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1b0ba4fc-bfca-4786-80d3-1930013a1173.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1b0ba4fc-bfca-4786-80d3-1930013a1173.sh
+INPUT_SCHEDULER_ACTION_PARAMS={"working-directory":"","script":"cat /proc/self/environ | tr '\\0' '\\n' | grep API_KEY || echo not found\n","shell":"","pluginInfo":"{\"uses\":\"official_shell@1.0.0\",\"pluginName\":\"official_shell\",\"pluginVersion\":\"1.0.0\"}"}
+INPUT_SCRIPT=cat /proc/self/environ | tr '\0' '\n' | grep API_KEY || echo not found

@@ -1,0 +1,6 @@
+=== JOB: Verify .gitcode workflows dir (status=COMPLETED) ===
+[2026/07/23 22:17:42.925 GMT+08:00] [INFO] Job(1529975825048813568_1529975825011064839) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/597789f8-f4eb-4c9d-b32d-5f1d73680286.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/597789f8-f4eb-4c9d-b32d-5f1d73680286.sh
+GITCODE_DIR_RECOGNIZED_OK

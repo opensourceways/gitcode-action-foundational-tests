@@ -1,0 +1,6 @@
+=== JOB: Test permission inheritance (status=FAILED) ===
+[2026/07/23 22:06:10.148 GMT+08:00] [INFO] Job(1529972919336046592_1529972919310880775) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/6524ea65-d3b3-42b6-82f2-1c4a1c56c494.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6524ea65-d3b3-42b6-82f2-1c4a1c56c494.sh
+000{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found","trace_id":"fc37cf8321aebc57a99740e7bfd2ddd9"}401000000::error::Process exited with code 6

@@ -1,0 +1,26 @@
+=== JOB: multi step log clarity (status=COMPLETED) ===
+[2026/07/23 22:43:59.466 GMT+08:00] [INFO] Job(1529982437490958336_1529982437461598215) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/094b1d2f-6eda-40d5-ae7f-7e1d27197e8c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/094b1d2f-6eda-40d5-ae7f-7e1d27197e8c.sh
+prepare done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bfaddf8f-5d2a-492b-bca1-e16a551ee496.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bfaddf8f-5d2a-492b-bca1-e16a551ee496.sh
+build done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d9c3725c-5b35-464a-a324-54d4823ef44f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d9c3725c-5b35-464a-a324-54d4823ef44f.sh
+test done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/625bd794-2d31-4d11-ab4a-4bdc7dd27ec6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/625bd794-2d31-4d11-ab4a-4bdc7dd27ec6.sh
+package done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4b2214c4-1be7-4ac9-bd8b-8c7acae4c313.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4b2214c4-1be7-4ac9-bd8b-8c7acae4c313.sh
+summary done

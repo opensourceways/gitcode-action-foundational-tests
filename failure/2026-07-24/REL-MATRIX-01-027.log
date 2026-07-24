@@ -1,0 +1,25 @@
+=== JOB: matrix test job (status=COMPLETED) ===
+[2026/07/23 22:32:25.955 GMT+08:00] [INFO] Job(1529979528439144448_1529979528447533059) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ef5c5c7a-e84d-43df-aae2-0ad4ab23cd31.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ef5c5c7a-e84d-43df-aae2-0ad4ab23cd31.sh
+version=1
+
+
+=== JOB: matrix test job (status=COMPLETED) ===
+[2026/07/23 22:32:25.842 GMT+08:00] [INFO] Job(1529979528439144448_1529979528447533058) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/7b830982-6c75-4913-8212-a872c4870154.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/7b830982-6c75-4913-8212-a872c4870154.sh
+version=2
+
+
+=== JOB: matrix test job (status=COMPLETED) ===
+[2026/07/23 22:32:26.346 GMT+08:00] [INFO] Job(1529979528439144448_1529979528447533057) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/09b98e13-4327-408a-9754-da0dd75e9c90.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/09b98e13-4327-408a-9754-da0dd75e9c90.sh
+version=3
+
+
+=== JOB: matrix test job (status=COMPLETED) ===

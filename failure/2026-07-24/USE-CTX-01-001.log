@@ -1,0 +1,6 @@
+=== JOB: test atomgit context (status=COMPLETED) ===
+[2026/07/23 22:41:13.287 GMT+08:00] [INFO] Job(1529981740632387584_1529981740607221767) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/07ce60ee-d901-44a3-834d-112858aaee91.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/07ce60ee-d901-44a3-834d-112858aaee91.sh
+ref=main

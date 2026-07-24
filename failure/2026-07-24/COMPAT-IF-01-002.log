@@ -1,0 +1,11 @@
+=== JOB: Test continue on error (status=COMPLETED) ===
+[2026/07/23 22:21:22.562 GMT+08:00] [INFO] Job(1529976746424537088_1529976746403565575) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/50a9cce2-d74a-4d72-b24f-f866c81d9e54.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/50a9cce2-d74a-4d72-b24f-f866c81d9e54.sh
+::error::Process exited with code 1
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/0ad931c3-77b7-4f35-b78a-1b196294457d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/0ad931c3-77b7-4f35-b78a-1b196294457d.sh
+This should appear

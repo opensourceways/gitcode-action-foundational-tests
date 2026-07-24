@@ -1,0 +1,9 @@
+=== JOB: upstream failing job (status=FAILED) ===
+[2026/07/23 22:33:52.461 GMT+08:00] [INFO] Job(1529979891682521088_1529979891657355271) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c1c13e84-9d75-4ff3-b3ad-c9e88d6a8a55.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c1c13e84-9d75-4ff3-b3ad-c9e88d6a8a55.sh
+::error::Process exited with code 1
+
+
+=== JOB: downstream dependent job (status=IGNORED) ===

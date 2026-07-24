@@ -1,0 +1,52 @@
+=== JOB: Verify checkout path parameter (status=COMPLETED) ===
+[2026/07/23 22:16:42.407 GMT+08:00] [INFO] Job(1529975571306004480_1529975571276644359) duration check: true
+[2026/07/23 14:16:53.903 GMT+00:00] [INFO] repository dist full path is /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/subdir/checkout-path
+Getting Git version info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:53.908 GMT+00:00] [INFO] run git command --> git version
+[2026/07/23 14:16:53.916 GMT+00:00] [INFO] run git command stdout --> git version 2.43.0
+
+initialize git repository >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:53.918 GMT+00:00] [INFO] run git command --> git init
+[2026/07/23 14:16:53.928 GMT+00:00] [INFO] run git command stdout --> Initialized empty Git repository in /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/subdir/checkout-path/.git/
+[2026/07/23 14:16:53.929 GMT+00:00] [INFO] run git command --> git remote add origin https://gitcode.com/ComputingActionTest/gitcode-test-0.git
+[2026/07/23 14:16:53.933 GMT+00:00] [INFO] git repository initialized at /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/subdir/checkout-path
+
+Disabling automatic garbage collection >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:53.934 GMT+00:00] [INFO] run git command --> git config --local gc.auto 0
+
+Setting up auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:53.938 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/23 14:16:53.938 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/23 14:16:53.943 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/23 14:16:53.964 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/23 14:16:53.964 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/23 14:16:53.968 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/23 14:16:53.988 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/23 14:16:53.996 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+[2026/07/23 14:16:54.016 GMT+00:00] [INFO] configuring token
+[2026/07/23 14:16:54.022 GMT+00:00] [INFO] configuring token config local
+
+Start fetch git repo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:54.037 GMT+00:00] [INFO] run git command --> git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --progress --depth=1 origin +refs/heads/main*:refs/remotes/origin/main* +refs/tags/main*:refs/tags/main*
+
+Checking out the ref >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:54.515 GMT+00:00] [INFO] run git command --> git branch --list --remote origin/main
+[2026/07/23 14:16:54.519 GMT+00:00] [INFO] run git command stdout -->   origin/main
+[2026/07/23 14:16:54.519 GMT+00:00] [INFO] run git command --> git checkout --progress --force -B main refs/remotes/origin/main
+[2026/07/23 14:16:54.525 GMT+00:00] [INFO] run git command stdout --> branch 'main' set up to track 'origin/main'.
+
+Removing auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/23 14:16:54.535 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/23 14:16:54.536 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/23 14:16:54.539 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/23 14:16:54.560 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/23 14:16:54.561 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/23 14:16:54.565 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/23 14:16:54.586 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/23 14:16:54.610 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4e72cbf8-35e9-4b43-a198-293074894a4d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4e72cbf8-35e9-4b43-a198-293074894a4d.sh
+CHECKOUT_PATH_OK

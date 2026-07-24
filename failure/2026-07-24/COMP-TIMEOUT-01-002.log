@@ -1,0 +1,10 @@
+=== JOB: Verify timeout kill (status=CANCELED) ===
+[2026/07/23 22:15:10.715 GMT+08:00] [INFO] Job(1529975186650959872_1529975186625794055) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a86ef9ad-8274-4ad6-b1c6-9d2bf9752255.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a86ef9ad-8274-4ad6-b1c6-9d2bf9752255.sh
+starting
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2a43ae6e-da92-40e6-a74f-627a1cd6dc61.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2a43ae6e-da92-40e6-a74f-627a1cd6dc61.sh

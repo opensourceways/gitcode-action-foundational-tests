@@ -1,0 +1,6 @@
+=== JOB: test boolean input error (status=COMPLETED) ===
+[2026/07/23 22:43:37.866 GMT+08:00] [INFO] Job(1529982346910896128_1529982346885730311) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/23180564-e297-4a8e-8070-f5b7e2d4ee7c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/23180564-e297-4a8e-8070-f5b7e2d4ee7c.sh
+dry_run=false

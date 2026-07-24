@@ -1,0 +1,7 @@
+=== JOB: Test vars context (status=COMPLETED) ===
+[2026/07/23 22:24:32.696 GMT+08:00] [INFO] Job(1529977543715463168_1529977543686103047) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/6147c307-ee0f-4f35-93ac-59218dd7b0ce.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6147c307-ee0f-4f35-93ac-59218dd7b0ce.sh
+test_var=
+done

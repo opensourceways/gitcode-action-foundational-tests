@@ -1,0 +1,6 @@
+=== JOB: Test special secret name (status=COMPLETED) ===
+[2026/07/23 22:07:51.101 GMT+08:00] [INFO] Job(1529973342604107776_1529973342566359047) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/69d87b28-0d35-4dbf-b109-f07c69b27f7b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/69d87b28-0d35-4dbf-b109-f07c69b27f7b.sh
+value is 

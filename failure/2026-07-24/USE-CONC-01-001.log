@@ -1,0 +1,6 @@
+=== JOB: concurrency max out of range (status=COMPLETED) ===
+[2026/07/23 22:41:02.663 GMT+08:00] [INFO] Job(1529981696067907584_1529981696046936071) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ce4cdef8-2756-4284-bf72-91077196f349.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ce4cdef8-2756-4284-bf72-91077196f349.sh
+hello

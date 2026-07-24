@@ -1,0 +1,6 @@
+=== JOB: Test log masking (status=COMPLETED) ===
+[2026/07/23 22:06:47.001 GMT+08:00] [INFO] Job(1529973073862340608_1529973073841369095) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d8632be4-a2dc-499d-b389-bd86311dcd28.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d8632be4-a2dc-499d-b389-bd86311dcd28.sh
+The secret is 

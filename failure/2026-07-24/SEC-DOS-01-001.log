@@ -1,0 +1,40 @@
+=== JOB: Test size quota (status=COMPLETED) ===
+[2026/07/23 22:06:22.128 GMT+08:00] [INFO] Job(1529972969403326464_1529972969365577735) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/cac95512-2143-4654-8947-261bcf12118a.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/cac95512-2143-4654-8947-261bcf12118a.sh
+1100+0 records in
+1100+0 records out
+1153433600 bytes (1.2 GB, 1.1 GiB) copied, 0.691504 s, 1.7 GB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
+Uploading artifact "large-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/large.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
+Creating zip archive from 1 file(s)...
+Zip archive progress tracking enabled (~1100 MB source data)
+Zip archive created: /tmp/artifact-1784815594794-1b5b64dd.zip (~1 MB, 1121217 bytes)
+Creating artifact "large-artifact" (size: 1121217 bytes, workflow: 8a98f8e957be48fba3913589d4e719c5)...
+[Twirp] trace-id: 002f71f62db4dd315f32e22e54cf0dac
+Artifact created with ID 206049390960640, upload mode: simple
+Uploading artifact via simple PUT (~1 MB)...
+Upload complete. SHA-256: b41f2d865fe36b8dea24a1dbfd731189339c1045264505ba0c09be62ad930f5c
+Finalizing artifact...
+[Twirp] trace-id: 23584505ee458c83386a9e3e5a9185f8
+Artifact "large-artifact" finalized successfully.
+Fetching signed artifact URL...
+[Twirp] trace-id: cdc0b3e8ba27018e35093f4013a45aae
+Signed artifact URL obtained.
+::debug::Temp zip file removed: /tmp/artifact-1784815594794-1b5b64dd.zip
+Artifact "large-artifact" uploaded successfully. ID: 206049390960640, Size: 1121217 bytes
+Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/artifacts/206049390960640

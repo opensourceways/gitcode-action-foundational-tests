@@ -1,0 +1,7 @@
+=== JOB: Build multiple artifacts (status=FAILED) ===
+[2026/07/23 22:11:42.758 GMT+08:00] [INFO] Job(1529974314361176064_1529974314323427335) duration check: true
+
+ 
+ 
+
+=== JOB: Download all artifacts (status=IGNORED) ===

@@ -1,0 +1,13 @@
+=== JOB: Test artifact trust boundary (status=FAILED) ===
+[2026/07/23 22:11:09.460 GMT+08:00] [INFO] Job(1529974174812868608_1529974174787702791) duration check: true
+::debug::run-id input: '' (length: 0)
+::debug::Resolved path is /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+::debug::Artifact client initialized for https://actions-results.atomgit.com
+::debug::Resolved workflow id e1a87059abb6433e8824fd994031f936
+Downloading single artifact
+::debug::Listing artifacts for workflow e1a87059abb6433e8824fd994031f936 with name filter "untrusted-artifact"
+[Twirp] trace-id: f97e8586618b9a46953ce542e8743a45
+::debug::Found 0 artifact(s)
+::error::Unable to download artifact(s): Artifact 'untrusted-artifact' not found. Available artifacts: (none)
+
+ 

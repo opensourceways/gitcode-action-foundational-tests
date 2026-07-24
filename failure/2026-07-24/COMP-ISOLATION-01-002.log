@@ -1,0 +1,14 @@
+=== JOB: Create tmp isolation marker (status=COMPLETED) ===
+[2026/07/23 22:02:49.185 GMT+08:00] [INFO] Job(1529972076444266496_1529972076419100679) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/7a47315a-85d1-414b-a441-7f632dade35f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/7a47315a-85d1-414b-a441-7f632dade35f.sh
+MARKER_CREATED
+
+
+=== JOB: Check tmp marker isolation (status=COMPLETED) ===
+[2026/07/23 22:03:02.555 GMT+08:00] [INFO] Job(1529972076444266496_1529972076419100681) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b9bb0e2f-6080-4973-948c-712c5f45dde7.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b9bb0e2f-6080-4973-948c-712c5f45dde7.sh
+ISOLATION_STRONG: marker not visible across jobs

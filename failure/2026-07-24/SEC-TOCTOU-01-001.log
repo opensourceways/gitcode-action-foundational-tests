@@ -1,0 +1,6 @@
+=== JOB: Test TOCTOU protection (status=COMPLETED) ===
+[2026/07/23 22:10:48.247 GMT+08:00] [INFO] Job(1529974085599641600_1529974085566087175) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/89cfca38-c55f-46eb-acf8-5bf6a7c6d07b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/89cfca38-c55f-46eb-acf8-5bf6a7c6d07b.sh
+Running commit: 

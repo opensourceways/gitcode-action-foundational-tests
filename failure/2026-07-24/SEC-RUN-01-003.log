@@ -1,0 +1,6 @@
+=== JOB: Write project A data (status=FAILED) ===
+[2026/07/23 22:09:54.688 GMT+08:00] [INFO] Job(1529973861045248000_1529973861007499271) duration check: true
+
+
+=== JOB: Check project B isolation (status=FAILED) ===
+[2026/07/23 22:09:54.659 GMT+08:00] [INFO] Job(1529973861045248000_1529973861007499273) duration check: true

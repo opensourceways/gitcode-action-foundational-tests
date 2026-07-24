@@ -1,0 +1,10 @@
+=== JOB: cancel semantics test job (status=COMPLETED) ===
+[2026/07/23 22:26:49.936 GMT+08:00] [INFO] Job(1529978119413174272_1529978119388008455) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9ba3c7a9-e8da-440c-adcb-78eef9857334.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9ba3c7a9-e8da-440c-adcb-78eef9857334.sh
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/57a424b2-69c1-4f3a-b2c1-b663a18b280c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/57a424b2-69c1-4f3a-b2c1-b663a18b280c.sh
+cleanup executed

@@ -1,0 +1,6 @@
+=== JOB: Test multiline masking (status=COMPLETED) ===
+[2026/07/23 22:07:29.425 GMT+08:00] [INFO] Job(1529973251784843264_1529973251751288839) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/53327f0a-5d6c-4192-bfb3-edea180675df.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/53327f0a-5d6c-4192-bfb3-edea180675df.sh
+

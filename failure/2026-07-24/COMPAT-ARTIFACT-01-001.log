@@ -1,0 +1,30 @@
+=== JOB: Upload artifact (status=FAILED) ===
+[2026/07/23 22:16:53.204 GMT+08:00] [INFO] Job(1529975616432521216_1529975616398966791) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1bf65fa1-5d0e-4bdb-9619-e8fc68a51e0c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1bf65fa1-5d0e-4bdb-9619-e8fc68a51e0c.sh
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1
+Uploading artifact "cross-job-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/artifacts/marker.txt
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/artifacts/marker.txt'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/artifacts/marker.txt
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/artifacts
+Creating zip archive from 1 file(s)...
+Zip archive created: /tmp/artifact-1784816227356-bead89b4.zip (~0 MB, 164 bytes)
+Creating artifact "cross-job-artifact" (size: 164 bytes, workflow: ca416cbd7eb8494db7e18fe9285628b0)...
+[Twirp] trace-id: 12bc6206e2fe41bde000e039912805e8
+[Twirp] error trace-id: 12bc6206e2fe41bde000e039912805e8
+::debug::Temp zip file removed: /tmp/artifact-1784816227356-bead89b4.zip
+::error::Upload artifact failed: Artifact with name already exists: cross-job-artifact, repoId=10431328, workflowId=ca416cbd7eb8494db7e18fe9285628b0
+
+
+=== JOB: Download and verify artifact (status=IGNORED) ===

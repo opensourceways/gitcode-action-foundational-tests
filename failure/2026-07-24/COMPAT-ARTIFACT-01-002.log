@@ -1,0 +1,41 @@
+=== JOB: Verify artifact retention (status=COMPLETED) ===
+[2026/07/23 22:17:03.914 GMT+08:00] [INFO] Job(1529975661622079488_1529975661596913671) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/57b19c39-f572-4295-9401-a1ce51265408.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/57b19c39-f572-4295-9401-a1ce51265408.sh
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1
+Uploading artifact "retention-test-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/retention_marker.txt
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/retention_marker.txt'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/retention_marker.txt
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1
+Creating zip archive from 1 file(s)...
+Zip archive created: /tmp/artifact-1784816237243-65215bac.zip (~0 MB, 178 bytes)
+Creating artifact "retention-test-artifact" (size: 178 bytes, workflow: 241d8083e7784b8f9682f8959c717af9)...
+[Twirp] trace-id: e04d18519ebc63393218b0a7e03a3809
+Artifact created with ID 206052053389312, upload mode: simple
+Uploading artifact via simple PUT (~0 MB)...
+Upload complete. SHA-256: e7c9afcfb4e9116cc46c95b2f6c758156fa8623bf34eb0e02c7cf2fef7724bea
+Finalizing artifact...
+[Twirp] trace-id: 4b1415ebb70afa02fe11cdb914a2edb7
+Artifact "retention-test-artifact" finalized successfully.
+Fetching signed artifact URL...
+[Twirp] trace-id: 041e7a0f0ceab924ca21e574f8e09ff8
+Signed artifact URL obtained.
+::debug::Temp zip file removed: /tmp/artifact-1784816237243-65215bac.zip
+Artifact "retention-test-artifact" uploaded successfully. ID: 206052053389312, Size: 178 bytes
+Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/artifacts/206052053389312
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/66437c89-cbcf-4df8-ac7b-22c1c2a494b8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/66437c89-cbcf-4df8-ac7b-22c1c2a494b8.sh
+ARTIFACT_UPLOADED_OK

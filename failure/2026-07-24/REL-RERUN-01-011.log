@@ -1,0 +1,5 @@
+=== JOB: reliability test job (status=COMPLETED) ===
+[2026/07/23 22:35:44.236 GMT+08:00] [INFO] Job(1529980360316555264_1529980360291389447) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/63cb090b-59e5-4785-be0e-1f92475aae7e.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/63cb090b-59e5-4785-be0e-1f92475aae7e.sh

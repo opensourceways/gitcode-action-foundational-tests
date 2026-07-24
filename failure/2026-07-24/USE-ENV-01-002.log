@@ -1,0 +1,7 @@
+=== JOB: test GITHUB env var hint (status=FAILED) ===
+[2026/07/23 22:43:06.329 GMT+08:00] [INFO] Job(1529982214710374400_1529982214693597191) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c7c5c50c-e929-41f0-8d21-b4dac04536b0.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c7c5c50c-e929-41f0-8d21-b4dac04536b0.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c7c5c50c-e929-41f0-8d21-b4dac04536b0.sh: line 2: GITHUB_SHA: unbound variable
+::error::Process exited with code 1
