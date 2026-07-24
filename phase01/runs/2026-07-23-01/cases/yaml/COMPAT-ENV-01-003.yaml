@@ -1,0 +1,46 @@
+id: COMPAT-ENV-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "GITHUB_ENV 环境变量不应被静默映射到 ATOMGIT_ENV"
+intent_ref: INTENT-COMPAT-017
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-github-env:
+      name: Test GITHUB_ENV not mapped
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare env vars
+          run: |
+            echo "GITHUB_ENV=$GITHUB_ENV"
+            echo "ATOMGIT_ENV=$ATOMGIT_ENV"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "GITHUB_ENV 不应等于 ATOMGIT_ENV 的值"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "GITHUB_ENV 为空或未定义"
+
+teardown:
+  reset: none

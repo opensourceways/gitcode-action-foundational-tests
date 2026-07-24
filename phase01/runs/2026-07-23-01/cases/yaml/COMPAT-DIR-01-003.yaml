@@ -1,0 +1,44 @@
+id: COMPAT-DIR-01-003
+dimensions: [compatibility, usability]
+dimension: compatibility
+priority: P1
+title: ".github/workflows 目录不应被识别且应给出迁移提示"
+intent_ref: INTENT-COMPAT-029
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    push:
+  jobs:
+    test-github-dir:
+      name: Test github workflows dir
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: ".github/workflows 下的 workflow 不应被触发"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "系统给出迁移提示，说明 workflow 应放置在 .gitcode/workflows/ 目录下"
+
+teardown:
+  reset: none

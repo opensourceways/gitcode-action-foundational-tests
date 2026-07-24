@@ -1,0 +1,49 @@
+id: COMPAT-VARS-01-004
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "vars 与 env 同名时的优先级差异"
+intent_ref: INTENT-COMPAT-022
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables:
+    MY_VAR: var_value
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  env:
+    MY_VAR: env_value
+  jobs:
+    test-vars-env-priority:
+      name: Test vars vs env priority
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo vars and env
+          run: |
+            echo "shell_var=$MY_VAR"
+            echo "expr_var=${{ vars.MY_VAR }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "shell_var 应返回 env_value（env 优先级高于 vars）"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "若支持 vars，expr_var 应返回 var_value"
+
+teardown:
+  reset: fixture

@@ -3,7 +3,7 @@
 > 生成时间: 2026-07-23
 > 运行目的: 生产统一、自包含的基准全量用例集（全维度、全准入 intent + 补全字段级 KEEP 用例）
 > 准入 intent 总数: 186 条
-> 生成用例总数: 328 条
+> 生成用例总数: 369 条
 > 字段级 KEEP 补全: 42 条（合并自 ~260 条 KEEP 历史用例）
 > 复用已有 TC: 0 条
 > 待生成: 0
@@ -15,11 +15,11 @@
 | 维度 | 准入 Intent | 生成用例 | P0 | P1 | P2 |
 |---|---|---|---|---|---|
 | completeness | 16 | 88 | 16 | 72 | 0 |
-| compatibility | 35 | 66 | 13 | 53 | 0 |
+| compatibility | 35 | 107 | 13 | 53 | 0 |
 | security | 36 | 51 | 50 | 1 | 0 |
 | reliability | 66 | 74 | 2 | 69 | 3 |
 | usability | 29 | 49 | 2 | 47 | 0 |
-| **合计** | **182** | **328** | **83** | **242** | **3** |
+| **合计** | **182** | **369** | **83** | **269** | **17** |
 
 ---
 
@@ -119,7 +119,7 @@
 | COMP-WFLOW-01-064 | P1 | KEEP-TC-366~401 | workflow stages 阶段结构字段验证 |
 | COMP-WFLOW-01-065 | P1 | KEEP-TC-366~401 | workflow post 后处理阶段字段验证 |
 
-### compatibility（66 条）
+### compatibility（107 条）
 
 | 用例 ID | 优先级 | 溯源意图 | 标题 |
 |---|---|---|---|
@@ -189,6 +189,47 @@
 | COMPAT-TOKEN-01-002 | P0 | INTENT-COMPAT-020 | GITHUB_TOKEN 在 GitCode 中应为空且不应被静默映射 |
 | COMPAT-VARS-01-001 | P1 | INTENT-COMPAT-022 | vars 上下文若支持应正确返回值 |
 | COMPAT-VARS-01-002 | P1 | INTENT-COMPAT-022 | vars 上下文若不支持应报错而非静默为空 |
+| COMPAT-CONTAINER-01-001 | P1 | INTENT-COMPAT-NEW-001 | container 字段不被支持时应明确报错而非静默忽略 |
+| COMPAT-CONTAINER-01-002 | P1 | INTENT-COMPAT-NEW-001 | container 自定义镜像被拒绝时应给出替代指引 |
+| COMPAT-SECRET-01-005 | P1 | INTENT-COMPAT-NEW-002 | 环境级 secrets 不支持时应明确报错而非降级为项目级 |
+| COMPAT-PR-01-003 | P1 | INTENT-COMPAT-NEW-003 | PR types 配置后匹配类型不触发与 GitHub 行为差异 |
+| COMPAT-PR-01-004 | P1 | INTENT-COMPAT-NEW-003 | PR types 含 merge 时不触发与 GitHub 行为差异 |
+| COMPAT-PR-01-005 | P1 | INTENT-COMPAT-NEW-003 | PR paths 过滤不工作时的兼容性差异 |
+| COMPAT-PR-01-006 | P1 | INTENT-COMPAT-NEW-003 | PR 目标分支过滤行为差异 |
+| COMPAT-COMM-01-001 | P1 | INTENT-COMPAT-NEW-004 | issue_comment types 命名差异 - GitCode 合法 types 应被接受 |
+| COMPAT-COMM-01-002 | P1 | INTENT-COMPAT-NEW-004 | issue_comment types:created 不支持时应给出降级指引 |
+| COMPAT-CONCUR-01-003 | P1 | INTENT-COMPAT-NEW-005 | concurrency preemption enable 行为差异 |
+| COMPAT-CONCUR-01-004 | P1 | INTENT-COMPAT-NEW-005 | concurrency preemption events 越界时行为差异 |
+| COMPAT-OUTPUT-01-001 | P1 | INTENT-COMPAT-NEW-006 | 跨 Job 引用未声明 output 时返回空值的差异 |
+| COMPAT-MATRIX-01-003 | P2 | INTENT-COMPAT-NEW-007 | matrix 三维展开不被支持时的差异 |
+| COMPAT-MATRIX-01-004 | P2 | INTENT-COMPAT-NEW-007 | matrix include 无基础变量不被支持时的差异 |
+| COMPAT-MATRIX-01-005 | P2 | INTENT-COMPAT-NEW-007 | matrix exclude 全排除不被支持时的差异 |
+| COMPAT-RUNNER-01-003 | P2 | INTENT-COMPAT-NEW-008 | self-hosted 标签不被支持时应明确报错 |
+| COMPAT-RUNNER-01-004 | P2 | INTENT-COMPAT-NEW-008 | 自定义特征标签不被支持时应给出可用标签列表 |
+| COMPAT-RUNNER-01-005 | P2 | INTENT-COMPAT-NEW-008 | 内网环境 Runner 不支持时的差异 |
+| COMPAT-WCMD-01-001 | P2 | INTENT-COMPAT-NEW-009 | ::add-mask:: 不被支持时应静默降级而非报错 |
+| COMPAT-WCMD-01-002 | P2 | INTENT-COMPAT-NEW-009 | ::group:: 不被支持时应静默降级而非报错 |
+| COMPAT-WCMD-01-003 | P2 | INTENT-COMPAT-NEW-009 | ::stop-commands:: 不被支持时应静默降级而非报错 |
+| COMPAT-ACTIONDEV-01-001 | P2 | INTENT-COMPAT-NEW-010 | action.yml 元数据校验与 GitHub 差异 |
+| COMPAT-RUNNER-01-006 | P2 | INTENT-COMPAT-NEW-011 | Runner 未预装 Java 工具链与 GitHub 差异 |
+| COMPAT-VARS-01-003 | P1 | INTENT-COMPAT-022 | vars 项目级覆盖组织级的优先级差异 |
+| COMPAT-VARS-01-004 | P1 | INTENT-COMPAT-022 | vars 与 env 同名时的优先级差异 |
+| COMPAT-VARS-01-005 | P1 | INTENT-COMPAT-022 | vars 在条件表达式 if 中的可用性差异 |
+| COMPAT-VARS-01-006 | P1 | INTENT-COMPAT-022 | vars 在 Action 中的可用性差异 |
+| COMPAT-CTX-01-003 | P1 | INTENT-COMPAT-016 | github 上下文嵌套属性访问应报错而非返回空 |
+| COMPAT-ENV-01-003 | P1 | INTENT-COMPAT-017 | GITHUB_ENV 环境变量不应被静默映射到 ATOMGIT_ENV |
+| COMPAT-EXPR-01-013 | P1 | INTENT-COMPAT-004 | success() 带括号与不带括号的兼容性差异 |
+| COMPAT-EXPR-01-014 | P1 | INTENT-COMPAT-004 | always() 带括号与不带括号的兼容性差异 |
+| COMPAT-FIELD-01-003 | P1 | INTENT-COMPAT-021 | 未知顶层字段不应被静默忽略而应给出警告 |
+| COMPAT-PERM-01-005 | P0 | INTENT-COMPAT-030 | permissions 空对象时 ATOMGIT_TOKEN 默认权限范围差异 |
+| COMPAT-SCHEDULE-01-003 | P1 | INTENT-COMPAT-013 | schedule 在非默认分支不触发与 GitHub 差异 |
+| COMPAT-SHELL-01-003 | P2 | INTENT-COMPAT-001 | Windows runner 默认 shell 差异 |
+| COMPAT-TARGET-01-003 | P0 | INTENT-COMPAT-032 | pull_request_target 默认 types 与 GitHub 差异 |
+| COMPAT-TOKEN-01-003 | P0 | INTENT-COMPAT-020 | GITHUB_TOKEN 不应被静默映射为 ATOMGIT_TOKEN |
+| COMPAT-ENVIRON-01-002 | P1 | INTENT-COMPAT-023 | environment 字段绑定 secrets 的行为差异 |
+| COMPAT-DIR-01-003 | P1 | INTENT-COMPAT-029 | .github/workflows 目录不应被识别且应给出迁移提示 |
+| COMPAT-DEPR-01-001 | P1 | INTENT-COMPAT-NEW-012 | ::set-env:: 废弃命令应被拒绝或给出迁移指引 |
+| COMPAT-DEPR-01-002 | P1 | INTENT-COMPAT-NEW-012 | ::add-path:: 废弃命令应被拒绝或给出迁移指引 |
 
 ### security（51 条）
 

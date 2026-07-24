@@ -1,0 +1,46 @@
+id: COMPAT-COMM-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "issue_comment types 命名差异 - GitCode 合法 types 应被接受"
+intent_ref: INTENT-COMPAT-NEW-004
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    issue_comment:
+      types: [created, edited]
+  jobs:
+    test-comment-types:
+      name: Test issue comment types
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo trigger info
+          run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "done"
+
+trigger:
+  event: issue_comment
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "GitCode 风格 types 命名被接受，workflow 正常触发并运行"
+  - type: negative
+    target: validation_error
+    eval: llm_assisted
+    rubric: "不应因 created/edited 命名差异导致 workflow 被拒绝"
+
+teardown:
+  reset: none

@@ -1,0 +1,56 @@
+id: COMPAT-OUTPUT-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "跨 Job 引用未声明 output 时返回空值的差异"
+intent_ref: INTENT-COMPAT-NEW-006
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    job-a:
+      name: Job A declare output
+      runs-on: [dedicate-hosted, x64, large]
+      outputs:
+        declared_key: value_a
+      steps:
+        - name: Set output
+          run: |
+            echo "declared_key=value_a" >> $ATOMGIT_OUTPUT
+    job-b:
+      name: Job B reference outputs
+      runs-on: [dedicate-hosted, x64, large]
+      needs: job-a
+      steps:
+        - name: Echo outputs
+          run: |
+            echo "declared=${{ needs.job-a.outputs.declared_key }}"
+            echo "undeclared=${{ needs.job-a.outputs.undeclared_key }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "跨 Job 引用未声明 output 时不导致 workflow 崩溃"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "undeclared_key 返回空字符串或与 GitHub 行为一致"
+
+teardown:
+  reset: none

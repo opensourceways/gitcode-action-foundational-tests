@@ -1,0 +1,46 @@
+id: COMPAT-WCMD-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "::add-mask:: 不被支持时应静默降级而非报错"
+intent_ref: INTENT-COMPAT-NEW-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-add-mask:
+      name: Test add-mask command
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use add-mask
+          run: |
+            echo "::add-mask::MY_SECRET_VALUE"
+            echo "MY_SECRET_VALUE"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "workflow 不因 add-mask 命令而失败"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "add-mask 不应导致 workflow 报错中断"
+
+teardown:
+  reset: none

@@ -1,0 +1,47 @@
+id: COMPAT-WCMD-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "::group:: 不被支持时应静默降级而非报错"
+intent_ref: INTENT-COMPAT-NEW-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-group:
+      name: Test group command
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use group
+          run: |
+            echo "::group::My Group"
+            echo "inside group"
+            echo "::endgroup::"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "workflow 不因 group 命令而失败"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "group 命令不应导致 workflow 报错中断"
+
+teardown:
+  reset: none

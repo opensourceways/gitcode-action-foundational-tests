@@ -1,0 +1,46 @@
+id: COMPAT-PR-01-005
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "PR paths 过滤不工作时的兼容性差异"
+intent_ref: INTENT-COMPAT-NEW-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      paths: ['api/**']
+  jobs:
+    test-pr-paths:
+      name: Test PR paths filter
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo trigger info
+          run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "done"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "PR 修改 api/ 路径后，不应无 workflow 触发"
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "若平台已修复，匹配路径的 PR 应触发 workflow 并成功运行"
+
+teardown:
+  reset: none

@@ -1,0 +1,50 @@
+id: COMPAT-CONTAINER-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "container 字段不被支持时应明确报错而非静默忽略"
+intent_ref: INTENT-COMPAT-NEW-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-container:
+      name: Test container field
+      runs-on: [dedicate-hosted, x64, large]
+      container:
+        image: ubuntu:latest
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: validation_error
+    eval: llm_assisted
+    rubric: "不通过无指引的原始报错（如仅报 generic YAML error）"
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "不通过静默忽略导致 workflow 成功运行（container 字段应被拦截）"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息包含 container 关键字，指向具体字段，并给出可操作建议（如删除 container 字段或使用默认 Runner 环境）"
+
+teardown:
+  reset: fixture

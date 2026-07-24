@@ -1,0 +1,45 @@
+id: COMPAT-TARGET-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P0
+title: "pull_request_target 默认 types 与 GitHub 差异"
+intent_ref: INTENT-COMPAT-032
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+  jobs:
+    test-target-default-types:
+      name: Test pull_request_target default types
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo trigger info
+          run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "done"
+
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: llm_assisted
+    rubric: "默认 types 下 PR open 应触发 workflow"
+  - type: positive
+    target: run_status
+    eval: llm_assisted
+    rubric: "默认 types 下 PR synchronize 应触发 workflow"
+
+teardown:
+  reset: none

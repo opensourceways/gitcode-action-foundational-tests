@@ -1,0 +1,45 @@
+id: COMPAT-ACTIONDEV-01-001
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "action.yml 元数据校验与 GitHub 差异"
+intent_ref: INTENT-COMPAT-NEW-010
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-action-meta:
+      name: Test action metadata
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Checkout action repo
+          uses: checkout
+        - name: Use local action
+          uses: ./.github/actions/my-action
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: llm_assisted
+    rubric: "不支持的 action.yml 字段不导致 workflow 失败"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "系统对不支持的元数据字段给出明确提示"
+
+teardown:
+  reset: fixture

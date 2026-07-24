@@ -1,0 +1,45 @@
+id: COMPAT-SHELL-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "Windows runner 默认 shell 差异"
+intent_ref: INTENT-COMPAT-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-windows-shell:
+      name: Test Windows default shell
+      runs-on: [windows-latest, x64, small]
+      steps:
+        - name: Echo OS
+          run: |
+            echo %OS%
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "默认 shell 正确执行 Windows 命令"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "若默认 shell 不是 powershell，系统应给出明确说明"
+
+teardown:
+  reset: none

@@ -1,0 +1,45 @@
+id: COMPAT-CTX-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "github 上下文嵌套属性访问应报错而非返回空"
+intent_ref: INTENT-COMPAT-016
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-github-nested:
+      name: Test github nested property
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Access nested github property
+          run: |
+            echo "pr_number=${{ github.event.pull_request.number }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "嵌套属性访问不导致 workflow 崩溃"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "返回值与 GitHub 行为一致（空值或 null）"
+
+teardown:
+  reset: none
