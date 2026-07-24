@@ -69,6 +69,7 @@ def main():
         if r["verdict"] == "FAIL" and r.get("priority") == "P0":
             s["p0_fail"] += 1
 
+    tot = len(recs)
     # 执行覆盖率 guard：有效判定（通过+问题发现）/ 总数 < 阈值 → 整体 INCONCLUSIVE
     effective = sum(s["通过"] + s["问题发现"] for s in dims.values())
     exec_coverage = (effective / tot * 100) if tot else 0
@@ -107,7 +108,6 @@ def main():
                 fixes.append(r["case_id"])
 
     # 写报告
-    tot = len(recs)
     by_v = {}
     for r in recs:
         by_v[r["verdict"]] = by_v.get(r["verdict"], 0) + 1
