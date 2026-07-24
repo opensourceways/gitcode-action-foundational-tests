@@ -229,7 +229,12 @@ def run_pool(run_id, only=None, no_logs=False):
 
                     # push（同仓串行——一次只 push 一条）
                     wr.log(f"  [{cfg.repo}] deploy {cid}")
-                    sha, wf_filename, _ = wr.deploy(ws, cfg, cid, wf)
+                    wf_use = wf
+                    if ev == "schedule":
+                        import re as _re
+                        wf_use = _re.sub(r'(-?\s*cron\s*:\s*")[^"]*(")', r'\1* * * * *\2', wf)
+                        wr.log(f"  schedule cron replaced → * * * * *")
+                    sha, wf_filename, _ = wr.deploy(ws, cfg, cid, wf_use)
                     if not sha:
                         verdict = {"verdict": "ENV_ERROR", "verdict_flags": [],
                                    "reason": "git push 失败", "assertion_results": []}
@@ -241,7 +246,8 @@ def run_pool(run_id, only=None, no_logs=False):
                         continue
 
                     # 仅 push 触发登记待清理，其余保留（界面可查）
-                    if ev == "push":
+                    # schedule 强制登记——必须删防永久污染
+                    if ev == "push" or ev == "schedule":
                         repo_deployed[cfg.repo].append(wf_filename)
                     if ev == "tag":
                         tag = f"test-{cid.lower().replace('_','-')}"
@@ -323,7 +329,7 @@ def run_pool(run_id, only=None, no_logs=False):
                             else:
                                 if runs_non_push is None:
                                     try:
-                                        npev = "CreateTag" if ev == "tag" else "MR"
+                                        npev = "CreateTag" if ev == "tag" else ("Schedule" if ev == "schedule" else "MR")
                                         runs_non_push = wr.list_runs(cfg, per_page=30, event_filter=npev)
                                     except wr.ApiError:
                                         runs_non_push = []

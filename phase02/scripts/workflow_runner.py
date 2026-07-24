@@ -691,8 +691,7 @@ TRIGGER_STATUS = {
     "issue_comment":        {"supported": True},
     "fork_pr":              {"supported": False,
                              "reason": "fork_pr：需第二 GitCode 账号/token 模拟 untrusted 外部贡献者（基础设施依赖）"},
-    "schedule":             {"supported": False,
-                             "reason": "schedule：cron 无法按需触发（基础设施限制）"},
+    "schedule":             {"supported": True},
 }
 
 
@@ -914,6 +913,47 @@ def trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
         return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
 
 
+def trigger_schedule(ws, cfg, case_id, workflow_yaml, fetch_logs=False):
+    """schedule 触发链路：replace cron(* * * * *) → deploy → poll(Schedule) → collect → ★强制teardown。
+
+    ★污染红线：schedule 不删会永久每分钟触发→跑完必须删 workflow 文件并验证。
+    """
+    t0 = time.time()
+    # 正则替换 cron 值为每分钟（字符串替换，不 yaml.dump 往返）
+    import re as _re
+    wf_replaced = _re.sub(r'(-?\s*cron\s*:\s*")[^"]*(")', r'\1* * * * *\2', workflow_yaml)
+    try:
+        sha, wf_filename, _ = deploy(ws, cfg, case_id, wf_replaced)
+        if not sha:
+            return _exec_result("ENV_ERROR", case_id, reason="git push 失败", t0=t0)
+        log(f"  schedule deployed (cron→* * * * *), waiting for trigger...")
+        run = poll_run(cfg, sha, wf_filename, match_event="Schedule")
+        if run is None:
+            return _exec_result("NO_RUN", case_id, head_sha=sha, t0=t0)
+        if run.get("status") not in _TERMINAL:
+            return _exec_result("TIMEOUT", case_id, head_sha=sha,
+                                gitcode_run_id=run.get("workflow_run_id", ""), t0=t0)
+        rr = collect(cfg, run, fetch_logs=fetch_logs)
+        rr["duration_seconds"] = round(time.time() - t0)
+        if rr.get("status") == "FAILED" and not rr.get("jobs"):
+            rr["workflow_rejected"] = True
+            rr["reason"] = "run FAILED 且 0 job：workflow 可能被平台拒绝"
+        return rr
+    except ApiError as e:
+        return _exec_result("ENV_ERROR", case_id, reason=str(e), t0=t0)
+    finally:
+        # ★ schedule 强制 teardown：必须删 workflow 文件，防永久污染
+        if wf_filename:
+            ok = teardown(ws, cfg, wf_filename)
+            wf_path = f".gitcode/workflows/{wf_filename}"
+            full = os.path.join(ws.repo_dir, wf_path)
+            deleted = not os.path.exists(full)
+            if not ok or not deleted:
+                log(f"  ⚠️ SCHEDULE TEARDOWN FAILED: {wf_filename} 残留！需手工清理 {cfg.repo} 仓！")
+            else:
+                log(f"  schedule teardown OK: {wf_filename} 已删除")
+
+
 def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="fixture",
              trigger_event="push"):
     """执行单条用例的"执行层"链路。返回 RunResult（含执行层异常状态）。
@@ -940,6 +980,9 @@ def run_case(ws, cfg, case_id, workflow_yaml, fetch_logs=False, teardown_reset="
     # issue_comment / pull_request_comment 走评论触发链路
     if trigger_event in ("issue_comment", "pull_request_comment"):
         return trigger_comment(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
+    # schedule 走独立链路（cron替换 + 强制teardown）
+    if trigger_event == "schedule":
+        return trigger_schedule(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
     # pr / pull_request / pull_request_target 走 PR 链路
     if trigger_event in ("pr", "pull_request", "pull_request_target"):
         return trigger_pr(ws, cfg, case_id, workflow_yaml, fetch_logs=fetch_logs)
