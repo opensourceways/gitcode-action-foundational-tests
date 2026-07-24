@@ -67,6 +67,13 @@
 
 **置信度**: 高（日志确凿证实清理功能工作正常——"cleaned as expected" 确实在日志中；FAIL 原因仅为下划线 "cleaned_as_expected" ≠ 空格 "cleaned as expected" 的断言关键词不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 跨 job workspace 清理功能工作正常：job B 确认 `/tmp/sensitive-temp.txt` 不存在，输出 "cleaned as expected"，平台隔离保护生效
+- **静默性**: 🟢明确报错 — 日志确凿输出 "cleaned as expected"，清理行为完全可观测
+- **影响面**: 🟢单用例 — 仅影响 SEC-RUN-01-001 的断言匹配，workspace 清理机制本身正常
+- **综合**: 临时文件跨 job 隔离保护功能正常（无 "residual found"），FAIL 仅因断言关键词 `cleaned_as_expected`（下划线）与脚本 echo 输出 `cleaned as expected`（空格）字符不一致
+- **是否有规避手段**: 是 — 断言关键词改为空格分隔的 "cleaned as expected"，或编译期做下划线/空格归一化
+
 **建议**:
 - 断言关键词应与脚本 echo 输出字符精确一致：将 "cleaned_as_expected" 改为 "cleaned as expected"
 - 在断言编译期对所有 log 关键词做下划线/空格归一化处理（一次修复消除 SEC-RUN-01-001、SEC-RUN-01-002、SEC-NET-01-001、SEC-PERM-01-004 的同类型 FAIL）

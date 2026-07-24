@@ -70,6 +70,13 @@
 
 **置信度**: 高（日志 26 行全量证实 5 个 step 全部成功执行且按序排列，断言关键词 `"step one prepare"` 与 shell stdout 输出 `"prepare done"` 的字符串不匹配是典型的标记词汇错误）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台行为完全正常，5 个 step 全部成功执行，仅测试断言关键词选择错误
+- **静默性**: 🟢明确报错 — 断言失败原因明确（关键词 `"step one prepare"` 是 YAML name 字段而非 shell stdout 输出）
+- **影响面**: 🟢单用例 — 仅该测试用例的断言词汇不匹配问题，平台本身无任何缺陷
+- **综合**: 平台行为正确，失败仅因测试断言关键词使用了 YAML name 字段值而非 shell stdout 输出内容
+- **是否有规避手段**: 是 — 将断言关键词从 step name 改为对应的 stdout 输出字符串（如 `"prepare done"`）即可通过
+
 **建议**:
 - 修改断言关键词为 shell 输出内容：将 `"step one prepare"` 改为 `"prepare done"`（对应 step 1）、`"step two build"` 改为 `"build done"`（对应 step 2），逐一覆盖所有 5 个 step
 - 若需验证 step name 在日志中可见，应使用 `nonfunctional: ui_layout` 的 LLM 评估（已存在于 assertions[1]），而非在 `run_logs` 文本中搜索

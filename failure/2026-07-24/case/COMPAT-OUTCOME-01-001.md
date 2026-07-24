@@ -107,6 +107,13 @@ steps:<step_id>.conclusion 的值: success / failure / cancelled
 
 **置信度**: 高（::error::Process exited with code 1 → cleanup "Check step outcome and conclusion" — "failure"≠"FAILED"）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — Engine Bug（大小写比较），平台 continue-on-error false 后 cleanup 正常执行（"Check step outcome and conclusion"），仅断言 "failure"≠"FAILED"
+- **静默性**: 🟢明确报错 — 平台输出 "::error::Process exited with code 1"，错误清晰可诊断
+- **影响面**: 🟢单用例 — 表达式引擎大小写不一致，仅影响断言比较
+- **综合**: 平台 outcome/conclusion 行为正确，step 失败后 cleanup 执行，仅表达式返回值大小写与断言不匹配
+- **是否有规避手段**: 是 — 统一断言为 FAILED 或平台修复大小写语义
+
 **建议**:
 - 平台表达式引擎同时返回大写(`FAILED`/`CANCELED`)和文档中的小写(`success`/`failure`/`cancelled`)值
 - 建议统一为文档约定的小写语义值

@@ -49,6 +49,13 @@
 
 **置信度**: 中（negative 断言 PASS 证明 secret 未通过 add-mask 命令泄漏；断言关键词 "mask_command_without_payload" 从未被脚本输出是测试设计缺陷——与 SEC-MASK 系列的断言标记缺失同模式）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — `::add-mask::` 命令的响应中未泄露 secret 原值（payload 为空），安全属性满足；仅断言标记从未被脚本输出
+- **静默性**: 🟢明确报错 — 日志输出 `::add-mask::`（命令骨架可见，payload 为空），行为可观测，不存在 secret 泄漏
+- **影响面**: 🟢单用例 — 仅影响 SEC-WCMD-01-001 的 add-mask 命令响应测试
+- **综合**: add-mask 命令安全属性正常（无 secret 泄露），FAIL 原因仅为断言关键词 "mask_command_without_payload" 从未被脚本显式 echo 输出
+- **是否有规避手段**: 是 — 在脚本中添加显式标记输出或改用 `must_not_contain_secret` 作为唯一断言
+
 **建议**:
 - 在脚本中添加显式的断言标记输出（如 `echo "mask_command_without_payload"`）
 - 或改用更精确的断言：`must_not_contain_secret: "API_KEY"` 单独成立即可（因为这也验证了"响应不含 payload"）

@@ -63,6 +63,13 @@ steps:
 
 **置信度**: 高（CACHE_MISS, "Event Validation Error: The event type Manual...is not supported" — cache 不支持 workflow_dispatch）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — Job COMPLETED 但 cache 始终 MISS（workflow_dispatch 不在 cache allowlist），workflow 本身可完成但缓存功能未生效
+- **静默性**: 🔴静默错误 — 平台给出 ::warning:: 但依然运行，用户可能未察觉 cache 从未命中；Event Validation Error 提示 Manual 不支持但未阻止 job 执行
+- **影响面**: 🟡同维度 — 影响所有通过 workflow_dispatch 触发且需要 cache 的 workflow
+- **综合**: cache 不支持 workflow_dispatch 事件（仅支持 push/pull_request/merge_request），导致手动触发时缓存功能静默失效
+- **是否有规避手段**: 是 — 改用 push 事件触发 workflow；或平台扩展 cache allowlist 支持 manual 事件
+
 **建议**:
 - 将此缺陷提交给平台工程团队，附上日志文件 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMPAT-CACHE-01-001.log`
 - 建议修复后重新验跑 COMPAT-CACHE-01-001

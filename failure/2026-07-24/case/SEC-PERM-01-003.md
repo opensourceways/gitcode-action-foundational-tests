@@ -54,6 +54,13 @@
 
 **置信度**: 中（token not found 是环境问题已在日志确凿证实——与 SEC-DEFPERM-01-001 同模式；但默认 permissions 的最小化行为在修复环境后是否能被验证仍未知）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — job FAILED（exit code 6）但 workflow 能完成调度，permissions 继承逻辑因 token 不可用未能被验证
+- **静默性**: 🟡可察觉 — 日志明确返回 `{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found"}`，可观测但根因需排查
+- **影响面**: 🟢单用例 — 与 SEC-DEFPERM-01-001 同 token 注入问题，影响所有依赖 ATOMGIT_TOKEN 的 workflow_dispatch 测试
+- **综合**: ATOMGIT_TOKEN 在 workflow_dispatch 事件下不可用（"token not found"），默认 permissions 最小化行为未被测试到，属环境问题
+- **是否有规避手段**: 是 — 修复 ATOMGIT_TOKEN 注入或在 push 事件下触发测试
+
 **建议**:
 - 修复 ATOMGIT_TOKEN 在 workflow_dispatch 事件下的注入问题（同时影响 SEC-DEFPERM-01-001）
 - 修复后重跑此用例以验证默认 permissions 的最小化行为

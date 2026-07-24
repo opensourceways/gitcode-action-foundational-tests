@@ -42,6 +42,13 @@
 
 **置信度**: 高（日志第 6 行 `ref=placeholder_ref` 证实平台静默求值，Job COMPLETED 无报错，与 context.md 仅定义 `atomgit` 上下文的事实矛盾）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — github.ref 被静默求值为 placeholder_ref，workflow 仍正常完成，不阻塞执行
+- **静默性**: 🔴静默错误 — 平台完全不报错，用户使用 github.* 上下文时收到占位符值却无任何提示
+- **影响面**: 🟡同维度 — 所有从 GitHub Actions 迁移并使用 github.* 上下文的 workflow 均会接收到错误值
+- **综合**: github.* 上下文被静默求值为占位符值，所有从 GitHub Actions 迁移的 workflow 均会接收到错误值且无任何提示
+- **是否有规避手段**: 否 — 平台不提供 github.* → atomgit.* 迁移指引，用户无法得知应替换上下文前缀
+
 **建议**:
 - 平台需在表达式求值阶段检测 `github.*` 上下文引用，主动报错并提示用户使用 `atomgit.*` 作为替代，参考 GitHub Actions→GitCode Actions 迁移场景
 - 相关用例: USE-CTX-01-001（同一意图 INTENT-USE-002 sibling）

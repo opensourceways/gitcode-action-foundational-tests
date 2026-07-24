@@ -45,6 +45,13 @@
 
 **置信度**: 中（平台确凿拒绝了无效 action 引用——negative 断言 PASS；但 0 字节有效日志使得正向断言因无诊断输出而 FAIL，属于平台可观测性缺陷与断言关键词 mismatch 的叠加）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — 平台正确拒绝了无效的全零 hash action 引用（job FAILED，未执行步骤），安全策略生效；但缺乏诊断输出
+- **静默性**: 🔴静默错误 — job FAILED 但 0 字节有效日志，无 `::error::` 注释、无 "action not found" 或 "sha mismatch" 诊断，与 SEC-SUPPLY-01-001 同模式
+- **影响面**: 🟡同维度 — 影响所有不合法的 action hash 引用场景（SEC-SUPPLY 系列），不可信的无效引用均缺乏诊断输出
+- **综合**: 安全策略正确（拒绝执行无效 action），但 0 字节日志形成诊断盲区，违反"不应静默回退"的文档要求
+- **是否有规避手段**: 否 — 当前平台无内置诊断输出，用户无法自行获取无效 action 引用被拒绝的具体原因
+
 **建议**:
 - 平台应输出明确错误信息：如 `::error:: Action not found: docker/build-push-action@0000000... (SHA not found in registry)`
 - 断言可简化为仅依赖 negative/must_not_equal（当前 SEC-SUPPLY-01-002 的 negative 断言已经正确验证了行为）

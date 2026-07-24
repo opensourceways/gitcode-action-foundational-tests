@@ -80,6 +80,13 @@ steps:
 
 **置信度**: 高（"Artifact with name already exists: cross-job-artifact" + "[Twirp] error" — 制品名冲突）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — 制品上传因名称冲突失败（"Artifact with name already exists"），下游 Download 被 IGNORED，跨 job artifact 传递功能完全断裂
+- **静默性**: 🟡可察觉 — 平台清楚报错 "Artifact with name already exists" 含 Twirp trace-id，但该错误非正常业务流程（名称应唯一），暗示制品名管理不健全
+- **影响面**: 🔴跨维度 — artifact 名称冲突影响所有依赖 artifact 的 workflow，非孤立问题
+- **综合**: 制品存储层名称冲突导致跨 job artifact 传递失败，虽报错清晰但平台应独立管理制品命名空间
+- **是否有规避手段**: 否 — 需平台修复制品名称冲突管理机制
+
 **建议**:
 - 将此缺陷提交给平台工程团队，附上日志文件 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMPAT-ARTIFACT-01-001.log`
 - 建议修复后重新验跑 COMPAT-ARTIFACT-01-001

@@ -49,6 +49,13 @@
 
 **置信度**: 中（日志确凿显示含连字符 secret 被静默接受但值为空，run_status 断言关键词 "success_or_yaml_error" ≠ COMPLETED 是标记不匹配；但平台未在 YAML 校验阶段报错属于平台行为偏差）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 含连字符的 secret 名 `MY-VAR` 被平台静默接受但值为空，secret 原值未泄漏；平台未在 YAML 校验阶段报错属于行为偏差但非安全漏洞
+- **静默性**: 🟡可察觉 — 日志输出 `value is `（空值），用户可观察但无法获知原因是命名非法还是 secret 未定义
+- **影响面**: 🟢单用例 — 仅影响 SEC-NAME-01-001 的特殊字符 secret 名称测试
+- **综合**: run_status "COMPLETED" ≠ 断言期望的复合词汇 "success_or_yaml_error" 是标记不匹配；平台静默接受非法 secret 名但值为空，无安全泄漏
+- **是否有规避手段**: 是 — 平台应在 YAML 校验阶段拒绝非法 secret 名称并给出明确错误；断言应使用平台原生状态值
+
 **建议**:
 - 平台应在 YAML 校验阶段拒绝含非法字符的 secret 名称（连字符、数字开头等），给出明确错误
 - run_status 断言应使用平台原生值（"COMPLETED" 映射到 "success"）而非自定义复合词汇

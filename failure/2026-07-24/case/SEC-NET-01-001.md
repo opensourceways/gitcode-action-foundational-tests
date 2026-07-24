@@ -65,6 +65,13 @@
 
 **置信度**: 高（日志确凿显示 SSRF 防护工作正常——192.168.1.1 被成功阻断输出 "access denied or timeout"；FAIL 原因仅是下划线 vs 空格的断言关键词不匹配，这是典型的系统性 标记不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — SSRF 防护机制工作正常：内网 IP 192.168.1.1 被成功阻断，输出 "access denied or timeout"；仅断言关键词下划线 vs 空格不匹配
+- **静默性**: 🟢明确报错 — 日志确凿输出 "access denied or timeout"，阻断行为完全可观测
+- **影响面**: 🟢单用例 — 仅影响 SEC-NET-01-001 的断言匹配，SPRF 防护本身无误
+- **综合**: SSRF 防护功能正常（192.168.1.1 访问被阻断），FAIL 仅因断言关键词 `access_denied_or_timeout`（下划线）与脚本 echo 的自然输出 `access denied or timeout`（空格）字符不一致
+- **是否有规避手段**: 是 — 断言关键词改为空格分隔的 "access denied or timeout"，或在编译期做下划线/空格归一化
+
 **建议**:
 - 将断言关键词从 "access_denied_or_timeout" 改为 "access denied or timeout"（空格）以匹配 shell echo 的自然输出
 - 在断言编译期对所有 log 关键词做下划线/空格归一化处理（一次修复消除所有同类 FAIL）

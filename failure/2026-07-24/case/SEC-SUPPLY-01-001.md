@@ -42,6 +42,13 @@
 
 **置信度**: 中（0 字节有效日志是平台诊断缺失的确凿证据；但无法区分是"commit hash 不支持"还是"该 hash 恰好不存在"还是"平台完全不支持 hash pinning 引用"）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — 工作流在遇到无效 commit hash action 引用时 job 直接 FAILED 且 0 字节有效日志，用户完全无法获知失败原因
+- **静默性**: 🔴静默错误 — job FAILED 但无任何 `::error::` 注释、无 "action not found" 诊断、无步骤执行痕迹，用户面临完全的诊断盲区
+- **影响面**: 🟡同维度 — 影响所有使用 commit hash pinning 引用第三方 action 的场景（SEC-SUPPLY 全系列），不可信的无效引用同样缺乏诊断
+- **综合**: 平台对无效 action 引用（不存在的 commit hash）完全静默失败，缺乏可观测诊断输出，既是功能缺陷也是供应链安全可观测性缺口
+- **是否有规避手段**: 否 — 当前平台无内置诊断输出，用户无法在当前行为下自行排查无效 action 引用的问题
+
 **建议**:
 - 平台应为无效的 action 引用（包括不存在 hash、非法 hash 格式）输出明确错误信息（如 `::error:: Action not found: docker/build-push-action@1234567...`）
 - 使用真实存在的 action 仓库的完整 commit SHA 来验证正向 case（测试 commit hash pinning 是否被支持）

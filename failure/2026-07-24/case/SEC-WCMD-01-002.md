@@ -68,6 +68,13 @@
 
 **置信度**: 高（制品不存在是确凿事实——"Found 0 artifact(s)"——非安全缺陷，是测试前置条件未被满足的用例问题）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 测试前置条件（fork PR 已上传 "untrusted-artifact"）未满足，download-artifact 正确返回 "Artifact not found"，非 artifact trust boundary 安全缺陷
+- **静默性**: 🟢明确报错 — 日志明确输出 `::error::Unable to download artifact(s): Artifact 'untrusted-artifact' not found. Available artifacts: (none)`，诊断信息清晰
+- **影响面**: 🟢单用例 — 仅影响 SEC-WCMD-01-002 的跨 artifact 信任边界测试
+- **综合**: 前置条件缺失导致测试流程被阻断，平台的 download-artifact 行为正确（不会创建虚构制品），非安全漏洞
+- **是否有规避手段**: 是 — 需前置步骤创建 "untrusted-artifact"（通过 fork PR workflow run 上传），然后特权 run 尝试下载
+
 **建议**:
 - 前置条件需要先执行 fork PR workflow run 来创建 "untrusted-artifact"，然后特权 workflow run 尝试下载
 - 若跨 workflow run 的 artifact 下载不被支持（download-artifact 仅限同 workflow），则需重新设计测试——通过 API curl 直接下载其他 run 的 artifact

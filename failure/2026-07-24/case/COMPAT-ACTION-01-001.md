@@ -99,6 +99,13 @@ steps:
 
 **置信度**: 高（"CHECKOUT_REF_OK" — checkout ref 短名正常, run=COMPLETED）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台 checkout 短名 ref 参数正常（CHECKOUT_REF_OK），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常 checkout 并输出标记，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: checkout 裸插件名 ref 参数功能完全正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-ACTION-01-001 标记为「用例断言修复后应重新验跑」

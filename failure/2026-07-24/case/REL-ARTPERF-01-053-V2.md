@@ -53,6 +53,13 @@
 
 **置信度**: 高（日志明确 quota exceeded，`currentUsed=1.4GB > max=1GB`，是测试环境 artifact 配额耗尽问题，非平台上传逻辑缺陷）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — 1GB artifact上传在finalize阶段被配额拒绝，workflow无法完成
+- **静默性**: 🟡可察觉 — 平台明确返回 `Namespace artifact quota exceeded` 错误及配额详情，用户可诊断
+- **影响面**: 🟢单用例 — 仅影响本测试环境namespace，其他namespace不受配额限制影响
+- **综合**: 环境artifact配额（1GB）被前次运行残留数据占满导致上传被拒，平台功能正常，清理历史artifact释放配额即可规避
+- **是否有规避手段**: 是 — 测试运行前通过API清理namespace下历史artifact释放配额空间
+
 **建议**:
 - 测试运行前清理历史 artifact 数据（通过 API 删除或使用独立 namespace）以释放配额空间
 - 相关用例: REL-ART-01-041, REL-ARTPERF-01-053

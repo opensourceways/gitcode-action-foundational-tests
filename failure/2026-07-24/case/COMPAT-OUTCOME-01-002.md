@@ -114,6 +114,13 @@ steps:<step_id>.conclusion 的值: success / failure / cancelled
 
 **置信度**: 高（run=COMPLETED, 断言词汇不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台 continue-on-error true 后 job COMPLETED（后续 step "This step should run" 正常执行），断言词汇不一致
+- **静默性**: 🟢明确报错 — 平台正常执行后续 step 并输出，仅测试断言词汇不匹配
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 continue-on-error true 语义完全正常（outcome=failure, conclusion=success），仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-OUTCOME-01-002 标记为「用例断言修复后应重新验跑」

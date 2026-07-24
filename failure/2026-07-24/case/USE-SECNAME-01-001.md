@@ -45,6 +45,13 @@
 
 **置信度**: 高（日志第 6 行 `token=***` 证实 reserved prefix secret 被正常求值并遮掩，Job COMPLETED 无校验错误，与 spec using-secrets.md 第 46 行"不得以 ATOMGIT_ 开头"声明直接矛盾）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — ATOMGIT_TOKEN 被当作自定义 secret 正常求值并遮掩，workflow 正常完成，不阻塞执行
+- **静默性**: 🔴静默错误 — 平台对 ATOMGIT_ 前缀的 secret 名称静默接受，无任何命名规则校验错误或警告
+- **影响面**: 🟡同维度 — 所有以 ATOMGIT_ 开头的用户自定义 secret 均受影响，可能与系统保留变量产生命名冲突
+- **综合**: ATOMGIT_ 前缀的 secret 名称被静默接受，所有以 ATOMGIT_ 开头的自定义 secret 可能与系统保留变量冲突且无任何警告
+- **是否有规避手段**: 否 — 用户无法从平台获得命名规则违规提示，无法得知 ATOMGIT_ 前缀不可用于自定义 secret
+
 **建议**:
 - 平台需在校验或运行时阶段检查 `secrets.ATOMGIT_*` 的引用，拒绝以 `ATOMGIT_` 为前缀的用户自定义 secret 名称，并在错误信息中列出允许的命名规则（大写字母、数字、下划线；不得以 ATOMGIT_ 开头；不得以数字开头）
 - 将"Secret 名称违规"与"Secret 未配置"两类错误明确区分，避免用户混淆

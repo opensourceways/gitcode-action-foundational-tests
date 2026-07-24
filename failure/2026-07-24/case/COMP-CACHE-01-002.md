@@ -47,6 +47,13 @@ steps:
 
 **置信度**: 中（Job "Verify restore keys fallback" status=FAILED, 0 字节有效日志）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — Job FAILED 且 0 字节 shell 日志，restore-keys 前缀匹配验证无法完成
+- **静默性**: 🟡可察觉 — Job status=FAILED 但零 shell 输出，无法区分是 cache 插件缺陷还是 runner 环境问题
+- **影响面**: 🔴跨维度 — cache restore-keys 功能完全不可用
+- **综合**: cache 恢复能力整体故障，restore-keys 前缀匹配未被测试到
+- **是否有规避手段**: 否 — 平台 cache 链路缺陷
+
 **建议**:
 - 将此缺陷提交给平台工程团队，附上日志文件 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMP-CACHE-01-002.log`
 - 建议修复后重新验跑 COMP-CACHE-01-002

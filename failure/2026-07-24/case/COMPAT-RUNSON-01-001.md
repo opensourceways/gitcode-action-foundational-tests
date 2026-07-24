@@ -52,6 +52,13 @@ Runner labels: dedicate-hosted x64 large
 
 **置信度**: 高（"RUNSON_ARRAY_OK" — runs-on 三段式正常）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台 runs-on 三段式数组格式正常（RUNSON_ARRAY_OK, Runner labels: dedicate-hosted x64 large），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常调度并输出 Runner 标签，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 runs-on 三段式标签调度功能完全正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-RUNSON-01-001 标记为「用例断言修复后应重新验跑」

@@ -51,6 +51,13 @@
 
 **置信度**: 中（token not found 是环境问题已被日志确凿证实，但此环境下 permissions 继承逻辑是否正确无法判断）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — workflow 能完成（job FAILED 但有明确退出码 6），但 permissions 继承逻辑未被验证到
+- **静默性**: 🟡可察觉 — 日志明确显示 `{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found"}`，token 不可用的原因可观测但非自解释
+- **影响面**: 🟢单用例 — 同时影响 SEC-DEFPERM-01-001 和 SEC-PERM-01-003（同 token 注入问题），不涉及其他 security 维度
+- **综合**: ATOMGIT_TOKEN 在 workflow_dispatch 事件下注入失败，permissions 继承逻辑未被测试到，属环境问题而非权限控制缺陷
+- **是否有规避手段**: 是 — 修复 token 注入或在 push 事件下触发测试即可验证 permissions 逻辑
+
 **建议**:
 - 修复 ATOMGIT_TOKEN 在 workflow_dispatch 事件下的注入问题
 - 修复后重跑此用例以验证 permissions 继承逻辑

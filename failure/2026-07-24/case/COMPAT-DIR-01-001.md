@@ -51,6 +51,13 @@ GITCODE_DIR_RECOGNIZED_OK
 
 **置信度**: 高（"GITCODE_DIR_RECOGNIZED_OK" — .gitcode/workflows/ 正常识别）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台 .gitcode/workflows/ 目录识别正常（GITCODE_DIR_RECOGNIZED_OK），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常识别并输出确认标记，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 .gitcode/workflows/ 目录识别功能完全正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-DIR-01-001 标记为「用例断言修复后应重新验跑」

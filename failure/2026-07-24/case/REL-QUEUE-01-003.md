@@ -33,6 +33,13 @@
 
 **置信度**: 高（平台功能正常——job COMPLETED 说明 QUEUE 策略下的排队调度正常；失败纯因断言词汇不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台QUEUE策略下并发调度功能正常（job COMPLETED），测试失败纯因断言词汇与平台状态命名不一致
+- **静默性**: 🟢明确报错 — 断言系统返回FAIL并显示期望 `completed(success)` vs 实际 `COMPLETED`，差异明确可诊断
+- **影响面**: 🟢单用例 — 仅影响使用 `completed(success)` 标记的断言，不影响平台任何功能
+- **综合**: 断言词汇 `completed(success)` 与平台状态值 `COMPLETED` 不匹配，平台QUEUE并发策略正常，修正断言字符串即可完全规避
+- **是否有规避手段**: 是 — 将断言中的 `completed(success)` 改为 `COMPLETED`
+
 **建议**:
 - 修正断言中的 run_status 标记——将 `completed(success)` 改为 `COMPLETED`
 - 相关用例: REL-CONC-01-001, REL-IGNORE-01-004, REL-RERUN-01-011

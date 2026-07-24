@@ -46,6 +46,13 @@ permissions:
 
 **置信度**: 低（Job "Verify empty permissions" status=FAILED, 0 字节有效日志）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — Job FAILED 且 0 字节 shell 日志，permissions 空对象场景下 TOKEN 权限验证无法完成
+- **静默性**: 🟡可察觉 — Job status=FAILED 但零 shell 输出，无法判断是平台权限机制缺陷还是环境/配置问题
+- **影响面**: 🟡同维度 — 影响所有 permissions 配置场景的功能验证
+- **综合**: permissions 功能链路完全无声失败，零日志使根因无法自动判定，需人工介入分析
+- **是否有规避手段**: 否 — 需人工检查 runner/secret/平台日志后重新判断
+
 **建议**:
 - 因 0 字节有效日志，无法自动判定根因
 - 需人工检查 runner 端状态、secret 配置和平台日志后重新判断

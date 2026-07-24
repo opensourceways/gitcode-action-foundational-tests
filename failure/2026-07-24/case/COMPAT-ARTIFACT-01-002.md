@@ -90,6 +90,13 @@ steps:
 
 **置信度**: 高（"ARTIFACT_UPLOADED_OK" — 上传成功, run=COMPLETED）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台 artifact 上传成功（ARTIFACT_UPLOADED_OK，完整的上传日志），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台完整输出上传全流程日志（zip 创建、上传、finalize、signed URL），仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 artifact 上传保留期功能完全正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-ARTIFACT-01-002 标记为「用例断言修复后应重新验跑」

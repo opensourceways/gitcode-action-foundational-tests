@@ -52,6 +52,13 @@
 
 **置信度**: 中（脚本 0 字节有效输出是确凿事实，断言关键词从未被显式 echo 输出是测试设计缺陷；多行脱敏保护是否有效未被测试到）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 测试失败原因是脚本 0 字节有效输出（多行 secret 展开为空）和断言标记从未被 echo，非平台安全缺陷
+- **静默性**: 🟡可察觉 — job COMPLETED 但无 stdout 输出，行为可观测但原因（多行 secret 展开为空）需要推断
+- **影响面**: 🟢单用例 — 仅影响 SEC-MASK-01-005 的多行 secret 脱敏测试
+- **综合**: 脚本输出完全为空导致多行 secret 脱敏行为未被测试到，断言标记 "multiline_masked_with_asterisks" 从未被脚本显式输出，属测试设计缺陷
+- **是否有规避手段**: 是 — 在脚本中添加显式标记输出和 echo 测试文本（如 `echo "multiline_masked_with_asterisks"`）
+
 **建议**:
 - 在 script 中添加显式标记输出（如 `echo "multiline_masked_with_asterisks"`）作为断言锚点
 - 使用非空的显式标记词而非依赖 secret 展开后的 undefined 行为

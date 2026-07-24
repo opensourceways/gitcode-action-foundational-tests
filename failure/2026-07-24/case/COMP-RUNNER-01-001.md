@@ -50,6 +50,13 @@ arch=x86_64
 
 **置信度**: 高（Runner spec 验证通过, run=COMPLETED）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台三段式标签正常调度到对应 Runner 并输出 os/arch 信息，断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常完成 job 并输出 Runner 规格信息，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 Runner 标签调度完全正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMP-RUNNER-01-001 标记为「用例断言修复后应重新验跑」

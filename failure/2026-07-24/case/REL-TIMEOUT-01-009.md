@@ -33,6 +33,13 @@
 
 **置信度**: 高（日志零输出——job 在 183s 时被 CANCELED（harness），平台 timeout-minutes=1 的短超时终止行为完全未被观察到；需 disable harness 超时来验证平台短超时机制）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — 平台timeout-minutes=1短超时终止行为未被观察到（harness在183s取消混淆了平台60s超时），但平台job启动和harness取消机制均正常
+- **静默性**: 🟡可察觉 — job状态CANCELED可察觉被取消，但0字节有效日志无法区分平台超时和harness取消
+- **影响面**: 🟢单用例 — 仅影响本timeout短超时用例，不影响超长超时或正常用例
+- **综合**: harness取消（~183s）混淆了平台短超时（~60s）机制，平台timeout-minutes=1的终止行为未能独立验证，disable harness超时即可规避
+- **是否有规避手段**: 是 — 对于短超时用例（timeout-minutes≤N），disable测试harness的超时机制让平台独立触发
+
 **建议**:
 - 对于短超时用例（timeout-minutes=1~N），disable 测试 harness 的超时机制，让平台 timeout-minutes 独立触发
 - 相关用例: REL-TIMEOUT-01-007, REL-TIMEOUT-01-008, REL-TIMEOUT-01-010

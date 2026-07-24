@@ -44,6 +44,13 @@
 
 **置信度**: 中（Job status=FAILED, reusable workflow_call 调用失败）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — Job FAILED，2 层 workflow_call 嵌套调用失败
+- **静默性**: 🟡可察觉 — Job status=FAILED 但仅 2 行日志，reusable workflow 调用失败无具体错误信息
+- **影响面**: 🟡同维度 — 影响所有使用 workflow_call 进行可复用 workflow 调用的场景
+- **综合**: reusable workflow_call 调用机制整体失效，嵌套 workflow 无法正常工作
+- **是否有规避手段**: 否 — 平台 workflow_call 机制缺陷
+
 **建议**:
 - 将此缺陷提交给平台工程团队，附上日志文件 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMP-CALL-01-001.log`
 - 建议修复后重新验跑 COMP-CALL-01-001

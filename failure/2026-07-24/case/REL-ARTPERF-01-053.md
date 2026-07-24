@@ -62,6 +62,13 @@
 
 **置信度**: 中（下载步骤本身成功，但 verify 脚本中文件路径预期与 artifact 解压后实际路径不匹配，属于测试脚本编写问题而非平台缺陷）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台upload/download功能完全正常（100MB artifact成功上传并下载），失败仅因测试脚本的文件名假设错误
+- **静默性**: 🟡可察觉 — `ls: cannot access 'perf-artifact'` 明确报文件不存在，可诊断
+- **影响面**: 🟢单用例 — 仅影响本测试脚本的verify步骤，不影响平台artifact功能
+- **综合**: 测试脚本使用了artifact名称而非原始文件名查找下载文件，平台功能正常，修正verify步骤的文件名即可规避
+- **是否有规避手段**: 是 — 将verify步骤中的 `ls perf-artifact` 改为 `ls artifact.bin` 或通配符 `ls *.bin`
+
 **建议**:
 - 修复测试脚本的 verify 步骤——使用正确的解压后文件名 `artifact.bin` 或使用通配符 `ls` 检查所有解压文件
 - 相关用例: REL-ART-01-041

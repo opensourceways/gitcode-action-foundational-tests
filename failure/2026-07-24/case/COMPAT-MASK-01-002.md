@@ -100,6 +100,13 @@ Env value:
 
 **置信度**: 中（config_probe=PASS, run=COMPLETED）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台通过 env 注入 secret 并脱敏正常（"Env value:" 后为空），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常输出脱敏结果，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台 secret 通过 env 脱敏功能完全正常，secret 值在日志中已脱敏为空，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMPAT-MASK-01-002 标记为「用例断言修复后应重新验跑」

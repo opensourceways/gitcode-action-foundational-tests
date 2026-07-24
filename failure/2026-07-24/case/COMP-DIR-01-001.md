@@ -50,6 +50,13 @@ workflow recognized
 
 **置信度**: 高（"workflow recognized" — run=COMPLETED, 断言期望 "success" ≠ 平台 COMPLETED）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台行为正确，workflow 被识别并输出 "workflow recognized"，断言标记 COMPLETED≠success 是测试侧问题
+- **静默性**: 🟢明确报错 — 平台正常完成 job 并输出 shell 日志，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例的断言标记需要修复
+- **综合**: 平台功能正常（.gitcode/workflows/ 正确识别并触发），仅断言标记不匹配需修复 compile_asserts.py
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射：COMPLETED→success
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMP-DIR-01-001 标记为「用例断言修复后应重新验跑」

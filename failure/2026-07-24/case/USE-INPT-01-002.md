@@ -48,6 +48,13 @@
 
 **置信度**: 高（日志第 6 行 `dry_run=false` 证实 boolean 类型被静默降级为 string，Job COMPLETED 无校验错误，与 spec configure-triggers.md 第 103 行"仅支持 string"声明直接矛盾）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — type:boolean 被静默降级为 string，workflow 仍正常完成，不阻塞执行
+- **静默性**: 🔴静默错误 — boolean 类型被静默接受并降级为 string，无任何校验错误或警告
+- **影响面**: 🟡同维度 — 所有使用非 string 类型 input 的 workflow_dispatch 均受影响，任何非 string 类型都会被静默降级
+- **综合**: boolean 类型 input 被静默降级为 string 且无任何提示，所有使用非 string 类型 input 的 workflow_dispatch 均受影响
+- **是否有规避手段**: 否 — 用户无法从平台获得任何关于类型限制的提示
+
 **建议**:
 - 平台 YAML 校验器需拒绝 `type` 字段的非 `string` 值，在 API 返回/UI 展示中明确报出"inputs 仅支持 string 类型，如需布尔语义请在步骤中使用表达式转换"的错误信息
 - 相关用例: USE-INPT-01-001（同一意图 INTENT-USE-008 sibling）

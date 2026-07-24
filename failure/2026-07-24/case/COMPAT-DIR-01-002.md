@@ -52,6 +52,13 @@ GITHUB_DIR_WORKFLOW_RAN
 
 **置信度**: 高（"GITHUB_DIR_WORKFLOW_RAN" FOUND — 平台错误触发了 .github/workflows/, 安全边界破坏）
 
+**影响**:
+- **阻塞性**: 🔴阻塞 — 平台错误触发了 .github/workflows/ 下的 workflow（GITHUB_DIR_WORKFLOW_RAN），违反了安全边界预期
+- **静默性**: 🔴静默错误 — 平台未给出任何拒绝/忽略的提示，静默执行了不应被识别的 .github/ 目录下的 workflow
+- **影响面**: 🔴跨维度 — 安全边界破坏，可能导致误将 .github/ workflow 作为 .gitcode/ workflow 执行，影响所有仓库
+- **综合**: 平台严重安全缺陷：接受并执行了不应被识别的 .github/workflows/ 路径，无拒绝提示，违反目录命名隔离约定
+- **是否有规避手段**: 否 — 需平台修复 workflow 目录识别逻辑
+
 **建议**:
 - 将此缺陷提交给平台工程团队，附上日志文件 `/home/chenqi252/code/gitcode-ci/workspace-gitcode-action/gitcode-action-foundational-tests/failure/2026-07-24/COMPAT-DIR-01-002.log`
 - 建议修复后重新验跑 COMPAT-DIR-01-002

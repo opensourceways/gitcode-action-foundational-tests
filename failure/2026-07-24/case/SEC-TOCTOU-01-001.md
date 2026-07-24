@@ -48,6 +48,13 @@
 
 **置信度**: 中（atomgit.sha 为空是确凿事实，断言关键词 "approved_sha_matched" 从未被脚本输出是测试设计缺陷——脚本需要显式比较并输出标记）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — `atomgit.sha` 在 workflow_dispatch 事件下返回空字符串，TOCTOU 保护逻辑未被测试到；不存在"审批后新 commit 被执行"的安全缺陷
+- **静默性**: 🟡可察觉 — 日志输出 `Running commit: `（空值），用户可观察到 SHA 缺失但原因（上下文行为）需要推断
+- **影响面**: 🟢单用例 — 仅影响 SEC-TOCTOU-01-001 的 TOCTOU 保护验证
+- **综合**: `atomgit.sha` 在 workflow_dispatch 下返回空字符串，断言关键词 "approved_sha_matched" 从未被脚本显式输出，属上下文行为与测试设计偏差
+- **是否有规避手段**: 是 — 脚本需添加显式比较逻辑和标记输出；确认 workflow_dispatch 下 atomgit.sha 是否预期为空
+
 **建议**:
 - 脚本需添加显式的比较逻辑和断言标记输出（如 `[ "$ATOMGIT_SHA" = "$APPROVED_SHA" ] && echo approved_sha_matched`）
 - 确认 `atomgit.sha` 在 workflow_dispatch 事件下是否应返回非空值

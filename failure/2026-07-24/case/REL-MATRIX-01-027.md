@@ -50,6 +50,13 @@
 
 **置信度**: 高（平台功能正常——3 个 matrix job 全部 COMPLETED 且输出版本号正确；失败纯因断言词汇不匹配和可能的 matrix 维度配置问题）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台matrix展开和调度功能正常（3个job实例均COMPLETED并输出正确版本号），测试失败纯因断言词汇不匹配
+- **静默性**: 🟢明确报错 — 断言系统返回FAIL并显示期望 `completed(success)` vs 实际 `COMPLETED`，差异明确可诊断
+- **影响面**: 🟢单用例 — 仅影响使用 `completed(success)` 标记的断言，不影响平台matrix功能
+- **综合**: 断言词汇 `completed(success)` 与平台状态值 `COMPLETED` 不匹配，平台matrix功能正常，修正断言字符串即可完全规避
+- **是否有规避手段**: 是 — 将断言中的 `completed(success)` 改为 `COMPLETED`
+
 **建议**:
 - 修正断言中的 status 标记——将 `completed(success)` 改为 `COMPLETED`
 - 检查测试 YAML 中 matrix 配置是否为 3x3=9 组合（而非仅 3 个）

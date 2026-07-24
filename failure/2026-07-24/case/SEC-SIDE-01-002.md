@@ -81,6 +81,13 @@
 
 **置信度**: 中（制品名冲突是环境问题已被日志确凿证实；secret 通过 artifact 侧信道泄漏这一安全问题未被实际测试到——测试逻辑被环境残留阻断）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — workflow 能完成（job FAILED），但 artifact 因名称冲突上传失败，secret 通过 artifact 侧信道泄漏的测试完全未执行到
+- **静默性**: 🟡可察觉 — 日志明确提示 `::error::Upload artifact failed: Artifact with name already exists: secret-artifact`，原因可观测
+- **影响面**: 🟢单用例 — 仅影响 SEC-SIDE-01-002 的 artifact 侧信道测试，与 artifact 名称跨 run 冲突相关
+- **综合**: 制品名 `secret-artifact` 与前次运行残留冲突导致上传失败，secret 侧信道泄漏的安全边界未被实际测试到
+- **是否有规避手段**: 是 — 使用带时间戳的唯一制品名称避免跨 run 冲突；在 teardown 中清理前次残留 artifact
+
 **建议**:
 - 在 teardown 中清理前次运行残留的 artifact（使用唯一名称后缀如时间戳以避免跨 run 冲突）
 - 若 artifact 上传成功，需设计下载并验证 artifact 内容的步骤（当前测试缺少下载验证环节）

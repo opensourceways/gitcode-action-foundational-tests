@@ -47,6 +47,13 @@
 
 **置信度**: 中（commit message 为空导致注入测试未实际执行是确凿事实，同时 COMPLETED≠"success" 的 标记不匹配 叠加导致 FAIL）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 测试失败原因是指令注入攻击面未被实际触发（commit message 为空）而非真实安全漏洞；平台在 push 事件下 commit message 为空不是安全缺陷
+- **静默性**: 🟢明确报错 — run_status COMPLETED 与断言关键词 "success" 不匹配是可观测的断言失败，非隐藏行为
+- **影响面**: 🟢单用例 — 仅影响 SEC-INJ-01-004 的命令注入测试，不涉及其他用例或维度
+- **综合**: commit message 上下文传递为空字符串导致注入测试未执行，叠加 COMPLETED ≠ "success" 的标记不匹配，无安全风险
+- **是否有规避手段**: 是 — 确保 push 事件的 commit message 正确传递到 atomgit.event 上下文；run_status 断言使用 must_not_equal "FAILED"
+
 **建议**:
 - 前置条件需确保 push 的 commit message 正确传递到 workflow 上下文（而非空字符串）
 - run_status 断言应使用语义映射（COMPLETED→"success"）或使用 `must_not_equal: "FAILED"`

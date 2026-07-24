@@ -44,6 +44,13 @@
 
 **置信度**: 中（平台正确拦截了未定义变量，Job FAILED 非静默通过；但缺少映射指引属于编译缺口——断言 `eval=llm_assisted` 需要 LLM 判断"日志警告是否醒目"，编译期无法处理此 target 导致退化至 run_status 检查）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — bash 报错 `unbound variable` 导致 Job FAILED，用户可看到错误但缺少平台级迁移指引
+- **静默性**: 🟢明确报错 — bash 明确输出 `GITHUB_SHA: unbound variable` 错误，错误信息清晰可定位
+- **影响面**: 🟡同维度 — 所有引用 GITHUB_* 环境变量（非表达式）的 workflow 均会在此处失败
+- **综合**: bash 报错明确但缺少平台级 GITHUB_* → ATOMGIT_* 迁移指引，所有引用 GitHub 环境变量的 workflow 均受影响
+- **是否有规避手段**: 是 — 用户可直接将 `$GITHUB_SHA` 替换为 `$ATOMGIT_SHA`
+
 **建议**:
 - 平台可在 Runner 环境中设置 GITHUB_* → ATOMGIT_* 的兼容 alias，或在引用未定义的 GITHUB_* 变量时在 stderr 注入提示信息（如 "GITHUB_SHA is not set. Use ATOMGIT_SHA instead."）
 - 测试 YAML 断言 `eval: llm_assisted` 需要 LLM 运行时评估，建议增加一个 `positive: run_logs contains "ATOMGIT_SHA"` 作为确定性 fallback

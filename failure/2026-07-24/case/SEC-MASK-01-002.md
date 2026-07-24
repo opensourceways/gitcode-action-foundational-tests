@@ -63,6 +63,13 @@
 
 **置信度**: 中（断言引擎不支持 `step_summary`/`error_stack` 目标是编译期缺口，同时 secret 值在日志中为空而非 `***` 再次印证 SEC-MASK-01-001 的掩码缺陷）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 断言引擎不支持 `step_summary` 和 `error_stack` 目标类型是测试基础设施的编译期缺口，非平台安全缺陷；secret 脱敏行为本身（空字符串）与 SEC-MASK-01-001 同根因
+- **静默性**: 🟡可察觉 — job status FAILED 可被观测，但步骤 1（Write secret to summary）无标准输出，需推断步骤执行结果
+- **影响面**: 🟢单用例 — 仅影响依赖 `step_summary`/`error_stack` 断言目标的测试用例（当前仅 SEC-MASK-01-002）
+- **综合**: 断言引擎编译期无法读取 step_summary/error_stack 目标，叠加 secret 空字符串脱敏问题，非 step summary 特有的安全缺陷
+- **是否有规避手段**: 是 — 将断言 target 改为 run_logs 并通过 echo 输出验证标记；或在断言引擎中增加 step_summary/error_stack 读取支持
+
 **建议**:
 - 在断言引擎中增加 `step_summary` 和 `error_stack` 目标的读取支持
 - 若无条件支持，将断言的 target 改为 `run_logs` 并通过 echo 输出验证标记

@@ -55,6 +55,13 @@ jobs:
 
 **置信度**: 中（"starting" 出现(value=PASS), 227s 后 harness 超时取消, CANCELED≠"failure"）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — job 在 platform timeout 触发前被 harness 超时取消（CANCELED），平台 timeout 机制未被测试到但 job 本身可运行
+- **静默性**: 🟡可察觉 — Job status=CANCELED（harness 取消），但用户可见的是平台 CANCELED 而非期望的 failure，容易误判
+- **影响面**: 🟢单用例 — 仅本用例因 harness 超时配置不匹配受影响
+- **综合**: harness 超时先于平台 timeout 触发（227s vs 1min），job 被 CANCELED 而非平台 timeout 产生 FAILED，环境配置需调整
+- **是否有规避手段**: 是 — 增加 harness 超时或减小 platform timeout-minutes 使平台先触发
+
 **建议**:
 - 增加 harness 超时时间或减小 platform timeout-minutes 值以避免 harness 先触发
 - 将 COMP-TIMEOUT-01-002 标记为「环境修复后重新验跑」

@@ -103,6 +103,13 @@ Cleanup ran after failure
 
 **置信度**: 高（cleanup 执行 "Cleanup ran after failure" — value=PASS; 断言 exp="failure" vs act="FAILED" — 大小写不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — Engine Bug（大小写比较问题），平台 cleanup 正常执行（"Cleanup ran after failure" value=PASS），仅断言 "failure"≠"FAILED" 大小写不匹配
+- **静默性**: 🟢明确报错 — 平台完整输出 step 执行结果，错误可定位：表达式返回 FAILED 而断言期望 failure
+- **影响面**: 🟢单用例 — 平台表达式引擎大小写不一致问题，仅影响断言比较
+- **综合**: 平台行为正确（failure 后 cleanup 正常执行），表达式引擎返回大写 FAILED 与文档约定的小写 failure 不一致
+- **是否有规避手段**: 是 — 统一断言为大写匹配或平台修复大小写语义
+
 **建议**:
 - 平台表达式引擎同时返回大写(`FAILED`/`CANCELED`)和文档中的小写(`success`/`failure`/`cancelled`)值
 - 建议统一为文档约定的小写语义值

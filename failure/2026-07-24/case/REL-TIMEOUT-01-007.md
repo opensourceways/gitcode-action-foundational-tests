@@ -33,6 +33,13 @@
 
 **置信度**: 高（harness 300s 超时在 ~369s 时触发取消——`sleep 21540` 对应的 359min 远未到达；日志 0 字节有效输出证明 job 被外部取消而非平台 timeout 机制触发）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — 平台timeout-minutes=360功能未被测试（sleep 21540从未执行完成），但平台job启动和harness取消机制均正常
+- **静默性**: 🟡可察觉 — job状态CANCELED可察觉被取消，但0字节有效日志无法判断是平台timeout还是harness取消
+- **影响面**: 🟢单用例 — 仅影响超长sleep的timeout边界测试用例（REL-TIMEOUT-01-007/008/010），不影响短时用例
+- **综合**: harness 300s全局超时先于平台360min timeout触发导致platform timeout边界行为未被测试，调整harness超时配置即可规避
+- **是否有规避手段**: 是 — 将超长sleep用例的harness超时上限设置为大于平台timeout-minutes的值（如370min）
+
 **建议**:
 - 针对超长 sleep 用例（如 sleep 21540=359min），测试 harness 的超时上限应设置为大于平台 timeout-minutes 的值（如 370min），或 disable harness 超时
 - 相关用例: REL-TIMEOUT-01-008, REL-TIMEOUT-01-009, REL-TIMEOUT-01-010

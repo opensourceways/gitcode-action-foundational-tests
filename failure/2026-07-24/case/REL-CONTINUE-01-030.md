@@ -41,6 +41,13 @@
 
 **置信度**: 高（平台行为完全正确——continue-on-error 生效，job_b 正常执行 `job_b executed`；失败仅因断言 coarse 未区分预期失败 vs 意外失败）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台continue-on-error功能完全正确（job_a FAILED后job_b正常COMPLETED），测试失败纯因断言未区分预期失败
+- **静默性**: 🟡可察觉 — 断言判定FAIL但日志明确显示平台行为与规格一致，需要人工解读
+- **影响面**: 🟢单用例 — 仅影响本用例的断言评估策略，不影响平台continue-on-error功能
+- **综合**: 断言将预期失败的job_a的FAILED状态计入整体评估导致误判，平台行为完全正确，优化断言策略即可规避
+- **是否有规避手段**: 是 — 断言中增加job_a的expected-failure标记，仅验证job_b的COMPLETED状态
+
 **建议**:
 - 在断言中增加 `job_a` 的 expected-failure 标记，或修改断言策略使其仅验证 job_b 的成功执行
 - 相关用例: REL-NEEDS-01-025

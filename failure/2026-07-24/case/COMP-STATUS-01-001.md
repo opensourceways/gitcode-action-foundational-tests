@@ -45,6 +45,13 @@ running
 
 **置信度**: 高（"running" — run=COMPLETED, 断言词汇不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台状态机正常工作（"running" 输出确认 job 正常执行），断言标记 COMPLETED≠success
+- **静默性**: 🟢明确报错 — 平台正常完成 job 并输出运行状态，仅测试断言词汇不一致
+- **影响面**: 🟢单用例 — 仅本用例断言标记需修复
+- **综合**: 平台运行状态机功能正常，仅断言词汇不匹配
+- **是否有规避手段**: 是 — 修复 run_status 词汇映射
+
 **建议**:
 - 修复 `compile_asserts.py` 中的 run_status 词汇映射：`COMPLETED→success, FAILED→failure, CANCELED→canceled`
 - 将 COMP-STATUS-01-001 标记为「用例断言修复后应重新验跑」

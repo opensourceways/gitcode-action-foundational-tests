@@ -60,6 +60,13 @@
 
 **置信度**: 中（日志明确 artifact 名冲突，非平台功能缺陷，属测试环境中前次运行的残留 artifact 干扰）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台artifact上传功能正常，失败仅因环境中前次运行的artifact残留导致同名冲突
+- **静默性**: 🟡可察觉 — 平台明确返回 `Artifact with name already exists` 错误信息，但测试未捕获此消息
+- **影响面**: 🟢单用例 — 仅影响本测试用例，其他用例使用不同的artifact名称不受影响
+- **综合**: 环境同名artifact冲突导致测试失败，平台功能本身正常，使用唯一artifact名称即可完全规避
+- **是否有规避手段**: 是 — 每次运行时使用带UUID后缀的唯一artifact名称
+
 **建议**:
 - 每次测试运行前确保 artifact 名称唯一（如附加 run_id 或 UUID 后缀），避免跨运行同名冲突
 - 相关用例: REL-ARTPERF-01-053, REL-ARTPERF-01-053-V2, REL-ARTCONC-01-063

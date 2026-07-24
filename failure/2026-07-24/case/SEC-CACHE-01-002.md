@@ -67,6 +67,13 @@
 
 **置信度**: 中（cache 因事件限制未执行是确凿事实，但 fork cache 隔离是否真的有效未被测试）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — cache 插件因事件类型不匹配拒绝执行，测试流程未能完成，但平台行为本身合理（manual 事件不在 cache allowlist 中）
+- **静默性**: 🟡可察觉 — 日志中有 `::warning::` 明确说明事件验证失败原因 `allowlist=[push|pull_request|merge_request]`，可观测但容易忽略
+- **影响面**: 🟢单用例 — 仅影响 SEC-CACHE 系列在 workflow_dispatch 事件下的测试，cache 插件对 push/pull_request 事件正常
+- **综合**: 测试触发事件与 cache 插件支持的事件列表不匹配导致未执行，非 cache 隔离机制缺陷
+- **是否有规避手段**: 是 — 将触发事件从 workflow_dispatch 改为 push 即可通过 cache 插件事件校验
+
 **建议**:
 - 将触发事件从 `workflow_dispatch` 改为 `push` 以通过 cache 插件的事件校验
 - 在规格文档 `using-dependency-cache.md` 中补充说明 cache 插件支持的事件类型

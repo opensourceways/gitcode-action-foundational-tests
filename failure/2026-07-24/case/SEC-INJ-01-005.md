@@ -52,6 +52,13 @@
 
 **置信度**: 高（日志确凿显示 bash `bad substitution`——模板引擎未处理表达式。断言引擎对 "2" 的假阳性匹配导致 negative 断言误 FAIL，同时 "template_chars_escaped" 标记完全不匹配）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 模板语法 `${{ '{{ 1 + 1 }}' }}` 未被平台模板引擎求值（bash 直接收到字面量），不存在二次渲染安全漏洞；测试失败是断言设计问题
+- **静默性**: 🟡可察觉 — bash 报 `bad substitution` 错误并 exit 1，有明确错误信息，但根因（模板引擎未处理）需要推断
+- **影响面**: 🟢单用例 — 仅影响 SEC-INJ-01-005 的表达式二次求值测试
+- **综合**: `must_not_contain "2"` 对源文本 "1 + 1" 产生字符级假阳性匹配，叠加 "template_chars_escaped" 标记从未被输出，无安全风险
+- **是否有规避手段**: 是 — 将断言关键词改为更精确的标记（如 must_not_contain "double_eval_detected"）避免字符级假阳性
+
 **建议**:
 - 断言 `must_not_contain: "2"` 过于宽泛，应改为更精确的标记（如 `must_not_contain: "double_eval_detected"`）以避免字符级假阳性
 - 模板引擎应正确处理 `${{ '{{ ... }}' }}` 字面量场景（将内层 `{{ }}` 作为字符串返回）

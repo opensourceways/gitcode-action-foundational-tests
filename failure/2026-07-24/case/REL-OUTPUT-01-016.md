@@ -40,6 +40,13 @@
 
 **置信度**: 高（合约生成缺陷——`${{{{ }}}}` 四括号语法错误是已知的系统性问题；bash 语法错误 `bad substitution` 阻断所有 output 读取逻辑）
 
+**影响**:
+- **阻塞性**: ⚪无影响 — 平台step output传递机制未被测试到（bash语法错误先于output读取触发），失败仅因合约模板中CI表达式语法错误
+- **静默性**: 🟡可察觉 — bash明确报 `bad substitution` 错误，可诊断但非平台问题
+- **影响面**: 🟢单用例 — 仅影响使用 `${{{{ }}}}` 四括号模板生成的用例，不影响平台正常功能
+- **综合**: 合约生成器四层大括号语法错误导致output读取步骤bash崩溃，平台step output功能未被测试，修复合约生成器模板即可完全规避
+- **是否有规避手段**: 是 — 修复合约生成器将 `${{{{ steps.writer.outputs.data }}}}` 改为 `${{ steps.writer.outputs.data }}`
+
 **建议**:
 - 修复合约生成器，确保 steps context 引用输出为 `${{ steps.writer.outputs.data }}` 而非 `${{{{ steps.writer.outputs.data }}}}`
 - 相关用例: REL-ARTCONC-01-063, REL-MATRIX-01-038, REL-MATRIX-01-039
