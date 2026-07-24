@@ -7,9 +7,13 @@ from collections import defaultdict
 YAML_DIR = Path(__file__).resolve().parent / "VALID"
 OUT_DIR = Path(__file__).resolve().parent
 
-TRIGGER_SUPPORTED = {"push", "manual", "workflow_dispatch"}
-TRIGGER_SEMI = {"fork_pr", "pull_request", "pull_request_target", "pull_request_comment"}
-TRIGGER_CANNOT = {"schedule"}
+TRIGGER_SCRIPTABLE = {"push"}        # API works + platform fires trigger
+TRIGGER_API_READY  = {"pull_request", "pull_request_target", "fork_pr",
+                      "issue_comment", "pull_request_comment"}
+                                     # API calls verified, platform does NOT fire
+TRIGGER_WORKAROUND = {"schedule"}    # Needs cron push + wait (non-deterministic)
+TRIGGER_UNTESTED  = {"manual", "workflow_dispatch", "tag"}
+                                     # Not yet tested via API
 
 ENGINE_KINDS = {"status", "run_status", "value", "leak", "mask", "config_probe"}
 KNOWN_FIXTURES = {"basic-ci", "clean", "default", "with-secrets", "fork-target", "fork-source",
@@ -32,22 +36,27 @@ def classify_case(yf: Path) -> dict:
     fixture = setup.get("repo_fixture", "default")
     fi = case.get("fault_injection") or {}
     assertions = case.get("assertions", [])
-    classified = "full_scriptable"
+    classified = "scriptable"
     all_blockers = []
 
-    # Trigger analysis
-    trigger_ok = event in TRIGGER_SUPPORTED
-    if event in TRIGGER_CANNOT:
-        all_blockers.append(f"trigger {event}: platform limitation")
-    elif event in TRIGGER_SEMI:
-        all_blockers.append(f"trigger {event}: needs PR/fork API + second account")
-    elif event not in TRIGGER_SUPPORTED:
+    # Trigger analysis (post-demo: all API calls work, platform only fires push)
+    if event in TRIGGER_SCRIPTABLE:
+        trigger_ok = True
+    elif event in TRIGGER_API_READY:
+        trigger_ok = False
+        all_blockers.append(f"trigger {event}: API works, platform does NOT fire trigger")
+    elif event in TRIGGER_WORKAROUND:
+        trigger_ok = False
+        all_blockers.append(f"trigger {event}: needs cron push + wait (non-deterministic)")
+    elif event in TRIGGER_UNTESTED:
+        trigger_ok = False
+        all_blockers.append(f"trigger {event}: API not yet tested")
+    else:
+        trigger_ok = False
         all_blockers.append(f"trigger {event}: unknown/unmapped trigger event")
 
-    if actor == "untrusted_contributor":
+    if actor == "untrusted_contributor" and trigger_ok:
         all_blockers.append("trigger.as=untrusted_contributor: needs second account token")
-    elif event != "push" and not trigger_ok:
-        classified = "not_scriptable"
 
     # Setup analysis
     if fixture not in KNOWN_FIXTURES:
@@ -243,28 +252,34 @@ def generate_report(results, out_dir):
     lines.append("# Case 可脚本化分类报告 — 2026-07-23 VALID (229 cases)")
     lines.append("")
     lines.append(f"**数据源**: `phase02/classify-experiment/2026-07-23/VALID/` (仅含平台校验通过的 229 cases)")
-    lines.append(f"**Phase 02 执行器**: `workflow_runner.py` + `assertion_engine.py`")
+    lines.append(f"**分类方式**: 基于 demo 实测的 API 可用性 + 平台触发行为")
     lines.append("")
     lines.append("## 总体统计")
     lines.append("")
     lines.append(f"| 分类 | 数量 | 占比 | 含义 |")
     lines.append(f"|------|------|------|------|")
-    lines.append(f"| `full_scriptable` | **{full}** | {full/total*100:.1f}% | trigger 可触发 + 全部断言可映射 + 无 setup/fault 阻断 |")
-    lines.append(f"| `partial_scriptable` | **{partial}** | {partial/total*100:.1f}% | trigger 可触发但存在部分阻断 |")
-    lines.append(f"| `not_scriptable` | **{not_s}** | {not_s/total*100:.1f}% | trigger 不可触发或有不可自动化阻断 |")
+    lines.append(f"| `scriptable` | **{stats['__total__'].get('scriptable', 0)}** | {stats['__total__'].get('scriptable',0)/total*100:.1f}% | push trigger + 全部断言可映射 |")
+    lines.append(f"| `api_blocked` | **{stats['__total__'].get('api_blocked', 0)}** | {stats['__total__'].get('api_blocked',0)/total*100:.1f}% | API 调用可行，平台不触发 (非代码问题) |")
+    lines.append(f"| `fixture_gap` | **{stats['__total__'].get('fixture_gap', 0)}** | {stats['__total__'].get('fixture_gap',0)/total*100:.1f}% | trigger 可触发但缺 repo fixture |")
+    lines.append(f"| `assertion_gap` | **{stats['__total__'].get('assertion_gap', 0)}** | {stats['__total__'].get('assertion_gap',0)/total*100:.1f}% | trigger 可触发但断言需新 kind |")
     lines.append("")
 
     dims = ['completeness', 'compatibility', 'reliability', 'security', 'usability']
     lines.append("## 按维度 × 分类")
     lines.append("")
-    lines.append("| 维度 | full | partial | not | 合计 |")
-    lines.append("|------|------|---------|-----|------|")
+    lines.append("| 维度 | scriptable | api_blocked | fixture_gap | assertion_gap | 合计 |")
+    lines.append("|------|-----------|-------------|-------------|---------------|------|")
     for dim in dims:
-        f = stats[dim].get('full_scriptable', 0)
-        p = stats[dim].get('partial_scriptable', 0)
-        n = stats[dim].get('not_scriptable', 0)
-        lines.append(f"| {dim} | {f} | {p} | {n} | {f+p+n} |")
-    lines.append(f"| **合计** | **{full}** | **{partial}** | **{not_s}** | **{total}** |")
+        s = stats[dim].get('scriptable', 0)
+        a = stats[dim].get('api_blocked', 0)
+        f = stats[dim].get('fixture_gap', 0)
+        ag = stats[dim].get('assertion_gap', 0)
+        lines.append(f"| {dim} | {s} | {a} | {f} | {ag} | {s+a+f+ag} |")
+    st = stats['__total__'].get('scriptable', 0)
+    at = stats['__total__'].get('api_blocked', 0)
+    ft = stats['__total__'].get('fixture_gap', 0)
+    agt = stats['__total__'].get('assertion_gap', 0)
+    lines.append(f"| **合计** | **{st}** | **{at}** | **{ft}** | **{agt}** | **{st+at+ft+agt}** |")
     lines.append("")
 
     # Blocker summary
@@ -287,11 +302,19 @@ def generate_report(results, out_dir):
 
     lines.append("### Trigger 层")
     lines.append("")
-    lines.append("| 阻断 | Cases |")
-    lines.append("|------|-------|")
+    lines.append("| 阻断 | Cases | 说明 |")
+    lines.append("|------|-------|------|")
     for b, cases in sorted(blocker_cases.items(), key=lambda x: -len(x[1])):
         if "trigger" in b.lower():
-            lines.append(f"| {b} | {len(cases)} |")
+            # 标注是否为 api_blocked
+            note = ""
+            if "API works, platform does NOT fire" in b:
+                note = " (API 已打通，平台不触发)"
+            elif "needs cron" in b:
+                note = " (cron push + wait 可行)"
+            elif "API not yet tested" in b:
+                note = " (待 API 验证)"
+            lines.append(f"| {b} | {len(cases)} |{note}")
     lines.append("")
 
     lines.append("### 断言层 — 需新 assertion kind")
@@ -338,8 +361,10 @@ def generate_report(results, out_dir):
     lines.append("## 逐 Case 明细")
     lines.append("")
 
-    for r in sorted(results, key=lambda x: ({"full_scriptable": 0, "partial_scriptable": 1, "not_scriptable": 2}[x['classification']], x['case_id'])):
-        icon = {"full_scriptable": "✓", "partial_scriptable": "◐", "not_scriptable": "✗"}[r['classification']]
+    for r in sorted(results, key=lambda x: (
+        {"scriptable": 0, "assertion_gap": 1, "fixture_gap": 2, "api_blocked": 3}[x['classification']],
+        x['case_id'])):
+        icon = {"scriptable": "✓", "assertion_gap": "⬜", "fixture_gap": "⬜", "api_blocked": "✗"}[r['classification']]
         lines.append(f"### {icon} {r['case_id']} — {r['classification']}")
         lines.append(f"- 维度: {r['dimension']} | 优先级: {r['priority']}")
         lines.append(f"- 标题: {r['title']}")
