@@ -13,6 +13,7 @@
 # ✅ 正确 — 数组格式（demo 仓库实测可用）
 runs-on: [ubuntu-latest, x64, small]
 runs-on: [self-hosted, arch=arm]
+runs-on: [self-hosted, arch=arm, group=006]   # K8s 自托管 runner（group=006）
 runs-on: ['codearts-hosted', 'ubuntu-latest', 'x64', 'large']
 
 # ❌ 错误 — 对象格式被平台拒绝
@@ -34,7 +35,8 @@ runs-on: [ubuntu-latest, arm64, small]
 
 # 仅在用例本身测试 runs-on 标签/runner 选择逻辑时才用
 runs-on: [dedicate-hosted, x64, large]
-runs-on: [dedicate-hosted, arm64, large]   # ARM 架构时
+runs-on: [dedicate-hosted, arm64, large]       # ARM 架构时
+runs-on: [self-hosted, arch=arm, group=006]    # K8s self-hosted runner 用例
 runs-on: [ubuntu-latest, x64, small]
 runs-on: [self-hosted, arch=arm]
 ```
