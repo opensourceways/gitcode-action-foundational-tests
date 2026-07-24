@@ -1,4 +1,4 @@
-﻿id: USE-RUN-01-001
+id: USE-RUN-01-001
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-runner:
       name: test three-part labels
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: check runner
           run: |

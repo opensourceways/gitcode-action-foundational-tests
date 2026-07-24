@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-mask:
       name: test secret masking via env
-      runs-on: [self-hosted,arch=arm]
+      runs-on: [dedicate-hosted, x64, large]
       env:
         SECRET_VAL: ${{ secrets.TEST_SECRET }}
       steps:

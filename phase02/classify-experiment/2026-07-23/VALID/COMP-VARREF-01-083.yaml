@@ -1,0 +1,45 @@
+id: COMP-VARREF-01-083
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: YAML 表达式与 Shell 环境变量引用方式验证
+intent_ref: KEEP-TC-438~440
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  env:
+    TEST_VAR: hello
+  jobs:
+    verify:
+      name: Verify variable reference styles
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare references
+          run: |
+            echo "EXPR=${{ env.TEST_VAR }}"
+            echo "ENV=$TEST_VAR"
+            echo "SHA_EXPR=${{ atomgit.sha }}"
+            echo "SHA_ENV=$ATOMGIT_SHA"
+            echo "ref_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: EXPR=hello
+  - type: positive
+    target: run_logs
+    must_contain: ENV=hello
+  - type: positive
+    target: run_logs
+    must_contain: ref_ok
+teardown:
+  reset: fixture

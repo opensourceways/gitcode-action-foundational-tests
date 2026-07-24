@@ -1,0 +1,49 @@
+id: COMPAT-VARS-01-005
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "vars 在条件表达式 if 中的可用性差异"
+intent_ref: INTENT-COMPAT-022
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables:
+    ENABLE_FEATURE: "true"
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-vars-if:
+      name: Test vars in if condition
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Step always runs
+          run: |
+            echo "always"
+        - name: Step conditional on vars
+          if: ${{ vars.ENABLE_FEATURE == 'true' }}
+          run: |
+            echo "feature_enabled"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "若支持 vars，条件步骤应执行并输出 feature_enabled"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "vars 不应被静默视为空字符串导致条件步骤跳过"
+
+teardown:
+  reset: fixture

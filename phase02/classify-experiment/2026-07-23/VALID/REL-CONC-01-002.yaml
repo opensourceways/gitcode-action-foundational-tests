@@ -1,4 +1,4 @@
-﻿id: REL-CONC-01-002
+id: REL-CONC-01-002
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test:
       name: concurrency test job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: sleep step
           run: |

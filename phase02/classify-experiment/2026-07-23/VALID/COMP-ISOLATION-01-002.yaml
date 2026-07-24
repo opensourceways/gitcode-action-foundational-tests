@@ -1,4 +1,4 @@
-﻿id: COMP-ISOLATION-01-002
+id: COMP-ISOLATION-01-002
 dimensions: [completeness, reliability, security]
 dimension: completeness
 priority: P0
@@ -17,14 +17,14 @@ workflow: |
   jobs:
     job1:
       name: Set env
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Export env
           run: |
             echo "ISOLATION_VAR=leak" >> "$ATOMGIT_ENV"
     job2:
       name: Check env
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       needs: job1
       steps:
         - name: Verify env absent

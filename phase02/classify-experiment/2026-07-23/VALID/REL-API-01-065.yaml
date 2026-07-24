@@ -1,4 +1,4 @@
-﻿id: REL-API-01-065
+id: REL-API-01-065
 dimensions: [reliability]
 dimension: reliability
 priority: P2
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: reliability test job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: sleep step
           run: |

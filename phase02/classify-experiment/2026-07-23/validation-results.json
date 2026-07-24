@@ -1,0 +1,2778 @@
+[
+  {
+    "case_id": "COMP-ARTIFACT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ARTIFACT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ARTIFACT-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ATOMGIT-01-047",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ATOMGIT-01-048",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ATOMGIT-01-049",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "COMP-BOUND-01-084",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-BOUND-01-085",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      },
+      {
+        "severity": "Error",
+        "message": "on.schedule[1].cron: 不是可识别的cron表达式",
+        "line": 4,
+        "column": 13
+      },
+      {
+        "severity": "Error",
+        "message": "on.schedule[2].cron: 不是可识别的cron表达式",
+        "line": 5,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-BOUND-01-086",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-BOUND-01-087",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-BOUND-01-088",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CACHE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CACHE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CACHE-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CALL-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CALL-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CTX-01-051",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CTX-01-052",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-CTX-01-053",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-DIR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-DIR-01-002",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "COMP-ENVCTX-01-050",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-EXPR-01-054",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-EXPR-01-055",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-EXPR-01-056",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-EXPR-01-057",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-EXPR-01-058",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[verify].steps[2].if: if表达式无法解析 {0}",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-ISOLATION-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-ISOLATION-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-JOB-01-066",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-JOB-01-067",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-JOB-01-068",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PERMS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PERMS-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PERMS-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PR-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PR-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PRTARGET-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PRTARGET-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PUSH-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PUSH-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-PUSH-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RERUN-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RERUN-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RERUN-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RUNNER-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RUNNER-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-RUNNER-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[verify].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-RUNNER-01-080",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SCHEDULE-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-SCHEDULE-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-SCHEDULE-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-SCRIPT-01-081",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SCRIPT-01-082",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "COMP-SECRET-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SECRET-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SECRET-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-STAGES-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.util.LinkedHashMap<java.lang.String,com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.structs.GitcodeStage>` from Array value (token `JsonToken.START_ARRAY`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"stages\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-STAGES-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.util.LinkedHashMap<java.lang.String,com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.structs.GitcodeStage>` from Array value (token `JsonToken.START_ARRAY`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"stages\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-STAGES-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "post.steps: unknown property",
+        "line": 14,
+        "column": 5
+      },
+      {
+        "severity": "Error",
+        "message": "post.run_always: unknown property",
+        "line": 12,
+        "column": 15
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-STATUS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-STATUS-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-STEP-01-069",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-STEP-01-070",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-STEP-01-071",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SUMMARY-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SUMMARY-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SYSENV-01-059",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-SYSENV-01-060",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TIMEOUT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TIMEOUT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-072",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-073",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-074",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-075",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-TRIG-01-076",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-077",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-078",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-TRIG-01-079",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-UNKNOWN-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "unknown_field: unknown property",
+        "line": 1,
+        "column": 16
+      }
+    ]
+  },
+  {
+    "case_id": "COMP-UNKNOWN-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-VARREF-01-083",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-WFLOW-01-061",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-WFLOW-01-062",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-WFLOW-01-063",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-WFLOW-01-064",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMP-WFLOW-01-065",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "post.steps: unknown property",
+        "line": 14,
+        "column": 5
+      },
+      {
+        "severity": "Error",
+        "message": "post.run_always: unknown property",
+        "line": 12,
+        "column": 15
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-ACTION-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ACTION-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ACTIONDEV-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-action-meta].steps[1].uses: 格式错误：pluginname@version，其中 pluginname 为 1~50 位字母、数字、\"-\"、\"_\"，version（官方插件不填）为 00-99.00-99.00-99 三段两位数字",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "stages[default].jobs[test-action-meta]: 插件./.github/actions/my-action不存在",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-ARTIFACT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ARTIFACT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CACHE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CACHE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-COMM-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-COMM-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CONCUR-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.exceed-action: 值不能为空",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "concurrency.max: 值不能小于1",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-CONCUR-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.lang.String` from Array value (token `JsonToken.START_ARRAY`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"concurrency\"]->com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.strategy.GitcodeConcurrency[\"group\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-CONCUR-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.exceed-action: 值不能为空",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "concurrency.max: 值不能小于1",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-CONCUR-01-004",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.exceed-action: 值不能为空",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "concurrency.max: 值不能小于1",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "concurrency.preemption.events: 列表中存在非法值:[11] 允许值:[mr_id]",
+        "line": 7,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-CONTAINER-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CONTAINER-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CTX-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CTX-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-CTX-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-DEPR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-DEPR-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-DIR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-DIR-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-DIR-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ENV-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ENV-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ENV-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ENVIRON-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test].environment: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-ENVIRON-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-environment].environment: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-005",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-006",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-007",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-008",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-009",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-010",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-011",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-012",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-013",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-success-paren].steps[0].if: if表达式无法解析 表达式：success()第1位出现不支持的函数",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "jobs[test-success-paren].steps[1].if: if表达式无法解析 表达式：success第1位出现不支持的关键字",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-EXPR-01-014",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-always-paren].steps[1].if: if表达式无法解析 表达式：always第1位出现不支持的关键字",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-FIELD-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "run-name: unknown property",
+        "line": 1,
+        "column": 11
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-FIELD-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test].services: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-FIELD-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "custom_field: unknown property",
+        "line": 3,
+        "column": 15
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-IF-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-IF-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-INPUTS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-INPUTS-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ISOLATE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-ISOLATE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MASK-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MASK-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MATRIX-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MATRIX-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MATRIX-01-005",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-MIGRATE-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[migrate-permissions].permissions: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-MIGRATE-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "run-name: unknown property",
+        "line": 3,
+        "column": 11
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-NEST-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-NEST-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-OUTCOME-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-OUTCOME-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-OUTCOME-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-OUTPUT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PATHS-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.push: 列表长度超出限制，paths paths-ignore之和不能小于1或超过32",
+        "line": 3,
+        "column": 5
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PATHS-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.push: 列表长度超出限制，paths paths-ignore之和不能小于1或超过32",
+        "line": 3,
+        "column": 5
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PERM-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PERM-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PERM-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "permissions.contents: unknown property",
+        "line": 4,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PERM-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PERM-01-005",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-PR-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.merge_requests.types: 列表中存在非法值:[opened] 允许值:[close, merge, open, reopen, update]",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PR-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.merge_requests: 列表长度超出限制，branches branches-ignore之和不能小于1或超过32",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PR-01-004",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.merge_requests: 列表长度超出限制，branches branches-ignore之和不能小于1或超过32",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PR-01-005",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.merge_requests: 列表长度超出限制，branches branches-ignore之和不能小于1或超过32",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-PR-01-006",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-004",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-custom-label].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-005",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-intranet].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-RUNNER-01-006",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNSON-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-RUNSON-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-SCHEDULE-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.util.ArrayList<com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.on.GitcodeScheduleOn>` from Object value (token `JsonToken.START_OBJECT`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"on\"]->com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.on.GitcodeOn[\"schedule\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-SCHEDULE-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.util.ArrayList<com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.on.GitcodeScheduleOn>` from Object value (token `JsonToken.START_OBJECT`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"on\"]->com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.on.GitcodeOn[\"schedule\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-SCHEDULE-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.schedule[0].cron: 不是可识别的cron表达式",
+        "line": 3,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-SECRET-01-005",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-env-secret].environment: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-SHELL-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-SHELL-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-SHELL-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-windows-shell].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-TARGET-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-TARGET-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-TARGET-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-TOKEN-01-001",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "COMPAT-TOKEN-01-002",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "COMPAT-TOKEN-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-VARS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-VARS-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-VARS-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-VARS-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-VARS-01-005",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test-vars-if].steps[1].if: if表达式无法解析 表达式：vars.ENABLE_FEATURE == 'true'第1位出现不支持的关键字",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "COMPAT-VARS-01-006",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-WCMD-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-WCMD-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "COMPAT-WCMD-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-API-01-065",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-ART-01-041",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-ARTCONC-01-063",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-ARTPERF-01-053-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-ARTPERF-01-053",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-BIGRUNNER-01-066",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CACHE-01-046",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CACHEPERF-01-054",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CANCEL-01-028",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CANCELREL-01-061",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CHILDSTATE-01-064-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CHILDSTATE-01-064",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CONC-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CONC-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CONTINUE-01-030",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-CPU-01-022",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-DISK-01-018",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-DISK-01-019",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAIR-01-044",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAULT-01-031",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAULT-01-032",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAULT-01-033",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAULT-01-034",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FAULT-01-035",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FLOOD-01-036",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-FLOOD-01-037",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-IGNORE-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-IMAGE-01-052-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-IMAGE-01-052",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-K8S-01-045",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LATENCY-01-050-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LATENCY-01-050",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LOG-01-040",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "REL-LOGPERF-01-051-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LOGPERF-01-051",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LOGSTABLE-01-059",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-LONG-01-043",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MATRIX-01-026",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MATRIX-01-027",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MATRIX-01-038",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MATRIX-01-039",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MATRIXFAIR-01-056",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MEM-01-020",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-MEM-01-021",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-NEEDS-01-025",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-NEST-01-023",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-NEST-01-024",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-NETFAULT-01-062",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-OUTPUT-01-016",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-OUTPUT-01-017",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "REL-PATHS-01-014",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-PATHS-01-015",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-PREEMPT-01-005",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.preemption.events: 列表中存在非法值:[push] 允许值:[mr_id]",
+        "line": 7,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "REL-PREEMPT-01-006",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.preemption.events: 列表中存在非法值:[push] 允许值:[mr_id]",
+        "line": 7,
+        "column": 13
+      },
+      {
+        "severity": "Error",
+        "message": "concurrency.preemption.events: 列表长度必须在0到10之间",
+        "line": 7,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "REL-PRESSURE-01-055",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-PROJLIMIT-01-067",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-PROJLIMIT-01-068",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-QUEUE-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RACE-01-048",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[job_b].if: if表达式无法解析 表达式：failure()第1位出现不支持的函数",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "REL-RERUN-01-011",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RERUN-01-012",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RERUN-01-013",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RETAIN-01-047",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RUNNER-01-049-V2",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-RUNNER-01-049",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-SCHED-01-057",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-STAGES-01-029",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "Cannot deserialize value of type `java.util.LinkedHashMap<java.lang.String,com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.structs.GitcodeStage>` from Array value (token `JsonToken.START_ARRAY`)\n at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: com.huawei.devcloud.cloudpipeline.v2.domain.entity.pac2.gitcode.GitcodePipelineDefinition[\"stages\"])",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "REL-STATE-01-058",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-STEPS-01-042",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[test].steps: 列表长度必须在0到16之间",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "REL-TIMEOUT-01-007",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-TIMEOUT-01-008",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-TIMEOUT-01-009",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-TIMEOUT-01-010",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "REL-YAMLCACHE-01-060",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-ARTF-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-ARTF-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-BASE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-BASE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-CACHE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-CACHE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-COMM-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-DEFPERM-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-DEFPERM-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[override-test].permissions: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-DOS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-ENV-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[env-secret-approved].environment: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-ENV-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[env-secret-denied].environment: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-FORK-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-FORK-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-INJ-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-INJ-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-INJ-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-INJ-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-INJ-01-005",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-005",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-MASK-01-006",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-NAME-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-NAME-01-002",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "SEC-NET-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-OIDC-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-PERM-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[perm-read].permissions: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-PERM-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[perm-write-denied].permissions: unknown property",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-PERM-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-PERM-01-004",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-PRTGT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-PRTGT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-RUN-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-RUN-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-RUN-01-003",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-SIDE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-SIDE-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-SUPPLY-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-SUPPLY-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-SUPPLY-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[typo-test].steps[0].uses: 格式错误：pluginname@version，其中 pluginname 为 1~50 位字母、数字、\"-\"、\"_\"，version（官方插件不填）为 00-99.00-99.00-99 三段两位数字",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "stages[default].jobs[typo-test]: 插件checkout-action@v1不存在",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-TOCTOU-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-TOCTOU-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-TOKEN-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-TOKEN-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-WCMD-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-WCMD-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "SEC-WCMD-01-003",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "while scanning a simple key\n in 'string', line 11, column 1:\n    INJECTED_VAR=bad\" >> $ATOMGIT_ENV\n    ^\ncould not find expected ':'\n in 'string', line 12, column 13:\n          - name: Check no injection\n                ^\n",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "SEC-WCMD-01-004",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "while scanning a simple key\n in 'string', line 12, column 1:\n    hijacked=bad\" >> $ATOMGIT_OUTPUT\n    ^\ncould not find expected ':'\n in 'string', line 13, column 13:\n          - name: Check no hijack\n                ^\n",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-ACT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-ACT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-ANNOT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-ANNOT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-BADGE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-CONC-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-CONC-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "concurrency.max: 值不能小于1",
+        "line": 2,
+        "column": 8
+      }
+    ]
+  },
+  {
+    "case_id": "USE-CTX-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-CTX-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DEPR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DEPR-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DIR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DIR-01-002",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "USE-DISP-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DISP-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-DOC-01-001",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "USE-ENV-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-ENV-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-EXPR-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-EXPR-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[bad].steps[0].if: if表达式无法解析 表达式：unknownFunc()第1位出现不支持的函数",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-INPT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-INPT-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-LBL-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[bad].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-LBL-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-LOG-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-MASK-01-001",
+    "valid": null,
+    "status": "VALID",
+    "raw": "{\"status_code\": 418, \"text\": \"<!DOCTYPE html><html style=\\\"height:100%;width:100%\\\"><head><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=utf-8\\\" /><meta http-equiv=\\\"Server\\\" content=\\\"CloudWAF\\\" /><title id=\\\"title\\\">访问被拦截！</title></head><body onload=\\\"bindall()\\\" style=\\\"height:100%;width:100%;margin:0px;font-family:Microsoft yahei\\\"><div><style type=\\\"text/css\\\">\\t.select {float: right;margin: 10px 20px 0 0;height: 32px;line-height: 20px;font-size: 14px;width: 80px;}</style><s",
+    "diagnostics": [],
+    "_original_error": "WAF_blocked_manual_verified"
+  },
+  {
+    "case_id": "USE-MASK-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-MD-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-NEST-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[caller].steps[0].uses: 格式错误：pluginname@version，其中 pluginname 为 1~50 位字母、数字、\"-\"、\"_\"，version（官方插件不填）为 00-99.00-99.00-99 三段两位数字",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "stages[default].jobs[caller]: 插件./.gitcode/workflows/reusable-level1.yml不存在",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-NEST-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[caller].steps[0].uses: 格式错误：pluginname@version，其中 pluginname 为 1~50 位字母、数字、\"-\"、\"_\"，version（官方插件不填）为 00-99.00-99.00-99 三段两位数字",
+        "line": 0,
+        "column": 0
+      },
+      {
+        "severity": "Error",
+        "message": "stages[default].jobs[caller]: 插件./.gitcode/workflows/reusable-level1.yml不存在",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-OS-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-PATH-01-001",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "USE-PERM-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-PERM-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "permissions.contents: unknown property",
+        "line": 2,
+        "column": 13
+      }
+    ]
+  },
+  {
+    "case_id": "USE-RES-01-001",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "USE-RUN-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-RUN-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[bad-runner].runs-on: runs-on以数组形式定义时，若为默认资源池则定义为['codearts-hosted',{os},{arch},{flavor}]，如['codearts-hosted','ubuntu-latest','x64','large']，其中'codearts-hosted'可省略；若为自定义资源池则定义为['self-hosted',{name},{label_1},{label_2},...,{label_n}]，如['self-hosted','my-private-pool','x64','region=cn-north-4']",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-SEARCH-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-SECNAME-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-SECNAME-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-STAT-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-STAT-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "jobs[bad-stat].steps[0].if: if表达式无法解析 表达式：success()第1位出现不支持的函数",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-TYPE-01-001",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-TYPE-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on.merge_requests.types: 列表中存在非法值:[opened] 允许值:[close, merge, open, reopen, update]",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-UNKN-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "run-name: unknown property",
+        "line": 1,
+        "column": 11
+      }
+    ]
+  },
+  {
+    "case_id": "USE-UNKN-01-002",
+    "valid": true,
+    "status": "VALID",
+    "diagnostics": []
+  },
+  {
+    "case_id": "USE-VARS-01-001",
+    "valid": null,
+    "status": "SKIP",
+    "reason": "no workflow field"
+  },
+  {
+    "case_id": "USE-YAML-01-001",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "on: 值不能为空",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  },
+  {
+    "case_id": "USE-YAML-01-002",
+    "valid": false,
+    "status": "INVALID",
+    "diagnostics": [
+      {
+        "severity": "Error",
+        "message": "while parsing a block mapping\n in 'string', line 5, column 5:\n        name: indent error\n        ^\nexpected <block end>, but found '<block sequence start>'\n in 'string', line 11, column 6:\n         - name: step two\n         ^\n",
+        "line": 0,
+        "column": 0
+      }
+    ]
+  }
+]

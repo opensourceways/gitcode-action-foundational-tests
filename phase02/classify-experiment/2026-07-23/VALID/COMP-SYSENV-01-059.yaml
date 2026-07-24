@@ -1,0 +1,57 @@
+id: COMP-SYSENV-01-059
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: ATOMGIT 系统环境变量关键变量存在性
+intent_ref: KEEP-TC-197~222
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify ATOMGIT env presence
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check critical vars
+          run: |
+            echo "SHA_SET=$([ -n "$ATOMGIT_SHA" ] && echo yes || echo no)"
+            echo "REF_SET=$([ -n "$ATOMGIT_REF" ] && echo yes || echo no)"
+            echo "REF_NAME_SET=$([ -n "$ATOMGIT_REF_NAME" ] && echo yes || echo no)"
+            echo "EVENT_NAME_SET=$([ -n "$ATOMGIT_EVENT_NAME" ] && echo yes || echo no)"
+            echo "WORKSPACE_SET=$([ -n "$ATOMGIT_WORKSPACE" ] && echo yes || echo no)"
+            echo "REPO_SET=$([ -n "$ATOMGIT_REPOSITORY" ] && echo yes || echo no)"
+            echo "RUN_ID_SET=$([ -n "$ATOMGIT_RUN_ID" ] && echo yes || echo no)"
+            echo "RUN_NUM_SET=$([ -n "$ATOMGIT_RUN_NUMBER" ] && echo yes || echo no)"
+            echo "SERVER_SET=$([ -n "$ATOMGIT_SERVER_URL" ] && echo yes || echo no)"
+            echo "API_SET=$([ -n "$ATOMGIT_API_URL" ] && echo yes || echo no)"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: SHA_SET=yes
+  - type: positive
+    target: run_logs
+    must_contain: REF_SET=yes
+  - type: positive
+    target: run_logs
+    must_contain: EVENT_NAME_SET=yes
+  - type: positive
+    target: run_logs
+    must_contain: WORKSPACE_SET=yes
+  - type: positive
+    target: run_logs
+    must_contain: REPO_SET=yes
+  - type: positive
+    target: run_logs
+    must_contain: RUN_ID_SET=yes
+teardown:
+  reset: fixture

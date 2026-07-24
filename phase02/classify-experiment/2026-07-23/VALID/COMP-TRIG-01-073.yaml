@@ -1,0 +1,41 @@
+id: COMP-TRIG-01-073
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: pull_request 事件关键字段与 types 验证
+intent_ref: KEEP-TC-061~083
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    pull_request:
+      types: [open, update, reopen]
+      branches: [main]
+  jobs:
+    verify:
+      name: Verify pull_request event fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print PR fields
+          run: |
+            echo "PR_NUM=${{ atomgit.event.pull_request.number }}"
+            echo "PR_TITLE=${{ atomgit.event.pull_request.title }}"
+            echo "PR_STATE=${{ atomgit.event.pull_request.state }}"
+            echo "pr_ok"
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: PR_NUM=
+  - type: positive
+    target: run_logs
+    must_contain: pr_ok
+teardown:
+  reset: fixture

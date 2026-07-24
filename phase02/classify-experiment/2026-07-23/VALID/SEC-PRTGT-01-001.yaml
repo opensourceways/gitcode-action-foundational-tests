@@ -1,0 +1,40 @@
+id: SEC-PRTGT-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "pull_request_target 下显式 checkout 不可信 PR 时 secrets 仍应受控"
+intent_ref: INTENT-SEC-002
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+  branch_protection: default
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    risky-checkout:
+      name: Risky checkout test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Checkout PR head
+          uses: checkout
+          with:
+            ref: ${{ atomgit.event.pull_request.head.sha }}
+        - name: Attempt secret access
+          run: |
+            echo "secret is ${{ secrets.DEPLOY_TOKEN }}"
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "DEPLOY_TOKEN"
+  - type: positive
+    target: run_status
+    equals: "blocked_or_pending"
+teardown:
+  reset: fixture

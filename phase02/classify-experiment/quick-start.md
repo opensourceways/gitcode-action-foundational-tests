@@ -2,134 +2,220 @@
 
 ## 背景
 
-`phase01/runs/2026-07-21-02/cases/` 下有 197 个 case（YAML + Markdown）。
-目标是逐个分析每个 case 的 **trigger + setup + fault_injection + 断言**，判断能否被 Phase 02 的执行器 (`workflow_runner.py` + `assertion_engine.py`) 全自动执行。
+对每个 case YAML 的 **trigger + setup + fault_injection + 断言** 做可脚本化分析，
+判断能否被 `workflow_runner.py` + `assertion_engine.py` 全自动执行。
 
-## 目录文件
+---
 
-### 分类脚本
+## 一、完整工作流
 
-| 文件 | 说明 |
-|------|------|
-| `classify_cases.py` | v1 — 只按断言分类（trigger/setup/fault 未考虑） |
-| `classify_cases_v2.py` | **v2（推荐）** — 全维度分类：trigger + setup + fault_injection + 断言 |
-| `api_gap_analysis.py` | v1 API 缺口分析（有 bug，已废弃） |
-| `api_gap_analysis_v2.py` | v2 API 缺口分析 |
+### Step 1: 校验（validate）
 
-### 分类结果
-
-| 文件 | 说明 |
-|------|------|
-| `classification_report.md` | v1 逐 case 明细报告 |
-| `classification_v2_report.md` | **v2 逐 case 明细报告（2791行）** |
-| `classification_v2.csv` | **v2 CSV 表格（推荐直接看这个）** |
-| `classification_v2_detail.json` | v2 机器可读 JSON |
-
-### 操作工具
-
-| 文件 | 说明 |
-|------|------|
-| `actions_ctl.py` | **GitCode Actions dispatch / stop CLI 工具** |
-| `run-case.sh` | Phase 02 最小闭环执行脚本（单 case 部署+跑+断言） |
-
-## 快速上手
-
-### 1. 生成分类报告
+将 case YAML 批量提交到平台 API 校验，按结果分组到 `VALID/`、`INVALID/`、`SKIP/`。
 
 ```bash
-cd phase02/classify-experiment
-python3 classify_cases_v2.py
-# 输出: classification_v2_report.md, classification_v2.csv, classification_v2_detail.json
+cd phase02/classify-experiment/2026-07-23
+python3 batch_validate.py
+# 输入: phase01/runs/2026-07-23-01/cases/yaml/ (369 cases)
+# 输出: VALID/ INVALID/ SKIP/ + validation-results.json
 ```
 
-### 2. 查看分类结果（推荐先看 CSV）
+### Step 2: 可脚本化分类（classify）
+
+只对 `VALID/` 中的 case 做 trigger + assertion 自动化可行性分析。
 
 ```bash
-# 看总体统计
-head -20 classification_v2_report.md
-
-# 只看 full_scriptable 的 case
-grep full_scriptable classification_v2.csv
-
-# 只看 not_scriptable 的 case
-grep not_scriptable classification_v2.csv
+python3 classify_20260723.py
+# 输入: VALID/ (289 cases)
+# 输出: classification_report.md
 ```
 
-### 3. 使用 actions_ctl 操作 workflow
+### Step 3: 无效案例分析（failure triage）
 
-**前置条件**：从浏览器 F12 抓包获取 `GITCODE_COOKIE`，写入 `.env`：
+为 INVALID/ERROR 案例生成故障分析报告。
 
 ```bash
-cd phase02          # 项目根目录（.env 在这里）
-echo 'GITCODE_COOKIE=<your-cookie>' >> .env
-echo 'GITCODE_ACCESS_TOKEN=<your-token>' >> .env   # v8 API 轮询用
+python3 failure/2026-07-24/gen_invalid_reports.py
+# 输入: validation-results.json
+# 输出: failure/2026-07-24/analysis/validation-invalid-74-cases.md
+#       failure/2026-07-24/case/{CASE_ID}.md (74 per-case reports)
 ```
+
+### Step 4: 分发/执行（dispatch）
+
+对 `scriptable` 分类的 case，通过 API 触发执行。
 
 ```bash
-# 列出某个项目的所有 workflow
-python3 classify-experiment/actions_ctl.py list -p ComputingActionTest/foundational-tests
-
-# 手动触发
-python3 classify-experiment/actions_ctl.py dispatch -p ComputingActionTest/foundational-tests -w PILOT-BASIC
-
-# 触发 + 等待完成
-python3 classify-experiment/actions_ctl.py dispatch -p ComputingActionTest/foundational-tests -w PILOT-BASIC --wait
-
-# 带 inputs 触发
-python3 classify-experiment/actions_ctl.py dispatch -p ComputingActionTest/foundational-tests \
-  -w some-workflow -i '{"key":"value"}' --wait
-
-# 停止运行中的 run
-python3 classify-experiment/actions_ctl.py stop -p ComputingActionTest/foundational-tests -r <workflow_run_id>
+python3 actions_ctl.py dispatch -w <workflow-name> --wait
+# 或 python3 phase02/scripts/run_batch.py
 ```
 
-### 4. 执行单个 case（全体）
+---
 
-```bash
-export GITCODE_ACCESS_TOKEN=<token>
-export GITCODE_EXECUTOR=<你的 GitCode 用户名>
+## 二、最新批次结果（369 cases → 2026-07-23-01）
 
-# 执行一个 case
-./classify-experiment/run-case.sh phase01/runs/2026-07-21-02/cases/yaml/COMP-ENV-02-001.yaml test-run-01
-```
+| 阶段 | 数量 | 占比 | 输出文件 |
+|------|------|------|---------|
+| 总输入 | 369 | 100% | `phase01/runs/2026-07-23-01/cases/yaml/` |
+| VALID | 297 | 80.5% | `VALID/` (含 8 个 WAF 拦截但人工验证通过的 case) |
+| INVALID | 66 | 17.9% | `INVALID/` + `failure/2026-07-24/` |
+| SKIP (无 workflow) | 6 | 1.6% | `SKIP/` |
 
-## 核心结论
+> **注意**: 8 个 case 在 API 校验时被 WAF 拦截（HTTP 418），经人工验证确认为合法 workflow，
+> 已从 `ERROR_WAF/` 手动提升至 `VALID/`。这些 YAML 触发 WAF 的原因可能是：
+> `${}` 表达式、反引号、URI 编码样式字符串等，需排查 WAF 规则。
+>
+> | case_id | 维度 | WAF 提升原因 |
+> |---------|------|-------------|
+> | COMP-ATOMGIT-01-049 | completeness | atomgit 边界格式校验 |
+> | COMP-SCRIPT-01-082 | completeness | 脚本权限设置 |
+> | COMPAT-TOKEN-01-001 | compatibility | ATOMGIT_TOKEN 有效性 |
+> | COMPAT-TOKEN-01-002 | compatibility | GITHUB_TOKEN 空值映射 |
+> | REL-LOG-01-040 | reliability | 100MB 超长日志 |
+> | REL-OUTPUT-01-017 | reliability | step output 1MB+ 越界 |
+> | SEC-NAME-01-002 | security | printenv 脱敏验证 |
+> | USE-MASK-01-001 | usability | secret 脱敏文档描述 |
 
-### 分类结果（197 case 总计）
+### 可脚本化分类（297 VALID → 分类报告）
 
-| 分类 | 数量 | 含义 |
+| 分类 | 数量 | 占比 | 含义 |
+|------|------|------|------|
+| `scriptable` | 13 | 4.4% | push trigger + 全部断言可映射 |
+| `api_blocked` | 35 | 11.8% | API 可行，平台不触发 |
+| `untested` | 243 | 81.8% | workflow_dispatch 等未验证 |
+| `fixture_gap` | 2 | 0.7% | 缺 repo fixture |
+| `assertion_gap` | 4 | 1.3% | 断言需新 kind |
+
+### INVALID 主要根因
+
+| 类别 | 数量 | 典型错误 |
+|------|------|---------|
+| 未知字段 | 21 | `post.steps`, `run-name`, `environment`, `permissions` 等字段平台不支持 |
+| concurrency | 12 | `exceed-action` 为空, `max < 1`, `preemption.events` 值非法 |
+| cron 表达式 | 8 | 平台 cron 语法与标准不兼容 |
+| if 表达式 | 8 | `failure()` 函数不识别（应用 `failed` 关键字） |
+
+---
+
+## 三、分类规则（基于 demo 实测）
+
+### Trigger 层
+
+| 触发事件 | API 调用链 | 平台是否触发 | 分类结论 |
+|----------|-----------|-------------|---------|
+| `push` | git push | ✅ | `scriptable` |
+| `pull_request` | `POST /pulls` | ❌ | `api_blocked` — API 可行，平台不触发 |
+| `pull_request_target` | `POST /pulls` (fork) | ❌ | `api_blocked` |
+| `fork_pr` | `POST /forks` + `POST /pulls` | ❌ | `api_blocked` |
+| `issue_comment` | `POST /issues` + `POST /comments` | ❌ | `api_blocked` |
+| `pull_request_comment` | `POST /comments` (PR) | ❌ | `api_blocked` |
+| `schedule` | push cron + wait | ⚠️ | `api_blocked` — 变通可行但不稳定 |
+| `manual` / `workflow_dispatch` | dispatch API | ❓ | `untested` — 未验证 |
+| `tag` | git tag + push | ❓ | `untested` — 未验证 |
+
+### 分类标签
+
+| 标签 | 含义 | 示例 |
 |------|------|------|
-| `full_scriptable` | 107 (54.3%) | trigger=push + 全部断言可映射 + 无阻断 |
-| `partial_scriptable` | 59 (29.9%) | trigger=push 但存在 LLM/新 target/未知 fixture 阻断 |
-| `not_scriptable` | 31 (15.7%) | trigger 非 push（fork_pr/manual/schedule/pr） |
+| `scriptable` | trigger=push + 全部断言可映射 + 无 setup/fault 阻断 | 标准 push workflow |
+| `api_blocked` | API 调用链已打通，但平台不触发 workflow | 所有 PR/issue_comment/schedule 事件 |
+| `untested` | API 尚未验证（如 workflow_dispatch） | manual/tag 触发 |
+| `fixture_gap` | trigger 可触发但缺 repo fixture | `with-cache`, `with-artifacts` |
+| `fault_gap` | 需要故障注入基础设施 | `kill_runner`, `network_partition` |
+| `assertion_gap` | trigger 可触发但断言需要新 kind | `artifact_download`, `pr_ui`, LLM |
 
-### 按维度
+### 断言层映射
 
-| 维度 | full | partial | not | 主要阻断原因 |
-|------|------|---------|-----|-------------|
-| completeness | 21 | 6 | 2 | 未知 fixture |
-| compatibility | 39 | 16 | 6 | pr/manual trigger |
-| reliability | 25 | 10 | 5 | fault_injection + schedule |
-| security | 17 | 8 | 15 | fork_pr + untrusted_contributor |
-| usability | 5 | 19 | 3 | llm_assisted + error_message |
+| 断言 kind | 状态 | 说明 |
+|----------|------|------|
+| `status` | ✅ 已实现 | 所有 job/step 为绿 |
+| `run_status` | ✅ 已实现 | conclusion 比对 |
+| `value` | ✅ 已实现 | 日志包含期望值 |
+| `leak` | ✅ 已实现 | 日志不包含明文 secret |
+| `mask` | ✅ 已实现 | *** 命中 + 明文 0 命中 |
+| `config_probe` | ✅ 已实现 | 前置资源探测 |
+| `artifact_download` | ⚠️ 模式已证明 | API 已确认，待写入 engine |
+| `cache_pollution` / `cache_restore` | ⚠️ 模式已证明 | 日志扫描 CACHE_HIT/CACHE_MISS |
+| `pr_ui` / `run_ui` | ⚠️ 需 Playwright | 浏览器截图 + LLM 判定 |
+| `eval=llm_assisted` | ⚠️ 需 LLM 集成 | 非确定性判定 |
+| 其他新 target | ⚠️ 需新 kind | `runner_schedulable`, `error_message` 等 |
 
-### API 状态（所有阻断项对应的 API 均已确认存在）
+### Actor 层
 
-| 端点 | 状态 |
-|------|------|
-| `POST web-api.gitcode.com/api/v2/.../actions/workflows/{id}/dispatch` | ✅ `actions_ctl.py` 已验证 |
-| `POST web-api.gitcode.com/api/v2/.../actions/workflow-runs/{id}/stop` | ✅ `actions_ctl.py` 已验证 |
-| `POST api.gitcode.com/api/v5/repos/{o}/{r}/pulls` | ✅ 文档已收录 |
-| `POST api.gitcode.com/api/v5/repos/{o}/{r}/forks` | ✅ 文档已收录 |
-| `POST api.gitcode.com/api/v5/repos/{o}/{r}/pulls/{n}/comments` | ✅ 文档已收录 |
+| actor | 需要 | 状态 |
+|-------|------|------|
+| `maintainer` | bot token | ✅ 已配置 |
+| `untrusted_contributor` | `CONTRIBUTOR_GITCODE_TOKEN` | ✅ 已配置，fork API 已验证 |
 
-### 非 API 问题（需其他方案）
+## 分类命令
 
-| 阻断 | 数量 | 方案 |
-|------|------|------|
-| `eval=llm_assisted` | 44 | LLM 集成到 assertion_engine |
-| `trigger.as=untrusted_contributor` | 17 | 第二 GitCode 账号 |
-| `schedule` trigger | 5 | 改为 push + 手动设 `ATOMGIT_EVENT_NAME=schedule` |
-| `target=run_ui / pr_ui` | 4 | Playwright 浏览器自动化 |
-| `fault_injection` | 5 | runner kill / network_partition infra |
-| 未知 `repo_fixture` | ~18 | 预先创建配置好的测试仓 |
+```bash
+cd phase02/classify-experiment/2026-07-23
+python3 classify_20260723.py
+# 输出: classification_report.md
+```
+
+## 运行案例 demo
+
+```bash
+cd phase02/classify-experiment/demo
+python3 demo_artifact_assertion.py   # artifact 上传 → 下载 → 校验
+python3 demo_cache_assertion.py     # cache 写 → 读 → 验证隔离
+python3 demo_pr_trigger.py          # same-repo PR 创建
+python3 demo_fork_pr.py             # fork → PR 全流程
+python3 demo_issue_comment.py       # issue + comment 触发
+python3 demo_schedule.py            # cron 触发等待
+python3 demo_pull_request_target.py  # PR target 触发
+```
+
+## 核心结论（197 case 旧批次）
+
+| 分类 | 旧标签 | 新标签 | 说明 |
+|------|--------|--------|------|
+| 107 | `full_scriptable` | `scriptable` | push trigger + 全部断言可映射 |
+| 59 | `partial_scriptable` | `assertion_gap` / `fixture_gap` | trigger 可行但断言/环境缺 |
+| 31 | `not_scriptable` | `api_blocked` | API 可行，平台不触发 |
+
+## 目录结构
+
+```
+phase02/classify-experiment/
+├── quick-start.md              ← 本文件
+├── actions_ctl.py              ← dispatch/list/stop CLI
+├── 2026-07-23/                 ← 批次目录
+│   ├── batch_validate.py       ← 批量校验脚本
+│   ├── classify_20260723.py    ← 分类脚本
+│   ├── classification_report.md ← 分类报告输出
+│   ├── validation-results.json ← 原始校验结果
+│   ├── VALID/                  ← 通过校验的 case YAML
+│   ├── INVALID/                ← 校验失败的 case YAML
+│   ├── ERROR_WAF/              ← WAF 拦截的 case YAML (HTTP 418)
+│   └── SKIP/                   ← 无 workflow 字段的 case YAML
+├── demo/                       ← Demo 验证脚本
+│   ├── demo_pr_trigger.py
+│   ├── demo_fork_pr.py
+│   ├── demo_schedule.py
+│   ├── demo_issue_comment.py
+│   ├── demo_pull_request_target.py
+│   ├── demo_artifact_assertion.py
+│   ├── demo_cache_assertion.py
+│   └── demo_pr_ui_assertion.py
+└── output/                     ← 旧批次报告
+
+failure/2026-07-24/
+├── analysis/
+│   ├── failure-analysis-96-cases.md       ← 96 条运行失败交叉分析
+│   └── validation-invalid-74-cases.md     ← 74 条校验失败分析
+├── case/                       ← 逐 case 分诊报告
+│   ├── COMP-ARTIFACT-01-002.md
+│   ├── COMP-BOUND-01-085.md
+│   └── ... (96+74 cases)
+└── *.log                       ← 原始 job 日志
+```
+
+## Demo 验证结论（2026-07-24）
+
+- `push` — 唯一平台会触发的 trigger
+- `pull_request` / `pull_request_target` / `issue_comment` / `schedule` — API 全打通，平台均不触发
+- `fork_pr` — 双账号 fork→PR 全流程自动化可行，平台不触发
+- `workflow_dispatch` / `tag` / `manual` — 未验证

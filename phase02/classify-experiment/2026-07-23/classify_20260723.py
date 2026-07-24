@@ -20,6 +20,18 @@ KNOWN_FIXTURES = {"basic-ci", "clean", "default", "with-secrets", "fork-target",
                   "environment-protected", "private-registry", "large-repo",
                   "runner-release", "badge-test"}
 
+CLASS_LABELS = {
+    "scriptable": "push trigger + 全部断言可映射",
+    "api_blocked": "API 调用可行，平台不触发 (非代码问题)",
+    "untested": "API 尚未验证可行性",
+    "fixture_gap": "trigger 可触发但缺 repo fixture",
+    "fault_gap": "需故障注入基础设施",
+    "assertion_gap": "trigger 可触发但断言需新 kind",
+}
+
+SORT_ORDER = {"scriptable": 0, "assertion_gap": 1, "fixture_gap": 2, "fault_gap": 3, "untested": 4, "api_blocked": 5}
+ICON = {"scriptable": "✓", "assertion_gap": "⬜", "fixture_gap": "⬜", "fault_gap": "⬜", "untested": "❓", "api_blocked": "✗"}
+
 
 def classify_case(yf: Path) -> dict:
     with open(yf) as f:
@@ -61,8 +73,6 @@ def classify_case(yf: Path) -> dict:
     # Setup analysis
     if fixture not in KNOWN_FIXTURES:
         all_blockers.append(f"unknown repo_fixture '{fixture}'")
-        if classified == "full_scriptable":
-            classified = "partial_scriptable"
 
     # Fault injection
     if fi and fi.get("action"):
@@ -215,17 +225,25 @@ def classify_case(yf: Path) -> dict:
             elif not kind:
                 assertions_unmappable += 1
 
-    # Set classification
-    if any("platform limitation" in b for b in all_blockers):
-        classified = "not_scriptable"
-    elif not trigger_ok and event not in ("push",) and classified != "not_scriptable":
-        classified = "not_scriptable"
-    if classified == "full_scriptable" and all_blockers:
-        classified = "partial_scriptable"
-    if assertions_llm > 0 and assertions_mappable == 0 and classified != "not_scriptable":
-        classified = "partial_scriptable"
-    if assertions_unmappable > 0 and assertions_mappable == 0 and classified != "not_scriptable":
-        classified = "partial_scriptable"
+    # Set classification (post-demo: all API calls proven, platform blocks non-push)
+    if event in TRIGGER_UNTESTED:
+        classified = "untested"
+    elif event in TRIGGER_API_READY or event in TRIGGER_WORKAROUND:
+        classified = "api_blocked"
+    else:
+        classified = "scriptable"
+    # Fixture issues
+    if any("unknown repo_fixture" in b for b in all_blockers):
+        if classified == "scriptable":
+            classified = "fixture_gap"
+    # Fault injection
+    if fi and fi.get("action") and classified == "scriptable":
+        classified = "fault_gap"
+    # Assertion issues
+    if assertions_llm > 0 and assertions_mappable == 0 and classified == "scriptable":
+        classified = "assertion_gap"
+    if assertions_unmappable > 0 and assertions_mappable == 0 and classified == "scriptable":
+        classified = "assertion_gap"
 
     return {
         "case_id": cid, "dimension": dim, "priority": pri, "title": title,
@@ -243,43 +261,35 @@ def generate_report(results, out_dir):
         stats[r['dimension']][r['classification']] += 1
         stats['__total__'][r['classification']] += 1
 
-    full = stats['__total__'].get('full_scriptable', 0)
-    partial = stats['__total__'].get('partial_scriptable', 0)
-    not_s = stats['__total__'].get('not_scriptable', 0)
     total = len(results)
 
     lines = []
-    lines.append("# Case 可脚本化分类报告 — 2026-07-23 VALID (229 cases)")
+    lines.append("# Case 可脚本化分类报告 — 2026-07-23 VALID")
     lines.append("")
-    lines.append(f"**数据源**: `phase02/classify-experiment/2026-07-23/VALID/` (仅含平台校验通过的 229 cases)")
-    lines.append(f"**分类方式**: 基于 demo 实测的 API 可用性 + 平台触发行为")
+    lines.append(f"**数据源**: `phase02/classify-experiment/2026-07-23/VALID/` (平台校验通过的 cases)")
+    lines.append(f"**分类规则**: `phase02/classify-experiment/quick-start.md` (基于 demo 实测)")
     lines.append("")
     lines.append("## 总体统计")
     lines.append("")
     lines.append(f"| 分类 | 数量 | 占比 | 含义 |")
     lines.append(f"|------|------|------|------|")
-    lines.append(f"| `scriptable` | **{stats['__total__'].get('scriptable', 0)}** | {stats['__total__'].get('scriptable',0)/total*100:.1f}% | push trigger + 全部断言可映射 |")
-    lines.append(f"| `api_blocked` | **{stats['__total__'].get('api_blocked', 0)}** | {stats['__total__'].get('api_blocked',0)/total*100:.1f}% | API 调用可行，平台不触发 (非代码问题) |")
-    lines.append(f"| `fixture_gap` | **{stats['__total__'].get('fixture_gap', 0)}** | {stats['__total__'].get('fixture_gap',0)/total*100:.1f}% | trigger 可触发但缺 repo fixture |")
-    lines.append(f"| `assertion_gap` | **{stats['__total__'].get('assertion_gap', 0)}** | {stats['__total__'].get('assertion_gap',0)/total*100:.1f}% | trigger 可触发但断言需新 kind |")
+    for label, meaning in CLASS_LABELS.items():
+        cnt = stats['__total__'].get(label, 0)
+        lines.append(f"| `{label}` | **{cnt}** | {cnt/total*100:.1f}% | {meaning} |")
     lines.append("")
 
     dims = ['completeness', 'compatibility', 'reliability', 'security', 'usability']
     lines.append("## 按维度 × 分类")
     lines.append("")
-    lines.append("| 维度 | scriptable | api_blocked | fixture_gap | assertion_gap | 合计 |")
-    lines.append("|------|-----------|-------------|-------------|---------------|------|")
+    labels_order = list(CLASS_LABELS.keys())
+    lines.append("| 维度 | " + " | ".join(labels_order) + " | 合计 |")
+    lines.append("|------" + "|------" * len(labels_order) + "|------|")
     for dim in dims:
-        s = stats[dim].get('scriptable', 0)
-        a = stats[dim].get('api_blocked', 0)
-        f = stats[dim].get('fixture_gap', 0)
-        ag = stats[dim].get('assertion_gap', 0)
-        lines.append(f"| {dim} | {s} | {a} | {f} | {ag} | {s+a+f+ag} |")
-    st = stats['__total__'].get('scriptable', 0)
-    at = stats['__total__'].get('api_blocked', 0)
-    ft = stats['__total__'].get('fixture_gap', 0)
-    agt = stats['__total__'].get('assertion_gap', 0)
-    lines.append(f"| **合计** | **{st}** | **{at}** | **{ft}** | **{agt}** | **{st+at+ft+agt}** |")
+        cols = [str(stats[dim].get(l, 0)) for l in labels_order]
+        lines.append(f"| {dim} | " + " | ".join(cols) + f" | {sum(int(c) for c in cols)} |")
+    totals = [str(stats['__total__'].get(l, 0)) for l in labels_order]
+    grand = sum(int(t) for t in totals)
+    lines.append(f"| **合计** | " + " | **" + " | **".join(totals) + f"** | **{grand}** |")
     lines.append("")
 
     # Blocker summary
@@ -362,9 +372,9 @@ def generate_report(results, out_dir):
     lines.append("")
 
     for r in sorted(results, key=lambda x: (
-        {"scriptable": 0, "assertion_gap": 1, "fixture_gap": 2, "api_blocked": 3}[x['classification']],
+        SORT_ORDER.get(x['classification'], 99),
         x['case_id'])):
-        icon = {"scriptable": "✓", "assertion_gap": "⬜", "fixture_gap": "⬜", "api_blocked": "✗"}[r['classification']]
+        icon = ICON.get(r['classification'], "?")
         lines.append(f"### {icon} {r['case_id']} — {r['classification']}")
         lines.append(f"- 维度: {r['dimension']} | 优先级: {r['priority']}")
         lines.append(f"- 标题: {r['title']}")
@@ -388,8 +398,10 @@ def generate_report(results, out_dir):
 
 
 def main():
-    yaml_files = sorted(YAML_DIR.glob("*.yaml"))
-    print(f"Classifying {len(yaml_files)} cases...")
+    import sys
+    src = YAML_DIR
+    yaml_files = sorted(src.glob("*.yaml"))
+    print(f"Classifying {len(yaml_files)} cases from {src}...")
     results = [classify_case(yf) for yf in yaml_files]
     generate_report(results, OUT_DIR)
 

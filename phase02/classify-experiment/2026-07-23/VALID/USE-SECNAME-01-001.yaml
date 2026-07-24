@@ -1,4 +1,4 @@
-﻿id: USE-SECNAME-01-001
+id: USE-SECNAME-01-001
 dimensions: ["usability", "security"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     bad:
       name: secret name rule violation
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: use reserved prefix secret
           run: |

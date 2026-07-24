@@ -1,4 +1,4 @@
-﻿id: SEC-RUN-01-001
+id: SEC-RUN-01-001
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,14 +12,14 @@ workflow: |
   jobs:
     job-a:
       name: Write sensitive file
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Write temp secret
           run: |
             echo sensitive-data > /tmp/sensitive-temp.txt
     job-b:
       name: Check cleanup
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Check no residual
           run: |

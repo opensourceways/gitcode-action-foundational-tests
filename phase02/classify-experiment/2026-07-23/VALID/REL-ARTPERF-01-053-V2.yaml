@@ -1,4 +1,4 @@
-﻿id: REL-ARTPERF-01-053-V2
+id: REL-ARTPERF-01-053-V2
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     upload:
       name: upload artifact job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: generate 1024MB file
           run: |
@@ -27,7 +27,7 @@ workflow: |
             path: artifact.bin
     download:
       name: download artifact job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       needs: upload
       steps:
         - name: download artifact step

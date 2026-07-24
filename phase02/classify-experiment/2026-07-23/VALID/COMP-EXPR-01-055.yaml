@@ -1,0 +1,45 @@
+id: COMP-EXPR-01-055
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: hashFiles 函数边界行为
+intent_ref: KEEP-TC-186
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify hashFiles boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Single file hash
+          run: |
+            echo "HASH_SINGLE=${{ hashFiles('package.json') }}"
+        - name: Multi pattern hash
+          run: |
+            echo "HASH_MULTI=${{ hashFiles('src/**', 'package.json') }}"
+        - name: No match hash
+          run: |
+            echo "HASH_NONE=${{ hashFiles('nonexistent.xyz') }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: HASH_SINGLE=
+  - type: positive
+    target: run_logs
+    must_contain: HASH_MULTI=
+  - type: positive
+    target: run_logs
+    must_contain: HASH_NONE=
+teardown:
+  reset: fixture

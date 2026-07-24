@@ -1,4 +1,4 @@
-﻿id: REL-CONTINUE-01-030
+id: REL-CONTINUE-01-030
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     job_a:
       name: job with continue on error
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       continue-on-error: true
       steps:
         - name: fail step
@@ -23,7 +23,7 @@ workflow: |
             exit 1
     job_b:
       name: downstream after continue
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: success step
           run: |

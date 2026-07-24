@@ -1,0 +1,34 @@
+id: COMP-SCRIPT-01-082
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 脚本权限设置与直接执行验证
+intent_ref: KEEP-TC-431~433
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify script permission and execution
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Set permission and run
+          run: |
+            chmod +x ./scripts/hello.sh
+            ./scripts/hello.sh
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+teardown:
+  reset: fixture

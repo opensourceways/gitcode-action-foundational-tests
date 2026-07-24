@@ -1,0 +1,44 @@
+id: COMPAT-RUNNER-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "self-hosted 标签不被支持时应明确报错"
+intent_ref: INTENT-COMPAT-NEW-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-self-hosted:
+      name: Test self-hosted label
+      runs-on: [self-hosted, linux]
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "系统对不支持的 self-hosted 标签给出明确报错"
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "不应无限排队且无提示"
+
+teardown:
+  reset: none

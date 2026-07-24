@@ -1,4 +1,4 @@
-﻿id: REL-NETFAULT-01-062
+id: REL-NETFAULT-01-062
 dimensions: [reliability]
 dimension: reliability
 priority: P2
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: network fault tolerance test
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: curl unreachable addresses
           run: |

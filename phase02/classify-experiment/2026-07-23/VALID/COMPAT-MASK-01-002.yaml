@@ -1,4 +1,4 @@
-﻿id: COMPAT-MASK-01-002
+id: COMPAT-MASK-01-002
 dimensions: [compatibility, security]
 dimension: compatibility
 priority: P0
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     mask-env-test:
       name: Test secret masking via env
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: checkout source
           uses: checkout

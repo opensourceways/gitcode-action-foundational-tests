@@ -1,4 +1,4 @@
-﻿id: SEC-INJ-01-004
+id: SEC-INJ-01-004
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -13,7 +13,7 @@ workflow: |
   jobs:
     commit-inj:
       name: Test commit message injection
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Inline commit message
           run: |

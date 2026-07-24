@@ -1,0 +1,48 @@
+id: COMP-EXPR-01-054
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 字符串函数 contains startsWith endsWith 边界行为
+intent_ref: KEEP-TC-180~182
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify string functions boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Contains match
+          if: ${{ contains(atomgit.ref_name, 'main') }}
+          run: |
+            echo "contains_passed"
+        - name: StartsWith match
+          if: ${{ startsWith(atomgit.ref, 'refs/heads/') }}
+          run: |
+            echo "startswith_passed"
+        - name: EndsWith match
+          if: ${{ endsWith(atomgit.ref_name, 'ain') }}
+          run: |
+            echo "endswith_passed"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: contains_passed
+  - type: positive
+    target: run_logs
+    must_contain: startswith_passed
+  - type: positive
+    target: run_logs
+    must_contain: endswith_passed
+teardown:
+  reset: fixture

@@ -1,4 +1,4 @@
-﻿id: REL-CANCEL-01-028
+id: REL-CANCEL-01-028
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: cancel semantics test job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: sleep main step
           run: |

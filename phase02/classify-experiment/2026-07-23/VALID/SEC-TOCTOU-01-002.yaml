@@ -1,0 +1,34 @@
+id: SEC-TOCTOU-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "评论触发不应绕过代码固定与 PR 审批"
+intent_ref: INTENT-SEC-031
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    issue_comment:
+      types: [created]
+  jobs:
+    comment-toctou:
+      name: Test comment TOCTOU
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check fixed commit
+          run: |
+            echo "Executing commit: ${{ atomgit.sha }}"
+trigger:
+  event: issue_comment
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "new_commit_after_trigger"
+  - type: positive
+    target: run_logs
+    equals: "trigger_sha_matched"
+teardown:
+  reset: fixture

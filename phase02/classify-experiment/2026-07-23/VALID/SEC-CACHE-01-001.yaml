@@ -1,0 +1,36 @@
+id: SEC-CACHE-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 写入的 cache 必须不可被主仓后续 workflow 读取"
+intent_ref: INTENT-SEC-018
+setup:
+  repo_fixture: with-cache
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    cache-write:
+      name: Write cache from fork
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write cache
+          uses: cache
+          with:
+            path: ./node_modules
+            key: test-cache-key
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: cache_restore
+    must_not_hit: "fork_cache_key"
+  - type: positive
+    target: run_status
+    equals: "completed"
+teardown:
+  reset: fixture

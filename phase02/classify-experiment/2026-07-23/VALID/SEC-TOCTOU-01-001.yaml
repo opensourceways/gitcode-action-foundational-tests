@@ -1,4 +1,4 @@
-﻿id: SEC-TOCTOU-01-001
+id: SEC-TOCTOU-01-001
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     toctou-test:
       name: Test TOCTOU protection
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Check commit SHA
           run: |

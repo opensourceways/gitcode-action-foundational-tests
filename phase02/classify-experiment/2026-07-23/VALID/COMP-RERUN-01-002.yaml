@@ -1,4 +1,4 @@
-﻿id: COMP-RERUN-01-002
+id: COMP-RERUN-01-002
 dimensions: [completeness, reliability]
 dimension: completeness
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     verify:
       name: Verify rerun limit
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Echo
           run: |

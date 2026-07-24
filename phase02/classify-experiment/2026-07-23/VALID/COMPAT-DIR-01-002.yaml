@@ -1,4 +1,4 @@
-﻿id: COMPAT-DIR-01-002
+id: COMPAT-DIR-01-002
 dimensions: [compatibility, usability]
 dimension: compatibility
 priority: P1
@@ -18,7 +18,7 @@ workflow: |
   jobs:
     verify-github-dir-ignored:
       name: Verify .github workflows dir ignored
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: (TC) echo if reached
           run: |

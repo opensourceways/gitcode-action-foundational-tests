@@ -1,0 +1,49 @@
+id: COMPAT-PERM-01-005
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: "permissions 空对象时 ATOMGIT_TOKEN 默认权限范围差异"
+intent_ref: INTENT-COMPAT-030
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  permissions: {}
+  jobs:
+    test-empty-perm:
+      name: Test empty permissions
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Try read with token
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $ATOMGIT_TOKEN" "$ATOMGIT_API_URL/user" || true
+        - name: Try write with token
+          run: |
+            curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $ATOMGIT_TOKEN" -X POST "$ATOMGIT_API_URL/user/repos" -d '{"name":"test"}' || true
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "读操作返回 200"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "写操作被平台拒绝（返回 403 或 401）"
+
+teardown:
+  reset: none

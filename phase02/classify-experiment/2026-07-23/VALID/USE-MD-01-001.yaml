@@ -1,4 +1,4 @@
-﻿id: USE-MD-01-001
+id: USE-MD-01-001
 dimensions: ["usability"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     summary-md:
       name: step summary markdown render
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: write summary
           run: |

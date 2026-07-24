@@ -1,4 +1,4 @@
-﻿id: COMPAT-EXPR-01-012
+id: COMPAT-EXPR-01-012
 dimensions: [compatibility, usability]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-fromjson:
       name: Test fromJSON function availability
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Test fromJSON function in run block
           run: |

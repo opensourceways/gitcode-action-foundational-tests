@@ -1,0 +1,46 @@
+id: COMP-BOUND-01-087
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 步骤输出与跨 job 传递边界验证
+intent_ref: KEEP-TC-331~333
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify output boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Write output
+          id: writer
+          run: |
+            echo "key1=val1" >> "$ATOMGIT_OUTPUT"
+            echo "key2=val2" >> "$ATOMGIT_OUTPUT"
+        - name: Read output
+          run: |
+            echo "K1=${{ steps.writer.outputs.key1 }}"
+            echo "K2=${{ steps.writer.outputs.key2 }}"
+            echo "output_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: K1=val1
+  - type: positive
+    target: run_logs
+    must_contain: K2=val2
+  - type: positive
+    target: run_logs
+    must_contain: output_ok
+teardown:
+  reset: fixture

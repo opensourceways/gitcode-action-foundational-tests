@@ -1,0 +1,46 @@
+id: COMPAT-RUNNER-01-006
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "Runner 未预装 Java 工具链与 GitHub 差异"
+intent_ref: INTENT-COMPAT-NEW-011
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-java-toolchain:
+      name: Test Java toolchain
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check Java
+          run: |
+            java -version || true
+            mvn -version || true
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "系统对缺失的 Java 工具链给出明确提示"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "提示应建议替代方案，如使用自定义 Runner 或预装环境"
+
+teardown:
+  reset: none

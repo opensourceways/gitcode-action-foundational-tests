@@ -1,0 +1,43 @@
+id: COMP-CTX-01-052
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 上下文在条件表达式 if 中注入验证
+intent_ref: KEEP-TC-086~124
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify context in if expressions
+      runs-on: [dedicate-hosted, x64, large]
+      if: ${{ atomgit.ref == 'refs/heads/main' || true }}
+      steps:
+        - name: Always run
+          run: |
+            echo "always"
+        - name: Conditional env
+          if: ${{ env.ALWAYS_TRUE == 'yes' }}
+          env:
+            ALWAYS_TRUE: yes
+          run: |
+            echo "conditional_env_passed"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: always
+  - type: positive
+    target: run_logs
+    must_contain: conditional_env_passed
+teardown:
+  reset: fixture

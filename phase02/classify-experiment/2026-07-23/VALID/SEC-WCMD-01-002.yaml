@@ -1,4 +1,4 @@
-﻿id: SEC-WCMD-01-002
+id: SEC-WCMD-01-002
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     artifact-trust:
       name: Test artifact trust boundary
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Download untrusted artifact
           uses: download-artifact

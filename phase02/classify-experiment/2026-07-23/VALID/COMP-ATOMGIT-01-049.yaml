@@ -1,0 +1,42 @@
+id: COMP-ATOMGIT-01-049
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: atomgit 边界格式校验
+intent_ref: KEEP-TC-566~570
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify atomgit boundary formats
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Check formats
+          run: |
+            echo "SHA_LEN=${#ATOMGIT_SHA}"
+            echo "REF_PREFIX=${ATOMGIT_REF%%/*}"
+            echo "REF_NAME_NO_PREFIX=${ATOMGIT_REF_NAME#refs/}"
+            echo "ACTOR_LEN=${#ATOMGIT_ACTOR}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: SHA_LEN=40
+  - type: positive
+    target: run_logs
+    must_contain: REF_PREFIX=refs
+  - type: positive
+    target: run_logs
+    must_contain: ACTOR_LEN=
+teardown:
+  reset: fixture

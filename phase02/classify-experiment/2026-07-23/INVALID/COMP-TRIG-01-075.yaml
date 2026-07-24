@@ -1,0 +1,35 @@
+id: COMP-TRIG-01-075
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: schedule 事件关键字段与 cron 格式验证
+intent_ref: KEEP-TC-237~430
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    schedule:
+      - cron: "0 2 * * *"
+  jobs:
+    verify:
+      name: Verify schedule event fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print schedule
+          run: |
+            echo "SCHEDULE=${{ atomgit.event.schedule }}"
+            echo "schedule_ok"
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: schedule_ok
+teardown:
+  reset: fixture

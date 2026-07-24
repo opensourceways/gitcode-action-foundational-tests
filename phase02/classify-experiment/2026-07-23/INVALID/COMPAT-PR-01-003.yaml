@@ -1,0 +1,46 @@
+id: COMPAT-PR-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "PR types 配置后匹配类型不触发与 GitHub 行为差异"
+intent_ref: INTENT-COMPAT-NEW-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      types: [open, reopen, update]
+  jobs:
+    test-pr-types:
+      name: Test PR types trigger
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo trigger info
+          run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "done"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "PR 更新提交后，不应出现假阴性（无对应 workflow 运行）"
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "若平台已修复，PR 更新后应触发 workflow 并成功运行"
+
+teardown:
+  reset: none

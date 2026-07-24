@@ -1,0 +1,45 @@
+id: COMP-PR-01-002
+dimensions: [completeness, security]
+dimension: completeness
+priority: P0
+title: pull_request_target 可访问 secrets 且 TOKEN 拥有写权限
+intent_ref: INTENT-COMP-004
+
+setup:
+  repo_fixture: with-secrets
+  secrets: ['DEPLOY_TOKEN']
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request_target:
+      branches:
+        - main
+  jobs:
+    verify:
+      name: Verify pull_request_target secret access
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Read secret and token
+          run: |
+            echo "secret is ${{ secrets.DEPLOY_TOKEN }}"
+            echo "token length is ${#ATOMGIT_TOKEN}"
+
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_logs
+    contains_masked: DEPLOY_TOKEN
+  - type: positive
+    target: run_status
+    equals: success
+
+teardown:
+  reset: fixture

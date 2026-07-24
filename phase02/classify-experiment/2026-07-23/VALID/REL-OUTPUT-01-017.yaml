@@ -15,9 +15,9 @@ workflow: |
   jobs:
     test:
       name: output over limit test
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
-        - name: write 1MB plus 1 output
+        - name: write 1MB+1 output
           run: |
             python3 -c "print('A'*1048577)" > out.txt
             echo "data=$(cat out.txt)" >> $ATOMGIT_OUTPUT

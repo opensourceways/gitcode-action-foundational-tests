@@ -1,4 +1,4 @@
-﻿id: COMPAT-PERM-01-001
+id: COMPAT-PERM-01-001
 dimensions: [compatibility, security]
 dimension: compatibility
 priority: P0
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-read:
       name: Test default read permissions
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: checkout source
           uses: checkout

@@ -1,0 +1,43 @@
+id: COMP-BOUND-01-084
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 路径与分支过滤组合及否定模式边界验证
+intent_ref: KEEP-TC-514~559
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    push:
+      branches:
+        - main
+        - "feature/**"
+        - "!feature/experimental"
+      paths:
+        - "src/**"
+        - "!src/docs/**"
+  jobs:
+    verify:
+      name: Verify filter boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "filter_boundary_ok"
+trigger:
+  event: push
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: filter_boundary_ok
+teardown:
+  reset: fixture

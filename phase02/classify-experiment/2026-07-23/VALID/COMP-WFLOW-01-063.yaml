@@ -1,0 +1,43 @@
+id: COMP-WFLOW-01-063
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: workflow concurrency 并发控制字段验证
+intent_ref: KEEP-TC-289~293
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    enable: true
+    max: 2
+    exceed-action: QUEUE
+    preemption:
+      enable: true
+      events: [mr_id]
+  jobs:
+    verify:
+      name: Verify concurrency fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "concurrency_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: concurrency_ok
+teardown:
+  reset: fixture

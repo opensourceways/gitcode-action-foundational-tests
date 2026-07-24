@@ -1,4 +1,4 @@
-﻿id: COMPAT-INPUTS-01-002
+id: COMPAT-INPUTS-01-002
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -23,7 +23,7 @@ workflow: |
   jobs:
     verify:
       name: Verify string input acceptance
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Echo input value
           run: |

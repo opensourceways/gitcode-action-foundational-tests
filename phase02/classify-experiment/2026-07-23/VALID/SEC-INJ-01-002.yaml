@@ -1,0 +1,34 @@
+id: SEC-INJ-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "不可信分支名不可直接插进 run 脚本导致命令注入"
+intent_ref: INTENT-SEC-010
+setup:
+  repo_fixture: default
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    branch-inj:
+      name: Test branch name injection
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Inline branch name
+          run: |
+            echo "Branch is ${{ atomgit.head_ref }}"
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "injected_command_executed"
+  - type: positive
+    target: run_status
+    equals: "success"
+teardown:
+  reset: fixture

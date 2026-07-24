@@ -1,4 +1,4 @@
-﻿id: REL-LONG-01-043
+id: REL-LONG-01-043
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: long run 350min test
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       timeout-minutes: 360
       steps:
         - name: heartbeat run

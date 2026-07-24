@@ -1,4 +1,4 @@
-﻿id: USE-SECNAME-01-002
+id: USE-SECNAME-01-002
 dimensions: ["usability", "security"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     bad:
       name: secret name starts with digit
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: use invalid secret name
           run: |

@@ -1,0 +1,47 @@
+id: COMPAT-CONTAINER-01-002
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "container 自定义镜像被拒绝时应给出替代指引"
+intent_ref: INTENT-COMPAT-NEW-001
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-custom-image:
+      name: Test custom container image
+      runs-on: [dedicate-hosted, x64, large]
+      container:
+        image: myregistry.com/build-env:v1
+        options: --cpus 1
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: validation_error
+    eval: llm_assisted
+    rubric: "报错信息说明 container 自定义镜像不被支持"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错给出替代方案，如使用默认 Runner 环境或指定 runs-on 标签"
+
+teardown:
+  reset: fixture

@@ -1,0 +1,50 @@
+id: COMPAT-MATRIX-01-004
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "matrix include 无基础变量不被支持时的差异"
+intent_ref: INTENT-COMPAT-NEW-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-matrix-include:
+      name: Test matrix include without base vars
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          include:
+            - os: ubuntu
+              node: 20
+      steps:
+        - name: Echo matrix values
+          run: |
+            echo "os=${{ matrix.os }}"
+            echo "node=${{ matrix.node }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: llm_assisted
+    rubric: "系统接受 include 无基础变量配置并正常生成实例，或明确拒绝并给出原因"
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "include 配置不应被静默忽略"
+
+teardown:
+  reset: none

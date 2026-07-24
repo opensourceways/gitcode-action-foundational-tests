@@ -1,0 +1,43 @@
+id: COMP-SCHEDULE-01-001
+dimensions: [completeness, compatibility]
+dimension: completeness
+priority: P1
+title: 合法 cron 在默认分支按时触发
+intent_ref: INTENT-COMP-005
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    schedule:
+      - cron: "0 2 * * *"
+  jobs:
+    verify:
+      name: Verify schedule trigger
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo scheduled
+          run: |
+            echo "scheduled run"
+
+trigger:
+  event: schedule
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_event
+    equals: schedule
+
+teardown:
+  reset: none

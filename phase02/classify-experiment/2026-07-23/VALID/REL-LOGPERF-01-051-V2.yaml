@@ -1,4 +1,4 @@
-﻿id: REL-LOGPERF-01-051-V2
+id: REL-LOGPERF-01-051-V2
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: log perf 200MB test
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: generate 200MB log
           run: |

@@ -1,0 +1,51 @@
+id: COMPAT-MATRIX-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "matrix 三维展开不被支持时的差异"
+intent_ref: INTENT-COMPAT-NEW-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-3d-matrix:
+      name: Test 3D matrix
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os: [ubuntu, macos]
+          node: [16, 18]
+          browser: [chrome, firefox]
+      steps:
+        - name: Echo matrix values
+          run: |
+            echo "os=${{ matrix.os }}"
+            echo "node=${{ matrix.node }}"
+            echo "browser=${{ matrix.browser }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    eval: llm_assisted
+    rubric: "系统对三维 matrix 给出明确响应（接受并展开为 8 个实例，或拒绝并给出原因）"
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "不应静默忽略导致 matrix 配置仅生成部分实例"
+
+teardown:
+  reset: none

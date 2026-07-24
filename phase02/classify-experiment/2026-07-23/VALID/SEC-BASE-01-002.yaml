@@ -1,0 +1,35 @@
+id: SEC-BASE-01-002
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 改 workflow 不被 pull_request_target 采用"
+intent_ref: INTENT-SEC-035
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+workflow: |
+  on:
+    pull_request_target:
+      branches: [main]
+  jobs:
+    reject-fork-wf:
+      name: Reject fork workflow changes
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Base step only
+          run: |
+            echo "Only base steps run"
+trigger:
+  event: pull_request_target
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain: "fork_injected_step"
+  - type: positive
+    target: run_status
+    equals: "success_with_base_workflow"
+teardown:
+  reset: fixture

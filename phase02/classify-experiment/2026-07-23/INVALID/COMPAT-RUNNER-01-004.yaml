@@ -1,0 +1,44 @@
+id: COMPAT-RUNNER-01-004
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "自定义特征标签不被支持时应给出可用标签列表"
+intent_ref: INTENT-COMPAT-NEW-008
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-custom-label:
+      name: Test custom feature label
+      runs-on: [gpu, nvidia]
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错信息说明标签组合 gpu,nvidia 不可用"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错给出可用标签列表或标签格式指引"
+
+teardown:
+  reset: none

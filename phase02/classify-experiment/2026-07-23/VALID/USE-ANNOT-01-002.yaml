@@ -1,0 +1,48 @@
+id: USE-ANNOT-01-002
+dimensions: ["usability"]
+dimension: usability
+priority: P1
+title: "::error:: 生成的 PR annotation 具备文件路径、行号与可点击跳转"
+intent_ref: INTENT-USE-021
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      types:
+        - open
+        - update
+      branches: [main]
+  jobs:
+    annot-pr:
+      name: PR annotation test
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: checkout
+          uses: checkout
+        - name: emit annotation
+          run: |
+            echo "::error file=README.md,line=1::Test error annotation"
+            echo "::warning file=README.md,line=2::Test warning annotation"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: nonfunctional
+    target: pr_ui
+    eval: llm_assisted
+    rubric: "若支持 annotation，错误 annotation 在 PR 页面必须包含准确的文件路径、行号、错误信息，且颜色为红色（warning 为黄色）；若不支持，文档的 COMPAT-NOTES 或差异说明中必须列出 GitHub 的 ::error:: / ::warning:: annotation 在 GitCode 中暂未支持"
+
+teardown:
+  reset: none
+

@@ -1,4 +1,4 @@
-﻿id: REL-CHILDSTATE-01-064-V2
+id: REL-CHILDSTATE-01-064-V2
 dimensions: [reliability]
 dimension: reliability
 priority: P0
@@ -18,7 +18,7 @@ workflow: |
       uses: ./.gitcode/workflows/child_missing.yml
     downstream:
       name: downstream job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       needs: call_child
       steps:
         - name: should not run

@@ -1,0 +1,54 @@
+id: COMPAT-TOKEN-01-003
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: "GITHUB_TOKEN 不应被静默映射为 ATOMGIT_TOKEN"
+intent_ref: INTENT-COMPAT-020
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-github-token:
+      name: Test GITHUB_TOKEN not mapped
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Compare tokens
+          run: |
+            echo "GITHUB_TOKEN=$GITHUB_TOKEN"
+            echo "ATOMGIT_TOKEN=$ATOMGIT_TOKEN"
+            echo "done"
+        - name: Reference secrets GITHUB_TOKEN
+          run: |
+            echo "secret_github_token=${{ secrets.GITHUB_TOKEN }}"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "GITHUB_TOKEN 不应等于 ATOMGIT_TOKEN"
+  - type: positive
+    target: run_logs
+    eval: llm_assisted
+    rubric: "GITHUB_TOKEN 为空或未定义"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "secrets.GITHUB_TOKEN 不应被静默映射为有值"
+
+teardown:
+  reset: none

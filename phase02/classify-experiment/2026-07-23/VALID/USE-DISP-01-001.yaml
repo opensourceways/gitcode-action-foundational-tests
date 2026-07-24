@@ -1,4 +1,4 @@
-﻿id: USE-DISP-01-001
+id: USE-DISP-01-001
 dimensions: ["usability", "completeness"]
 dimension: usability
 priority: P1
@@ -22,7 +22,7 @@ workflow: |
   jobs:
     test-required:
       name: missing required input
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: echo env
           run: |

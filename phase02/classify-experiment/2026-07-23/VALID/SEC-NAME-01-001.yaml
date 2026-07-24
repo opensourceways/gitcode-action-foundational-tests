@@ -1,4 +1,4 @@
-﻿id: SEC-NAME-01-001
+id: SEC-NAME-01-001
 dimensions: ["security", "compatibility"]
 dimension: security
 priority: P0
@@ -13,7 +13,7 @@ workflow: |
   jobs:
     special-name:
       name: Test special secret name
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Use hyphen secret
           run: |

@@ -1,4 +1,4 @@
-﻿id: SEC-DOS-01-001
+id: SEC-DOS-01-001
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     quota-test:
       name: Test size quota
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Create large file
           run: |

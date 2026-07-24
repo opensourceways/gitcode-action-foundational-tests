@@ -1,4 +1,4 @@
-﻿id: COMPAT-EXPR-01-008
+id: COMPAT-EXPR-01-008
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-tojson:
       name: Test toJson output format
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Output object via toJson
           run: |

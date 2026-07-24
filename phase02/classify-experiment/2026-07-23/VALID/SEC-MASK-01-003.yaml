@@ -1,4 +1,4 @@
-﻿id: SEC-MASK-01-003
+id: SEC-MASK-01-003
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -13,7 +13,7 @@ workflow: |
   jobs:
     b64-bypass:
       name: Test base64 bypass
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Encode and echo secret
           run: |

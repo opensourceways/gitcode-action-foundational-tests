@@ -1,0 +1,49 @@
+id: COMPAT-CONCUR-01-004
+dimensions: [compatibility, reliability]
+dimension: compatibility
+priority: P1
+title: "concurrency preemption events 越界时行为差异"
+intent_ref: INTENT-COMPAT-NEW-005
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  concurrency:
+    group: test-preemption-events
+    preemption:
+      enable: true
+      events: 11
+  jobs:
+    test-preemption-events:
+      name: Test preemption events boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo hello
+          run: |
+            echo "hello"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "系统对 events 越界值给出明确报错"
+  - type: positive
+    target: error_message
+    eval: llm_assisted
+    rubric: "报错包含有效范围提示（如 1-10）"
+
+teardown:
+  reset: none

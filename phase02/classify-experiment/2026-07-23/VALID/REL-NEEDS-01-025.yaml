@@ -1,4 +1,4 @@
-﻿id: REL-NEEDS-01-025
+id: REL-NEEDS-01-025
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,14 +15,14 @@ workflow: |
   jobs:
     job_a:
       name: upstream failing job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: fail step
           run: |
             exit 1
     job_b:
       name: downstream dependent job
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       needs: job_a
       steps:
         - name: should be skipped

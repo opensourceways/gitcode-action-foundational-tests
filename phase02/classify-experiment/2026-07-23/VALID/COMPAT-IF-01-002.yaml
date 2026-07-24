@@ -1,4 +1,4 @@
-﻿id: COMPAT-IF-01-002
+id: COMPAT-IF-01-002
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-continue:
       name: Test continue on error
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: force failure with continue
           continue-on-error: true

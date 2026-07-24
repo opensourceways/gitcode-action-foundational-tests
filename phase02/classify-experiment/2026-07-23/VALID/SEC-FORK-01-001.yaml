@@ -1,0 +1,39 @@
+id: SEC-FORK-01-001
+dimensions: ["security"]
+dimension: security
+priority: P0
+title: "fork PR 触发 pull_request 时不可读取项目 secrets"
+intent_ref: INTENT-SEC-001
+setup:
+  repo_fixture: with-secrets
+  secrets: ["DEPLOY_TOKEN"]
+  branch_protection: default
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    check-secret:
+      name: Check secret isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Try access secret
+          run: |
+            echo "secret value is ${{ secrets.DEPLOY_TOKEN }}"
+        - name: Print env
+          run: |
+            env | grep DEPLOY_TOKEN || echo "not found"
+trigger:
+  event: pull_request
+  as: untrusted_contributor
+  params: {}
+fault_injection: null
+assertions:
+  - type: negative
+    target: run_logs
+    must_not_contain_secret: "DEPLOY_TOKEN"
+  - type: positive
+    target: run_status
+    equals: "completed_or_blocked"
+teardown:
+  reset: fixture

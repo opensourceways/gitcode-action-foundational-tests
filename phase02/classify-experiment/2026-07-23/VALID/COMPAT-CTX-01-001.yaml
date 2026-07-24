@@ -1,4 +1,4 @@
-﻿id: COMPAT-CTX-01-001
+id: COMPAT-CTX-01-001
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test:
       name: Test github context reference
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Echo github ref
           run: |

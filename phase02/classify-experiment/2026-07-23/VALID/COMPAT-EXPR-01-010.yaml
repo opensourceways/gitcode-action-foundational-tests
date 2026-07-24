@@ -1,4 +1,4 @@
-﻿id: COMPAT-EXPR-01-010
+id: COMPAT-EXPR-01-010
 dimensions: [compatibility]
 dimension: compatibility
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-null-eq:
       name: Test loose equality with null
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Compare null and empty string
           run: |

@@ -1,4 +1,4 @@
-﻿id: USE-CTX-01-001
+id: USE-CTX-01-001
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-ctx:
       name: test atomgit context
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: echo atomgit ref
           run: |

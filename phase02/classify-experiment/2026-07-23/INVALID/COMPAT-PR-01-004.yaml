@@ -1,0 +1,46 @@
+id: COMPAT-PR-01-004
+dimensions: [compatibility]
+dimension: compatibility
+priority: P1
+title: "PR types 含 merge 时不触发与 GitHub 行为差异"
+intent_ref: INTENT-COMPAT-NEW-003
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      types: [open, merge]
+  jobs:
+    test-pr-merge:
+      name: Test PR merge trigger
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo trigger info
+          run: |
+            echo "event_name=${{ atomgit.event_name }}"
+            echo "done"
+
+trigger:
+  event: pull_request
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "合并 PR 后不应仅产生 PUSH 运行，应有独立的 pull_request merge 运行"
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "若平台已修复，合并后应触发 pull_request 运行并成功"
+
+teardown:
+  reset: none

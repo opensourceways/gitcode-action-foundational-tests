@@ -1,0 +1,53 @@
+id: COMP-ATOMGIT-01-047
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: atomgit 核心上下文属性可访问性
+intent_ref: KEEP-TC-017~057
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify atomgit core properties
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print core properties
+          run: |
+            echo "SHA=${{ atomgit.sha }}"
+            echo "REF=${{ atomgit.ref }}"
+            echo "REF_NAME=${{ atomgit.ref_name }}"
+            echo "REF_TYPE=${{ atomgit.ref_type }}"
+            echo "EVENT=${{ atomgit.event_name }}"
+            echo "REPO=${{ atomgit.repository }}"
+            echo "RUN_NUM=${{ atomgit.run_number }}"
+            echo "RUN_ATT=${{ atomgit.run_attempt }}"
+            echo "WF=${{ atomgit.workflow }}"
+            echo "SERVER=${{ atomgit.server_url }}"
+            echo "API=${{ atomgit.api_url }}"
+            echo "WORKSPACE=${{ atomgit.workspace }}"
+            echo "ACTOR=${{ atomgit.actor }}"
+            echo "REPO_URL=${{ atomgit.repositoryUrl }}"
+            echo "BASE_REF=${{ atomgit.base_ref }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: SHA=
+  - type: positive
+    target: run_logs
+    must_contain: REF=refs/
+  - type: positive
+    target: run_logs
+    must_contain: REPO=
+teardown:
+  reset: fixture

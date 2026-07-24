@@ -1,4 +1,4 @@
-﻿id: REL-FAULT-01-032
+id: REL-FAULT-01-032
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: fault injection network partition
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: generate artifact file
           run: |

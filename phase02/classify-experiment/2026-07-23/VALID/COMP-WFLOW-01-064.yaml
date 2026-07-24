@@ -1,0 +1,51 @@
+id: COMP-WFLOW-01-064
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: workflow stages 阶段结构字段验证
+intent_ref: KEEP-TC-366~401
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  stages:
+    build:
+      name: Build Stage
+      fail_fast: true
+      jobs:
+        build:
+          name: Build job
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Build step
+              run: |
+                echo "build_done"
+    test:
+      name: Test Stage
+      fail_fast: false
+      jobs:
+        test:
+          name: Test job
+          runs-on: [dedicate-hosted, x64, large]
+          steps:
+            - name: Test step
+              run: |
+                echo "test_done"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: build_done
+  - type: positive
+    target: run_logs
+    must_contain: test_done
+teardown:
+  reset: fixture

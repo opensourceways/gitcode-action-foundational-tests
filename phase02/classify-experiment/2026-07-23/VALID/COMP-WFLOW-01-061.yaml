@@ -1,0 +1,37 @@
+id: COMP-WFLOW-01-061
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: workflow name 与 on 字段必填与类型验证
+intent_ref: KEEP-TC-366~401
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  name: Test workflow name and on
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify workflow fields
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Echo ok
+          run: |
+            echo "workflow_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+  - type: positive
+    target: run_logs
+    must_contain: workflow_ok
+teardown:
+  reset: fixture

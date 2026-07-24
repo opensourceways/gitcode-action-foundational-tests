@@ -1,4 +1,4 @@
-﻿id: SEC-OIDC-01-001
+id: SEC-OIDC-01-001
 dimensions: ["security", "compatibility"]
 dimension: security
 priority: P1
@@ -12,7 +12,7 @@ workflow: |
   jobs:
     oidc-check:
       name: Check OIDC documentation
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Document check placeholder
           run: |

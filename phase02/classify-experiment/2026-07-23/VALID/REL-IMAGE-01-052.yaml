@@ -1,4 +1,4 @@
-﻿id: REL-IMAGE-01-052
+id: REL-IMAGE-01-052
 dimensions: [reliability]
 dimension: reliability
 priority: P1
@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: image pull 500MB test
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       container:
         image: python:3.11-slim
       steps:

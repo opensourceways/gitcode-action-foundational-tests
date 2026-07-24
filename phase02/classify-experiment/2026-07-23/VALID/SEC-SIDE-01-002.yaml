@@ -1,4 +1,4 @@
-﻿id: SEC-SIDE-01-002
+id: SEC-SIDE-01-002
 dimensions: ["security"]
 dimension: security
 priority: P0
@@ -13,7 +13,7 @@ workflow: |
   jobs:
     side-artifact:
       name: Test secret in artifact
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Write secret to file
           run: |

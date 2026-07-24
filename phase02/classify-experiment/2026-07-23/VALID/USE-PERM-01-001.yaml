@@ -1,4 +1,4 @@
-﻿id: USE-PERM-01-001
+id: USE-PERM-01-001
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -19,7 +19,7 @@ workflow: |
   jobs:
     test-perm:
       name: test gitcode permission names
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: checkout
           uses: checkout

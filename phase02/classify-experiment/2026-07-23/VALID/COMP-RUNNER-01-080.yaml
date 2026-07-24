@@ -1,0 +1,47 @@
+id: COMP-RUNNER-01-080
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: runner 上下文属性可访问性验证
+intent_ref: KEEP-TC-096~098
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify runner context
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Print runner props
+          run: |
+            echo "NAME=${{ runner.name }}"
+            echo "TEMP=${{ runner.temp }}"
+            echo "TOOL_CACHE=${{ runner.tool_cache }}"
+            echo "OS=${{ runner.os }}"
+            echo "ARCH=${{ runner.arch }}"
+            echo "runner_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: NAME=
+  - type: positive
+    target: run_logs
+    must_contain: TEMP=
+  - type: positive
+    target: run_logs
+    must_contain: TOOL_CACHE=
+  - type: positive
+    target: run_logs
+    must_contain: runner_ok
+teardown:
+  reset: fixture

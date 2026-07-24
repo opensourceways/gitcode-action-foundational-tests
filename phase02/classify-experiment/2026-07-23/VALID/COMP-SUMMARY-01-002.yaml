@@ -1,4 +1,4 @@
-﻿id: COMP-SUMMARY-01-002
+id: COMP-SUMMARY-01-002
 dimensions: [completeness, compatibility]
 dimension: completeness
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     verify:
       name: Verify summary security
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Write safe summary
           run: |

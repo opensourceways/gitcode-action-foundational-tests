@@ -1,0 +1,47 @@
+id: COMPAT-WCMD-01-003
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "::stop-commands:: 不被支持时应静默降级而非报错"
+intent_ref: INTENT-COMPAT-NEW-009
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-stop-commands:
+      name: Test stop-commands command
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Use stop-commands
+          run: |
+            echo "::stop-commands::pause"
+            echo "::set-output name=K::V"
+            echo "::pause::"
+            echo "done"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: run_status
+    equals: success
+    rubric: "workflow 不因 stop-commands 而失败"
+  - type: negative
+    target: run_logs
+    eval: llm_assisted
+    rubric: "stop-commands 不应导致 workflow 报错中断"
+
+teardown:
+  reset: none

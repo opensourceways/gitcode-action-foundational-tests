@@ -1,4 +1,4 @@
-﻿id: COMPAT-PERM-01-004
+id: COMPAT-PERM-01-004
 dimensions: [compatibility, security]
 dimension: compatibility
 priority: P0
@@ -19,7 +19,7 @@ workflow: |
   jobs:
     verify-repository-perm:
       name: Verify repository permission works
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: (TC) checkout with repository read
           uses: checkout

@@ -1,0 +1,45 @@
+id: COMP-BOUND-01-086
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 矩阵构建 include exclude 与单值边界验证
+intent_ref: KEEP-TC-276~328
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify matrix boundary
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os: [linux]
+          version: [1, 2]
+          include:
+            - os: linux
+              version: 3
+          exclude:
+            - os: linux
+              version: 2
+      steps:
+        - name: Matrix value
+          run: |
+            echo "OS=${{ matrix.os }}"
+            echo "VER=${{ matrix.version }}"
+            echo "matrix_ok"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: matrix_ok
+teardown:
+  reset: fixture

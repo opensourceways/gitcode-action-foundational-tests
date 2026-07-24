@@ -1,0 +1,46 @@
+id: REL-PROJLIMIT-01-067
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "项目级 workflow 并发上限——200 条同时触发时全部完成无丢失"
+intent_ref: INTENT-REL-067
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: concurrency limit test job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: quick step
+          run: |
+            echo "run_id=${{ atomgit.run_id }}"
+            sleep 5
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: completed_count
+    equals: "200"
+  - type: positive
+    target: failed_count
+    equals: "0"
+  - type: positive
+    target: queued_count
+    equals: "0"
+  - type: nonfunctional
+    target: total_duration_seconds
+    le: "3600"
+  - type: nonfunctional
+    target: lost_count
+    equals: "0"
+teardown:
+  reset: none

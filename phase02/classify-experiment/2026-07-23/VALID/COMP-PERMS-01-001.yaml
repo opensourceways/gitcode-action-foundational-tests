@@ -1,4 +1,4 @@
-﻿id: COMP-PERMS-01-001
+id: COMP-PERMS-01-001
 dimensions: [completeness, security]
 dimension: completeness
 priority: P0
@@ -18,7 +18,7 @@ workflow: |
   jobs:
     verify:
       name: Verify empty permissions
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       steps:
         - name: Attempt write
           run: |

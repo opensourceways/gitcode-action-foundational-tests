@@ -1,4 +1,4 @@
-﻿id: USE-UNKN-01-002
+id: USE-UNKN-01-002
 dimensions: ["usability", "compatibility"]
 dimension: usability
 priority: P1
@@ -17,7 +17,7 @@ workflow: |
   jobs:
     bad:
       name: github specific field container
-      runs-on: [ubuntu-latest, x64, small]
+      runs-on: [dedicate-hosted, x64, large]
       container:
         image: node:20
       steps:

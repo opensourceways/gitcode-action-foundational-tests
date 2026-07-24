@@ -1,0 +1,52 @@
+id: COMPAT-MATRIX-01-005
+dimensions: [compatibility]
+dimension: compatibility
+priority: P2
+title: "matrix exclude 全排除不被支持时的差异"
+intent_ref: INTENT-COMPAT-NEW-007
+
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test-matrix-exclude:
+      name: Test matrix exclude all
+      runs-on: [dedicate-hosted, x64, large]
+      strategy:
+        matrix:
+          os: [ubuntu]
+          node: [16]
+          exclude:
+            - os: ubuntu
+              node: 16
+      steps:
+        - name: Echo matrix values
+          run: |
+            echo "os=${{ matrix.os }}"
+            echo "node=${{ matrix.node }}"
+
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: positive
+    target: validation_error
+    eval: llm_assisted
+    rubric: "系统对空矩阵给出明确报错（如 matrix is empty）"
+  - type: negative
+    target: run_status
+    eval: llm_assisted
+    rubric: "exclude 不应被静默忽略导致所有实例仍生成"
+
+teardown:
+  reset: none

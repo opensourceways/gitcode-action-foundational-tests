@@ -1,0 +1,62 @@
+id: COMPAT-CACHE-01-002
+dimensions: [compatibility, security]
+dimension: compatibility
+priority: P0
+title: cache 行为等价性——fork PR 写隔离
+intent_ref: INTENT-COMPAT-025
+
+setup:
+  repo_fixture: with-fork-pr
+  secrets: []
+  variables: {}
+  branch_protection: default
+
+workflow: |
+  on:
+    pull_request:
+      branches: [main]
+  jobs:
+    verify-fork-cache:
+      name: Verify fork PR cache isolation
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: (TC) restore cache
+          uses: cache
+          with:
+            path: ~/.cache/test-dir
+            key: compat-cache-fork-test
+            restore-keys: compat-cache-fork-test-
+        - name: (TC) attempt write from fork
+          run: |
+            mkdir -p "$HOME/.cache/test-dir"
+            echo "FORK_MARKER_$(date +%s)" > "$HOME/.cache/test-dir/fork_marker.txt"
+            echo "FORK_WRITE_ATTEMPTED"
+        - name: (TC) save cache
+          if: ${{ always() }}
+          uses: cache
+          with:
+            path: ~/.cache/test-dir
+            key: compat-cache-fork-test
+
+trigger:
+  event: pr
+  as: untrusted_contributor
+  params: {}
+
+fault_injection: null
+
+assertions:
+  - type: negative
+    target: run_logs
+    eval: deterministic
+    rubric: "fork PR 不应成功覆盖主干缓存条目"
+  - type: positive
+    target: run_logs
+    eval: deterministic
+    rubric: "日志中应出现明确的缓存隔离或拒绝写入标识"
+  - type: negative
+    target: run_status
+    equals: leaked_cache_to_fork
+
+teardown:
+  reset: fixture

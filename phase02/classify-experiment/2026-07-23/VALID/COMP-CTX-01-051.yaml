@@ -1,0 +1,46 @@
+id: COMP-CTX-01-051
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: 上下文在 workflow job step 各级注入验证
+intent_ref: KEEP-TC-086~124
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  env:
+    WF_REF: ${{ atomgit.ref }}
+  jobs:
+    verify:
+      name: Verify context injection at all levels
+      runs-on: [dedicate-hosted, x64, large]
+      env:
+        JOB_REF: ${{ env.WF_REF }}
+      steps:
+        - name: Step context
+          run: |
+            echo "WF_REF=$WF_REF"
+            echo "JOB_REF=$JOB_REF"
+            echo "JOB_STATUS=${{ job.status }}"
+            echo "ATOMGIT_REF=${{ atomgit.ref }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: WF_REF=refs/
+  - type: positive
+    target: run_logs
+    must_contain: JOB_REF=refs/
+  - type: positive
+    target: run_logs
+    must_contain: JOB_STATUS=
+teardown:
+  reset: fixture

@@ -1,0 +1,41 @@
+id: COMP-EXPR-01-056
+dimensions: [completeness]
+dimension: completeness
+priority: P1
+title: toJson 函数边界行为
+intent_ref: KEEP-TC-187
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+fault_injection: null
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    verify:
+      name: Verify toJson boundary
+      runs-on: [dedicate-hosted, x64, large]
+      steps:
+        - name: Serialize event
+          run: |
+            echo "EVENT_JSON=${{ toJson(atomgit.event) }}"
+        - name: Serialize env context
+          env:
+            TEST_KEY: test_value
+          run: |
+            echo "ENV_JSON=${{ toJson(env) }}"
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+assertions:
+  - type: positive
+    target: run_logs
+    must_contain: "EVENT_JSON={"
+  - type: positive
+    target: run_logs
+    must_contain: "ENV_JSON={"
+teardown:
+  reset: fixture
