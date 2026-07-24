@@ -30,6 +30,7 @@ CONCLUSION = {
     "TIMEOUT": "不可测试", "COMPILE_ERROR": "不可测试",
     "FAIL": "问题发现",
 }
+MIN_EXECUTION_COVERAGE = float(os.environ.get("MIN_EXECUTION_COVERAGE", "0.6"))
 # 分维度默认阈值（quality-gate.md 不可解析时的兜底）
 DEFAULT_GATE = {"completeness": 95, "compatibility": 90, "reliability": 85,
                 "security": 90, "usability": 80}
@@ -68,14 +69,23 @@ def main():
         if r["verdict"] == "FAIL" and r.get("priority") == "P0":
             s["p0_fail"] += 1
 
-    # 门禁：任何 P0 FAIL → BLOCKED；维度通过率低于阈值 → 该维度 BLOCKED
+    # 执行覆盖率 guard：有效判定（通过+问题发现）/ 总数 < 阈值 → 整体 INCONCLUSIVE
+    effective = sum(s["通过"] + s["问题发现"] for s in dims.values())
+    exec_coverage = (effective / tot * 100) if tot else 0
+    coverage_ok = (effective / tot) >= MIN_EXECUTION_COVERAGE if tot else False
+
+    # 门禁：先判覆盖率，不够 → INCONCLUSIVE；够了再走 P0/通过率逻辑
     blocked_dims, overall = [], "GO"
+    if not coverage_ok:
+        overall = "INCONCLUSIVE"
     dim_rows = []
     for d, s in sorted(dims.items()):
         denom = s["通过"] + s["问题发现"]  # 剔除不可测试/未发现问题
         rate = (s["通过"] * 100 // denom) if denom else None
         thr = DEFAULT_GATE.get(d, 85)
         gate = "✅"
+        if not coverage_ok:
+            gate = "⚪"; overall = "INCONCLUSIVE"
         if rate is not None and rate < thr:
             gate = "⛔"; blocked_dims.append(d); overall = "BLOCKED"
         if s["p0_fail"]:
@@ -105,7 +115,11 @@ def main():
     rp = os.path.join(PHASE02, "reports", run_id, "report.md")
     with open(rp, "w", encoding="utf-8") as f:
         f.write(f"# GitCode Actions 测试报告 · {run_id}\n\n")
-        f.write(f"## 门禁判定: {'✅ GO' if overall == 'GO' else '⛔ BLOCKED'}\n\n")
+        icon = "⛔ BLOCKED" if overall == "BLOCKED" else ("⚪ INCONCLUSIVE" if overall == "INCONCLUSIVE" else "✅ GO")
+        f.write(f"## 门禁判定: {icon}\n\n")
+        f.write(f"- 执行覆盖率: {(exec_coverage/100):.1%}（{effective}/{tot} 有效判定）\n")
+        if not coverage_ok:
+            f.write(f"- 原因: 执行覆盖率仅 {effective}/{tot}，未达阈值 {MIN_EXECUTION_COVERAGE:.0%}，样本不足以支撑上线结论\n")
         if blocked_dims:
             f.write(f"**Blocked 维度**: {', '.join(blocked_dims)}\n\n")
         f.write("## 执行摘要\n")
@@ -146,6 +160,7 @@ def main():
         f.write(run_id + "\n")
 
     print(f"报告已生成: reports/{run_id}/report.md")
+    print(f"执行覆盖率: {effective}/{tot} ({effective/tot:.1%})" if tot else "覆盖率: N/A")
     print(f"门禁: {overall}" + (f" (blocked: {blocked_dims})" if blocked_dims else ""))
     if compare:
         print(f"回归: {regressions or '无'} | 修复: {fixes or '无'}")
