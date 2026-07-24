@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-006
+参照来源:  inputs/gitcode-spec/
 母意图:    —
 标题:      preemption events 越界值——配置 11 个应被拒绝
 

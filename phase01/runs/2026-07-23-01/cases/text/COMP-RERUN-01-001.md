@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-009
+参照来源:  inputs/gitcode-spec/running-pipelines/view-job-logs.md; inputs/gitcode-spec/running-pipelines/view-run-results.md
 母意图:    —
 标题:      rerun 后 atomgit.sha 保持原始值 run_number 递增
 

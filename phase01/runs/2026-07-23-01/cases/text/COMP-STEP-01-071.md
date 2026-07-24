@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-279~288
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      step 执行控制 shell working-directory continue-on-error timeout-minutes 验证
 

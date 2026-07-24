@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-003
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      paths 过滤匹配前 300 个变更文件行为符合预期
 

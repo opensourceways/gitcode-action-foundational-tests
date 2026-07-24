@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-025
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    COMPAT-CACHE-01-001
 标题:      cache 行为等价性——fork PR 写隔离
 

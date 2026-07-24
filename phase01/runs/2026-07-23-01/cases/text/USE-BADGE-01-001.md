@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-019
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      workflow 运行完成后状态徽标及时回写且语义清晰
 

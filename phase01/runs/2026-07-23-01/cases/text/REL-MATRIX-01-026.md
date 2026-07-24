@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-026
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      matrix fail-fast=true——任意 job 实例失败应立即取消其余实例
 

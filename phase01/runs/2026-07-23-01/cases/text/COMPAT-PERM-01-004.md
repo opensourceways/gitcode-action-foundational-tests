@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-030
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    COMPAT-PERM-01-003
 标题:      permissions 命名差异——GitCode repository 权限项正常生效
 

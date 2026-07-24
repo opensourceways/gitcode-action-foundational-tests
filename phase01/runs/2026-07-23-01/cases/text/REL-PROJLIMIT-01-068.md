@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-068
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      项目级 workflow 并发上限越界——201 条同时触发时至少一条进入排队
 

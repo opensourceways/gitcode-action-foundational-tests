@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-007
+参照来源:  inputs/gitcode-spec/action-development/top-level-fields.md
 母意图:    —
 标题:      使用 actions/checkout@v4 时报错应给出迁移指引
 

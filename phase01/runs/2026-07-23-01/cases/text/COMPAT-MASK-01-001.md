@@ -5,6 +5,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-033
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      直接 echo secrets 值应在日志中被脱敏
 

@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-012
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    COMPAT-PATHS-01-001
 标题:      paths 过滤器 301 条越界测试
 

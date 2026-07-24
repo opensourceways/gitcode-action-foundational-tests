@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-264~288
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      job 必填字段 name runs-on steps 验证
 

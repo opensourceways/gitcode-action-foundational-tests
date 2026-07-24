@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-046
+参照来源:  inputs/gitcode-spec/core-concepts/artifacts-and-cache.md
 母意图:    —
 标题:      缓存 LRU 淘汰压力——连续写入 10 个大缓存后最旧缓存应被正确淘汰
 

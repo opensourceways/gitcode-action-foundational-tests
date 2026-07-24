@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-NEW-006
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      跨 Job 引用未声明 output 时返回空值的差异
 

@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-011
+参照来源:  inputs/gitcode-spec/running-pipelines/view-job-logs.md; inputs/gitcode-spec/running-pipelines/view-run-results.md
 母意图:    —
 标题:      rerun 边界值——单条运行连续重新运行 3 次应全部成功
 

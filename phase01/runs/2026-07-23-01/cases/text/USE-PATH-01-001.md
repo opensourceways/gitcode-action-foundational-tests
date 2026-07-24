@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-015
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      paths 300 文件上限在文档与行为中一致且明示
 

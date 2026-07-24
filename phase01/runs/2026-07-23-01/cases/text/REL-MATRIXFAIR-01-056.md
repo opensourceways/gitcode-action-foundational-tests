@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-056
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      矩阵调度公平性——20 实例 matrix 配 max-parallel=4 的无饿死验证
 

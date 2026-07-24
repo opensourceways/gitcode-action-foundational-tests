@@ -3,6 +3,7 @@
 维度:      usability/security
 优先级:    P0
 溯源意图:  INTENT-USE-016
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      secret 脱敏文档描述与实际行为一致并给出缓解建议
 

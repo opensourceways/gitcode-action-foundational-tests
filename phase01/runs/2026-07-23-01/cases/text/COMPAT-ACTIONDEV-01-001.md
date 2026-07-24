@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P2
 溯源意图:  INTENT-COMPAT-NEW-010
+参照来源:  inputs/gitcode-spec/action-development/top-level-fields.md
 母意图:    —
 标题:      action.yml 元数据校验与 GitHub 差异
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-027
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      环境级 secret 必须经审批后才能被 workflow 访问
 

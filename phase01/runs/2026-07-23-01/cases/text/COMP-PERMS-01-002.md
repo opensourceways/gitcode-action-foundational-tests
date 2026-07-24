@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-013
+参照来源:  inputs/gitcode-spec/
 母意图:    —
 标题:      声明 repository write 后 TOKEN 可推送代码
 

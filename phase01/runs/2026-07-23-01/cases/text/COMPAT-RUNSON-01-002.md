@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-027
+参照来源:  inputs/gitcode-spec/runner-management/selecting-runner-labels.md; inputs/platform-config/instance-config.md
 母意图:    COMPAT-RUNSON-01-001
 标题:      runs-on 标签体系——单标签字符串应报错
 

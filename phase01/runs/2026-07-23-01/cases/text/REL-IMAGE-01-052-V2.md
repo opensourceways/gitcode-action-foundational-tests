@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-052
+参照来源:  inputs/gitcode-spec/runner-management/selecting-runner-labels.md; inputs/platform-config/instance-config.md
 母意图:    —
 标题:      镜像拉取性能——5GB 自定义 container 环境准备耗时基准
 

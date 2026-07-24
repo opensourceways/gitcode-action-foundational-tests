@@ -5,6 +5,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-031
+参照来源:  inputs/github-reference/reference/workflow-syntax.md; inputs/gitcode-spec/COMPAT-NOTES.md
 母意图:    —
 标题:      GitHub 风格 run-name 语法迁移报错应给出可操作指引
 

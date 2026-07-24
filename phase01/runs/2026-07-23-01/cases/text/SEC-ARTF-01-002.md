@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-019
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    SEC-ARTF-01-001
 标题:      跨仓库 artifact 下载返回 403 或 404
 

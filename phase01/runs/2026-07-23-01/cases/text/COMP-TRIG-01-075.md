@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-237~430
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      schedule 事件关键字段与 cron 格式验证
 

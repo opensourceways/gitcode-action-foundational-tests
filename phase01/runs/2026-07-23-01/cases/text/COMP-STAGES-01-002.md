@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-007
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      fail_fast true 时 stage 内任一 job 失败终止同阶段其余 job
 

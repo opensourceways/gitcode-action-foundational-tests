@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-008
+参照来源:  inputs/gitcode-spec/core-concepts/variables-secrets-context-expressions.md; inputs/gitcode-spec/syntax-reference/expressions.md; inputs/gitcode-spec/syntax-reference/context.md
 母意图:    —
 标题:      超时的 job 被强制终止并标记为 failure
 

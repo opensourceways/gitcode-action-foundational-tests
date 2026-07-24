@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-036
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      并发洪泛——同一仓库 10 个 push 同时触发 10 个 workflow 运行应无丢失
 

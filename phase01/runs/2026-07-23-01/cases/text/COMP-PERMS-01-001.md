@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-013
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      permissions 空对象时 ATOMGIT_TOKEN 仅 repository read
 

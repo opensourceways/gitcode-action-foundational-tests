@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-027
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    SEC-ENV-01-001
 标题:      环境级 secret 审批前 workflow 不可读取
 

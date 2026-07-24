@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-031
+参照来源:  inputs/gitcode-spec/syntax-reference/runner-images-tools.md; inputs/gitcode-spec/writing-pipelines/using-script-commands.md
 母意图:    —
 标题:      审批后推送新 commit 不应被已授权特权运行执行
 

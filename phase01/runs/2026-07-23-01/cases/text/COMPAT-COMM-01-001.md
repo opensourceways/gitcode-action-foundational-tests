@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-NEW-004
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      issue_comment types 命名差异 - GitCode 合法 types 应被接受
 

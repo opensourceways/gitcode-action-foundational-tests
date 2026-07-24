@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-002
+参照来源:  inputs/gitcode-spec/writing-pipelines/workflow-file-location-structure.md
 母意图:    —
 标题:      不应静默忽略未知字段导致用户误以为配置生效
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-036
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    SEC-DEFPERM-01-001
 标题:      job 级覆盖后权限正确收窄
 

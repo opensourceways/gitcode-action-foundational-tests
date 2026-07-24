@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-018
+参照来源:  inputs/gitcode-spec/core-concepts/artifacts-and-cache.md
 母意图:    SEC-CACHE-01-001
 标题:      主仓 cache restore 对 fork cache miss
 

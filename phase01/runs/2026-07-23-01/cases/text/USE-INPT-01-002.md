@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-008
+参照来源:  inputs/gitcode-spec/
 母意图:    —
 标题:      使用 boolean 类型 input 时报错应提示仅支持 string
 

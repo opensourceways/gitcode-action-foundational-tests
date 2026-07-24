@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-017
+参照来源:  inputs/gitcode-spec/core-concepts/variables-secrets-context-expressions.md; inputs/gitcode-spec/syntax-reference/expressions.md; inputs/gitcode-spec/syntax-reference/context.md
 母意图:    COMPAT-ENV-01-001
 标题:      GITHUB_SHA 环境变量在 GitCode 中应为空或未定义
 

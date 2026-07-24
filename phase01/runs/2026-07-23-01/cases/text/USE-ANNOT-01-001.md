@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-021
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      workflow 命令 ::error:: 与 ::warning:: 在日志中保留原文
 

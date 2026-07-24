@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-061~083
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      pull_request 事件关键字段与 types 验证
 

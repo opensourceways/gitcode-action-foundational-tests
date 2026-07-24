@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-014
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      pull_request_target 默认使用 base 分支 workflow 版本
 

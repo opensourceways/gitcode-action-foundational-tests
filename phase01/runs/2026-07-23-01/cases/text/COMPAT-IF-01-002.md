@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-003
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      continue-on-error 标记后失败 step 不阻断后续执行
 

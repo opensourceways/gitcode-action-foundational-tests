@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-025
+参照来源:  inputs/gitcode-spec/core-concepts/artifacts-and-cache.md
 母意图:    —
 标题:      cache 行为等价性——缓存命中场景
 

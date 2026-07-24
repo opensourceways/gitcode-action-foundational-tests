@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P2
 溯源意图:  INTENT-COMPAT-NEW-007
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      matrix 三维展开不被支持时的差异
 

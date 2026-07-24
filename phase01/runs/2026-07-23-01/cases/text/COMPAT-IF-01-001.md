@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-003
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      step 失败后后续 step 默认跳过行为
 

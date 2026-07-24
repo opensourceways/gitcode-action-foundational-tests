@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-003
+参照来源:  inputs/gitcode-spec/
 母意图:    SEC-TOKEN-01-001
 标题:      fork PR 中 ATOMGIT_TOKEN 写操作被平台拒绝
 

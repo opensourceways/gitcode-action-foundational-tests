@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-031
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      故障注入——job 执行中 runner 进程被 SIGKILL 后应记录失败并保留已执行日志
 

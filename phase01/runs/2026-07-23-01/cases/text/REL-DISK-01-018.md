@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-018
+参照来源:  inputs/gitcode-spec/runner-management/selecting-runner-labels.md; inputs/platform-config/instance-config.md
 母意图:    —
 标题:      Runner 磁盘边界——small runner 写入 49 GB 应成功
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-014
+参照来源:  inputs/gitcode-spec/syntax-reference/runner-images-tools.md; inputs/gitcode-spec/writing-pipelines/using-script-commands.md
 母意图:    SEC-SUPPLY-01-001
 标题:      commit hash 不匹配时第三方 Action 应被拒绝执行
 

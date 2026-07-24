@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P2
 溯源意图:  INTENT-COMPAT-NEW-009
+参照来源:  inputs/gitcode-spec/syntax-reference/workflow-commands.md
 母意图:    —
 标题:      ::group:: 不被支持时应静默降级而非报错
 

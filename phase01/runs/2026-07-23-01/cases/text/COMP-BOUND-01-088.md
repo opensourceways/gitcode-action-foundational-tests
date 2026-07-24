@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-240~246
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      工作流命令 set-env add-path 与文件写入边界验证
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-004
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    SEC-MASK-01-001
 标题:      Secret 值在 step summary 和错误堆栈中必须被脱敏
 

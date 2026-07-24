@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-279~288
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      step 可选字段 id env if with 验证
 

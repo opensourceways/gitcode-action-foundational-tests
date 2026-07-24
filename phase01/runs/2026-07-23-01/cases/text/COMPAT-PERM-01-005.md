@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-030
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      permissions 空对象时 ATOMGIT_TOKEN 默认权限范围差异
 

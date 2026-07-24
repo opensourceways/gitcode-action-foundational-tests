@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-006
+参照来源:  inputs/gitcode-spec/core-concepts/variables-secrets-context-expressions.md; inputs/gitcode-spec/syntax-reference/expressions.md; inputs/gitcode-spec/syntax-reference/context.md
 母意图:    —
 标题:      contains 表达式空值与空字符串边界
 

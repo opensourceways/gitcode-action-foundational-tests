@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-024
+参照来源:  inputs/gitcode-spec/core-concepts/variables-secrets-context-expressions.md; inputs/gitcode-spec/syntax-reference/expressions.md; inputs/gitcode-spec/syntax-reference/context.md
 母意图:    —
 标题:      调用未知函数时报错应提示函数名错误与修正方向
 

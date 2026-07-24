@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-031
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    SEC-TOCTOU-01-001
 标题:      评论触发不应绕过代码固定与 PR 审批
 

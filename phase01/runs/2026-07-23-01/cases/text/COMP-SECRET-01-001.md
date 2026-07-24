@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-012
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      echo secret 在日志中被脱敏为 ***
 

@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-017~057
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      atomgit 核心上下文属性可访问性
 

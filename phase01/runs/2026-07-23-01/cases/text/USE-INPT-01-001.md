@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-008
+参照来源:  inputs/gitcode-spec/writing-pipelines/workflow-file-location-structure.md
 母意图:    —
 标题:      使用 string 类型 input 时正常通过校验
 

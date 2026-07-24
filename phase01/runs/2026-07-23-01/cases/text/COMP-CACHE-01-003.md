@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-016
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      fork PR 不应覆盖或污染主分支 cache
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-001
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    SEC-FORK-01-001
 标题:      fork PR 中 secrets 引用返回空值且 job 不崩溃
 

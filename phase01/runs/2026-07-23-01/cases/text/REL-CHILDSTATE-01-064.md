@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P0
 溯源意图:  INTENT-REL-064
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      子任务状态传播——workflow_call 失败时父 workflow 不应假阳性完成
 

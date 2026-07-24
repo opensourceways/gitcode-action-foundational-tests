@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P2
 溯源意图:  INTENT-COMPAT-NEW-009
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      ::add-mask:: 不被支持时应静默降级而非报错
 

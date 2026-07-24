@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-086~124
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      上下文在 Action 插件参数中注入验证
 

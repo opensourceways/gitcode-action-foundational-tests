@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-014
+参照来源:  inputs/gitcode-spec/action-development/top-level-fields.md
 母意图:    —
 标题:      显式 checkout head.sha 后执行不可信代码的风险可控
 

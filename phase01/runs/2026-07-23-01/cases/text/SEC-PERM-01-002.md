@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-016
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    SEC-PERM-01-001
 标题:      permissions 声明 read 时写操作被平台拒绝
 

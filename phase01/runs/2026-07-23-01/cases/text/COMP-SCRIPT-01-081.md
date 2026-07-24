@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-431~433
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      仓库内脚本执行与路径验证
 

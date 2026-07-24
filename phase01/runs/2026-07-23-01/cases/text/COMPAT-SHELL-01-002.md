@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-001
+参照来源:  inputs/gitcode-spec/writing-pipelines/workflow-file-location-structure.md
 母意图:    —
 标题:      默认工作目录隐式行为差异 - 未显式声明时是否为仓库根目录
 

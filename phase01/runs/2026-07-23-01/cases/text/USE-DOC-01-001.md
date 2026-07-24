@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-011
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      stages 与 post 概念在迁移文档中具备可发现性
 

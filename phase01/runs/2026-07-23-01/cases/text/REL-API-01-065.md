@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P2
 溯源意图:  INTENT-REL-065
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      API 限流与一致性——10 QPS 高频查询 run/job 状态不丢数据
 

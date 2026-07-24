@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P0
 溯源意图:  INTENT-COMP-016
+参照来源:  inputs/gitcode-spec/
 母意图:    —
 标题:      restore-keys 前缀匹配兜底生效
 

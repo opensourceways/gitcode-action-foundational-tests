@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-025
+参照来源:  inputs/gitcode-spec/runner-management/selecting-runner-labels.md; inputs/platform-config/instance-config.md
 母意图:    —
 标题:      runs-on 标签因容量不足排队时应提示排队状态而非无可用 runner
 

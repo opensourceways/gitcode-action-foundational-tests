@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-001~004
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      env 优先级链 step 大于 job 大于 workflow
 

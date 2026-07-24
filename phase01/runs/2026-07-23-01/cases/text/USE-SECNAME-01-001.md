@@ -3,6 +3,7 @@
 维度:      usability/security
 优先级:    P1
 溯源意图:  INTENT-USE-028
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      Secret 名称以 ATOMGIT_ 开头时应给出命名规则错误
 

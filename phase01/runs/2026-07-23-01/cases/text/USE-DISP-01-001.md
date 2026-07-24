@@ -3,6 +3,7 @@
 维度:      usability/completeness
 优先级:    P1
 溯源意图:  INTENT-USE-030
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      workflow_dispatch 必填参数未提供时应给出明确校验错误
 

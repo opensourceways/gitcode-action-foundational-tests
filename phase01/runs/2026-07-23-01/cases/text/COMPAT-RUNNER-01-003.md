@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P2
 溯源意图:  INTENT-COMPAT-NEW-008
+参照来源:  inputs/gitcode-spec/runner-management/selecting-runner-labels.md; inputs/platform-config/instance-config.md
 母意图:    —
 标题:      self-hosted 标签不被支持时应明确报错
 

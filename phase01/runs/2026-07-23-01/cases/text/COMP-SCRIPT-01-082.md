@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-431~433
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      脚本权限设置与直接执行验证
 

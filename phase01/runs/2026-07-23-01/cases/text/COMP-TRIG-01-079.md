@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-234~560
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      触发事件 types 取值与过滤边界验证
 

@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-NEW-012
+参照来源:  inputs/gitcode-spec/syntax-reference/workflow-commands.md; inputs/github-reference/reference/workflow-commands.md
 母意图:    —
 标题:      ::set-env:: 废弃命令应被拒绝或给出迁移指引
 

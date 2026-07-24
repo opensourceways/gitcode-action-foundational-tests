@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P2
 溯源意图:  INTENT-REL-054
+参照来源:  inputs/gitcode-spec/core-concepts/artifacts-and-cache.md
 母意图:    —
 标题:      缓存加速比——cache 命中 vs 未命中构建耗时对比
 

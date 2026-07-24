@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-016
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    COMPAT-CTX-01-001
 标题:      使用 atomgit.ref 上下文应正确返回触发引用
 

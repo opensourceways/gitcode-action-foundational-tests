@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-035
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    SEC-BASE-01-001
 标题:      fork PR 改 workflow 不被 pull_request_target 采用
 

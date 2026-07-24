@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-001
+参照来源:  inputs/github-reference/reference/workflow-syntax.md; inputs/gitcode-spec/COMPAT-NOTES.md
 母意图:    —
 标题:      默认 shell 隐式行为差异 - 未显式声明时是否为 bash
 

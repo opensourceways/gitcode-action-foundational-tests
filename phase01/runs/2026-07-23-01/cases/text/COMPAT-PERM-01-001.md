@@ -4,6 +4,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-002
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      未声明 permissions 时默认 TOKEN 读操作权限范围
 

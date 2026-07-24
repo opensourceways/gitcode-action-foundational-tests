@@ -5,6 +5,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-033
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      通过 env 注入 secret 后输出应在日志中被脱敏
 

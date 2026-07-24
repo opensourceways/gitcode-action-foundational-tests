@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-022
+参照来源:  inputs/gitcode-spec/; inputs/business-context/README.md
 母意图:    —
 标题:      YAML 缩进错误时报错应指出具体行号与列号
 

@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-002
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    SEC-PRTGT-01-001
 标题:      pull_request_target 无审批不执行 fork PR 代码
 

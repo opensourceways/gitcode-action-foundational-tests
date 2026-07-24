@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-015
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    COMPAT-NEST-01-001
 标题:      workflow_call 嵌套层数 - 3 层越界应报错
 

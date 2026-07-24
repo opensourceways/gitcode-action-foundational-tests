@@ -5,6 +5,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-034
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      concurrency cancel-in-progress false 时应排队而非报错
 

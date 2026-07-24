@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-514~559
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      路径与分支过滤组合及否定模式边界验证
 

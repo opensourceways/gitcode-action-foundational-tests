@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P1
 溯源意图:  INTENT-REL-005
+参照来源:  inputs/platform-config/instance-config.md
 母意图:    —
 标题:      preemption events 边界值——配置 10 个应正常解析
 

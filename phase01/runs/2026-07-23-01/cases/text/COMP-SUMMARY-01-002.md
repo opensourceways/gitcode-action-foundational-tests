@@ -3,6 +3,7 @@
 维度:      completeness
 优先级:    P1
 溯源意图:  INTENT-COMP-018
+参照来源:  inputs/gitcode-spec/syntax-reference/workflow-commands.md
 母意图:    —
 标题:      summary 中不应暴露系统内部路径
 

@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-032
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    —
 标题:      pull_request_target 默认 types 与 GitHub 差异
 

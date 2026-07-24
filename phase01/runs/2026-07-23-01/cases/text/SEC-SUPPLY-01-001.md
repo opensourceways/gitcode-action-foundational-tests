@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-014
+参照来源:  inputs/gitcode-spec/
 母意图:    —
 标题:      第三方 Action 引用应支持完整 commit hash 固定
 

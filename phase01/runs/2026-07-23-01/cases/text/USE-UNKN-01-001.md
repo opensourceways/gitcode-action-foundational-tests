@@ -3,6 +3,7 @@
 维度:      usability/compatibility
 优先级:    P1
 溯源意图:  INTENT-USE-023
+参照来源:  inputs/gitcode-spec/writing-pipelines/workflow-file-location-structure.md
 母意图:    —
 标题:      未知字段如 run-name 不应被静默忽略而应给出警告或错误
 

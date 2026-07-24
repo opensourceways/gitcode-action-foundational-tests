@@ -3,6 +3,7 @@
 维度:      稳定性
 优先级:    P2
 溯源意图:  INTENT-REL-062
+参照来源:  inputs/gitcode-spec/core-concepts/workflow-job-step-action.md; inputs/gitcode-spec/writing-pipelines/configure-jobs.md
 母意图:    —
 标题:      网络依赖容错——workflow 中访问不可达地址的明确失败与有界超时
 

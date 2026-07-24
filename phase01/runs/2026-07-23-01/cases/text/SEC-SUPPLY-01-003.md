@@ -3,6 +3,7 @@
 维度:      安全性
 优先级:    P0
 溯源意图:  INTENT-SEC-015
+参照来源:  inputs/platform-config/instance-config.md
 母意图:    —
 标题:      第三方 Action 来源应具备信任边界（typosquatting 限制）
 

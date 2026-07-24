@@ -3,6 +3,7 @@
 维度:      usability/security
 优先级:    P0
 溯源意图:  INTENT-USE-016
+参照来源:  inputs/security-knowledge/issues.md; inputs/github-reference/security/
 母意图:    —
 标题:      直接 echo secrets 值时文档描述的绕过风险与实际一致
 

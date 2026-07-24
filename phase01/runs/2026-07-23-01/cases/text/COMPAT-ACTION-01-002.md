@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-024
+参照来源:  inputs/gitcode-spec/action-development/top-level-fields.md
 母意图:    COMPAT-ACTION-01-001
 标题:      checkout 短名等价性——path 参数支持
 

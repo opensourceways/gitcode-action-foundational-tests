@@ -3,6 +3,7 @@
 维度:      完备性
 优先级:    P1
 溯源意图:  KEEP-TC-197~222
+参照来源:  inputs/existing-cases/cases.md
 母意图:    —
 标题:      ATOMGIT 系统环境变量关键变量存在性
 

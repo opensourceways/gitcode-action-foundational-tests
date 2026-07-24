@@ -3,6 +3,7 @@
 维度:      usability
 优先级:    P1
 溯源意图:  INTENT-USE-021
+参照来源:  inputs/gitcode-spec/syntax-reference/workflow-commands.md
 母意图:    —
 标题:      ::error:: 生成的 PR annotation 具备文件路径、行号与可点击跳转
 

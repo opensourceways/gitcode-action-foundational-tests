@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P0
 溯源意图:  INTENT-COMPAT-020
+参照来源:  inputs/gitcode-spec/
 母意图:    COMPAT-TOKEN-01-001
 标题:      GITHUB_TOKEN 在 GitCode 中应为空且不应被静默映射
 

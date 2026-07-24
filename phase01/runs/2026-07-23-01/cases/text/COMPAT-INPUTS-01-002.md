@@ -3,6 +3,7 @@
 维度:      兼容性
 优先级:    P1
 溯源意图:  INTENT-COMPAT-014
+参照来源:  inputs/gitcode-spec/core-concepts/trigger-events.md
 母意图:    COMPAT-INPUTS-01-001
 标题:      workflow_dispatch inputs 类型限制 - string 正常通过
 
