@@ -34,7 +34,7 @@
 | 案例 | 描述 |confirm|evidence|
 |---|---|---|--|
 | REL-NEEDS-01-025 | needs 失败传播不生效，下游未 skip | fake |https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/33c72b47d51b493490bd665d1a659324|
-| REL-YAMLCACHE-01-060 | 推送新 YAML 后平台仍执行旧版本（缓存不失效） |||
+| REL-YAMLCACHE-01-060 | 推送新 YAML 后平台仍执行旧版本（缓存不失效） |fake|https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/beb155d45c804a479fd3ba73ee23b5cf/job/77e450d25ce04d64a7fab68d4d234b3d,https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/fca4c7f3203b40e389ffb757b7173f1f/job/6da949a9f74d4bb8837acf9832ff994b|
 
 ### COMPATIBILITY
 | 案例 | 描述 |
