@@ -1,14 +1,16 @@
 ## 失败分诊 · USE-EXPR-01-001 · 引用不存在的上下文属性时报错应包含原始表达式与错误类型
 
 **判定结果**: FAIL
-**失败断言**: assertions[0] (negative, run_status) — 期望 run_status 不为 COMPLETED（即表达式求值应报错），实际 COMPLETED；assertions[1] (nonfunctional, error_message) — 期望报错含原始表达式和错误类型说明，实际无任何报错
+**失败断言**:
+- negative/run_status: expected ≠ COMPLETED, actual = COMPLETED（平台未拒绝未定义属性）
+- nonfunctional/error_message: rubric "报错信息必须包含出错的原始表达式和错误类型说明" — 无任何报错
 
 **根因初判**: 产品bug
 **责任人**: 平台方
 
 **证据**:
 
-- **Job 日志全量**（6 行）:
+- **Job 日志全量**:
   ```
   === JOB: undefined context property (status=COMPLETED) ===
   [2026/07/23 22:43:16.941 GMT+08:00] [INFO] Job(1529982259069460480_1529982259035906055) duration check: true
@@ -17,36 +19,56 @@
   ::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6a7813a6-cf11-4a67-a9e5-9b5d034cce44.sh
   val=
   ```
-  `${{ atomgit.nonexistent_property }}` 表达式被静默求值为空字符串 `""`（输出 `val=`），Job 以 COMPLETED 完成。平台未因引用不存在的上下文属性而报错，也未给出任何关于"未知上下文属性"或"请检查拼写"的错误提示。
 
-- **预期行为**（Phase 01 文本用例 `USE-EXPR-01-001`，优先级 P1，维度 usability/compatibility）:
-  - 操作步骤 1: "在 run 步骤中使用 ${{ atomgit.nonexistent_property }}"
-  - 预期结果: "报错包含原始表达式字符串和错误类型说明（undefined property / unknown context）"
-  - 验证点: "[负向] 不应静默求值为空字符串"；"[非功能] 报错中是否包含原始表达式和错误位置"
+- **预期行为**（Phase 01 文本用例）:
+  - 前置条件: workflow 文件位于 .gitcode/workflows/
+  - 操作步骤: 在 run 步骤中使用 ${{ atomgit.nonexistent_property }}
+  - 预期结果: 报错包含原始表达式字符串和错误类型说明（undefined property / unknown context）
 
 - **实际行为**:
-  - 平台对 `atomgit.nonexistent_property` 表达式执行了求值，结果为空字符串（`val=`），Job 正常结束。触发了"静默求值为空字符串"这一负向验证点描述的禁止行为。用户无法判断表达式是否存在错误或拼写问题。
+  - 表达式 `${{ atomgit.nonexistent_property }}` **静默求值为空字符串**
+  - Job 成功完成（COMPLETED），无任何错误、警告或提示
+  - **失败传导链**: 平台 → `atomgit.nonexistent_property` 静默求值为 `""` → job 正常完成 → 测试断言 negative/run_status ≠ COMPLETED 失败
 
 - **测试 YAML 与规格精确对照**:
-  - 测试 YAML 中 `bad` job 的步骤:
+  - **测试 YAML** 中 `bad` job 的 `bad expression` step:
     ```yaml
     steps:
       - name: bad expression
         run: |
           echo "val=${{ atomgit.nonexistent_property }}"
     ```
-  - 这对应 GitCode 规格 `phase01/inputs/gitcode-spec/syntax-reference/context.md` 第 27-48 行的 `atomgit` 上下文完整属性表，其中定义了 19 个合法属性（如 `atomgit.ref`、`atomgit.sha`、`atomgit.event_name` 等），不包含 `nonexistent_property`。文档第 5 行声明"每个上下文是一个 JSON 对象，可通过表达式 `${{ context.property }}` 访问"，暗含了属性应在上下文中存在的前提。平台应在引用不存在的属性时产生诊断信息。
+  - **GitCode 规格** `syntax-reference/context.md` 第25-48行:
+    ```markdown
+    ## 2.2 atomgit 上下文完整属性
+    
+    | 属性 | 类型 | 说明 |
+    |------|------|------|
+    | `atomgit.event_name` | string | 当前触发事件名称 |
+    | `atomgit.sha` | string | 触发提交的 SHA |
+    | `atomgit.ref` | string | 触发引用 |
+    | ... |
+    ```
+    `atomgit` 上下文的合法属性列表中**不存在** `nonexistent_property`
+  - **逐项映射**:
+    - 测试 `atomgit.nonexistent_property` → 规格中 `atomgit` 无此属性，属性名不合法
+    - 平台行为：未定义属性静默展开为空字符串，无报错
+    - 差异：应产生包含原始表达式 `${{ atomgit.nonexistent_property }}` 和 "undefined property" 类型的报错
 
-**置信度**: 高（日志第 6 行 `val=` 证实表达式被求值为空字符串，Job COMPLETED 无任何报错，直接违反"不应静默求值为空字符串"的负向验证点）
+- **环境前置条件验证**: workflow_dispatch 触发，Runner [dedicate-hosted, x64, large]，表达式语法 `${{ }}` 正确
+
+**置信度**: 高（日志直接证明 undefined property 静默求值为空；规格明确列出 atomgit 的合法属性集合）
 
 **影响**:
-- **阻塞性**: 🟡非阻塞 — 未定义属性被静默求值为空字符串，workflow 仍正常完成，不阻塞执行
-- **静默性**: 🔴静默错误 — 表达式被静默求值为空字符串，无任何错误或警告，用户无法察觉属性名拼写错误
-- **影响面**: 🟡同维度 — 所有使用 atomgit.* 上下文属性的 workflow 均受影响，任何属性名拼写错误都会收到静默空值
-- **综合**: 未定义的上下文属性被静默求值为空字符串，所有带有拼写错误的 atomgit.* 引用均会收到空值且无任何诊断信息
-- **是否有规避手段**: 否 — 用户无法从平台获得任何诊断信息判断属性名是否正确
+- **阻塞性**: 🔴 用户使用不存在的上下文属性（拼写错误、迁移遗留等）不会得到任何反馈，静默使用空值
+- **静默性**: 🔴 完全静默 — 无任何错误、警告
+- **影响面**: 🔴 所有 workflow — 对任何上下文属性的拼写错误都无校验
+- **综合**: 用户可能因拼写错误（如 `atomgit.shaa`）导致脚本逻辑错误，排障极端困难
+- **是否有规避手段**: 否（用户无法区分"属性不存在返回空"和"属性值为空"）
 
 **建议**:
-- 平台表达式引擎应在求值阶段检测上下文属性的存在性，对 `atomgit.<不存在的属性>` 抛出明确错误（含原始表达式和"undefined property"类型说明）
-- 最少应产生一个警告级别的诊断信息，避免用户因拼写错误导致静默空值传播
-- 相关用例: USE-EXPR-01-002（同一意图 INTENT-USE-024 sibling）
+- 平台方应在表达式求值阶段对未定义的上下文属性进行检测，报错内容须包含：
+  - 原始表达式字符串（或前50字符）
+  - 错误类型（undefined property / unknown context）
+  - 建议检查上下文名称和属性名拼写
+- 建议同时校验其他上下文（runner、env、vars 等）的属性合法性

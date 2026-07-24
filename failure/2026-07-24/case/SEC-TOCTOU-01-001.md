@@ -1,16 +1,16 @@
 ## 失败分诊 · SEC-TOCTOU-01-001 · 审批后推送新 commit 不应被已授权特权运行执行
 
 **判定结果**: FAIL
-**失败断言**: 
-- negative, run_logs, must_not_contain "unapproved_commit_executed" — 通过（无未审批 commit）
-- positive, run_logs, equals "approved_sha_matched" — 日志中 SHA 为空，不匹配
+**失败断言**:
+  - 负向 `run_logs` `must_not_contain: "unapproved_commit_executed"` — 无法判定: commit SHA 输出为空
+  - 正向 `run_logs` `equals: "approved_sha_matched"` — **FAIL**: 输出 "Running commit: " 后为空，无法确认 SHA
 
-**根因初判**: 环境问题
-**责任人**: Phase 02
+**根因初判**: 测试环境缺少审批流程和 commit SHA 上下文
+**责任人**: Phase 01
 
 **证据**:
 
-- **Job 日志全量** (6 行):
+- **Job 日志全量**:
   ```
   === JOB: Test TOCTOU protection (status=COMPLETED) ===
   [2026/07/23 22:10:48.247 GMT+08:00] [INFO] Job(1529974085599641600_1529974085566087175) duration check: true
@@ -20,36 +20,51 @@
   Running commit: 
   ```
 
-- **预期行为** (Phase 01 文本用例 SEC-TOCTOU-01-001, 优先级 P0, 维度 security):
+- **预期行为**（Phase 01 文本用例）:
   - 前置条件: 仓库配置了审批触发 workflow
-  - 操作步骤 1: 管理员审批一个 workflow 运行
-  - 操作步骤 2: 在审批后、执行前，攻击者推送恶意 commit
-  - 操作步骤 3: 观察特权运行是否执行了新 commit
-  - 预期结果: 特权运行应绑定审批时刻的具体 commit SHA；审批后推送的新 commit 不应被已授权的特权运行自动采用
+  - 操作步骤: 1. 管理员审批一个 workflow 运行；2. 在审批后、执行前，攻击者推送恶意 commit；3. 观察特权运行是否执行了新 commit
+  - 预期结果: 特权运行应绑定审批时刻的具体 commit SHA
 
 - **实际行为**:
-  - `echo "Running commit: ${{ atomgit.sha }}"` 输出 `Running commit: ` 后为空
-  - `atomgit.sha` 上下文变量在 workflow_dispatch 触发下为空
-  - TOCTOU 验证因缺少 commit SHA 而无法进行
-  - 失败传导链: 单 job，无传导
+  - 测试通过 `workflow_dispatch`（手动触发）运行，不存在审批流程
+  - `${{ atomgit.sha }}` 求值为空 → 输出 "Running commit: " 无 SHA
+  - 手动触发的工作流没有对应的 push commit SHA
+  - **失败传导链**: `workflow_dispatch` trigger → 无 commit SHA 上下文 → `atomgit.sha` 为空 → 无法绑定审批时刻的 commit → TOCTOU 验证无法进行
 
-- **对照 GitCode 规格** `syntax-reference/context.md`:
-  - 第 N-M 行: `atomgit.sha` — 当前提交 SHA
-  - workflow_dispatch 事件下，`atomgit.sha` 可能为触发分支的 HEAD 而非具体值
+- **测试 YAML 与规格精确对照**:
+  - **测试 YAML** 中 `toctou-test` 的 `Check commit SHA`:
+    ```yaml
+    on:
+      workflow_dispatch:
+    jobs:
+      toctou-test:
+        name: Test TOCTOU protection
+        runs-on: [dedicate-hosted, x64, large]
+        steps:
+          - name: Check commit SHA
+            run: |
+              echo "Running commit: ${{ atomgit.sha }}"
+    ```
+  - **GitCode 规格** `syntax-reference/runner-images-tools.md` 及 `writing-pipelines/using-script-commands.md`:
+    ```
+    规格中 atomgit.sha 上下文的定义
+    ```
+  - **逐项映射**:
+    - `${{ atomgit.sha }}`: 测试 YAML 引用 commit SHA — 在 `workflow_dispatch` 事件下可能为空
+    - `on.workflow_dispatch`: 手动触发 — 不产生 commit SHA，与 TOCTOU 攻击场景的前提（审批 → 推送恶意 commit）不兼容
+    - **测试设计缺陷**: TOCTOU 攻击需要审批流程 + push 事件，手动触发无法模拟
 
-- **环境前置条件验证**: YAML `setup.repo_fixture: default`, 无 secrets, 无 config_probe。`workflow_dispatch` 触发方式下 `atomgit.sha` 未填充，TOCTOU 审批锁定场景未被模拟。
+- **环境前置条件验证**: `workflow_dispatch` 下 `atomgit.sha` 为空，前置条件（审批触发 workflow）不满足
 
-**置信度**: 高 (atomgit.sha 为空，环境未模拟审批锁定场景)
+**置信度**: 高（`atomgit.sha` 为空，与测试设计不符）
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — TOCTOU 验证完全无法执行
-- **静默性**: 🔴静默错误 — SHA 为空但不报错，静默通过
-- **影响面**: 🟢单用例 — 仅影响此 TOCTOU 审批场景测试
-- **综合**: workflow_dispatch 触发下 atomgit.sha 为空，TOCTOU 场景需审批事件支持
-- **是否有规避手段**: 否
+- **阻塞性**: 高 — 测试场景与平台能力不匹配（审批流程未就绪）
+- **静默性**: 高 — 当前测试无法发现 TOCTOU 漏洞
+- **影响面**: 中 — TOCTOU 是审批类 CI/CD 的关键安全威胁
+- **综合**: 测试使用 `workflow_dispatch`（无审批、无 commit SHA）模拟需要审批 + push 事件联动的 TOCTOU 攻击场景，`atomgit.sha` 为空导致测试完全无效
+- **是否有规避手段**: 是 — 等待平台审批流程功能就绪后重新设计测试
 
 **建议**:
-- TOCTOU 测试需特殊的事件触发方式（如 `deployment` 或自定义审批事件的模拟）
-- 测试 YAML 可改用 `pull_request_target` + 审批流程来模拟 TOCTOU 场景
-- 添加 config_probe 验证 `atomgit.sha` 在目标事件下非空
-- 若平台缺乏审批触发机制，此用例应标记为编译缺口
+- Phase 01: 重新评估 TOCTOU 测试流程：(1) 确认平台是否支持审批触发（approval gate / protected environment）；(2) 若支持，将 trigger 从 `workflow_dispatch` 改为审批相关的事件类型；(3) 在用例文档中标记为"前置依赖：审批流程已上线"
+- 平台方: 明确审批流程与 commit SHA 绑定的文档说明

@@ -1,16 +1,16 @@
 ## 失败分诊 · SEC-WCMD-01-002 · 跨运行 artifact 必须被视为不可信数据
 
 **判定结果**: FAIL
-**失败断言**: 
-- negative, run_logs, must_not_contain "auto_executed" — 通过（未自动执行）
-- positive, run_status, equals "completed" — job 状态 FAILED，不匹配
+**失败断言**:
+  - 负向 `run_logs` `must_not_contain: "auto_executed"` — **PASS**: 未出现 auto_executed
+  - 正向 `run_status` `equals: "completed"` — **FAIL**: download-artifact 失败（artifact not found），job 进入错误状态
 
-**根因初判**: 环境问题
+**根因初判**: 环境问题（测试 fixture 中的 "untrusted-artifact" 不存在，跨运行边界未正确设置）
 **责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量** (13 行):
+- **Job 日志全量**:
   ```
   === JOB: Test artifact trust boundary (status=FAILED) ===
   [2026/07/23 22:11:09.460 GMT+08:00] [INFO] Job(1529974174812868608_1529974174787702791) duration check: true
@@ -23,39 +23,66 @@
   [Twirp] trace-id: f97e8586618b9a46953ce542e8743a45
   ::debug::Found 0 artifact(s)
   ::error::Unable to download artifact(s): Artifact 'untrusted-artifact' not found. Available artifacts: (none)
-  
-   
+
   ```
 
-- **预期行为** (Phase 01 文本用例 SEC-WCMD-01-002, 优先级 P0, 维度 security):
+- **预期行为**（Phase 01 文本用例）:
   - 前置条件: 仓库支持 artifact 传递
-  - 操作步骤 1: 提交一个不可信运行（fork PR）上传 artifact
-  - 操作步骤 2: 提交一个特权运行尝试下载并执行该 artifact
+  - 操作步骤: 1. 不可信运行（fork PR）上传 artifact；2. 特权运行尝试下载并执行该 artifact
   - 预期结果: 特权运行不自动执行 artifact 内容；artifact 来源可追溯至其产出运行的信任级别
 
 - **实际行为**:
-  - `download-artifact` 尝试下载名为 `untrusted-artifact` 的 artifact
-  - 结果: `Found 0 artifact(s)` — 目标 artifact 不存在
-  - `run-id input: '' (length: 0)` — run-id 为空，未正确传递 fork PR 的运行 ID
-  - artifact 来源追溯因下载失败而无法验证
-  - 失败传导链: 单 job，artifact 不存在导致下载失败
+  - `run-id input: '' (length: 0)` — 未指定 run-id，默认使用当前 workflow ID
+  - 在当前 workflow (e1a87059abb6...) 中搜索 "untrusted-artifact" — 找到 0 个
+  - 前置的 fork PR 上传 artifact 步骤未执行或在不同 workflow 中
+  - **失败传导链**: 不可信来源的 artifact 未创建 → 特权运行中 download-artifact 找不到 → "Available artifacts: (none)" → 测试未达到验证边界
 
-- **对照 GitCode 规格** `core-concepts/workflow-job-step-action.md`:
-  - 第 N-M 行: artifact 应可跨运行传递且来源可追溯（信任级别判定）
+- **测试 YAML 与规格精确对照**:
+  - **测试 YAML** 中 `artifact-trust` 的 `Download untrusted artifact` 和 `Do not auto execute`:
+    ```yaml
+    setup:
+      repo_fixture: with-artifacts
+    jobs:
+      artifact-trust:
+        name: Test artifact trust boundary
+        runs-on: [dedicate-hosted, x64, large]
+        steps:
+          - name: Download untrusted artifact
+            uses: download-artifact
+            with:
+              name: untrusted-artifact
+          - name: Do not auto execute
+            run: |
+              echo "Artifact downloaded but not executed automatically"
+    ```
+  - **GitCode 规格** `core-concepts/artifacts-and-cache.md` 第 7-19 行:
+    ```yaml
+    steps:
+      - uses: upload-artifact
+        with:
+          name: build-output
+          path: dist/
+      - uses: download-artifact
+        with:
+          name: build-output
+          path: ./app
+    ```
+  - **逐项映射**:
+    - `uses: download-artifact` + `name: untrusted-artifact`: 测试 YAML 使用 artifact action — 匹配规格示例
+    - `run-id` 未指定: 测试 YAML 未传递跨运行的 run-id 参数 — download-artifact 默认在当前 workflow 中查找
+    - **关键缺陷**: 跨运行 artifact 信任测试需要两个独立的 workflow 运行：(1) 不可信运行上传；(2) 特权运行下载 — 当前测试 YAML 仅包含下载端，未设置跨运行引用
 
-- **环境前置条件验证**: YAML `setup.repo_fixture: with-artifacts`。假定 fixture 提供了名为 `untrusted-artifact` 的预设 artifact，但实际环境中该 artifact 不存在。`run-id` 输入为空表明跨运行 artifact 追踪机制未正确配置。
+- **环境前置条件验证**: fork PR 上传的 artifact 不存在（不可信运行未触发或未产生 artifact）
 
-**置信度**: 高 (artifact 不存在 + run-id 为空)
+**置信度**: 高（artifact 不存在，跨运行边界未建立）
 
 **影响**:
-- **阻塞性**: 🔴阻塞 — artifact 信任边界验证完全无法执行
-- **静默性**: 🟢明确报错 — "Artifact 'untrusted-artifact' not found" 清晰指示
-- **影响面**: 🟢单用例 — 仅影响此 artifact 信任边界测试
-- **综合**: 测试 fixture 中的 `untrusted-artifact` 未预先创建；run-id 参数为空表明跨运行衔接缺失
-- **是否有规避手段**: 是
+- **阻塞性**: 高 — 测试核心流程缺失前置步骤
+- **静默性**: 高 — 错误 "not found" 掩盖了信任边界验证
+- **影响面**: 中 — 跨运行 artifact 信任是 CI/CD 供应链安全关键
+- **综合**: "untrusted-artifact" 在当前 workflow 中不存在（0 artifact），跨运行下载未指定 `run-id` 参数，测试无法验证不可信来源 artifact 的信任边界
+- **是否有规避手段**: 是 — 需两阶段测试：(1) 触发不可信运行上传 artifact；(2) 特权运行下载时指定不可信运行的 run-id
 
 **建议**:
-- 测试 YAML 添加前置步骤：先上传 `untrusted-artifact`（模拟 fork PR 创建）
-- 修复 `run-id` 输入：通过 workflow_call 或 inputs 传递不可信运行的 run ID
-- 扩展 fixture 为双 workflow 结构：(a) 不可信运行上传 artifact (b) 特权运行下载并检查
-- 添加 config_probe 步骤：列出所有可用 artifact 确认 fixture 正确
+- Phase 01/02: 重新设计测试流程为两阶段：(1) Phase 1 workflow（不可信触发）上传 artifact 并记录 run-id；(2) Phase 2 workflow（特权触发）用 `run-id` 参数指定下载不可信运行的 artifact；(3) 验证下载后不自动执行
+- Phase 02: 测试 YAML 中 `download-artifact` 增加 `run-id: ${{ needs.untrusted_run.outputs.run_id }}` 或类似跨运行引用

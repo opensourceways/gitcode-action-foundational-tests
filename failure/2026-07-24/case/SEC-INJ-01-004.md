@@ -1,16 +1,16 @@
 ## 失败分诊 · SEC-INJ-01-004 · 不可信 commit message 不可直接插进 run 脚本导致命令注入
 
 **判定结果**: FAIL
-**失败断言**: 
-- negative, run_logs, must_not_contain "injected_command_executed" — 通过（无注入）
-- positive, run_status, equals "success" — job 状态 COMPLETED（未 FAIL），符合
+**失败断言**:
+  - 负向 `run_logs` `must_not_contain: "injected_command_executed"` — **PASS**: 未出现注入执行
+  - 正向 `run_status` `equals: "success"` — **PASS**: job status=COMPLETED
 
-**根因初判**: 环境问题
-**责任人**: Phase 02
+**根因初判**: 测试 YAML 与规格行为不匹配（commit message 为空，未实际注入 shell 元字符）
+**责任人**: Phase 01
 
 **证据**:
 
-- **Job 日志全量** (6 行):
+- **Job 日志全量**:
   ```
   === JOB: Test commit message injection (status=COMPLETED) ===
   [2026/07/23 22:06:29.162 GMT+08:00] [INFO] Job(1529972999023501312_1529972998989946887) duration check: true
@@ -20,34 +20,55 @@
   Message is 
   ```
 
-- **预期行为** (Phase 01 文本用例 SEC-INJ-01-004, 优先级 P0, 维度 security):
+- **预期行为**（Phase 01 文本用例）:
   - 前置条件: 存在一条 commit message 含反引号或分号的 push
-  - 操作步骤 1: 提交一个由 push 触发的 workflow，在 run 中引用 commit message
-  - 操作步骤 2: 推送一条含 shell 元字符的 commit
-  - 预期结果: commit message 中的 shell 元字符不应被解释为命令执行；安全写法（中间环境变量）应正常生效
+  - 操作步骤: 1. 提交一个由 push 触发的 workflow，在 run 中引用 commit message；2. 推送一条含 shell 元字符的 commit
+  - 预期结果: commit message 中的 shell 元字符不应被解释为命令执行
 
 - **实际行为**:
-  - `echo "Message is ${{ atomgit.event.commits[0].message }}"` 输出 `Message is ` (空)
-  - `atomgit.event.commits[0].message` 展开为空字符串
-  - push 事件未携带含 shell 元字符的 commit message（可能使用了空 commit 或普通 commit）
-  - 无法验证注入保护机制，但命令注入本身未发生
+  - 日志输出 "Message is " 后为空，说明 push 事件的 commit message 为空
+  - 测试环境的 push 未携带包含 shell 元字符（反引号、分号）的 commit message
+  - Job 正常完成但未实际执行注入测试
+  - **失败传导链**: push trigger 未提供包含元字符的 commit message → `${{ atomgit.event.commits[0].message }}` 求值为空 → 无注入输入 → 断言无法验证注入防护效果
 
-- **对照 GitCode 规格** `security-permissions/using-secrets.md`:
-  - 第 66 行: "Secret 值在日志中自动替换为 ***" (同类安全机制)
-  - 未找到 commit message 注入防护的显式规格，属于 knowledge base 来自的安全要求
+- **测试 YAML 与规格精确对照**:
+  - **测试 YAML** 中 `commit-inj` 的 `Inline commit message`:
+    ```yaml
+    on:
+      push:
+        branches: [main]
+    jobs:
+      commit-inj:
+        name: Test commit message injection
+        runs-on: [dedicate-hosted, x64, large]
+        steps:
+          - name: Inline commit message
+            run: |
+              echo "Message is ${{ atomgit.event.commits[0].message }}"
+    ```
+  - **GitCode 规格** `core-concepts/variables-secrets-context-expressions.md` 第 25-30 行:
+    ```
+    ## Context
+    AtomGit Action supports 12 contexts, with the core context being **`atomgit`**:
+    | `atomgit` | Core workflow run information | `atomgit.sha`, `atomgit.ref`, `atomgit.event_name` |
+    ```
+  - **逐项映射**:
+    - `${{ atomgit.event.commits[0].message }}`: 测试 YAML 引用 commit message 作为执行输入 — 此即为注入风险点
+    - 规格中上下文 `atomgit` 提供运行时信息，`atomgit.event_name` 可获取事件类型
+    - 测试 YAML 的防护写法是将 commit message 作为 echo 字符串输出，不执行 — 若平台转义正确，应仅显示字符串
+    - **关键问题**: 测试环境 push 触发时未注入包含 shell 元字符的 test commit，导致实际测试输入为空
 
-- **环境前置条件验证**: YAML `setup.repo_fixture: default`, 无 secrets, trigger as `untrusted_contributor`。确认 commit message 为空 —— push 事件的触发上下文未提供含恶意字符的 commit。
+- **环境前置条件验证**: push 触发正常但 commit message 为空，前置条件（含 shell 元字符的 commit message）未满足
 
-**置信度**: 中 (commit message 为空，测试预期输入未满足)
+**置信度**: 中（push 触发成功但 commit message 为空，无法判定平台的注入防护是否生效）
 
 **影响**:
-- **阻塞性**: 🟡非阻塞 — 测试覆盖了代码路径但缺少有效测试输入
-- **静默性**: 🟡可察觉 — 日志显示 "Message is " 暗示输入为空，但未报错
-- **影响面**: 🟢单用例 — 其他注入用例可能也不受影响
-- **综合**: push 触发事件未提供含反引号/分号的 commit message，测试断言可部分通过但未验证注入保护
-- **是否有规避手段**: 是
+- **阻塞性**: 中 — 测试未覆盖注入场景，无法验证平台的安全性
+- **静默性**: 高 — 若平台存在注入漏洞，当前测试不会发现
+- **影响面**: 高 — commit message 注入是常见的 CI/CD 攻击向量
+- **综合**: push 事件触发的 workflow 中 commit message 为空，测试无法验证注入防护效果；需修改测试前置条件确保注入包含 shell 元字符的 commit message
+- **是否有规避手段**: 是 — 在测试 fixture 中显式推送包含反引号/分号的 commit
 
 **建议**:
-- 测试 YAML 确保 push trigger 携带含 `;` 或 `` ` `` 的 commit message (如 `test;cat /etc/passwd`)
-- 添加 config_probe 步骤打印 commit message 原值以确认输入有效性
-- 或切换为 workflow_dispatch + inputs 方式可控注入攻击向量
+- Phase 01: 重新设计测试流程：(1) setup 阶段先推送一条包含 `; whoami` 或 `` `id` `` 的 commit；(2) 确保 commit message 非空且包含 shell 元字符
+- Phase 02: 测试 YAML 的 trigger 参数中增加 test commit message 注入逻辑

@@ -1,16 +1,16 @@
 ## 失败分诊 · SEC-NAME-01-001 · Secret/变量名含特殊字符时不可导致意外求值或权限绕过
 
 **判定结果**: FAIL
-**失败断言**: 
-- negative, run_logs, must_not_contain_secret "MY-VAR" — 日志中无原值（形式通过但原因错误）
-- positive, run_status, equals "success_or_yaml_error" — job 状态 COMPLETED（通过但无意义）
+**失败断言**:
+  - 负向 `run_logs` `must_not_contain_secret: "MY-VAR"` — 无法判定: 日志输出 "value is " 后为空
+  - 正向 `run_status` `equals: "success_or_yaml_error"` — **PASS**（status=COMPLETED）
 
-**根因初判**: 环境问题
+**根因初判**: 环境问题（secret MY-VAR 为空或未注入）
 **责任人**: Phase 02
 
 **证据**:
 
-- **Job 日志全量** (6 行):
+- **Job 日志全量**:
   ```
   === JOB: Test special secret name (status=COMPLETED) ===
   [2026/07/23 22:07:51.101 GMT+08:00] [INFO] Job(1529973342604107776_1529973342566359047) duration check: true
@@ -20,34 +20,50 @@
   value is 
   ```
 
-- **预期行为** (Phase 01 文本用例 SEC-NAME-01-001, 优先级 P0, 维度 security):
-  - 前置条件: 仓库配置了含中划线的 secret `MY-VAR`
-  - 操作步骤 1: 提交一个 workflow，引用 `secrets.MY-VAR` 并在 shell 中使用
-  - 操作步骤 2: 触发 workflow 并查看运行日志
-  - 预期结果: 含中划线的 secret 不应因解析错误而被泄露到日志；若不支持中划线，应在 YAML 校验阶段报错
+- **预期行为**（Phase 01 文本用例）:
+  - 前置条件: 仓库配置了含中划线的 secret MY-VAR
+  - 操作步骤: 1. 提交 workflow，引用 secrets.MY-VAR 并在 shell 中使用；2. 查看运行日志
+  - 预期结果: 含中划线的 secret 不应因解析错误而被泄露到日志
 
 - **实际行为**:
-  - `echo "value is ${{ secrets.MY-VAR }}"` 输出 `value is ` 后为空
-  - secret `MY-VAR` 值为空，无法判断平台是否支持中划线 secret 名
-  - YAML 校验阶段未报错（workflow 成功提交并运行）
-  - 无法验证平台对中划线 secret 的支持策略（接受/拒绝/警告）
+  - Job 正常完成（status=COMPLETED），说明含中划线的 secret 引用未导致 YAML 解析错误
+  - 但输出 "value is " 后为空，secret 值未显示
+  - **失败传导链**: `${{ secrets.MY-VAR }}` 求值为空 → 无法确认是 secret 未注入、被正确脱敏为空、还是解析异常导致
 
-- **对照 GitCode 规格** `security-permissions/using-secrets.md`:
-  - 第 44-45 行: "Secret 名称规则：仅允许大写字母、数字和下划线；不得以 ATOMGIT_ 开头；不得以数字开头"
-  - 明确禁用了中划线！规格要求 secret 名仅允许大写字母、数字和下划线
+- **测试 YAML 与规格精确对照**:
+  - **测试 YAML** 中 `special-name` 的 `Use hyphen secret`:
+    ```yaml
+    setup:
+      secrets: ["MY-VAR"]
+    jobs:
+      special-name:
+        name: Test special secret name
+        runs-on: [dedicate-hosted, x64, large]
+        steps:
+          - name: Use hyphen secret
+            run: |
+              echo "value is ${{ secrets.MY-VAR }}"
+    ```
+  - **GitCode 规格** `core-concepts/variables-secrets-context-expressions.md` 第 10-16 行:
+    ```
+    | `secrets` | Passwords, tokens, private keys | Yes | `${{ secrets.NAME }}` |
+    ```
+  - **逐项映射**:
+    - `secrets.MY-VAR`: 测试 YAML 引用含中划线的 secret 名 — 规格中 `NAME` 未定义允许字符集
+    - 测试 YAML 语法 `${{ secrets.MY-VAR }}` 中 `MY-VAR` 含中划线，可能被表达式引擎解释为减法表达式 `MY - VAR`
+    - 若 YAML 解析不支持中划线，应在解析阶段报错而非静默通过
 
-- **环境前置条件验证**: YAML `setup.secrets: ["MY-VAR"]`，声明含中划线 secret。无 `config_probe` 步骤。输出为空，说明该 secret 在平台侧可能因命名规则被拒绝创建或值为空。
+- **环境前置条件验证**: **FAIL** — secret MY-VAR 求值为空。符合"Secret/token empty → 环境问题 (Phase 02)"
 
-**置信度**: 中 (secret 值为空，规格明确禁止中划线，但无法确认平台行为)
+**置信度**: 中（secret 值为空且未触发 YAML 解析错误，无法区分是环境问题还是平台对中划线的静默处理）
 
 **影响**:
-- **阻塞性**: 🟡非阻塞 — secret 命名规则已知（仅允许 `[A-Z0-9_]`），测试可据此更新
-- **静默性**: 🔴静默错误 — 使用了不合规的 secret 名但平台未报错，仅静默返回空值
-- **影响面**: 🟡同维度 — 可能导致用户误以为特殊字符在 secret 名中可用
-- **综合**: Spec 已明确规定 secret 名仅支持大写字母/数字/下划线；平台对中划线 `MY-VAR` 静默返回空值，应在 YAML 校验阶段拒绝
-- **是否有规避手段**: 是
+- **阻塞性**: 低 — secret 值未泄露（空输出），但无法验证安全性
+- **静默性**: 高 — 若平台静默吞掉不支持的 secret 名，用户将无法发现配置问题
+- **影响面**: 低 — 仅影响含特殊字符的 secret 命名场景
+- **综合**: 含中划线的 secret MY-VAR 引用未报错但求值为空，无法验证特殊字符 secret 的安全性
+- **是否有规避手段**: 是 — 修复 secret 注入；或改为无中划线的 secret 名对比测试
 
 **建议**:
-- Phase 01 文本用例修正：确认 secret 命名规则的测试应分为两个用例：(a) 合规名 `MY_VAR` 验证正常引用 (b) 不合规名 `MY-VAR` 验证平台在 YAML 校验阶段拒绝
-- 平台应在 YAML 校验阶段拒绝含中划线的 secret 引用，而非静默返回空值
-- 测试 YAML 添加 config_probe 确认 `MY-VAR` 是否被平台接受
+- Phase 02: 确保 MY-VAR secret 已配置且非空
+- Phase 01: 增加对照测试：使用无中划线的 secret 名（如 MY_VAR）验证注入是否正常，再对比特殊字符名
