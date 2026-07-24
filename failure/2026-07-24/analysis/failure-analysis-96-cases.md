@@ -7,104 +7,104 @@
 
 ## 一、逐条归因表
 
-| # | case_id | dim | 根因初判 | 置信度 | 失败断言摘要 | spec_file | spec_lines | 失败传导链 |
-|---|---------|-----|---------|--------|------------|-----------|-----------|-----------|
-| 1 | COMP-ARTIFACT-01-002 | completeness | 产品bug | 高 | run_status: success→FAILED | upload-download-artifacts.md | 95-103 | Build FAILED → Download IGNORED |
-| 2 | COMP-ARTIFACT-01-003 | completeness | 产品bug | 高 | artifact_available: yes_within_retention→absent | upload-download-artifacts.md | 51-77 | — |
-| 3 | COMP-CACHE-01-001 | completeness | 产品bug | 中 | run_status: success→FAILED, 0字节日志 | using-dependency-cache.md | 41-66 | — |
-| 4 | COMP-CACHE-01-002 | completeness | 产品bug | 中 | run_status: success→FAILED, 0字节日志 | using-dependency-cache.md | 41-66 | — |
-| 5 | COMP-CALL-01-001 | completeness | 产品bug | 中 | run_status: success→FAILED | workflow-job-step-action.md | — | — |
-| 6 | COMP-DIR-01-001 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | workflow-file-location-structure.md | 33-41 | — |
-| 7 | COMP-ISOLATION-01-001 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED`，WORKSPACE_ISOLATED_OK | runner-and-environment.md | — | — |
-| 8 | COMP-ISOLATION-01-002 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED`，隔离全部通过 | runner-and-environment.md | — | — |
-| 9 | COMP-PERMS-01-001 | completeness | 需人工判断 | 低 | run_status: success→FAILED, 0字节日志 | token-permissions.md | — | — |
-| 10 | COMP-PERMS-01-002 | completeness | 需人工判断 | 低 | run_status: success→FAILED, 0字节日志 | token-permissions.md | — | — |
-| 11 | COMP-PUSH-01-001 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | trigger-events.md | — | — |
-| 12 | COMP-RUNNER-01-001 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
-| 13 | COMP-SECRET-01-001 | completeness | 用例问题 | 中 | secret 输出为空/截断，断言期望 `***` | using-secrets.md | 62-69 | — |
-| 14 | COMP-STATUS-01-001 | completeness | 标记不匹配 | 高 | `"queued→in_progress→completed"` ≠ `COMPLETED` | view-run-results.md | — | — |
-| 15 | COMP-TIMEOUT-01-001 | completeness | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` (73s内完成) | configure-jobs.md | — | — |
-| 16 | COMP-TIMEOUT-01-002 | completeness | 环境问题 | 中 | `"failure"` ≠ `CANCELED` (harness 227s超时) | configure-jobs.md | — | — |
-| 17 | COMPAT-ACTION-01-001 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED` | using-actions.md | — | — |
-| 18 | COMPAT-ACTION-01-002 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED` | using-actions.md | — | — |
-| 19 | COMPAT-ARTIFACT-01-001 | compatibility | 产品bug | 高 | artifact name conflict → FAILED | upload-download-artifacts.md | 51-77 | Upload FAILED → Download IGNORED |
-| 20 | COMPAT-ARTIFACT-01-002 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED`, 上传成功 | upload-download-artifacts.md | 51-77 | — |
-| 21 | COMPAT-CACHE-01-001 | compatibility | 产品bug | 高 | cache 不支持 workflow_dispatch 事件 | using-dependency-cache.md | 15-37 | — |
-| 22 | COMPAT-CTX-01-002 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | context.md | 25-49 | — |
-| 23 | COMPAT-DIR-01-001 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED`, 正常识别 | workflow-file-location-structure.md | 33-41 | — |
-| 24 | COMPAT-DIR-01-002 | compatibility | 产品bug | 高 | `.github/workflows/` 被错误触发 | workflow-file-location-structure.md | 33-41 | — |
-| 25 | COMPAT-ENV-01-001 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | expressions.md | — | — |
-| 26 | COMPAT-EXPR-01-002 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED`, success()工作正常 | expressions.md | — | — |
-| 27 | COMPAT-EXPR-01-003 | compatibility | Engine Bug | 高 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
-| 28 | COMPAT-IF-01-001 | compatibility | Engine Bug | 高 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
-| 29 | COMPAT-IF-01-002 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED`, if true步骤正常 | expressions.md | — | — |
-| 30 | COMPAT-INPUTS-01-002 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED`, inputs传递正常 | expressions.md | — | — |
-| 31 | COMPAT-MASK-01-002 | compatibility | 标记不匹配 | 中 | `"success"` ≠ `COMPLETED`, config_probe正常 | using-secrets.md | 62-69 | — |
-| 32 | COMPAT-OUTCOME-01-001 | compatibility | Engine Bug | 高 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
-| 33 | COMPAT-OUTCOME-01-002 | compatibility | 标记不匹配 | 高 | `"failure"` ≠ COMPLETED实际值 | expressions.md | — | — |
-| 34 | COMPAT-PERM-01-001 | compatibility | 用例问题 | 高 | 断言关键词"README"与中文仓库内容不匹配 | token-permissions.md | — | — |
-| 35 | COMPAT-PERM-01-004 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED`, PERM_OK | token-permissions.md | — | — |
-| 36 | COMPAT-RUNNER-01-001 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
-| 37 | COMPAT-RUNNER-01-002 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
-| 38 | COMPAT-RUNSON-01-001 | compatibility | 标记不匹配 | 高 | `"completed_success"` ≠ `COMPLETED`, 三段式正常 | runner-and-environment.md | — | — |
-| 39 | COMPAT-VARS-01-001 | compatibility | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | expressions.md | — | — |
-| 40 | REL-ART-01-041 | reliability | 环境问题 | 中 | artifact name already exists → upload FAILED | upload-download-artifacts.md | 51-77 | Upload FAILED → Download IGNORED |
-| 41 | REL-ARTCONC-01-063 | reliability | 用例问题 | 高 | `${{{{ }}}} ` 四括号bash语法错误 | expressions.md | — | — |
-| 42 | REL-ARTPERF-01-053-V2 | reliability | 环境问题 | 高 | namespace artifact quota exceeded (1074MB > 1024MB) | upload-download-artifacts.md | 51-77 | Upload FAILED (配额) → Download IGNORED |
-| 43 | REL-ARTPERF-01-053 | reliability | 环境问题 | 中 | download成功但 `ls: cannot access 'perf-artifact'` | upload-download-artifacts.md | 79-103 | — |
-| 44 | REL-CANCEL-01-028 | reliability | 用例问题 | 中 | 期望cancelled→实际COMPLETED，workflow从未被取消 | expressions.md | — | — |
-| 45 | REL-CONC-01-001 | reliability | 标记不匹配 | 高 | `"completed(success)"` ≠ `COMPLETED` | — | — | — |
-| 46 | REL-CONTINUE-01-030 | reliability | 用例问题 | 高 | job_a FAILED → job_b正常（continue-on-error生效） | configure-conditional-execution.md | — | — |
-| 47 | REL-FAULT-01-031 | reliability | 平台缺陷 | 高 | step_1~5全部输出，SIGKILL故障注入未生效 | runner-and-environment.md | — | — |
-| 48 | REL-FAULT-01-032 | reliability | 平台缺陷 | 高 | 10MB artifact上传成功，网络分区故障注入未生效 | runner-and-environment.md | — | — |
-| 49 | REL-FAULT-01-033 | reliability | 平台缺陷 | 高 | 2.1GB写入成功，磁盘满故障注入未生效 | runner-and-environment.md | — | — |
-| 50 | REL-IGNORE-01-004 | reliability | 标记不匹配 | 高 | `"completed(success)"` ≠ `COMPLETED` | trigger-events.md | — | — |
-| 51 | REL-K8S-01-045 | reliability | 环境问题 | 中 | K8s runner 未被调度，0字节日志 | runner-and-environment.md | — | — |
-| 52 | REL-MATRIX-01-027 | reliability | 标记不匹配 | 高 | `"completed(success)"` ≠ `COMPLETED`，3实例均正常 | configure-matrix-builds.md | — | — |
-| 53 | REL-MATRIX-01-038 | reliability | 用例问题 | 高 | 20 job全部 `${{{{ }}}} ` bad substitution | configure-matrix-builds.md | — | — |
-| 54 | REL-MATRIX-01-039 | reliability | 用例问题 | 高 | 50 job全部 `${{{{ }}}} ` bad substitution | configure-matrix-builds.md | — | — |
-| 55 | REL-NEEDS-01-025 | reliability | 用例问题 | 高 | 下游IGNORED (平台用词) ≠ 断言期望 `SKIPPED` | configure-conditional-execution.md | — | — |
-| 56 | REL-OUTPUT-01-016 | reliability | 用例问题 | 高 | `${{{{ }}}} ` bad substitution | pass-output-between-jobs.md | — | — |
-| 57 | REL-QUEUE-01-003 | reliability | 标记不匹配 | 高 | `"completed(success)"` ≠ `COMPLETED` | trigger-events.md | — | — |
-| 58 | REL-RERUN-01-011 | reliability | 标记不匹配 | 高 | `"success"` ≠ `COMPLETED` | — | — | — |
-| 59 | REL-TIMEOUT-01-007 | reliability | 环境/Harness | 高 | harness 300s超时覆盖平台360min | configure-jobs.md | — | — |
-| 60 | REL-TIMEOUT-01-008 | reliability | 环境/Harness | 高 | harness 366s超时覆盖平台360min | configure-jobs.md | — | — |
-| 61 | REL-TIMEOUT-01-009 | reliability | 环境/Harness | 高 | harness 183s超时覆盖平台1min | configure-jobs.md | — | — |
-| 62 | REL-TIMEOUT-01-010 | reliability | 环境/Harness | 高 | harness 346s超时覆盖平台360min | configure-jobs.md | — | — |
-| 63 | REL-YAMLCACHE-01-060 | reliability | 平台缺陷 | 高 | marker_v1→YAML缓存未失效，执行旧版workflow | using-dependency-cache.md | — | — |
-| 64 | SEC-ARTF-01-002 | security | 标记不匹配 | 中 | 实际HTTP 400≠断言期望403/404 | upload-download-artifacts.md | 22-45 | — |
-| 65 | SEC-CACHE-01-002 | security | 平台缺陷 | 中 | cache拒绝dispatch事件，功能完全未执行 | using-dependency-cache.md | 15-37 | — |
-| 66 | SEC-DEFPERM-01-001 | security | 环境问题 | 中 | 401 UNAUTHORIZED, token not found | token-permissions.md | 49-65 | — |
-| 67 | SEC-DOS-01-001 | security | 平台缺陷 | 高 | 1.1GB制品未被配额拒绝 | upload-download-artifacts.md | 48-58 | — |
-| 68 | SEC-INJ-01-004 | security | 用例问题 | 中 | commit message为空，run=COMPLETED | configure-conditional-execution.md | 42-60 | — |
-| 69 | SEC-INJ-01-005 | security | 标记不匹配 | 高 | bash bad substitution, `"2"`是源文本`1+1`子串假阳性 | configure-conditional-execution.md | — | — |
-| 70 | SEC-MASK-01-001 | security | 平台缺陷 | 高 | secret值输出为空而非`***` | using-secrets.md | 62-69 | — |
-| 71 | SEC-MASK-01-002 | security | 编译缺口 | 中 | 断言target `step_summary`不被引擎支持 | using-secrets.md | 62-69 | step1成功→step2 exit1→断言退化 |
-| 72 | SEC-MASK-01-005 | security | 用例问题 | 中 | 脚本无有效输出，无法判断多行secret脱敏 | using-secrets.md | 62-69 | — |
-| 73 | SEC-NAME-01-001 | security | 用例问题 | 中 | 含连字符secret被接受但值为空 | using-secrets.md | 43-47 | — |
-| 74 | SEC-NAME-01-002 | security | 标记不匹配 | 高 | 下划线vs空格: `masked_or_not_found` ≠ `not found` | using-secrets.md | 62-69 | — |
-| 75 | SEC-NET-01-001 | security | 标记不匹配 | 高 | 下划线vs空格: SSRF防护实际工作正常 | runner-and-environment.md | 5-28 | — |
-| 76 | SEC-PERM-01-003 | security | 环境问题 | 中 | ATOMGIT_TOKEN不可用, curl返回401 | token-permissions.md | 97-103 | TOKEN不可用→401→exit6→Job FAILED |
-| 77 | SEC-PERM-01-004 | security | 标记不匹配 | 高 | 下划线vs空格: push拒绝但git config失败在前 | token-permissions.md | 97-103 | git commit失败→exit128→push从未执行 |
-| 78 | SEC-RUN-01-001 | security | 标记不匹配 | 高 | 下划线vs空格: `cleaned_as_expected`≠`cleaned as expected` | runner-and-environment.md | 5-28 | Job A完成→Job B验证清理→成功 |
-| 79 | SEC-RUN-01-002 | security | 标记不匹配 | 高 | 下划线vs空格: `isolated_as_expected`≠`isolated as expected` | runner-and-environment.md | — | Job A设变量/文件→Job B验证隔离→成功 |
-| 80 | SEC-RUN-01-003 | security | 需人工判断 | 低 | 2 job均FAILED无shell输出，自托管Runner不可用 | runner-and-environment.md | 30-40 | project-a FAILED → project-b FAILED |
-| 81 | SEC-SIDE-01-002 | security | 环境问题 | 中 | artifact name already exists | using-secrets.md | 62-69 | upload-artifact失败→artifact未存储 |
-| 82 | SEC-SUPPLY-01-001 | security | 平台缺陷 | 中 | 假commit hash引用无任何诊断输出 | plugin-security-specification.md | 3-5 | — |
-| 83 | SEC-SUPPLY-01-002 | security | 平台缺陷+用例问题 | 中 | 平台正确拒绝无效action但无日志输出 | plugin-security-specification.md | 43-52 | — |
-| 84 | SEC-TOCTOU-01-001 | security | 标记不匹配 | 中 | `atomgit.sha`在dispatch事件返回空串 | configure-conditional-execution.md | 9-12 | — |
-| 85 | SEC-WCMD-01-001 | security | 标记不匹配 | 中 | `::add-mask::`后payload为空，secret未泄漏 | workflow-commands.md | 60-70 | — |
-| 86 | SEC-WCMD-01-002 | security | 用例问题 | 高 | `Artifact 'untrusted-artifact' not found` | upload-download-artifacts.md | 79-93 | download找不到制品→error→step2被跳过 |
-| 87 | USE-CONC-01-001 | usability | 产品bug | 高 | `concurrency.max: 10`静默接受 | workflow-file-location-structure.md | 181-187 | — |
-| 88 | USE-CTX-01-001 | usability | 产品bug | 高 | `atomgit.ref`返回`main`而非`refs/heads/main` | context.md | 31 | — |
-| 89 | USE-CTX-01-002 | usability | 产品bug | 高 | `github.ref`被静默求值为`placeholder_ref` | context.md | 9-21 | — |
-| 90 | USE-DISP-01-002 | usability | 需人工判断 | 低 | Job FAILED, 0字节日志 | manually-trigger-pipeline.md | 13-53 | — |
-| 91 | USE-ENV-01-002 | usability | 产品bug+用例问题 | 中 | `GITHUB_SHA` unbound variable，无平台映射指引 | — | — | — |
-| 92 | USE-EXPR-01-001 | usability | 产品bug | 高 | `atomgit.nonexistent_property`静默求值为空串 | context.md | 27-48 | — |
-| 93 | USE-INPT-01-002 | usability | 产品bug | 高 | `type: boolean`被静默降级为string | configure-triggers.md | 56-67 | — |
-| 94 | USE-LOG-01-001 | usability | 用例问题 | 高 | 断言关键词用step name而非shell输出 | view-job-logs.md | 17-27 | — |
-| 95 | USE-OS-01-001 | usability | 产品bug (文档偏差) | 高 | `runner.os`返回`linux`小写 vs 文档`"Linux"` | context.md | 211-228 | — |
-| 96 | USE-SECNAME-01-001 | usability | 产品bug | 高 | `ATOMGIT_`前缀secret被接受，无视命名规则 | using-secrets.md | 43-47 | — |
+| # | case_id | dim | 根因初判 | 置信度 | 阻塞性 | 静默性 | 影响面 | 失败断言摘要 | spec_file | spec_lines | 失败传导链 |
+|---|---------|-----|---------|--------|--------|--------|--------|------------|-----------|-----------|-----------|
+| 1 | COMP-ARTIFACT-01-002 | completeness | 产品bug | 高 | 🔴阻塞 | 🟡可察觉 | 🔴跨维度 | run_status: success→FAILED | upload-download-artifacts.md | 95-103 | Build FAILED → Download IGNORED |
+| 2 | COMP-ARTIFACT-01-003 | completeness | 产品bug | 高 | 🔴阻塞 | 🟡可察觉 | 🔴跨维度 | artifact_available: yes_within_retention→absent | upload-download-artifacts.md | 51-77 | — |
+| 3 | COMP-CACHE-01-001 | completeness | 产品bug | 中 | 🔴阻塞 | 🟡可察觉 | 🔴跨维度 | run_status: success→FAILED, 0字节日志 | using-dependency-cache.md | 41-66 | — |
+| 4 | COMP-CACHE-01-002 | completeness | 产品bug | 中 | 🔴阻塞 | 🟡可察觉 | 🔴跨维度 | run_status: success→FAILED, 0字节日志 | using-dependency-cache.md | 41-66 | — |
+| 5 | COMP-CALL-01-001 | completeness | 产品bug | 中 | 🔴阻塞 | 🟡可察觉 | 🟡同维度 | run_status: success→FAILED | workflow-job-step-action.md | — | — |
+| 6 | COMP-DIR-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | workflow-file-location-structure.md | 33-41 | — |
+| 7 | COMP-ISOLATION-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`，WORKSPACE_ISOLATED_OK | runner-and-environment.md | — | — |
+| 8 | COMP-ISOLATION-01-002 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`，隔离全部通过 | runner-and-environment.md | — | — |
+| 9 | COMP-PERMS-01-001 | completeness | 需人工判断 | 低 | 🔴阻塞 | 🟡可察觉 | 🟡同维度 | run_status: success→FAILED, 0字节日志 | token-permissions.md | — | — |
+| 10 | COMP-PERMS-01-002 | completeness | 需人工判断 | 低 | 🔴阻塞 | 🟡可察觉 | 🟡同维度 | run_status: success→FAILED, 0字节日志 | token-permissions.md | — | — |
+| 11 | COMP-PUSH-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | trigger-events.md | — | — |
+| 12 | COMP-RUNNER-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
+| 13 | COMP-SECRET-01-001 | completeness | 用例问题 | 中 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | secret 输出为空/截断，断言期望 `***` | using-secrets.md | 62-69 | — |
+| 14 | COMP-STATUS-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"queued→in_progress→completed"` ≠ `COMPLETED` | view-run-results.md | — | — |
+| 15 | COMP-TIMEOUT-01-001 | completeness | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` (73s内完成) | configure-jobs.md | — | — |
+| 16 | COMP-TIMEOUT-01-002 | completeness | 环境问题 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | `"failure"` ≠ `CANCELED` (harness 227s超时) | configure-jobs.md | — | — |
+| 17 | COMPAT-ACTION-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED` | using-actions.md | — | — |
+| 18 | COMPAT-ACTION-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED` | using-actions.md | — | — |
+| 19 | COMPAT-ARTIFACT-01-001 | compatibility | 产品bug | 高 | 🔴阻塞 | 🟡可察觉 | 🔴跨维度 | artifact name conflict → FAILED | upload-download-artifacts.md | 51-77 | Upload FAILED → Download IGNORED |
+| 20 | COMPAT-ARTIFACT-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED`, 上传成功 | upload-download-artifacts.md | 51-77 | — |
+| 21 | COMPAT-CACHE-01-001 | compatibility | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | cache 不支持 workflow_dispatch 事件 | using-dependency-cache.md | 15-37 | — |
+| 22 | COMPAT-CTX-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | context.md | 25-49 | — |
+| 23 | COMPAT-DIR-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED`, 正常识别 | workflow-file-location-structure.md | 33-41 | — |
+| 24 | COMPAT-DIR-01-002 | compatibility | 产品bug | 高 | 🔴阻塞 | 🔴静默错误 | 🔴跨维度 | `.github/workflows/` 被错误触发 | workflow-file-location-structure.md | 33-41 | — |
+| 25 | COMPAT-ENV-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | expressions.md | — | — |
+| 26 | COMPAT-EXPR-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`, success()工作正常 | expressions.md | — | — |
+| 27 | COMPAT-EXPR-01-003 | compatibility | Engine Bug | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
+| 28 | COMPAT-IF-01-001 | compatibility | Engine Bug | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
+| 29 | COMPAT-IF-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`, if true步骤正常 | expressions.md | — | — |
+| 30 | COMPAT-INPUTS-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`, inputs传递正常 | expressions.md | — | — |
+| 31 | COMPAT-MASK-01-002 | compatibility | 标记不匹配 | 中 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED`, config_probe正常 | using-secrets.md | 62-69 | — |
+| 32 | COMPAT-OUTCOME-01-001 | compatibility | Engine Bug | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"failure"` (小写) ≠ `"FAILED"` (大写) | expressions.md | — | — |
+| 33 | COMPAT-OUTCOME-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"failure"` ≠ COMPLETED实际值 | expressions.md | — | — |
+| 34 | COMPAT-PERM-01-001 | compatibility | 用例问题 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 断言关键词"README"与中文仓库内容不匹配 | token-permissions.md | — | — |
+| 35 | COMPAT-PERM-01-004 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED`, PERM_OK | token-permissions.md | — | — |
+| 36 | COMPAT-RUNNER-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
+| 37 | COMPAT-RUNNER-01-002 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | runner-and-environment.md | — | — |
+| 38 | COMPAT-RUNSON-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed_success"` ≠ `COMPLETED`, 三段式正常 | runner-and-environment.md | — | — |
+| 39 | COMPAT-VARS-01-001 | compatibility | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | expressions.md | — | — |
+| 40 | REL-ART-01-041 | reliability | 环境问题 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | artifact name already exists → upload FAILED | upload-download-artifacts.md | 51-77 | Upload FAILED → Download IGNORED |
+| 41 | REL-ARTCONC-01-063 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | `${{{{ }}}} ` 四括号bash语法错误 | expressions.md | — | — |
+| 42 | REL-ARTPERF-01-053-V2 | reliability | 环境问题 | 高 | 🔴阻塞 | 🟡可察觉 | 🟢单用例 | namespace artifact quota exceeded (1074MB > 1024MB) | upload-download-artifacts.md | 51-77 | Upload FAILED (配额) → Download IGNORED |
+| 43 | REL-ARTPERF-01-053 | reliability | 环境问题 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | download成功但 `ls: cannot access 'perf-artifact'` | upload-download-artifacts.md | 79-103 | — |
+| 44 | REL-CANCEL-01-028 | reliability | 用例问题 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | 期望cancelled→实际COMPLETED，workflow从未被取消 | expressions.md | — | — |
+| 45 | REL-CONC-01-001 | reliability | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed(success)"` ≠ `COMPLETED` | — | — | — |
+| 46 | REL-CONTINUE-01-030 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | job_a FAILED → job_b正常（continue-on-error生效） | configure-conditional-execution.md | — | — |
+| 47 | REL-FAULT-01-031 | reliability | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | step_1~5全部输出，SIGKILL故障注入未生效 | runner-and-environment.md | — | — |
+| 48 | REL-FAULT-01-032 | reliability | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | 10MB artifact上传成功，网络分区故障注入未生效 | runner-and-environment.md | — | — |
+| 49 | REL-FAULT-01-033 | reliability | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | 2.1GB写入成功，磁盘满故障注入未生效 | runner-and-environment.md | — | — |
+| 50 | REL-IGNORE-01-004 | reliability | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed(success)"` ≠ `COMPLETED` | trigger-events.md | — | — |
+| 51 | REL-K8S-01-045 | reliability | 环境问题 | 中 | 🔴阻塞 | 🟡可察觉 | 🟢单用例 | K8s runner 未被调度，0字节日志 | runner-and-environment.md | — | — |
+| 52 | REL-MATRIX-01-027 | reliability | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed(success)"` ≠ `COMPLETED`，3实例均正常 | configure-matrix-builds.md | — | — |
+| 53 | REL-MATRIX-01-038 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 20 job全部 `${{{{ }}}} ` bad substitution | configure-matrix-builds.md | — | — |
+| 54 | REL-MATRIX-01-039 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 50 job全部 `${{{{ }}}} ` bad substitution | configure-matrix-builds.md | — | — |
+| 55 | REL-NEEDS-01-025 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 下游IGNORED (平台用词) ≠ 断言期望 `SKIPPED` | configure-conditional-execution.md | — | — |
+| 56 | REL-OUTPUT-01-016 | reliability | 用例问题 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | `${{{{ }}}} ` bad substitution | pass-output-between-jobs.md | — | — |
+| 57 | REL-QUEUE-01-003 | reliability | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"completed(success)"` ≠ `COMPLETED` | trigger-events.md | — | — |
+| 58 | REL-RERUN-01-011 | reliability | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `"success"` ≠ `COMPLETED` | — | — | — |
+| 59 | REL-TIMEOUT-01-007 | reliability | 环境/Harness | 高 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | harness 300s超时覆盖平台360min | configure-jobs.md | — | — |
+| 60 | REL-TIMEOUT-01-008 | reliability | 环境/Harness | 高 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | harness 366s超时覆盖平台360min | configure-jobs.md | — | — |
+| 61 | REL-TIMEOUT-01-009 | reliability | 环境/Harness | 高 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | harness 183s超时覆盖平台1min | configure-jobs.md | — | — |
+| 62 | REL-TIMEOUT-01-010 | reliability | 环境/Harness | 高 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | harness 346s超时覆盖平台360min | configure-jobs.md | — | — |
+| 63 | REL-YAMLCACHE-01-060 | reliability | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | marker_v1→YAML缓存未失效，执行旧版workflow | using-dependency-cache.md | — | — |
+| 64 | SEC-ARTF-01-002 | security | 标记不匹配 | 中 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 实际HTTP 400≠断言期望403/404 | upload-download-artifacts.md | 22-45 | — |
+| 65 | SEC-CACHE-01-002 | security | 平台缺陷 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | cache拒绝dispatch事件，功能完全未执行 | using-dependency-cache.md | 15-37 | — |
+| 66 | SEC-DEFPERM-01-001 | security | 环境问题 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | 401 UNAUTHORIZED, token not found | token-permissions.md | 49-65 | — |
+| 67 | SEC-DOS-01-001 | security | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | 1.1GB制品未被配额拒绝 | upload-download-artifacts.md | 48-58 | — |
+| 68 | SEC-INJ-01-004 | security | 用例问题 | 中 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | commit message为空，run=COMPLETED | configure-conditional-execution.md | 42-60 | — |
+| 69 | SEC-INJ-01-005 | security | 标记不匹配 | 高 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | bash bad substitution, `"2"`是源文本`1+1`子串假阳性 | configure-conditional-execution.md | — | — |
+| 70 | SEC-MASK-01-001 | security | 平台缺陷 | 高 | 🔴阻塞 | 🔴静默错误 | 🔴跨维度 | secret值输出为空而非`***` | using-secrets.md | 62-69 | — |
+| 71 | SEC-MASK-01-002 | security | 编译缺口 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 断言target `step_summary`不被引擎支持 | using-secrets.md | 62-69 | step1成功→step2 exit1→断言退化 |
+| 72 | SEC-MASK-01-005 | security | 用例问题 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 脚本无有效输出，无法判断多行secret脱敏 | using-secrets.md | 62-69 | — |
+| 73 | SEC-NAME-01-001 | security | 用例问题 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | 含连字符secret被接受但值为空 | using-secrets.md | 43-47 | — |
+| 74 | SEC-NAME-01-002 | security | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 下划线vs空格: `masked_or_not_found` ≠ `not found` | using-secrets.md | 62-69 | — |
+| 75 | SEC-NET-01-001 | security | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 下划线vs空格: SSRF防护实际工作正常 | runner-and-environment.md | 5-28 | — |
+| 76 | SEC-PERM-01-003 | security | 环境问题 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | ATOMGIT_TOKEN不可用, curl返回401 | token-permissions.md | 97-103 | TOKEN不可用→401→exit6→Job FAILED |
+| 77 | SEC-PERM-01-004 | security | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 下划线vs空格: push拒绝但git config失败在前 | token-permissions.md | 97-103 | git commit失败→exit128→push从未执行 |
+| 78 | SEC-RUN-01-001 | security | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 下划线vs空格: `cleaned_as_expected`≠`cleaned as expected` | runner-and-environment.md | 5-28 | Job A完成→Job B验证清理→成功 |
+| 79 | SEC-RUN-01-002 | security | 标记不匹配 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 下划线vs空格: `isolated_as_expected`≠`isolated as expected` | runner-and-environment.md | — | Job A设变量/文件→Job B验证隔离→成功 |
+| 80 | SEC-RUN-01-003 | security | 需人工判断 | 低 | 🟡非阻塞 | 🟢明确报错 | 🟢单用例 | 2 job均FAILED无shell输出，自托管Runner不可用 | runner-and-environment.md | 30-40 | project-a FAILED → project-b FAILED |
+| 81 | SEC-SIDE-01-002 | security | 环境问题 | 中 | 🟡非阻塞 | 🟡可察觉 | 🟢单用例 | artifact name already exists | using-secrets.md | 62-69 | upload-artifact失败→artifact未存储 |
+| 82 | SEC-SUPPLY-01-001 | security | 平台缺陷 | 中 | 🔴阻塞 | 🔴静默错误 | 🟡同维度 | 假commit hash引用无任何诊断输出 | plugin-security-specification.md | 3-5 | — |
+| 83 | SEC-SUPPLY-01-002 | security | 平台缺陷+用例问题 | 中 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | 平台正确拒绝无效action但无日志输出 | plugin-security-specification.md | 43-52 | — |
+| 84 | SEC-TOCTOU-01-001 | security | 标记不匹配 | 中 | ⚪无影响 | 🟡可察觉 | 🟢单用例 | `atomgit.sha`在dispatch事件返回空串 | configure-conditional-execution.md | 9-12 | — |
+| 85 | SEC-WCMD-01-001 | security | 标记不匹配 | 中 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `::add-mask::`后payload为空，secret未泄漏 | workflow-commands.md | 60-70 | — |
+| 86 | SEC-WCMD-01-002 | security | 用例问题 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | `Artifact 'untrusted-artifact' not found` | upload-download-artifacts.md | 79-93 | download找不到制品→error→step2被跳过 |
+| 87 | USE-CONC-01-001 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `concurrency.max: 10`静默接受 | workflow-file-location-structure.md | 181-187 | — |
+| 88 | USE-CTX-01-001 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `atomgit.ref`返回`main`而非`refs/heads/main` | context.md | 31 | — |
+| 89 | USE-CTX-01-002 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `github.ref`被静默求值为`placeholder_ref` | context.md | 9-21 | — |
+| 90 | USE-DISP-01-002 | usability | 需人工判断 | 低 | 🔴阻塞 | 🟡可察觉 | 🟢单用例 | Job FAILED, 0字节日志 | manually-trigger-pipeline.md | 13-53 | — |
+| 91 | USE-ENV-01-002 | usability | 产品bug+用例问题 | 中 | 🟡非阻塞 | 🟢明确报错 | 🟡同维度 | `GITHUB_SHA` unbound variable，无平台映射指引 | — | — | — |
+| 92 | USE-EXPR-01-001 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `atomgit.nonexistent_property`静默求值为空串 | context.md | 27-48 | — |
+| 93 | USE-INPT-01-002 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `type: boolean`被静默降级为string | configure-triggers.md | 56-67 | — |
+| 94 | USE-LOG-01-001 | usability | 用例问题 | 高 | ⚪无影响 | 🟢明确报错 | 🟢单用例 | 断言关键词用step name而非shell输出 | view-job-logs.md | 17-27 | — |
+| 95 | USE-OS-01-001 | usability | 产品bug (文档偏差) | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `runner.os`返回`linux`小写 vs 文档`"Linux"` | context.md | 211-228 | — |
+| 96 | USE-SECNAME-01-001 | usability | 产品bug | 高 | 🟡非阻塞 | 🔴静默错误 | 🟡同维度 | `ATOMGIT_`前缀secret被接受，无视命名规则 | using-secrets.md | 43-47 | — |
 
 ---
 
