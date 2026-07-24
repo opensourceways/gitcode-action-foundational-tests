@@ -42,6 +42,14 @@
 
 **置信度**: 高（日志第 6 行 `ref=main` 不含 `refs/heads/` 前缀，与 spec context.md 第 31 行声明直接矛盾）
 
+**影响**:
+- **阻塞性**: 🟡非阻塞 — `atomgit.ref` 返回短格式仍能完成 CI pipeline，workflow 正常 COMPLETED
+- **静默性**: 🔴静默错误 — 平台不报错，但值格式与文档不符。用户若在脚本中按文档示例写 `echo ${{ atomgit.ref }} | cut -d'/' -f3` 期望提取分支名，在短格式下会得到空串或错误截断，且不会触发任何错误提示
+- **影响面**: 🟡同维度 — 所有引用 `${{ atomgit.ref }}` 并依赖 `refs/heads/` 前缀的 workflow 均受影响（包括所有使用该上下文做条件判断、脚本路径拼接的场景）
+- **综合**: 非阻塞但静默——`atomgit.ref` 返回短格式可导致所有依赖全格式 `refs/heads/main` 的下游脚本静默出错，用户无法从平台获得任何错误提示
+- **是否有规避手段**: 是，用户可用 `${{ atomgit.ref_name }}` 代替 `${{ atomgit.ref }}` 获得相同短格式值；若需要全格式，需手动拼接 `refs/heads/${{ atomgit.ref_name }}`
+
 **建议**:
-- 平台需确认 `atomgit.ref` 的规范行为：若按 GitHub Actions 兼容语义应返回全格式 `refs/heads/main`，需修复实现；若平台选择短格式，需更新文档 context.md 第 31 行的属性说明及示例值
+- 平台需确认 `atomgit.ref` 的规范行为：若按文档承诺应返回全格式 `refs/heads/main`，需修复实现；若平台选择短格式，需更新文档 context.md 第 31 行的属性说明及示例值
+- 无论哪种修复方向，当前「实现与文档不一致」的状态是最危险的——用户信任文档写脚本，却得到格式不符的值且无任何警告
 - 相关用例: USE-CTX-01-002（同一意图 INTENT-USE-002 sibling）
