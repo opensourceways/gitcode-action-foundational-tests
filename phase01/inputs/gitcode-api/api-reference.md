@@ -333,7 +333,7 @@ curl -s "https://api.gitcode.com/api/v8/repos/$OWNER/$REPO/actions/runs/$RUN_ID/
 | Pull Requests | v5 | `POST /api/v5/repos/:owner/:repo/pulls` | **创建 PR**（maintainer PR 触发 `pull_request` 事件） |
 | Repositories | v5 | `POST /api/v5/repos/:owner/:repo/forks` | **创建 fork**（fork PR 隔离测试的第一步） |
 | Repositories | v5 | `GET /api/v5/repos/:owner/:repo/git/trees/:sha` | 验证 checkout 行为 |
-| Issues | v5 | `POST /api/v5/repos/:owner/issues` | 创建 Issue |
+| Issues | v5 | `POST /api/v5/repos/:owner/:repo/issues` | 创建 Issue |
 | Issues | v5 | `POST /api/v5/repos/:owner/:repo/issues/:number/comments` | **创建 Issue 评论**（触发 `issue_comment` 事件） |
 | Webhooks | v5 | `GET /api/v5/repos/:owner/:repo/hooks` | 验证 webhook 与 workflow 触发关联 |
 
@@ -368,7 +368,7 @@ GET /api/v8/repos/{owner}/{repo}/actions/runs/{run_id}/jobs/{job_id}/download-lo
 
 ```
 # 1. 创建 Issue（以 bot token）
-POST /api/v5/repos/{owner}/issues
+POST /api/v5/repos/{owner}/{repo}/issues
   Body: { "title": "test issue", "body": "trigger workflow" }
   → response: { number: 42, ... }
 

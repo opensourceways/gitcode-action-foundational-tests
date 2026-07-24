@@ -11,6 +11,8 @@
 | PR #2 | same-repo | `POST /pulls` (bot token, workflow on base first) | ❌ 无触发 |
 | PR #3 | same-repo | `POST /pulls` (bot token, 30s wait + git pull sync) | ❌ 无触发 |
 | **PR #4** | **fork → upstream** | **`POST /pulls` (contributor token, `head: teamfi:branch`)** | **❌ 无触发** |
+| **PR #5** | **fork → upstream** | **same, no cleanup** | **❌ 无触发 (Web UI pending)** |
+| **issue_comment #1** | **issue + comment** | **`POST /issues` + `POST /comments` (contributor)** | **❌ 无触发** |
 
 ## What Works
 

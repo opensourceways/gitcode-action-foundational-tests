@@ -110,6 +110,27 @@ jobs:
 | `if: ${{ always }}`（文档写法·裸） | ❌ 拒绝：`表达式：always 第1位出现不支持的关键字` |
 | `if: ${{ failed }}`（文档写法·裸） | ❌ 拒绝：`表达式：failed 第1位出现不支持的关键字` |
 | `if: ${{ success() }}` | ❌ 拒绝：`表达式：success() 第1位出现不支持的函数` |
+| `if: ${{ failure() }}`（GitHub 语法） | ❌ 拒绝：`表达式：failure() 第1位出现不支持的函数` |
+
+### 4d. `failure()` vs `failed` — 命名差异 [官方文档 COMPAT-NOTES.md]
+
+GitCode 与 GitHub Actions 对「失败」状态函数使用了**不同名称**：
+
+| 平台 | 语法 | 是否带括号 |
+|------|------|------------|
+| **GitCode** | `${{ failed }}` | 无括号（keyword） |
+| **GitHub** | `${{ failure() }}` | 带括号（function call） |
+
+```yaml
+# ❌ 错误 — GitHub 语法，平台拒绝
+if: ${{ failure() }}
+
+# ✅ 正确 — 唯一确认可用的状态函数
+if: ${{ always() }}
+```
+
+> 来源：`COMPAT-NOTES.md` 明确注明 "GitCode 的失败函数名为 `failed`，GitHub 为 `failure()`"。
+> 实测 `${{ failed }}`（无括号）也被平台拒绝（见上表），因此当前实际可用的状态函数仅有 `${{ always() }}`。
 
 - ✅ **清理/兜底步骤**（无论成败都执行）用 `if: ${{ always() }}`。
 - ⚠️ **success / failure 门控暂无确认可用写法**：文档的裸 `success`/`failed` 与 GitHub 的 `success()` 平台都拒。
