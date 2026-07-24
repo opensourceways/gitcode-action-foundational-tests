@@ -31,10 +31,10 @@
 | COMP-CACHE-01-002 | 同上 |
 
 ### RELIABILITY
-| 案例 | 描述 |
-|---|---|
-| REL-NEEDS-01-025 | needs 失败传播不生效，下游未 skip |
-| REL-YAMLCACHE-01-060 | 推送新 YAML 后平台仍执行旧版本（缓存不失效） |
+| 案例 | 描述 |confirm|evidence|
+|---|---|---|--|
+| REL-NEEDS-01-025 | needs 失败传播不生效，下游未 skip | fake |https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/33c72b47d51b493490bd665d1a659324|
+| REL-YAMLCACHE-01-060 | 推送新 YAML 后平台仍执行旧版本（缓存不失效） |||
 
 ### COMPATIBILITY
 | 案例 | 描述 |
