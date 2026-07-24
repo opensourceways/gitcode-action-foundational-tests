@@ -34,7 +34,43 @@ def compile_one(assertion, case_id):
     target = assertion.get("target", "")
     rubric_text = assertion.get("rubric", "")
 
-    # 1) run_status
+    # ── 0) 明文值字段：不限 target，有明确值就编译 ──
+    # contains / must_contain（positive）
+    if atype == "positive":
+        val = (assertion.get("contains") or assertion.get("must_contain"))
+        if val is not None:
+            return {"kind": "value", "expect": str(val)}
+    # must_not_contain / must_not_equal（negative）
+    if atype == "negative":
+        val = (assertion.get("must_not_contain") or assertion.get("must_not_equal"))
+        if val is not None:
+            return {"kind": "leak", "forbidden": str(val)}
+    # must_not_contain_secret / contains_masked → config_probe
+    sn = (assertion.get("must_not_contain_secret") or assertion.get("contains_masked"))
+    if sn is not None and sn:
+        return {"kind": "config_probe"}
+
+    # ── 1) status 家族：有 equals 字段且值为非HTTP码枚举 → run_status ──
+    # ★ 近似局限：job/step 级 status 用 run 级 conclusion 近似判定（复用 run_status）。
+    # 单 job / 全 job 同命运：正确。多 job 部分成功部分失败：run.conclusion 整体可能不精确。
+    # 若后续发现多 job 用例判不准，需新增 job 级 kind，本期用近似换覆盖率。
+    _STATUS_TARGETS = (
+        "run_status", "job_status", "step_status", "step_conclusion",
+        "parent_status", "api_status", "downstream_status",
+        "job_a_status", "job_b_status", "rerun_result",
+    )
+    eq_val = assertion.get("equals")
+    if target in _STATUS_TARGETS and eq_val is not None:
+        eq_s = str(eq_val)
+        if re.match(r"^\d{3}$", eq_s):
+            return None  # HTTP 码不作为状态，留给明文值进入 needs_review
+        if atype == "positive":
+            return {"kind": "run_status", "equals": eq_s}
+        if atype == "negative":
+            not_eq = assertion.get("not_equals", eq_s)
+            return {"kind": "run_status_not", "not_equals": str(not_eq)}
+
+    # ── 1b) 原始 run_status（无 equals 时兜底）───
     if target == "run_status":
         if atype == "positive":
             val = assertion.get("equals", "COMPLETED")
@@ -43,29 +79,14 @@ def compile_one(assertion, case_id):
             val = assertion.get("not_equals", assertion.get("equals") or "SUCCESS")
             return {"kind": "run_status_not", "not_equals": str(val)}
 
-    # 2) run_logs
+    # 2) run_logs（equals 字段 + 关键词提取，contains/must_not_contain 已在 §0 全局处理）
     if target == "run_logs":
-        # 2a) explicit positive: contains / equal / must_contain
+        # 2a) equals（positive 用作日志内容匹配）
         if atype == "positive":
-            val = (assertion.get("contains") or assertion.get("equals")
-                   or assertion.get("must_contain"))
+            val = assertion.get("equals")
             if val is not None:
                 return {"kind": "value", "expect": str(val)}
-        # 2b) explicit negative: must_not_contain / must_not_equal / contains (negative)
-        if atype == "negative":
-            val = (assertion.get("must_not_contain") or assertion.get("must_not_equal")
-                   or assertion.get("contains"))
-            if val is not None:
-                return {"kind": "leak", "forbidden": str(val)}
-        # 2c) must_not_contain_secret → config_probe with secret name
-        sn = assertion.get("must_not_contain_secret")
-        if sn is not None and sn:
-            return {"kind": "config_probe"}
-        # 2d) contains_masked → config_probe
-        sn = assertion.get("contains_masked")
-        if sn is not None and sn:
-            return {"kind": "config_probe"}
-        # 2e) eval=deterministic + rubric → extract keyword from rubric
+        # 2b) eval=deterministic + rubric → extract keyword
         if assertion.get("eval") == "deterministic" and rubric_text:
             kws = _extract_keyword(rubric_text)
             if kws:
