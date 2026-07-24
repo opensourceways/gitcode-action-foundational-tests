@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-CONC-01-001",
+  "title": "concurrency.max 配置 0 或 10 时报错应提示有效范围 1-5",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-027",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "a861ec0a83ab42e29c36e95b9ca4bcda",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 35,
+  "log_fingerprint": "939266c7b2440de6",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/a861ec0a83ab42e29c36e95b9ca4bcda",
+  "assertion_results": [
+    {
+      "kind": "run_status_not",
+      "type": "negative",
+      "target": "run_status",
+      "pass": false,
+      "expected": "conclusion != COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

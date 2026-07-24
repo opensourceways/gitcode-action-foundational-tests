@@ -1,0 +1,28 @@
+{
+  "case_id": "COMPAT-VARS-01-006",
+  "title": "vars 在 Action 中的可用性差异",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-022",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "d3cdec9481014eacabd7a6efe5000bb2",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 74,
+  "log_fingerprint": "448233317261f7e1",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/d3cdec9481014eacabd7a6efe5000bb2",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

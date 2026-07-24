@@ -1,0 +1,28 @@
+{
+  "case_id": "SEC-TOKEN-01-002",
+  "title": "fork PR 中 ATOMGIT_TOKEN 写操作被平台拒绝",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-003",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "df5ffdc0582f40768ecc7da7552d5751",
+  "run_status": "FAILED",
+  "head_sha": "6abd77781f3fa80f1b659447c85513816b77c779",
+  "job_count": 1,
+  "duration_seconds": 44,
+  "log_fingerprint": "626ad96ad8c898b3",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/df5ffdc0582f40768ecc7da7552d5751",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

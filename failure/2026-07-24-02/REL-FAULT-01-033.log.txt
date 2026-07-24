@@ -1,0 +1,11 @@
+[2026/07/24 17:44:45.600 GMT+08:00] [INFO] Job(1530269521296244736_1530269521262690311) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4e6f1b64-5390-4440-94d3-3d5bf76b6238.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4e6f1b64-5390-4440-94d3-3d5bf76b6238.sh
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3757d613-95c0-4d44-a547-246bfcb822d4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3757d613-95c0-4d44-a547-246bfcb822d4.sh
+2048+0 records in
+2048+0 records out
+2147483648 bytes (2.1 GB, 2.0 GiB) copied, 0.967439 s, 2.2 GB/s

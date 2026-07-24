@@ -1,0 +1,39 @@
+{
+  "case_id": "COMPAT-DIR-01-002",
+  "title": "工作流目录差异——.github/workflows/ 不应被识别",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-029",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [
+    "SECURITY_CRITICAL"
+  ],
+  "reason": "",
+  "gitcode_run_id": "c16cc17b3cce476d8f44f916702c15a3",
+  "run_status": "COMPLETED",
+  "head_sha": "17a626747f77d760d4ebf7a9a106071c4944bf4e",
+  "job_count": 1,
+  "duration_seconds": 42,
+  "log_fingerprint": "b8fed463c7ec57c0",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/c16cc17b3cce476d8f44f916702c15a3",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": false,
+      "is_security_critical": true,
+      "expected": "plaintext 'GITHUB_DIR_WORKFLOW_RAN' 0 hits",
+      "actual": "FOUND"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

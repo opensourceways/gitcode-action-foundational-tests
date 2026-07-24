@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-SUPPLY-01-001",
+  "title": "第三方 Action 引用应支持完整 commit hash 固定",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-014",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "ab5fe4128bb640cca10ee5077b62bb02",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 147,
+  "log_fingerprint": "ad66f64ef04e2250",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/ab5fe4128bb640cca10ee5077b62bb02",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "SUCCESS_OR_ACTION_EXECUTED",
+      "actual": "FAILED"
+    },
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'unauthorized_action_execution' 0 hits",
+      "actual": 0
+    }
+  ]
+}

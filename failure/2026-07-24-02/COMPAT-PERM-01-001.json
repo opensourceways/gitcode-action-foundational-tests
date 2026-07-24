@@ -1,0 +1,36 @@
+{
+  "case_id": "COMPAT-PERM-01-001",
+  "title": "未声明 permissions 时默认 TOKEN 读操作权限范围",
+  "dimension": "compatibility",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMPAT-002",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "010f09b6ee5c4bb6bb86084ea1347ce3",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 39,
+  "log_fingerprint": "988f32a104c674f4",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/010f09b6ee5c4bb6bb86084ea1347ce3",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'README'",
+      "actual": "absent"
+    }
+  ]
+}

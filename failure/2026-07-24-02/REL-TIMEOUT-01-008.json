@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-TIMEOUT-01-008",
+  "title": "job timeout 越界触发——361 分钟应在 360 分钟被强制终止",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-008",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "96727d795f5545d2ad644fc68f922d78",
+  "run_status": "CANCELED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 157,
+  "log_fingerprint": "014b685611acb75f",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/96727d795f5545d2ad644fc68f922d78",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "CANCELLED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'timeout'",
+      "actual": "absent"
+    }
+  ]
+}

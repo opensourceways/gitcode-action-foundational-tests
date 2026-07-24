@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-TOKEN-01-001",
+  "title": "fork PR 触发 pull_request 时 ATOMGIT_TOKEN 必须仅拥有 read 权限",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-003",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "67ba65baa11d48b399dbf3b13e90f478",
+  "run_status": "FAILED",
+  "head_sha": "6abd77781f3fa80f1b659447c85513816b77c779",
+  "job_count": 1,
+  "duration_seconds": 52,
+  "log_fingerprint": "fcdde36f4dae650b",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/67ba65baa11d48b399dbf3b13e90f478",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'clone_successful'",
+      "actual": "absent"
+    },
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'write_permission_granted' 0 hits",
+      "actual": 0
+    }
+  ]
+}

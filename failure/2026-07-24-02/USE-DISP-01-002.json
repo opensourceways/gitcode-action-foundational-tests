@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-DISP-01-002",
+  "title": "workflow_dispatch 未提供参数但存在 default 时应使用默认值运行",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-030",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "b998578ee7314edf9abf7a1611da1b2c",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 80,
+  "log_fingerprint": "bf11e08099313aed",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/b998578ee7314edf9abf7a1611da1b2c",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'env=staging'",
+      "actual": "absent"
+    }
+  ]
+}

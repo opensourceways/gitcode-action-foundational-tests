@@ -1,0 +1,10 @@
+[2026/07/24 17:22:44.138 GMT+08:00] [INFO] Job(1530263978872016896_1530263978851045383) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a6efeb99-ee9a-4ec5-bec1-f89bd1aa116c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a6efeb99-ee9a-4ec5-bec1-f89bd1aa116c.sh
+Cloning into 'test-clone'...
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a64de391-8c5b-4360-bac3-36c7c4202961.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a64de391-8c5b-4360-bac3-36c7c4202961.sh
+000{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found","trace_id":"f4b58a7faeb8192af6954ee25ba93100"}401000000::error::Process exited with code 6

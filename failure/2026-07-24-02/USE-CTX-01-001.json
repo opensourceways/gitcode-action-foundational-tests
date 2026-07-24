@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-CTX-01-001",
+  "title": "使用 atomgit 上下文时表达式正常求值",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-002",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "90a2bc0a55884171bca3af71c4483940",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 134,
+  "log_fingerprint": "045336438dbb8123",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/90a2bc0a55884171bca3af71c4483940",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'ref=refs/heads/'",
+      "actual": "absent"
+    }
+  ]
+}

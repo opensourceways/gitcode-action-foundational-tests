@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-LOG-01-001",
+  "title": "多 step 日志按时间线组织且边界清晰",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-017",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "5c4d7a86811444dca03779fec2d9e45b",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 103,
+  "log_fingerprint": "e6b2eac9083b579a",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/5c4d7a86811444dca03779fec2d9e45b",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'step one prepare'",
+      "actual": "absent"
+    }
+  ]
+}

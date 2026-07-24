@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-RUNNER-01-049-V2",
+  "title": "Runner 规格真实性——xlarge/2xlarge 实际 CPU/内存/磁盘 vs 声明值",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-049",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "3505db435d5a446c8527e52ce7575928",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 36,
+  "log_fingerprint": "b2b979a1de05316a",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/3505db435d5a446c8527e52ce7575928",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'probe 2xlarge runner' status=FAILED"
+    }
+  ]
+}

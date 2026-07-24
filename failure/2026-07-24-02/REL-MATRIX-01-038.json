@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-MATRIX-01-038",
+  "title": "大规模 matrix——20 个组合应全部生成并正确调度",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-038",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "37150d5245224c86afd2f9fa8312c1b4",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 25,
+  "duration_seconds": 122,
+  "log_fingerprint": "87d789971fbab707",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/37150d5245224c86afd2f9fa8312c1b4",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

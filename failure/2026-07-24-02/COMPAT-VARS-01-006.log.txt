@@ -1,0 +1,6 @@
+[2026/07/24 17:40:19.333 GMT+08:00] [INFO] Job(1530268404504465408_1530268404483493895) duration check: true
+[2026/07/24 09:40:30.666 GMT+00:00] [ERROR] ID: CHECKOUT.00010003
+[2026/07/24 09:40:30.666 GMT+00:00] [ERROR] 描述: 插件执行异常.
+[2026/07/24 09:40:30.666 GMT+00:00] [ERROR] 根因: Input required and not supplied: COMMIT_REF_NAME
+[2026/07/24 09:40:30.666 GMT+00:00] [ERROR] 解决方法: 查看报错日志, 分析错误原因.
+::error::Input required and not supplied: COMMIT_REF_NAME

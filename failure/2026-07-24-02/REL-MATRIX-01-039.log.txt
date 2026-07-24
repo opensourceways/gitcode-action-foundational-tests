@@ -1,0 +1,350 @@
+[2026/07/24 17:49:57.775 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141094) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/e9a25aa1-6d35-452c-a749-2241512c18bc.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/e9a25aa1-6d35-452c-a749-2241512c18bc.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/e9a25aa1-6d35-452c-a749-2241512c18bc.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.583 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141093) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/57e68b94-6533-414d-8dff-5a37f27a06ad.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/57e68b94-6533-414d-8dff-5a37f27a06ad.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/57e68b94-6533-414d-8dff-5a37f27a06ad.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.059 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141092) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/979876aa-27cc-4a53-a056-7a3e2c8bdf77.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/979876aa-27cc-4a53-a056-7a3e2c8bdf77.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/979876aa-27cc-4a53-a056-7a3e2c8bdf77.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:58.272 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141091) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/06e399b2-5ead-4c0d-86aa-4abe93bd6ddb.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/06e399b2-5ead-4c0d-86aa-4abe93bd6ddb.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/06e399b2-5ead-4c0d-86aa-4abe93bd6ddb.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.744 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141090) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8ca15581-16bf-42b9-a5a0-1910eed6e145.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8ca15581-16bf-42b9-a5a0-1910eed6e145.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/8ca15581-16bf-42b9-a5a0-1910eed6e145.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.979 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141106) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/5c5ca6a5-3454-43f4-a87a-625e184e420f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/5c5ca6a5-3454-43f4-a87a-625e184e420f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/5c5ca6a5-3454-43f4-a87a-625e184e420f.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.358 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141104) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3c3d9065-bbef-4946-b9ff-c577a6fd7bd3.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3c3d9065-bbef-4946-b9ff-c577a6fd7bd3.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/3c3d9065-bbef-4946-b9ff-c577a6fd7bd3.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.446 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141102) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9345a3bd-96c5-46d8-8e83-3ab8f69adaa3.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9345a3bd-96c5-46d8-8e83-3ab8f69adaa3.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9345a3bd-96c5-46d8-8e83-3ab8f69adaa3.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.887 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141100) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1a08f77b-1df5-444e-b042-8c9e91d6be54.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1a08f77b-1df5-444e-b042-8c9e91d6be54.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1a08f77b-1df5-444e-b042-8c9e91d6be54.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.494 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141098) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b40303c9-a68a-4472-9280-d966aa4eceb9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b40303c9-a68a-4472-9280-d966aa4eceb9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/b40303c9-a68a-4472-9280-d966aa4eceb9.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.577 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141086) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/fb3131eb-ab7c-4936-8dd8-c948ff7cefd7.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/fb3131eb-ab7c-4936-8dd8-c948ff7cefd7.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/fb3131eb-ab7c-4936-8dd8-c948ff7cefd7.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.261 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141085) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ff533c0e-335b-48d9-ad3a-9fb9b0483e45.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ff533c0e-335b-48d9-ad3a-9fb9b0483e45.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/ff533c0e-335b-48d9-ad3a-9fb9b0483e45.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.386 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141084) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bd99bf5d-c991-46a8-8da3-23182efcbf09.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bd99bf5d-c991-46a8-8da3-23182efcbf09.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/bd99bf5d-c991-46a8-8da3-23182efcbf09.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.154 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141083) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/16ef45b1-e31b-4096-b10d-22d560eee33c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/16ef45b1-e31b-4096-b10d-22d560eee33c.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/16ef45b1-e31b-4096-b10d-22d560eee33c.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:58.171 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141082) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c1d04d9c-f7ba-4505-9f46-9a6c359e7189.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c1d04d9c-f7ba-4505-9f46-9a6c359e7189.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c1d04d9c-f7ba-4505-9f46-9a6c359e7189.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.179 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141081) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f067a234-25db-4890-b73e-068cb58d1a82.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f067a234-25db-4890-b73e-068cb58d1a82.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f067a234-25db-4890-b73e-068cb58d1a82.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.579 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141080) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/006d0e57-3af3-4fe7-bc06-06c16c074362.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/006d0e57-3af3-4fe7-bc06-06c16c074362.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/006d0e57-3af3-4fe7-bc06-06c16c074362.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.965 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141079) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/073662e3-14ce-4712-a8f3-9ee5201fb3f1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/073662e3-14ce-4712-a8f3-9ee5201fb3f1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/073662e3-14ce-4712-a8f3-9ee5201fb3f1.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.073 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141078) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f5a849a3-1355-4aca-87fb-fc9d40f090cb.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f5a849a3-1355-4aca-87fb-fc9d40f090cb.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f5a849a3-1355-4aca-87fb-fc9d40f090cb.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.269 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141077) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/87e5e7b9-efe9-4b5e-b2f6-8fd42fade94f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/87e5e7b9-efe9-4b5e-b2f6-8fd42fade94f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/87e5e7b9-efe9-4b5e-b2f6-8fd42fade94f.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.664 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141076) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/64438e2a-a4bf-43fc-af39-6376c3971094.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/64438e2a-a4bf-43fc-af39-6376c3971094.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/64438e2a-a4bf-43fc-af39-6376c3971094.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.864 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141075) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8f268c6e-f80a-4e34-a87d-66837d372fee.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8f268c6e-f80a-4e34-a87d-66837d372fee.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/8f268c6e-f80a-4e34-a87d-66837d372fee.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:50:06.210 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141074) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bf3e6c75-75b9-4e64-bef3-19777de90195.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bf3e6c75-75b9-4e64-bef3-19777de90195.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/bf3e6c75-75b9-4e64-bef3-19777de90195.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.264 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141073) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9b2c4d4f-66ad-412d-a626-6df2e09e843c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9b2c4d4f-66ad-412d-a626-6df2e09e843c.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9b2c4d4f-66ad-412d-a626-6df2e09e843c.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.159 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141072) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ab711d42-6eaa-4a54-84ec-412ce341e578.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ab711d42-6eaa-4a54-84ec-412ce341e578.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/ab711d42-6eaa-4a54-84ec-412ce341e578.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:50:04.815 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141071) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c8796027-9357-4dd3-8873-02b31fdee98b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c8796027-9357-4dd3-8873-02b31fdee98b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c8796027-9357-4dd3-8873-02b31fdee98b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.428 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141070) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/fe56331e-61bc-4275-9792-d04c03594996.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/fe56331e-61bc-4275-9792-d04c03594996.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/fe56331e-61bc-4275-9792-d04c03594996.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.570 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141069) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/fbd0366b-becf-4cf1-97b5-8e8cb6459839.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/fbd0366b-becf-4cf1-97b5-8e8cb6459839.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/fbd0366b-becf-4cf1-97b5-8e8cb6459839.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.274 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141068) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/657a5276-f044-4eef-844c-d480ac2a02b7.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/657a5276-f044-4eef-844c-d480ac2a02b7.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/657a5276-f044-4eef-844c-d480ac2a02b7.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.670 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141067) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/51a32d4d-b031-41a9-88b6-0c6d723f8516.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/51a32d4d-b031-41a9-88b6-0c6d723f8516.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/51a32d4d-b031-41a9-88b6-0c6d723f8516.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.864 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141066) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/da0a8e23-26dd-4be4-90a3-75b8a1658c62.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/da0a8e23-26dd-4be4-90a3-75b8a1658c62.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/da0a8e23-26dd-4be4-90a3-75b8a1658c62.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:50:06.349 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141065) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/626addcd-3278-4e44-8e7a-f3a9741b1907.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/626addcd-3278-4e44-8e7a-f3a9741b1907.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/626addcd-3278-4e44-8e7a-f3a9741b1907.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.050 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141064) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2bdd6c4e-0cd8-4219-b903-17102d5292c8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2bdd6c4e-0cd8-4219-b903-17102d5292c8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/2bdd6c4e-0cd8-4219-b903-17102d5292c8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.673 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141063) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a78c1bec-9f11-460b-89ef-38f8e6d42111.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a78c1bec-9f11-460b-89ef-38f8e6d42111.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a78c1bec-9f11-460b-89ef-38f8e6d42111.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:58.345 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141062) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/c23c8661-cb04-49a2-bb44-1a814106cad5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/c23c8661-cb04-49a2-bb44-1a814106cad5.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/c23c8661-cb04-49a2-bb44-1a814106cad5.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.998 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141061) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/d14de200-4241-4639-9c87-6fe45264d0c2.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/d14de200-4241-4639-9c87-6fe45264d0c2.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/d14de200-4241-4639-9c87-6fe45264d0c2.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:50:04.712 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141060) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f388ef52-d24a-40d0-af83-8efb147ebb3f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f388ef52-d24a-40d0-af83-8efb147ebb3f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f388ef52-d24a-40d0-af83-8efb147ebb3f.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.477 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141059) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2bff168c-de49-4c9d-8c28-6fa59fe1a1ad.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2bff168c-de49-4c9d-8c28-6fa59fe1a1ad.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/2bff168c-de49-4c9d-8c28-6fa59fe1a1ad.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.794 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141058) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/de878505-bae9-4e61-914e-4ce77069fce8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/de878505-bae9-4e61-914e-4ce77069fce8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/de878505-bae9-4e61-914e-4ce77069fce8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.054 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141057) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4950f334-0c49-493d-98d5-50c0c8e45b65.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4950f334-0c49-493d-98d5-50c0c8e45b65.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4950f334-0c49-493d-98d5-50c0c8e45b65.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.767 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141105) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1e858b7d-e485-4171-b0ba-82d72d313395.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1e858b7d-e485-4171-b0ba-82d72d313395.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1e858b7d-e485-4171-b0ba-82d72d313395.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:56.464 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141103) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/4fa66ab1-a415-4d32-8769-4e76889361c8.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/4fa66ab1-a415-4d32-8769-4e76889361c8.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/4fa66ab1-a415-4d32-8769-4e76889361c8.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.972 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141101) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/231653ff-cf0c-4fcb-b52b-1bdf72cdb32b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/231653ff-cf0c-4fcb-b52b-1bdf72cdb32b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/231653ff-cf0c-4fcb-b52b-1bdf72cdb32b.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:53.959 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141099) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3dc79f3b-ee4e-4ec4-a171-ae8956e4b8ca.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3dc79f3b-ee4e-4ec4-a171-ae8956e4b8ca.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/3dc79f3b-ee4e-4ec4-a171-ae8956e4b8ca.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:58.468 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141097) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/800194e6-e120-4e9f-ad9c-f1bdeb873e37.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/800194e6-e120-4e9f-ad9c-f1bdeb873e37.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/800194e6-e120-4e9f-ad9c-f1bdeb873e37.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:57.517 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141096) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/973f2917-9cb5-421b-b404-ba5ac478d6bd.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/973f2917-9cb5-421b-b404-ba5ac478d6bd.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/973f2917-9cb5-421b-b404-ba5ac478d6bd.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.749 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141095) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/5b9a14a1-7f87-406b-acf1-e574a1ac6711.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/5b9a14a1-7f87-406b-acf1-e574a1ac6711.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/5b9a14a1-7f87-406b-acf1-e574a1ac6711.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:55.891 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141089) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/68f84626-4401-473e-b7f4-c5219a5ec548.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/68f84626-4401-473e-b7f4-c5219a5ec548.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/68f84626-4401-473e-b7f4-c5219a5ec548.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:58.063 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141088) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/e4bd562e-9d7b-4ba4-96b0-e89a5e7a16de.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/e4bd562e-9d7b-4ba4-96b0-e89a5e7a16de.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/e4bd562e-9d7b-4ba4-96b0-e89a5e7a16de.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:54.198 GMT+08:00] [INFO] Job(1530270813183946752_1530270813188141087) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/7eed064c-fe09-4db2-b571-f4ac5dcea986.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/7eed064c-fe09-4db2-b571-f4ac5dcea986.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/7eed064c-fe09-4db2-b571-f4ac5dcea986.sh: line 1: v1=${{{{ matrix.v1 }}}}: bad substitution
+::error::Process exited with code 1
+

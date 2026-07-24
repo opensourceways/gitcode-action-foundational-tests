@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-WCMD-01-002",
+  "title": "跨运行 artifact 必须被视为不可信数据",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-029",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "a600a3301d3248d9a7e066e9e13b565d",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 37,
+  "log_fingerprint": "1835609f2f5b154c",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/a600a3301d3248d9a7e066e9e13b565d",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'auto_executed' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

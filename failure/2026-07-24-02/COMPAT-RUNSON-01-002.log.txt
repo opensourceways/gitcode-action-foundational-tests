@@ -1,0 +1,5 @@
+[2026/07/24 17:38:21.445 GMT+08:00] [INFO] Job(1530267909664546816_1530267909626798087) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/90022725-4cfe-4256-b91a-1a2ff1254b64.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/90022725-4cfe-4256-b91a-1a2ff1254b64.sh
+RUNSON_STRING_ACCEPTED

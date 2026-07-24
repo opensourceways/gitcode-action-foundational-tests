@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-YAMLCACHE-01-060",
+  "title": "Workflow YAML 缓存失效——修改后无旧代码残留",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-060",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "98c08ff48775477ea63519b4add421af",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 59,
+  "log_fingerprint": "2039670c060f17af",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/98c08ff48775477ea63519b4add421af",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'marker_v2'",
+      "actual": "absent"
+    }
+  ]
+}

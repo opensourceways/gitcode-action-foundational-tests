@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-RUN-01-003",
+  "title": "自托管 Runner 跨项目残留必须被隔离",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-022",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "e06fdbe4025349889cc0ee035444e696",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 61,
+  "log_fingerprint": "3f3fb22d29e6f24e",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/e06fdbe4025349889cc0ee035444e696",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'cross project leak' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'isolated_as_expected'",
+      "actual": "absent"
+    }
+  ]
+}

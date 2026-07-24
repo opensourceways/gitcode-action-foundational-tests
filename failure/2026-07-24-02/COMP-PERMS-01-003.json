@@ -1,0 +1,36 @@
+{
+  "case_id": "COMP-PERMS-01-003",
+  "title": "fork PR 的 pull_request 下声明 write 仍仅 read",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-013",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "92c3188563ab4e6890f2cad7b7b5f671",
+  "run_status": "COMPLETED",
+  "head_sha": "954fb9b624eb488e479214b273815f7cfbec4ab8",
+  "job_count": 1,
+  "duration_seconds": 42,
+  "log_fingerprint": "3f8c78253987c27c",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/92c3188563ab4e6890f2cad7b7b5f671",
+  "assertion_results": [
+    {
+      "kind": "run_status_not",
+      "type": "negative",
+      "target": "run_status",
+      "pass": true,
+      "expected": "conclusion != SUCCESS_WITH_WRITE",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'write failed as expected'",
+      "actual": "absent"
+    }
+  ]
+}

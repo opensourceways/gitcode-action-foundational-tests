@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-PERM-01-003",
+  "title": "未声明 permissions 时 ATOMGIT_TOKEN 默认权限必须最小化（read-only）",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-017",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "96b4fa980cf8445083bf4fb454e603d5",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 41,
+  "log_fingerprint": "5de16dc04be0ad6b",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/96b4fa980cf8445083bf4fb454e603d5",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'write_permission_granted' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+[2026/07/24 17:40:30.120 GMT+08:00] [INFO] Job(1530268449790365696_1530268449769394177) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/16333d1f-4029-45f4-a4f3-6ad9ddd8e3ff.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/16333d1f-4029-45f4-a4f3-6ad9ddd8e3ff.sh
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB, 100 MiB) copied, 0.336029 s, 312 MB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Uploading artifact "perf-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Creating zip archive from 1 file(s)...
+Zip archive progress tracking enabled (~100 MB source data)
+Zip archive created: /tmp/artifact-1784886043331-2c1bd108.zip (~100 MB, 104889728 bytes)
+Creating artifact "perf-artifact" (size: 104889728 bytes, workflow: a44a8dd05f9645c492c9807ee708990f)...
+[Twirp] trace-id: 004844df4d6f4dad5a48a5b652bf37b2
+Artifact created with ID 206344857751552, upload mode: multipart
+Uploading artifact via multipart (partSize: 209715200 bytes, totalParts: 1)...
+Artifact multipart upload started (~100 MB archive, 1 part(s))
+Starting upload with concurrency: 1
+::debug::Multipart upload: sending part 1/1 (~100 MB)...
+Artifact multipart upload progress: ~100 MB (100% of ~100 MB)
+::debug::Multipart upload: part 1/1 done, etag=b476ad8323fbff9842f52d0caedfa576, size=104889728
+All parts uploaded. Completing multipart upload...
+[Twirp] trace-id: 6baa014d6f99bef18e965c96772ea860
+Upload complete. SHA-256: 361e6ae866d8eb079e4725d65480f51b9f187c8a7720f9ccbb14a06ae7e912d4
+Finalizing artifact...
+[Twirp] trace-id: 8d080906a94cd7d44672790e413ddfd0
+Artifact "perf-artifact" finalized successfully.
+Fetching signed artifact URL...
+[Twirp] trace-id: a879c98adba9fba26d22898e726dc886
+Signed artifact URL obtained.
+::debug::Temp zip file removed: /tmp/artifact-1784886043331-2c1bd108.zip
+Artifact "perf-artifact" uploaded successfully. ID: 206344857751552, Size: 104889728 bytes
+Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/artifacts/206344857751552
+
+[2026/07/24 17:40:49.974 GMT+08:00] [INFO] Job(1530268449790365696_1530268449769394179) duration check: true
+::debug::run-id input: '' (length: 0)
+::debug::Resolved path is /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+::debug::Artifact client initialized for https://actions-results.atomgit.com
+::debug::Resolved workflow id a44a8dd05f9645c492c9807ee708990f
+Downloading single artifact
+::debug::Listing artifacts for workflow a44a8dd05f9645c492c9807ee708990f with name filter "perf-artifact"
+[Twirp] trace-id: 0999c1865b3890b66f9c7ee4a1cbf03a
+::debug::Found 1 artifact(s)
+::debug::Found named artifact 'perf-artifact' (ID: 206344857751552, Size: 104889728)
+Preparing to download the following artifacts:
+- perf-artifact (ID: 206344857751552, Size: 104889728)
+Fetching signed artifact URL for artifact 206344857751552...
+[Twirp] trace-id: 4d41e95d797200715***7350385076f
+Signed artifact URL obtained.
+Downloading artifact archive (~100 MB)...
+Artifact download progress: ~50 MB (50% of ~100 MB)
+Artifact download progress: ~100 MB (99% of ~100 MB)
+Artifact download progress: ~100 MB (100% of ~100 MB)
+::debug::Validating artifact digest for artifact 206344857751552
+Extracting artifact archive to /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3 (~100 MB)...
+Artifact archive extracted to /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3 (~100 MB, 104889728 bytes)
+Artifact 206344857751552 downloaded to /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3 (~100 MB, 104889728 bytes)
+Total of 1 artifact(s) downloaded
+Download artifact has finished successfully
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8526af42-dc08-49c2-b1a5-b49661eff799.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8526af42-dc08-49c2-b1a5-b49661eff799.sh
+ls: cannot access 'perf-artifact': No such file or directory
+::error::Process exited with code 2

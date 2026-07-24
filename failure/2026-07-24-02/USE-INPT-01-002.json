@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-INPT-01-002",
+  "title": "使用 boolean 类型 input 时报错应提示仅支持 string",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-008",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "4f62225417ca4ea5a2c5218fbedc3542",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 35,
+  "log_fingerprint": "d8f2e97a83ed401c",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/4f62225417ca4ea5a2c5218fbedc3542",
+  "assertion_results": [
+    {
+      "kind": "run_status_not",
+      "type": "negative",
+      "target": "run_status",
+      "pass": false,
+      "expected": "conclusion != COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-LONG-01-043",
+  "title": "长时运行接近 timeout 边界——350 分钟运行应成功且心跳保活正常",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-043",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "db8b96f2cc1346d1ad801c4b98110601",
+  "run_status": "CANCELED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 291,
+  "log_fingerprint": "e2f066be443043de",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/db8b96f2cc1346d1ad801c4b98110601",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "CANCELLED"
+    }
+  ]
+}

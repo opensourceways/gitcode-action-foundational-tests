@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-MATRIX-01-039",
+  "title": "大规模 matrix——50 个组合应全部生成并正确调度",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-039",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "5a4ade70523a49a890467244cde7a9c2",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 51,
+  "duration_seconds": 145,
+  "log_fingerprint": "44c84ae64b97081c",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/5a4ade70523a49a890467244cde7a9c2",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'matrix 50 combos test' status=FAILED"
+    }
+  ]
+}

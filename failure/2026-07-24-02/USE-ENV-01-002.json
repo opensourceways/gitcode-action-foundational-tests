@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-ENV-01-002",
+  "title": "引用 GITHUB_SHA 时日志应给出环境变量映射提示",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-003",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "6e24b84ec15647ab87092944ae2c3c2b",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 63,
+  "log_fingerprint": "53f3905860a50be3",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/6e24b84ec15647ab87092944ae2c3c2b",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'test GITHUB env var hint' status=FAILED"
+    }
+  ]
+}

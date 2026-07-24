@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-MD-01-001",
+  "title": "ATOMGIT_STEP_SUMMARY 写入的 Markdown 正确渲染为 HTML",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-020",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "fd1710a73e354d049753e0b1ba003f8c",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 93,
+  "log_fingerprint": "6daf200e6e6eb887",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/fd1710a73e354d049753e0b1ba003f8c",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'Test Report'",
+      "actual": "absent"
+    }
+  ]
+}

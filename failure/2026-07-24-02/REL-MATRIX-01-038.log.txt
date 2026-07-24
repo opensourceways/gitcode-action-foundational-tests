@@ -1,0 +1,168 @@
+[2026/07/24 17:49:43.823 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032587) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9d9d02ce-4e97-4c60-8256-1b1372fa4d4b.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9d9d02ce-4e97-4c60-8256-1b1372fa4d4b.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9d9d02ce-4e97-4c60-8256-1b1372fa4d4b.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.728 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032586) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/2a3b9ddd-ac1f-444e-900f-0a1b802f39a4.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/2a3b9ddd-ac1f-444e-900f-0a1b802f39a4.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/2a3b9ddd-ac1f-444e-900f-0a1b802f39a4.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.437 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032585) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/7f9e6042-34b0-4bc9-94e9-5d861c40a3df.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/7f9e6042-34b0-4bc9-94e9-5d861c40a3df.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/7f9e6042-34b0-4bc9-94e9-5d861c40a3df.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.624 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032584) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b62fe0da-9dec-4add-a101-603915d504b9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b62fe0da-9dec-4add-a101-603915d504b9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/b62fe0da-9dec-4add-a101-603915d504b9.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.511 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032583) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b9344381-5068-4e1c-a9b0-c3ebac83a5cc.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b9344381-5068-4e1c-a9b0-c3ebac83a5cc.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/b9344381-5068-4e1c-a9b0-c3ebac83a5cc.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.037 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032600) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1e2eb73d-fab4-4233-96bf-ee9072393252.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1e2eb73d-fab4-4233-96bf-ee9072393252.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1e2eb73d-fab4-4233-96bf-ee9072393252.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:44.223 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032599) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/bc443a6f-b330-4107-b2e9-4acbe81e32fd.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/bc443a6f-b330-4107-b2e9-4acbe81e32fd.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/bc443a6f-b330-4107-b2e9-4acbe81e32fd.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.711 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032598) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/99876434-41be-4b28-bdce-b72774f93b2d.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/99876434-41be-4b28-bdce-b72774f93b2d.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/99876434-41be-4b28-bdce-b72774f93b2d.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:44.324 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032596) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9d3662f6-6f0f-4833-be0b-cc4c0c9ffd3f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9d3662f6-6f0f-4833-be0b-cc4c0c9ffd3f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/9d3662f6-6f0f-4833-be0b-cc4c0c9ffd3f.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.915 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032593) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/eca92b5b-f48f-405a-9395-dcda0514c047.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/eca92b5b-f48f-405a-9395-dcda0514c047.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/eca92b5b-f48f-405a-9395-dcda0514c047.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.100 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032594) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/05e8b9b6-09b5-4987-a541-400f4bcec30c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/05e8b9b6-09b5-4987-a541-400f4bcec30c.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/05e8b9b6-09b5-4987-a541-400f4bcec30c.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.331 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032591) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a304000e-d5f8-4219-b2fb-a6896cc5db5c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a304000e-d5f8-4219-b2fb-a6896cc5db5c.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a304000e-d5f8-4219-b2fb-a6896cc5db5c.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:44.105 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032589) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f6874ea4-7a72-4cdf-9280-e265ec36bb28.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f6874ea4-7a72-4cdf-9280-e265ec36bb28.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f6874ea4-7a72-4cdf-9280-e265ec36bb28.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.323 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032588) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/db2a75b4-6b52-463e-bf21-f24cf0db5295.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/db2a75b4-6b52-463e-bf21-f24cf0db5295.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/db2a75b4-6b52-463e-bf21-f24cf0db5295.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.669 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032582) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/ec20f99e-2792-4a2f-8ebf-4aa83187644c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/ec20f99e-2792-4a2f-8ebf-4aa83187644c.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/ec20f99e-2792-4a2f-8ebf-4aa83187644c.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.860 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032581) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f59a8275-0b63-44b6-87e5-5d100a118eaf.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f59a8275-0b63-44b6-87e5-5d100a118eaf.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/f59a8275-0b63-44b6-87e5-5d100a118eaf.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.552 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032580) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8704e93e-703c-41a3-9473-b5ed8f2e4cc9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8704e93e-703c-41a3-9473-b5ed8f2e4cc9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/8704e93e-703c-41a3-9473-b5ed8f2e4cc9.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.430 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032579) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1fed0c1e-f9a6-455c-9b1e-c712b19030b5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1fed0c1e-f9a6-455c-9b1e-c712b19030b5.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1fed0c1e-f9a6-455c-9b1e-c712b19030b5.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.047 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032578) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/6a6b6973-43a9-409e-8aa9-2bac321d7d1a.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6a6b6973-43a9-409e-8aa9-2bac321d7d1a.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/6a6b6973-43a9-409e-8aa9-2bac321d7d1a.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:44.022 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032577) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/213291d3-a660-42cd-a1db-48161697c70f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/213291d3-a660-42cd-a1db-48161697c70f.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/213291d3-a660-42cd-a1db-48161697c70f.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.970 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032597) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/764b490a-f06e-40d4-af0c-d80cd453cd2e.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/764b490a-f06e-40d4-af0c-d80cd453cd2e.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/764b490a-f06e-40d4-af0c-d80cd453cd2e.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.221 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032595) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/6688bb28-33c3-4ce0-95e6-563e52c6a0a1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/6688bb28-33c3-4ce0-95e6-563e52c6a0a1.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/6688bb28-33c3-4ce0-95e6-563e52c6a0a1.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:42.104 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032592) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/5f7cff74-b2cd-4ece-9d96-4ea4d2cbf2a9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/5f7cff74-b2cd-4ece-9d96-4ea4d2cbf2a9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/5f7cff74-b2cd-4ece-9d96-4ea4d2cbf2a9.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+
+[2026/07/24 17:49:43.227 GMT+08:00] [INFO] Job(1530270763682643968_1530270763691032590) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/1d515b0c-674f-4380-9527-ebe16c92aef9.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/1d515b0c-674f-4380-9527-ebe16c92aef9.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/1d515b0c-674f-4380-9527-ebe16c92aef9.sh: line 1: os=${{{{ matrix.os }}}}: bad substitution
+::error::Process exited with code 1
+

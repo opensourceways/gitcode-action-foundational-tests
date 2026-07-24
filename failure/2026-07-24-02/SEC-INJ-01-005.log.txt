@@ -1,0 +1,6 @@
+[2026/07/24 17:16:37.644 GMT+08:00] [INFO] Job(1530262441483059200_1530262441453699079) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/a9c337cd-e04c-4faa-a7d4-7cc713854069.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/a9c337cd-e04c-4faa-a7d4-7cc713854069.sh
+/home/slave1/runner/workers/0.0.4.4.version/_temp/a9c337cd-e04c-4faa-a7d4-7cc713854069.sh: line 1: Input: ${{ '{{ 1 + 1 }}' }}: bad substitution
+::error::Process exited with code 1

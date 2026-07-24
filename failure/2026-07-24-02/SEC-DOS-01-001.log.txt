@@ -1,0 +1,30 @@
+[2026/07/24 17:14:59.067 GMT+08:00] [INFO] Job(1530262028071739392_1530262028017213447) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/085d0b62-bcb0-4c02-94e3-b51ec27aa87a.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/085d0b62-bcb0-4c02-94e3-b51ec27aa87a.sh
+1100+0 records in
+1100+0 records out
+1153433600 bytes (1.2 GB, 1.1 GiB) copied, 0.665225 s, 1.7 GB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Uploading artifact "large-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/large.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/large.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/large.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Creating zip archive from 1 file(s)...
+Zip archive progress tracking enabled (~1100 MB source data)
+Zip archive created: /tmp/artifact-1784884512649-0ec50054.zip (~1 MB, 1121217 bytes)
+Creating artifact "large-artifact" (size: 1121217 bytes, workflow: ba5629eb6c374fb6a43202d0cf9c6aba)...
+[Twirp] trace-id: fe3e8e0335688f080ddd40f2da3812a7
+[Twirp] error trace-id: fe3e8e0335688f080ddd40f2da3812a7
+::debug::Temp zip file removed: /tmp/artifact-1784884512649-0ec50054.zip
+::error::Upload artifact failed: Artifact with name already exists: large-artifact, repoId=10431336, workflowId=ba5629eb6c374fb6a43202d0cf9c6aba

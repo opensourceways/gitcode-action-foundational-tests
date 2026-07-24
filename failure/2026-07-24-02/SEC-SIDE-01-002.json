@@ -1,0 +1,35 @@
+{
+  "case_id": "SEC-SIDE-01-002",
+  "title": "Secret 不经 artifact 侧信道绕过脱敏外泄",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-032",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "0924b3e5c14842389aa5a8d016c7eb36",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 43,
+  "log_fingerprint": "667e8145c75b06b7",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/0924b3e5c14842389aa5a8d016c7eb36",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "BLOCKED_OR_MASKED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-TOCTOU-01-001",
+  "title": "审批后推送新 commit 不应被已授权特权运行执行",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-031",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "20b22aa901e7480cab7c0830591c5598",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 79,
+  "log_fingerprint": "e90dd299ea045871",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/20b22aa901e7480cab7c0830591c5598",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'unapproved_commit_executed' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'approved_sha_matched'",
+      "actual": "absent"
+    }
+  ]
+}

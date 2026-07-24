@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-TIMEOUT-01-009",
+  "title": "自定义短超时——timeout-minutes=1 时 step 运行 2 分钟应被强制终止",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-009",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "1678a65785544c91869a2f10cc86cf52",
+  "run_status": "CANCELED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 150,
+  "log_fingerprint": "766970c65be403d7",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/1678a65785544c91869a2f10cc86cf52",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "CANCELLED"
+    }
+  ]
+}

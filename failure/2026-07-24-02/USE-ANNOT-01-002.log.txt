@@ -1,0 +1,49 @@
+[2026/07/24 17:59:20.165 GMT+08:00] [INFO] Job(1530273189336981504_1530273189299232775) duration check: true
+[2026/07/24 09:59:32.767 GMT+00:00] [INFO] repository dist full path is /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Getting Git version info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:32.772 GMT+00:00] [INFO] run git command --> git version
+[2026/07/24 09:59:32.780 GMT+00:00] [INFO] run git command stdout --> git version 2.43.0
+
+[2026/07/24 09:59:32.781 GMT+00:00] [INFO] Deleting the contents of '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3'
+initialize git repository >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:32.782 GMT+00:00] [INFO] run git command --> git init
+[2026/07/24 09:59:32.788 GMT+00:00] [INFO] run git command stdout --> Initialized empty Git repository in /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/.git/
+[2026/07/24 09:59:32.789 GMT+00:00] [INFO] run git command --> git remote add origin https://gitcode.com/ComputingActionTest/gitcode-test-3.git
+[2026/07/24 09:59:32.792 GMT+00:00] [INFO] git repository initialized at /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+
+Disabling automatic garbage collection >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:32.793 GMT+00:00] [INFO] run git command --> git config --local gc.auto 0
+
+Setting up auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:32.797 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/24 09:59:32.797 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/24 09:59:32.801 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/24 09:59:32.823 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/24 09:59:32.823 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/24 09:59:32.827 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/24 09:59:32.846 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/24 09:59:32.855 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+[2026/07/24 09:59:32.878 GMT+00:00] [INFO] configuring token
+[2026/07/24 09:59:32.884 GMT+00:00] [INFO] configuring token config local
+
+Start fetch git repo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:32.896 GMT+00:00] [INFO] run git command --> git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --progress --depth=1 origin +refs/merge-requests/16/merge:refs/remotes/merge-requests/16/merge
+[2026/07/24 09:59:33.184 GMT+00:00] [INFO] run git command stderr --> fatal: couldn't find remote ref refs/merge-requests/16/merge
+
+[2026/07/24 09:59:33.184 GMT+00:00] [ERROR] ID: CHECKOUT.00010010
+[2026/07/24 09:59:33.185 GMT+00:00] [ERROR] 描述: Git命令执行失败.
+[2026/07/24 09:59:33.185 GMT+00:00] [ERROR] 根因: git进行拉取动作失败, 执行git命令失败
+[2026/07/24 09:59:33.185 GMT+00:00] [ERROR] 解决方法: 检查git命令及执行环境.
+Removing auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:59:33.185 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/24 09:59:33.185 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/24 09:59:33.190 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/24 09:59:33.211 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/24 09:59:33.211 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/24 09:59:33.215 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/24 09:59:33.236 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/24 09:59:33.262 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+
+::error::git进行拉取动作失败, 执行git命令失败
+
+ 

@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-FAULT-01-032",
+  "title": "故障注入——artifact 上传时网络分区 30 秒后应失败并报网络错误",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-032",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "64847cdba4ae49fcba6f92cdc75721a6",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 34,
+  "log_fingerprint": "b60981298e8a6e97",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/64847cdba4ae49fcba6f92cdc75721a6",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'network'",
+      "actual": "absent"
+    }
+  ]
+}

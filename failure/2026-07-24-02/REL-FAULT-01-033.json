@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-FAULT-01-033",
+  "title": "故障注入——runner 磁盘接近满时写入操作应失败并报磁盘满",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-033",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "feecb94be576489db7dac7cf856b867d",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 76,
+  "log_fingerprint": "0747f86a4d113905",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/feecb94be576489db7dac7cf856b867d",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'No space left on device'",
+      "actual": "absent"
+    }
+  ]
+}

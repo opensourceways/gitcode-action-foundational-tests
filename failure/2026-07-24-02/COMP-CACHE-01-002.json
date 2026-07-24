@@ -1,0 +1,28 @@
+{
+  "case_id": "COMP-CACHE-01-002",
+  "title": "restore-keys 前缀匹配兜底生效",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-016",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "537f691a6eb946f9a9eb5b908a4e4aae",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 99,
+  "log_fingerprint": "a2d83a4bcd173955",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/537f691a6eb946f9a9eb5b908a4e4aae",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'Verify restore keys fallback' status=FAILED"
+    }
+  ]
+}

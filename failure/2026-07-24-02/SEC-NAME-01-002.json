@@ -1,0 +1,35 @@
+{
+  "case_id": "SEC-NAME-01-002",
+  "title": "通过 printenv 或进程枚举获取 ATOMGIT_TOKEN/secrets 时日志中必须保持脱敏",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-025",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "094647969a3b4390973398a9e3e1e90b",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 58,
+  "log_fingerprint": "f066d005aa22f034",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/094647969a3b4390973398a9e3e1e90b",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'masked_or_not_found'",
+      "actual": "absent"
+    }
+  ]
+}

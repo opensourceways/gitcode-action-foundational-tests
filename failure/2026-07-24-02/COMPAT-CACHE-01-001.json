@@ -1,0 +1,28 @@
+{
+  "case_id": "COMPAT-CACHE-01-001",
+  "title": "cache 行为等价性——缓存命中场景",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-025",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "a87b4d10d2ea4354b50c49e41e72bd66",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 33,
+  "log_fingerprint": "b3343c03ce11ec5c",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/a87b4d10d2ea4354b50c49e41e72bd66",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'CACHE_HIT'",
+      "actual": "absent"
+    }
+  ]
+}

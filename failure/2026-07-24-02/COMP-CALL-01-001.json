@@ -1,0 +1,28 @@
+{
+  "case_id": "COMP-CALL-01-001",
+  "title": "2 层 workflow_call 嵌套正常执行",
+  "dimension": "completeness",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMP-006",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "8bd4cdcd26764cce994d37a1079ad253",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 56,
+  "log_fingerprint": "a4989c8be3560499",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/8bd4cdcd26764cce994d37a1079ad253",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

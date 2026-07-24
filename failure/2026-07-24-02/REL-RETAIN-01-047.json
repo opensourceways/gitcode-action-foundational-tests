@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-RETAIN-01-047",
+  "title": "artifact 保留期 90 天边界——第 91 天应不可下载",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-047",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "876c0fe12a584563b221798279107f4d",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 50,
+  "log_fingerprint": "c0b2df98ecf9b7a2",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/876c0fe12a584563b221798279107f4d",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'artifact retention test' status=FAILED"
+    }
+  ]
+}

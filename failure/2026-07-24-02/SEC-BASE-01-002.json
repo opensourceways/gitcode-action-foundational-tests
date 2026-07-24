@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-BASE-01-002",
+  "title": "fork PR 改 workflow 不被 pull_request_target 采用",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-035",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "482e4158ecb344068e5f231070e14f5e",
+  "run_status": "COMPLETED",
+  "head_sha": "c173618c7292b913286166cfa9b148e368b44f1c",
+  "job_count": 1,
+  "duration_seconds": 89,
+  "log_fingerprint": "8434acb22a19ab44",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/482e4158ecb344068e5f231070e14f5e",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'fork_injected_step' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "SUCCESS_WITH_BASE_WORKFLOW",
+      "actual": "COMPLETED"
+    }
+  ]
+}

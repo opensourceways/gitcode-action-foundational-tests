@@ -1,0 +1,35 @@
+[2026/07/24 17:21:05.901 GMT+08:00] [INFO] Job(1530263566685179904_1530263566660014087) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/917f3b3d-f24a-4f33-b1b4-8594349cf6d7.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/917f3b3d-f24a-4f33-b1b4-8594349cf6d7.sh
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Uploading artifact "secret-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/secret.txt
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/secret.txt'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/secret.txt
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Creating zip archive from 1 file(s)...
+Zip archive created: /tmp/artifact-1784884878272-206c61e2.zip (~0 MB, 143 bytes)
+Creating artifact "secret-artifact" (size: 143 bytes, workflow: 596195ca1a9e4bc5ac91aca8dbf0caac)...
+[Twirp] trace-id: 0c01284679db018e1b2630a1b95d6814
+Artifact created with ID 206339954610176, upload mode: simple
+Uploading artifact via simple PUT (~0 MB)...
+Upload complete. SHA-256: 24d234151974d9446ea9e940340600f746fbc39e8fcb679bb416f56bc2f013ef
+Finalizing artifact...
+[Twirp] trace-id: b754e14f5ab5ab93524335cb3ddc5df1
+Artifact "secret-artifact" finalized successfully.
+Fetching signed artifact URL...
+[Twirp] trace-id: fd3d6ecf338bbb86d31d9ede1f165d70
+Signed artifact URL obtained.
+::debug::Temp zip file removed: /tmp/artifact-1784884878272-206c61e2.zip
+Artifact "secret-artifact" uploaded successfully. ID: 206339954610176, Size: 143 bytes
+Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/artifacts/206339954610176

@@ -1,0 +1,26 @@
+[2026/07/24 17:55:28.605 GMT+08:00] [INFO] Job(1530272218250620928_1530272218229649415) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/f5ac4458-4a28-45fa-a17a-7a9bcfb2921c.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/f5ac4458-4a28-45fa-a17a-7a9bcfb2921c.sh
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
+Uploading artifact "retention-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/retention.txt
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/retention.txt'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0/retention.txt
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-0
+Creating zip archive from 1 file(s)...
+Zip archive created: /tmp/artifact-1784886942518-bb32f238.zip (~0 MB, 157 bytes)
+Creating artifact "retention-artifact" (size: 157 bytes, workflow: 9f986e43c94a432bb83750f5a8ac692c)...
+[Twirp] trace-id: 9faef55b29976f659a9a625785d27d0c
+[Twirp] error trace-id: 9faef55b29976f659a9a625785d27d0c
+::debug::Temp zip file removed: /tmp/artifact-1784886942518-bb32f238.zip
+::error::Upload artifact failed: Artifact with name already exists: retention-artifact, repoId=10431319, workflowId=9f986e43c94a432bb83750f5a8ac692c

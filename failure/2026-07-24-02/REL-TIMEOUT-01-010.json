@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-TIMEOUT-01-010",
+  "title": "默认超时——未声明 timeout-minutes 运行 361 分钟应被强制终止",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-010",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "7821799465b346c68dae6ec95f99875c",
+  "run_status": "CANCELED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 142,
+  "log_fingerprint": "fb11bac04b272bbd",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/7821799465b346c68dae6ec95f99875c",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "CANCELLED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'timeout'",
+      "actual": "absent"
+    }
+  ]
+}

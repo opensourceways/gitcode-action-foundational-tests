@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-ART-01-041",
+  "title": "超大 artifact——100 MB artifact 上传后下游 job 应成功下载",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-041",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "893fdb7eecb34b88b9fd3fd691e1a612",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 65,
+  "log_fingerprint": "5010738dad3cf152",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/893fdb7eecb34b88b9fd3fd691e1a612",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'download artifact job' status=FAILED"
+    }
+  ]
+}

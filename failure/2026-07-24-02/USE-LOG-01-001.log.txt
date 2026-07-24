@@ -1,0 +1,25 @@
+[2026/07/24 18:03:12.058 GMT+08:00] [INFO] Job(1530274162285359104_1530274162260193287) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3486502f-4eaa-4875-b374-6a2b5ebb68ab.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3486502f-4eaa-4875-b374-6a2b5ebb68ab.sh
+prepare done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8f276479-ca82-407e-97eb-30f8275241ca.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8f276479-ca82-407e-97eb-30f8275241ca.sh
+build done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3762a326-7de9-495c-8aba-909258165c14.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3762a326-7de9-495c-8aba-909258165c14.sh
+test done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/9038838a-f9a3-4b59-af93-e474a03163d5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/9038838a-f9a3-4b59-af93-e474a03163d5.sh
+package done
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/54b49dd9-9182-44cb-b968-4600c6b01255.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/54b49dd9-9182-44cb-b968-4600c6b01255.sh
+summary done

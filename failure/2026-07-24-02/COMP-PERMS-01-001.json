@@ -1,0 +1,36 @@
+{
+  "case_id": "COMP-PERMS-01-001",
+  "title": "permissions 空对象时 ATOMGIT_TOKEN 仅 repository read",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-013",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "483870c998204af08cb6af4925d6a7d2",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 67,
+  "log_fingerprint": "c5c50dcfbf9de62d",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/483870c998204af08cb6af4925d6a7d2",
+  "assertion_results": [
+    {
+      "kind": "run_status_not",
+      "type": "negative",
+      "target": "run_status",
+      "pass": true,
+      "expected": "conclusion != COMPLETED",
+      "actual": "FAILED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains '403'",
+      "actual": "absent"
+    }
+  ]
+}

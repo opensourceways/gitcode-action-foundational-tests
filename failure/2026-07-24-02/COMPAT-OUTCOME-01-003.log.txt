@@ -1,0 +1,58 @@
+[2026/07/24 17:37:37.632 GMT+08:00] [INFO] Job(1530267726108966912_1530267726075412487) duration check: true
+[2026/07/24 09:37:50.400 GMT+00:00] [INFO] repository dist full path is /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1
+Getting Git version info >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:50.406 GMT+00:00] [INFO] run git command --> git version
+[2026/07/24 09:37:50.413 GMT+00:00] [INFO] run git command stdout --> git version 2.43.0
+
+[2026/07/24 09:37:50.415 GMT+00:00] [INFO] Deleting the contents of '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1'
+initialize git repository >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:50.416 GMT+00:00] [INFO] run git command --> git init
+[2026/07/24 09:37:50.422 GMT+00:00] [INFO] run git command stdout --> Initialized empty Git repository in /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1/.git/
+[2026/07/24 09:37:50.423 GMT+00:00] [INFO] run git command --> git remote add origin https://gitcode.com/ComputingActionTest/gitcode-test-1.git
+[2026/07/24 09:37:50.428 GMT+00:00] [INFO] git repository initialized at /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-1
+
+Disabling automatic garbage collection >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:50.428 GMT+00:00] [INFO] run git command --> git config --local gc.auto 0
+
+Setting up auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:50.432 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/24 09:37:50.433 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/24 09:37:50.437 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/24 09:37:50.458 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/24 09:37:50.459 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/24 09:37:50.462 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/24 09:37:50.483 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/24 09:37:50.492 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+[2026/07/24 09:37:50.513 GMT+00:00] [INFO] configuring token
+[2026/07/24 09:37:50.519 GMT+00:00] [INFO] configuring token config local
+
+Start fetch git repo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:50.531 GMT+00:00] [INFO] run git command --> git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --progress --depth=1 origin +refs/heads/main*:refs/remotes/origin/main* +refs/tags/main*:refs/tags/main*
+
+Checking out the ref >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:51.232 GMT+00:00] [INFO] run git command --> git branch --list --remote origin/main
+[2026/07/24 09:37:51.236 GMT+00:00] [INFO] run git command stdout -->   origin/main
+[2026/07/24 09:37:51.236 GMT+00:00] [INFO] run git command --> git checkout --progress --force -B main refs/remotes/origin/main
+[2026/07/24 09:37:51.245 GMT+00:00] [INFO] run git command stdout --> branch 'main' set up to track 'origin/main'.
+
+Removing auth >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+[2026/07/24 09:37:51.254 GMT+00:00] [INFO] Removing SSH command configuration
+[2026/07/24 09:37:51.254 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp core\.sshCommand
+[2026/07/24 09:37:51.258 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"'
+[2026/07/24 09:37:51.277 GMT+00:00] [INFO] Removing HTTP extra header
+[2026/07/24 09:37:51.278 GMT+00:00] [INFO] run git command --> git config --local --name-only --get-regexp http\.https\:\/\/gitcode\.com\/\.extraheader
+[2026/07/24 09:37:51.281 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/gitcode\.com\/\.extraheader' && git config --local --unset-all 'http.https://gitcode.com/.extraheader' || :"'
+[2026/07/24 09:37:51.303 GMT+00:00] [INFO] Removing includeIf entries pointing to credentials config files
+[2026/07/24 09:37:51.328 GMT+00:00] [INFO] run git command --> git submodule foreach --recursive 'git config --local --show-origin --name-only --get-regexp remote.origin.url'
+
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/49110778-c919-4a1b-a020-588d9cf8fecd.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/49110778-c919-4a1b-a020-588d9cf8fecd.sh
+::error::Process exited with code 1
+
+[2026/07/24 17:37:53.387 GMT+08:00] [INFO] Job(1530267726108966912_1530267726075412489) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/3fa07f1f-80ca-4bee-8e56-b5d367720239.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/3fa07f1f-80ca-4bee-8e56-b5d367720239.sh
+Job A conclusion should be success

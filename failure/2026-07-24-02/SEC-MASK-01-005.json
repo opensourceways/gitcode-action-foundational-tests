@@ -1,0 +1,35 @@
+{
+  "case_id": "SEC-MASK-01-005",
+  "title": "Secret 日志脱敏不可通过多行值输出绕过",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-007",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "1b0efed9ba2940b39def3072e1cfa2b8",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 84,
+  "log_fingerprint": "780db0b6bea503ab",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/1b0efed9ba2940b39def3072e1cfa2b8",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'multiline_masked_with_asterisks'",
+      "actual": "absent"
+    }
+  ]
+}

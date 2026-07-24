@@ -1,0 +1,19 @@
+[2026/07/24 17:22:42.868 GMT+08:00] [INFO] Job(1530263973276815360_1530263973247455239) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/edf4e132-348d-48a9-b389-882a820e2732.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/edf4e132-348d-48a9-b389-882a820e2732.sh
+Cloning into 'repo'...
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'slave1@1530263973247455239-pod.(none)')
+::error::Process exited with code 128

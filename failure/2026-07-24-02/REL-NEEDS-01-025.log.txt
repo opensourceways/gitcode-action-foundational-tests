@@ -1,0 +1,6 @@
+[2026/07/24 17:52:29.609 GMT+08:00] [INFO] Job(1530271467361026048_1530271467327471623) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/42fa7426-93e6-437e-ba0b-02d1af46a60f.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/42fa7426-93e6-437e-ba0b-02d1af46a60f.sh
+::error::Process exited with code 1
+

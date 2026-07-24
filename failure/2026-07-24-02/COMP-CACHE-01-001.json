@@ -1,0 +1,28 @@
+{
+  "case_id": "COMP-CACHE-01-001",
+  "title": "cache hit 时恢复缓存内容正确",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-016",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "4464c79573a14e50ab2161a1217844d2",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 109,
+  "log_fingerprint": "66d9bfae6ca151f8",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/4464c79573a14e50ab2161a1217844d2",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

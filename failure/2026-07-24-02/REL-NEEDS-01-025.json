@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-NEEDS-01-025",
+  "title": "needs 失败传播——上游 job 失败时下游 job 应被 skip",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-025",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "365d3b6127e849eab9ff28112d094714",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 65,
+  "log_fingerprint": "8841a1d150f1e479",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/365d3b6127e849eab9ff28112d094714",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "FAILED",
+      "actual": "FAILED"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "SKIPPED",
+      "actual": "FAILED"
+    }
+  ]
+}

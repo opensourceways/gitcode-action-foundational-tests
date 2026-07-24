@@ -1,0 +1,28 @@
+{
+  "case_id": "COMP-PERMS-01-002",
+  "title": "声明 repository write 后 TOKEN 可推送代码",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-013",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "f0747e1b17f34b48abe6eb7463c560f0",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 59,
+  "log_fingerprint": "0ccc56e09c7ad33b",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/f0747e1b17f34b48abe6eb7463c560f0",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    }
+  ]
+}

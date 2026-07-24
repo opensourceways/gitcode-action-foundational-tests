@@ -1,0 +1,36 @@
+{
+  "case_id": "REL-CONTINUE-01-030",
+  "title": "continue-on-error=true——job 失败后 workflow 不应终止",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-030",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "ee6e12554f794079a74f7109f76a09e4",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 123,
+  "log_fingerprint": "1bb2bd5a4d92d71d",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/ee6e12554f794079a74f7109f76a09e4",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

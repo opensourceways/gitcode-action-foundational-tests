@@ -1,0 +1,38 @@
+[2026/07/24 17:44:34.841 GMT+08:00] [INFO] Job(1530269476383764480_1530269476362792967) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/df043040-67ec-44e6-93c6-0ffeb67cfdb6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/df043040-67ec-44e6-93c6-0ffeb67cfdb6.sh
+10+0 records in
+10+0 records out
+10485760 bytes (10 MB, 10 MiB) copied, 0.0336605 s, 312 MB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Uploading artifact "net-fault-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3/artifact.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-3
+Creating zip archive from 1 file(s)...
+Zip archive created: /tmp/artifact-1784886287593-a255494c.zip (~10 MB, 10489098 bytes)
+Creating artifact "net-fault-artifact" (size: 10489098 bytes, workflow: 77faeb0f512f40b6b30d634f90477d0a)...
+[Twirp] trace-id: cf3181b5deed5f2f29a2a127b6af6ff5
+Artifact created with ID 206345865338880, upload mode: simple
+Uploading artifact via simple PUT (~10 MB)...
+Upload complete. SHA-256: cf2c44626823e7bb5cba4fc06fc753f07622236388654cfc18c9803080650e14
+Finalizing artifact...
+[Twirp] trace-id: 8bd44d39e27c147a1b53a419cfb3aa4b
+Artifact "net-fault-artifact" finalized successfully.
+Fetching signed artifact URL...
+[Twirp] trace-id: 5fc60d1fdf6549235e39947cb583da33
+Signed artifact URL obtained.
+::debug::Temp zip file removed: /tmp/artifact-1784886287593-a255494c.zip
+Artifact "net-fault-artifact" uploaded successfully. ID: 206345865338880, Size: 10489098 bytes
+Artifact portal URL: https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/artifacts/206345865338880

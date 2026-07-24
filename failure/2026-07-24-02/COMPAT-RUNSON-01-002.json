@@ -1,0 +1,31 @@
+{
+  "case_id": "COMPAT-RUNSON-01-002",
+  "title": "runs-on 标签体系——单标签字符串应报错",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-027",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [
+    "SECURITY_CRITICAL"
+  ],
+  "reason": "",
+  "gitcode_run_id": "8eca927115b347beb8fea59f610cf7f0",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 44,
+  "log_fingerprint": "e57d4e66e838d268",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/8eca927115b347beb8fea59f610cf7f0",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": false,
+      "is_security_critical": true,
+      "expected": "plaintext 'RUNSON_STRING_ACCEPTED' 0 hits",
+      "actual": "FOUND"
+    }
+  ]
+}

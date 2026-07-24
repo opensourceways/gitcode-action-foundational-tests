@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-MATRIX-01-026",
+  "title": "matrix fail-fast=true——任意 job 实例失败应立即取消其余实例",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-026",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "d7a5eaf17c8947a4978160a9b83a7661",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 4,
+  "duration_seconds": 94,
+  "log_fingerprint": "7a9b99c80ee1d3b8",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/d7a5eaf17c8947a4978160a9b83a7661",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

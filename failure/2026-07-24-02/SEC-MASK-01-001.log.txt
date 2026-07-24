@@ -1,0 +1,5 @@
+[2026/07/24 17:16:48.629 GMT+08:00] [INFO] Job(1530262487628918784_1530262487607947271) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/240d3642-3a7a-4e83-9cc3-4bdb2860fe53.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/240d3642-3a7a-4e83-9cc3-4bdb2860fe53.sh
+The secret is 

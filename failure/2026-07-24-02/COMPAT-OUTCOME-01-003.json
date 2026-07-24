@@ -1,0 +1,36 @@
+{
+  "case_id": "COMPAT-OUTCOME-01-003",
+  "title": "outcome 与 conclusion 在 job 条件判断中不应互换语义",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-035",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "c933d0ea247c44f89decd4bb1e0d8aa0",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 76,
+  "log_fingerprint": "36c0fa026c75b6b0",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/c933d0ea247c44f89decd4bb1e0d8aa0",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

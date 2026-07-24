@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-SECNAME-01-001",
+  "title": "Secret 名称以 ATOMGIT_ 开头时应给出命名规则错误",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-028",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "8262b4038ec749ac86a6a79141907347",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 54,
+  "log_fingerprint": "551287334c100214",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/8262b4038ec749ac86a6a79141907347",
+  "assertion_results": [
+    {
+      "kind": "run_status_not",
+      "type": "negative",
+      "target": "run_status",
+      "pass": false,
+      "expected": "conclusion != COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

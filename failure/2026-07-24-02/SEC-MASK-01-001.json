@@ -1,0 +1,35 @@
+{
+  "case_id": "SEC-MASK-01-001",
+  "title": "Secret 值在运行日志中必须被自动脱敏为 ***",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-004",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "63e98d58d1134762a271c37f8aecf84d",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 46,
+  "log_fingerprint": "b2086a583e7a9332",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/63e98d58d1134762a271c37f8aecf84d",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'masked_with_asterisks'",
+      "actual": "absent"
+    }
+  ]
+}

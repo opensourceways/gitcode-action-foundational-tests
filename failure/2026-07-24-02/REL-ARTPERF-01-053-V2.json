@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-ARTPERF-01-053-V2",
+  "title": "制品传输性能——1GB artifact 上传下载耗时",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-053",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "95dafca9fd7a4dcda3f490e5f42ae916",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 168,
+  "log_fingerprint": "b57e4374c03c63cd",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/95dafca9fd7a4dcda3f490e5f42ae916",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'upload artifact job' status=FAILED"
+    }
+  ]
+}

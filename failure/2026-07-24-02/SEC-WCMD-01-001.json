@@ -1,0 +1,35 @@
+{
+  "case_id": "SEC-WCMD-01-001",
+  "title": "Workflow 命令（如 add-mask）的响应本身不可泄露被遮蔽前的 secret 值",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-028",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "3e80147ae6df4aeab55c6694943e994f",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 46,
+  "log_fingerprint": "4604dada43a145c7",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/3e80147ae6df4aeab55c6694943e994f",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'mask_command_without_payload'",
+      "actual": "absent"
+    }
+  ]
+}

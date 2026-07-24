@@ -1,0 +1,35 @@
+{
+  "case_id": "COMP-PR-01-001",
+  "title": "fork PR 触发 pull_request 时不可读取项目 secrets",
+  "dimension": "completeness",
+  "priority": "P0",
+  "intent_ref": "INTENT-COMP-004",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "9531324b7e5f4ef0a48bd87b1eab89ca",
+  "run_status": "COMPLETED",
+  "head_sha": "bba4aef1ff865213c4ab4e6ee99f1efcc40f8877",
+  "job_count": 1,
+  "duration_seconds": 35,
+  "log_fingerprint": "bfbb0e3df984f5bc",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/9531324b7e5f4ef0a48bd87b1eab89ca",
+  "assertion_results": [
+    {
+      "kind": "config_probe",
+      "pass": true,
+      "not_configured": false,
+      "expected": "资源已配置（日志无 'configured_len=0'）",
+      "actual": "configured"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "SUCCESS_OR_BLOCKED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-DOS-01-001",
+  "title": "大 artifact / 大 cache 必须受配额与边界限制",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-033",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "c7092ca64b184fa7b4f714d198ae9b78",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 54,
+  "log_fingerprint": "bf12caa8ebdd110a",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/c7092ca64b184fa7b4f714d198ae9b78",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'success' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'size_limit_exceeded_error'",
+      "actual": "absent"
+    }
+  ]
+}

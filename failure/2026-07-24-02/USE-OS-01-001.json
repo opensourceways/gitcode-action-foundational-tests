@@ -1,0 +1,28 @@
+{
+  "case_id": "USE-OS-01-001",
+  "title": "runner.os 返回值与文档声明的平台支持一致",
+  "dimension": "usability",
+  "priority": "P1",
+  "intent_ref": "INTENT-USE-013",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "01175933e8844f949f269a0f29cdec6c",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 85,
+  "log_fingerprint": "2ae980aea50fcd05",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/01175933e8844f949f269a0f29cdec6c",
+  "assertion_results": [
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'os=Linux'",
+      "actual": "absent"
+    }
+  ]
+}

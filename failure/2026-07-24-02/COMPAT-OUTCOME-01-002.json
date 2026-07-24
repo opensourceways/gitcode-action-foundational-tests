@@ -1,0 +1,44 @@
+{
+  "case_id": "COMPAT-OUTCOME-01-002",
+  "title": "continue-on-error true 时 outcome 应为 failure 而 conclusion 应为 success",
+  "dimension": "compatibility",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMPAT-035",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "076c0631c69748a9a7904451be292c05",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 85,
+  "log_fingerprint": "a1acee2c65d1706f",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/076c0631c69748a9a7904451be292c05",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "FAILED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    },
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": true,
+      "expected": "COMPLETED",
+      "actual": "COMPLETED"
+    }
+  ]
+}

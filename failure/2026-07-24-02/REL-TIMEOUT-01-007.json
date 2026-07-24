@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-TIMEOUT-01-007",
+  "title": "job timeout 边界值——359 分钟运行应在 360 分钟边界前完成",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-007",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "b06a8e0164404541822f9c4921f89b93",
+  "run_status": "CANCELED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 164,
+  "log_fingerprint": "c71faf69a4fb012f",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/b06a8e0164404541822f9c4921f89b93",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "CANCELLED"
+    }
+  ]
+}

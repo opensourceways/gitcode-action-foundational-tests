@@ -1,0 +1,5 @@
+[2026/07/24 17:14:48.252 GMT+08:00] [INFO] Job(1530261982706147328_1530261982672592903) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/96bb3b39-70b1-4b71-aa7d-6c31da001bf7.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/96bb3b39-70b1-4b71-aa7d-6c31da001bf7.sh
+000{"error_code":401,"error_code_name":"UNAUTHORIZED","error_message":"401, token not found","trace_id":"08573a375ec34186040dc88d7db1e2a3"}401000000::error::Process exited with code 6

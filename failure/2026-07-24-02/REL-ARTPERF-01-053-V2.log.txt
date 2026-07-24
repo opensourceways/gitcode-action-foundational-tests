@@ -1,0 +1,55 @@
+[2026/07/24 17:41:07.183 GMT+08:00] [INFO] Job(1530268605025624064_1530268604987875335) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/7a49516d-2d8e-4c56-963d-b17d415bfbf1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/7a49516d-2d8e-4c56-963d-b17d415bfbf1.sh
+1024+0 records in
+1024+0 records out
+1073741824 bytes (1.1 GB, 1.0 GiB) copied, 3.39644 s, 316 MB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Uploading artifact "perf-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Creating zip archive from 1 file(s)...
+Zip archive progress tracking enabled (~1024 MB source data)
+Zip archive creation still in progress (compression)... (30s elapsed)...
+Zip archive created: /tmp/artifact-1784886083399-f415b8ec.zip (~1024 MB, 1074069497 bytes)
+Creating artifact "perf-artifact" (size: 1074069497 bytes, workflow: 8923acab759f4b72972f4e5dc791b0e6)...
+[Twirp] trace-id: 97fd0df2efeb44a0d3e75ddb9ed17581
+Artifact created with ID 206345163935744, upload mode: multipart
+Uploading artifact via multipart (partSize: 209715200 bytes, totalParts: 6)...
+Artifact multipart upload started (~1024 MB archive, 6 part(s))
+Starting upload with concurrency: 6
+::debug::Multipart upload: sending part 1/6 (~200 MB)...
+::debug::Multipart upload: sending part 2/6 (~200 MB)...
+::debug::Multipart upload: sending part 3/6 (~200 MB)...
+::debug::Multipart upload: sending part 4/6 (~200 MB)...
+::debug::Multipart upload: sending part 5/6 (~200 MB)...
+::debug::Multipart upload: sending part 6/6 (~24 MB)...
+Artifact multipart upload progress: ~1024 MB (100% of ~1024 MB)
+::debug::Multipart upload: part 6/6 done, etag=f98ab52ac0ae2d63c81ca8dccfdc00a6, size=25493497
+::debug::Multipart upload: part 2/6 done, etag=f7a993ea7fb90498284142041f07bc59, size=209715200
+::debug::Multipart upload: part 3/6 done, etag=0d7a179a20ee900b93ee157c9c237173, size=209715200
+::debug::Multipart upload: part 5/6 done, etag=36e1595fe23d29606756aa957c2c4850, size=209715200
+::debug::Multipart upload: part 1/6 done, etag=a26eb9db001baab1b41ef904f26a20e7, size=209715200
+::debug::Multipart upload: part 4/6 done, etag=aa1d2d01b86acdb9fcc28c3b2c10d09a, size=209715200
+All parts uploaded. Completing multipart upload...
+[Twirp] trace-id: d46cb8fe7a2d591600cb02d459491a4d
+Upload complete. SHA-256: a36766067684ed76d641b362f2040bd89c942a5ab38cf15b08c126e1fbe92a13
+Finalizing artifact...
+[Twirp] trace-id: 7dafb90f446db8a66466f4904c57ae6b
+[Twirp] error trace-id: 7dafb90f446db8a66466f4904c57ae6b
+::warning::Upload failed, artifact ID 206345163935744 may require cleanup on the server.
+::debug::Temp zip file removed: /tmp/artifact-1784886083399-f415b8ec.zip
+::error::Upload artifact failed: Namespace artifact quota exceeded: namespace=13965860, repoId=10431338, requestedBytes=1074069497, currentUsed=1632234274, max=1073741824
+

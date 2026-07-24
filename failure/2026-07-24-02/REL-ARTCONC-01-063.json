@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-ARTCONC-01-063",
+  "title": "制品并发写一致性——多 job 同时 upload-artifact 同名 artifact",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-063",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "1f24636b6a5b44d19d9d657d188ec6db",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 4,
+  "duration_seconds": 60,
+  "log_fingerprint": "91a4d23929c07925",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-3/actions/runs/1f24636b6a5b44d19d9d657d188ec6db",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'artifact concurrent write test' status=FAILED"
+    }
+  ]
+}

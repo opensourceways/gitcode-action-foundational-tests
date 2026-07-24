@@ -1,0 +1,31 @@
+[2026/07/24 17:40:52.530 GMT+08:00] [INFO] Job(1530268543536873472_1530268543499124743) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/b82514da-2990-4ce5-96d5-45df26fce6c1.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/b82514da-2990-4ce5-96d5-45df26fce6c1.sh
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB, 100 MiB) copied, 0.341181 s, 307 MB/s
+
+::debug::Using workspace directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Uploading artifact "perf-artifact" from paths: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::followSymbolicLinks 'true'
+::debug::implicitDescendants 'true'
+::debug::matchDirectories 'true'
+::debug::omitBrokenSymbolicLinks 'true'
+::debug::Search path '/home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin'
+Found 1 file(s) to upload
+::debug::[diagnostic] First 1 matched file(s): /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4/artifact.bin
+::debug::Resolved root directory: /home/slave1/runner/workers/0.0.4.4.version/worker_dir/ComputingActionTest/gitcode-test-4
+Creating zip archive from 1 file(s)...
+Zip archive progress tracking enabled (~100 MB source data)
+Zip archive created: /tmp/artifact-1784886065543-f47be5f2.zip (~100 MB, 104889728 bytes)
+Creating artifact "perf-artifact" (size: 104889728 bytes, workflow: 37377f8b2720406ca6780f11c1fe26ed)...
+[Twirp] trace-id: d221e7b241d1751ac9d339dadc3bb136
+[Twirp] error trace-id: d221e7b241d1751ac9d339dadc3bb136
+::debug::Temp zip file removed: /tmp/artifact-1784886065543-f47be5f2.zip
+::error::Upload artifact failed: Artifact with name already exists: perf-artifact, repoId=10431338, workflowId=37377f8b2720406ca6780f11c1fe26ed
+

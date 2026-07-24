@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-ARTF-01-002",
+  "title": "跨仓库 artifact 下载返回 403 或 404",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-019",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "c13294bf3a5f464b990ada18a5a67e46",
+  "run_status": "COMPLETED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 39,
+  "log_fingerprint": "7a41edd434fc6316",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/c13294bf3a5f464b990ada18a5a67e46",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext '200' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains '403_or_404'",
+      "actual": "absent"
+    }
+  ]
+}

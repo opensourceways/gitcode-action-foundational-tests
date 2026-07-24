@@ -1,0 +1,36 @@
+{
+  "case_id": "COMP-ARTIFACT-01-001",
+  "title": "artifact 可在同 workflow 的 job 间正确传递",
+  "dimension": "completeness",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMP-015",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "dcf1e35dbbee45a7a779e4297e2cc4a4",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 86,
+  "log_fingerprint": "7c18693e6c0230d9",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-0/actions/runs/dcf1e35dbbee45a7a779e4297e2cc4a4",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'hello artifact'",
+      "actual": "absent"
+    }
+  ]
+}

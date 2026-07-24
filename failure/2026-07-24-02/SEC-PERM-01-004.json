@@ -1,0 +1,37 @@
+{
+  "case_id": "SEC-PERM-01-004",
+  "title": "默认状态下写操作被 403 拒绝",
+  "dimension": "security",
+  "priority": "P0",
+  "intent_ref": "INTENT-SEC-017",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "d8a44006a04b446c90debee28e440200",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 34,
+  "log_fingerprint": "105590ba1d661911",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-4/actions/runs/d8a44006a04b446c90debee28e440200",
+  "assertion_results": [
+    {
+      "kind": "leak",
+      "type": "negative",
+      "target": "run_logs",
+      "pass": true,
+      "is_security_critical": true,
+      "expected": "plaintext 'push_successful' 0 hits",
+      "actual": 0
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'push_denied_or_403'",
+      "actual": "absent"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[2026/07/24 17:15:09.573 GMT+08:00] [INFO] Job(1530262072049143808_1530262072028172295) duration check: true
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/aa748614-6be0-4455-baf5-2cffda2949a5.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/aa748614-6be0-4455-baf5-2cffda2949a5.sh
+secret value is 
+
+No shell specified, using platform default: default-bash
+::debug::Script file created: /home/slave1/runner/workers/0.0.4.4.version/_temp/8c434086-9018-424a-8527-a2e7656d01a6.sh
+::debug::Executing: bash -e /home/slave1/runner/workers/0.0.4.4.version/_temp/8c434086-9018-424a-8527-a2e7656d01a6.sh
+INPUT_SCHEDULER_ACTION_PARAMS={"shell":"","script":"env | grep DEPLOY_TOKEN || echo \"not found\"\n","working-directory":"","pluginInfo":"{\"uses\":\"official_shell@1.0.0\",\"pluginName\":\"official_shell\",\"pluginVersion\":\"1.0.0\"}"}
+INPUT_SCRIPT=env | grep DEPLOY_TOKEN || echo "not found"

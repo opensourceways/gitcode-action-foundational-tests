@@ -1,0 +1,44 @@
+{
+  "case_id": "COMP-ARTIFACT-01-002",
+  "title": "下载全部制品功能正常",
+  "dimension": "completeness",
+  "priority": "P1",
+  "intent_ref": "INTENT-COMP-015",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "95512369f9f245c4a172ecb7bae81aa1",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 2,
+  "duration_seconds": 77,
+  "log_fingerprint": "9b925e408dbb2ca0",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-1/actions/runs/95512369f9f245c4a172ecb7bae81aa1",
+  "assertion_results": [
+    {
+      "kind": "run_status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "COMPLETED",
+      "actual": "FAILED"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'app'",
+      "actual": "absent"
+    },
+    {
+      "kind": "value",
+      "type": "positive",
+      "target": "run_logs",
+      "pass": false,
+      "expected": "log contains 'report'",
+      "actual": "absent"
+    }
+  ]
+}

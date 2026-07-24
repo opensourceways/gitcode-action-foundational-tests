@@ -1,0 +1,28 @@
+{
+  "case_id": "REL-K8S-01-045",
+  "title": "自托管 K8s Runner 弹性伸缩——min=1/max=1 时并发 3 个 jobs 应排队执行",
+  "dimension": "reliability",
+  "priority": "P1",
+  "intent_ref": "INTENT-REL-045",
+  "phase02_run": "2026-07-24-valid297-final",
+  "verdict": "FAIL",
+  "verdict_flags": [],
+  "reason": "",
+  "gitcode_run_id": "8ad9e63479ce4c60a5dcf2a4d53e9c33",
+  "run_status": "FAILED",
+  "head_sha": "",
+  "job_count": 1,
+  "duration_seconds": 27,
+  "log_fingerprint": "0bb89019b1313e7d",
+  "run_url": "https://gitcode.com/ComputingActionTest/gitcode-test-2/actions/runs/8ad9e63479ce4c60a5dcf2a4d53e9c33",
+  "assertion_results": [
+    {
+      "kind": "status",
+      "type": "positive",
+      "target": "run_status",
+      "pass": false,
+      "expected": "all job/step green",
+      "actual": "job 'K8s runner scaling test' status=FAILED"
+    }
+  ]
+}
