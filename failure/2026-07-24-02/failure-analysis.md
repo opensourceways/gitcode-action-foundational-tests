@@ -37,13 +37,13 @@
 | REL-YAMLCACHE-01-060 | 推送新 YAML 后平台仍执行旧版本（缓存不失效） |fake|https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/beb155d45c804a479fd3ba73ee23b5cf/job/77e450d25ce04d64a7fab68d4d234b3d,https://gitcode.com/ComputingActionTest/foundational-tests/actions/runs/fca4c7f3203b40e389ffb757b7173f1f/job/6da949a9f74d4bb8837acf9832ff994b|
 
 ### COMPATIBILITY
-| 案例 | 描述 |
-|---|---|
-| COMPAT-CACHE-01-001 | dispatch 事件禁用 cache |
-| COMPAT-DIR-01-002 | 平台识别 .github/workflows/ 目录下的 workflow |
-| COMPAT-INPUTS-01-001 | boolean input 静默接受 |
-| COMPAT-RUNSON-01-002 | 接受单字符串 runs-on 格式 |
-| COMPAT-VARS-01-006 | `vars.ACTION_VAR` 在 Action `with:` 中求值为空 |
+| 案例 | 描述 |confirm|evidence|
+|---|---|---|--|
+| COMPAT-CACHE-01-001 | dispatch 事件禁用 cache |confirm|evidence|
+| COMPAT-DIR-01-002 | 平台识别 .github/workflows/ 目录下的 workflow | fake| design as this 
+| COMPAT-INPUTS-01-001 | boolean input 静默接受 |||
+| COMPAT-RUNSON-01-002 | 接受单字符串 runs-on 格式 |fake|用例断言改为 positive（期望接受单字符串），或删除此用例|
+| COMPAT-VARS-01-006 | `vars.ACTION_VAR` 在 Action `with:` 中求值为空 |fake|the env not set 
 
 ### USABILITY
 | 案例 | 描述 |
