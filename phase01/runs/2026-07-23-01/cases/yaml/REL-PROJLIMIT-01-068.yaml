@@ -1,0 +1,46 @@
+id: REL-PROJLIMIT-01-068
+dimensions: [reliability]
+dimension: reliability
+priority: P1
+title: "项目级 workflow 并发上限越界——201 条同时触发时至少一条进入排队"
+intent_ref: INTENT-REL-068
+setup:
+  repo_fixture: default
+  secrets: []
+  variables: {}
+  branch_protection: default
+workflow: |
+  on:
+    workflow_dispatch:
+  jobs:
+    test:
+      name: concurrency limit boundary job
+      runs-on: [ubuntu-latest, x64, small]
+      steps:
+        - name: quick step
+          run: |
+            echo "run_id=${{ atomgit.run_id }}"
+            sleep 5
+trigger:
+  event: workflow_dispatch
+  as: maintainer
+  params: {}
+fault_injection: null
+assertions:
+  - type: positive
+    target: completed_count
+    equals: "201"
+  - type: positive
+    target: failed_count
+    equals: "0"
+  - type: positive
+    target: queued_count
+    ge: "1"
+  - type: nonfunctional
+    target: total_duration_seconds
+    le: "3600"
+  - type: nonfunctional
+    target: lost_count
+    equals: "0"
+teardown:
+  reset: none

@@ -3,7 +3,7 @@
 > 生成时间: 2026-07-23
 > 运行目的: 生产统一、自包含的基准全量用例集（全维度、全准入 intent + 补全字段级 KEEP 用例）
 > 准入 intent 总数: 186 条
-> 生成用例总数: 326 条
+> 生成用例总数: 328 条
 > 字段级 KEEP 补全: 42 条（合并自 ~260 条 KEEP 历史用例）
 > 复用已有 TC: 0 条
 > 待生成: 0
@@ -17,9 +17,9 @@
 | completeness | 16 | 88 | 16 | 72 | 0 |
 | compatibility | 35 | 66 | 13 | 53 | 0 |
 | security | 36 | 51 | 50 | 1 | 0 |
-| reliability | 66 | 72 | 2 | 67 | 3 |
+| reliability | 66 | 74 | 2 | 69 | 3 |
 | usability | 29 | 49 | 2 | 47 | 0 |
-| **合计** | **182** | **326** | **83** | **240** | **3** |
+| **合计** | **182** | **328** | **83** | **242** | **3** |
 
 ---
 
@@ -322,6 +322,8 @@
 | REL-TIMEOUT-01-009 | P1 | INTENT-REL-009 | 自定义短超时——timeout-minutes=1 时 step 运行 2 分钟应被强制终止 |
 | REL-TIMEOUT-01-010 | P1 | INTENT-REL-010 | 默认超时——未声明 timeout-minutes 运行 361 分钟应被强制终止 |
 | REL-YAMLCACHE-01-060 | P1 | INTENT-REL-060 | Workflow YAML 缓存失效——修改后无旧代码残留 |
+| REL-PROJLIMIT-01-067 | P1 | INTENT-REL-067 | 项目级 workflow 并发上限——200 条同时触发时全部完成无丢失 |
+| REL-PROJLIMIT-01-068 | P1 | INTENT-REL-068 | 项目级 workflow 并发上限越界——201 条同时触发时至少一条进入排队 |
 
 ### usability（49 条）
 
@@ -397,7 +399,7 @@
 - [x] 所有 `run:` 全部使用 `run: |` block scalar
 - [x] 每个 job 有 `name:`，每个 step 有 `name:`
 - [x] Step name 无非法字符
-- [x] 326 条 YAML 全部通过 schema 解析验证
+- [x] 328 条 YAML 全部通过 schema 解析验证
 
 ---
 
