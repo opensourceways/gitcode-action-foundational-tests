@@ -15,7 +15,7 @@ workflow: |
   jobs:
     compile_xlarge:
       name: compile on xlarge
-      runs-on: [ubuntu-latest, x64, xlarge]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: compile step
           run: |
@@ -23,7 +23,7 @@ workflow: |
             sleep 30
     compile_2xlarge:
       name: compile on 2xlarge
-      runs-on: [ubuntu-latest, x64, 2xlarge]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: compile step
           run: |

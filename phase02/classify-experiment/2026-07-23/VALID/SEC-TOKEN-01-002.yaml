@@ -13,7 +13,7 @@ workflow: |
   jobs:
     token-write-denied:
       name: Test token write denied
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Attempt push
           run: |

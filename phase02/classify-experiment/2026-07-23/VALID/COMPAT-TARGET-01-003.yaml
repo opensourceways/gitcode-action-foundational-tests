@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-target-default-types:
       name: Test pull_request_target default types
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo trigger info
           run: |

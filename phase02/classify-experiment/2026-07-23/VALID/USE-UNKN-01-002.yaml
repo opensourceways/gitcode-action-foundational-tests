@@ -17,7 +17,7 @@ workflow: |
   jobs:
     bad:
       name: github specific field container
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       container:
         image: node:20
       steps:

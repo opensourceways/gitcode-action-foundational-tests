@@ -15,7 +15,7 @@ workflow: |
   jobs:
     probe-xlarge:
       name: probe xlarge runner
-      runs-on: [ubuntu-latest, x64, xlarge]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: probe xlarge
           run: |
@@ -24,7 +24,7 @@ workflow: |
             df -BG ${{RUNNER_TEMP}}
     probe-2xlarge:
       name: probe 2xlarge runner
-      runs-on: [ubuntu-latest, x64, 2xlarge]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: probe 2xlarge
           run: |

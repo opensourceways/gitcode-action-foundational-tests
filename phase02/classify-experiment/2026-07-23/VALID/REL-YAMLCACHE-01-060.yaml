@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: YAML cache invalidation test
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: echo marker
           run: |

@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-comment-created:
       name: Test issue comment created type
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo trigger info
           run: |

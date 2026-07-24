@@ -17,7 +17,7 @@ workflow: |
   jobs:
     verify-checkout-path:
       name: Verify checkout path parameter
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: (TC) checkout with path
           uses: checkout

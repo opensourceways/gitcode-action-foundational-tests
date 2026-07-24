@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-vars-priority:
       name: Test vars priority
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo vars
           run: |

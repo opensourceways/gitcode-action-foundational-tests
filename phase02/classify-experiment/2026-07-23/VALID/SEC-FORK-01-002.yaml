@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test-empty:
       name: Test empty secret
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       env:
         API_KEY: ${{ secrets.API_KEY }}
       steps:

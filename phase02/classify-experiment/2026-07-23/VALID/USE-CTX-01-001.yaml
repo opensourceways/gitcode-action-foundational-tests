@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-ctx:
       name: test atomgit context
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: echo atomgit ref
           run: |

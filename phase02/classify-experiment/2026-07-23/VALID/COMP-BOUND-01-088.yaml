@@ -16,7 +16,7 @@ workflow: |
   jobs:
     verify:
       name: Verify workflow commands boundary
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Write env and path
           run: |

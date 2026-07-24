@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-fromjson:
       name: Test fromJSON function availability
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Test fromJSON function in run block
           run: |

@@ -12,7 +12,7 @@ workflow: |
   jobs:
     quota-test:
       name: Test size quota
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Create large file
           run: |

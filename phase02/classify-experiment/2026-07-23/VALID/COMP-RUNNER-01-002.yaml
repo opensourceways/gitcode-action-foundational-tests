@@ -17,7 +17,7 @@ workflow: |
   jobs:
     verify:
       name: Verify default label
-      runs-on: default
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo runner info
           run: |

@@ -20,7 +20,7 @@ workflow: |
   jobs:
     test-vars-env-priority:
       name: Test vars vs env priority
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo vars and env
           run: |

@@ -15,14 +15,14 @@ workflow: |
   jobs:
     job_a:
       name: upstream failing job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: fail step
           run: |
             exit 1
     job_b:
       name: downstream dependent job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: job_a
       steps:
         - name: should be skipped

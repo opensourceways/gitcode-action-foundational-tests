@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: artifact concurrent write test
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       strategy:
         matrix:
           instance: [1,2,3]

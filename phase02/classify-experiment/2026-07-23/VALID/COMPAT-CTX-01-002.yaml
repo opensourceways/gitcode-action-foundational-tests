@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test:
       name: Test atomgit context reference
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Echo atomgit ref
           run: |

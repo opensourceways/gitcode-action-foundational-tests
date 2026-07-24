@@ -17,7 +17,7 @@ workflow: |
   jobs:
     multi-step:
       name: multi step log clarity
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: step one prepare
           run: |

@@ -15,7 +15,7 @@ workflow: |
   jobs:
     test:
       name: matrix 50 combos test
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       strategy:
         matrix:
           v1: [a,b,c,d,e]

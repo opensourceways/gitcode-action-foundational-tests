@@ -17,14 +17,14 @@ workflow: |
   jobs:
     job1:
       name: Set env
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Export env
           run: |
             echo "ISOLATION_VAR=leak" >> "$ATOMGIT_ENV"
     job2:
       name: Check env
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: job1
       steps:
         - name: Verify env absent

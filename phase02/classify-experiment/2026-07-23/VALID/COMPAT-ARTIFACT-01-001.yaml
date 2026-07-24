@@ -17,7 +17,7 @@ workflow: |
   jobs:
     job-upload:
       name: Upload artifact
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: (TC) create artifact file
           run: |
@@ -30,7 +30,7 @@ workflow: |
             path: artifacts/marker.txt
     job-download:
       name: Download and verify artifact
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: job-upload
       steps:
         - name: (TC) download artifact

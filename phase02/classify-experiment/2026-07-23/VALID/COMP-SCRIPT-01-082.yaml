@@ -16,7 +16,7 @@ workflow: |
   jobs:
     verify:
       name: Verify script permission and execution
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Set permission and run
           run: |

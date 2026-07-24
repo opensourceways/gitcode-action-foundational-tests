@@ -16,7 +16,7 @@ workflow: |
   jobs:
     verify:
       name: Verify step optional fields
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Step with id
           id: mystep

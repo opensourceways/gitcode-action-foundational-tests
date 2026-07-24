@@ -18,7 +18,7 @@ workflow: |
       uses: ./.gitcode/workflows/child_fail.yml
     downstream:
       name: downstream job
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       needs: call_child
       steps:
         - name: should not run

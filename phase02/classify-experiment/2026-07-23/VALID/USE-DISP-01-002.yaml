@@ -23,7 +23,7 @@ workflow: |
   jobs:
     test-default:
       name: default input value
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: echo env
           run: |

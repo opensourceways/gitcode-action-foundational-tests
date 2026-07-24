@@ -18,7 +18,7 @@ workflow: |
   jobs:
     verify:
       name: Verify env priority chain
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       env:
         MY_VAR: job_value
       steps:

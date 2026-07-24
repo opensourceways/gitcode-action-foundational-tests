@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-github-env:
       name: Test GITHUB_ENV not mapped
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Compare env vars
           run: |

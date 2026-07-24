@@ -17,7 +17,7 @@ workflow: |
   jobs:
     test-tojson:
       name: Test toJson output format
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Output object via toJson
           run: |

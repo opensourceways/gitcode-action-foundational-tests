@@ -18,7 +18,7 @@ workflow: |
   jobs:
     test-empty-perm:
       name: Test empty permissions
-      runs-on: [dedicate-hosted, x64, large]
+      runs-on: [ubuntu-latest, x64, small]
       steps:
         - name: Try read with token
           run: |
